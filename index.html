@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumline — Solver &amp; Optimization for Google Sheets</title>
+<meta name="description" content="A solver for Google Sheets that reads your model from the sheet, shows you what it understood before solving, and proves the answer against your own formulas.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="brand">Plumline</p>
+  <h1>Plumline is a solver for Google Sheets.</h1>
+  <p class="lead">
+    It finds the best allocation your spreadsheet allows — how much to make,
+    buy, ship or spend — by reading the model straight out of your formulas,
+    solving it, and proving the answer against your own sheet.
+  </p>
+  <p class="note">
+    Plumline is an add-on for Google Sheets™, published on the Google
+    Workspace™ Marketplace. It is free.
+    &nbsp;·&nbsp; <a href="privacy.html">Privacy policy</a>
+    &nbsp;·&nbsp; <a href="terms.html">Terms of service</a>
+  </p>
+</header>
+
+<section>
+  <h2>What Plumline does</h2>
+  <p>
+    Plumline solves resource allocation problems inside a Google Sheets™
+    spreadsheet: linear and integer optimisation. You already have the
+    arithmetic in your sheet — quantities, costs, a total, a few limits.
+    Plumline reads it, works out the combination of quantities that maximises
+    or minimises your total without breaking any limit, and writes that
+    combination back into the cells you choose.
+  </p>
+  <p>
+    It is used for production planning, purchasing, blending, staffing rotas,
+    transport volumes and budget allocation: any problem shaped as "how much of
+    each, given these limits".
+  </p>
+
+  <div class="receipt">
+    <div class="line head"><span>Total profit</span><span>1,760</span></div>
+    <div class="line"><span>A</span><span>0 → 0</span></div>
+    <div class="line"><span>B</span><span>0 → 40</span></div>
+    <div class="line"><span>C</span><span>0 → 20</span></div>
+    <div class="line"><span>Total hours</span><span>100 / 100 at limit</span></div>
+    <div class="line"><span>Units of product B</span><span>40 / 40 at limit</span></div>
+    <div class="check"><span>✓</span><span>The sheet recalculates 1,760, which matches.</span></div>
+  </div>
+  <p class="note">The panel as it appears after solving.</p>
+</section>
+
+<section>
+  <h2>Nothing to set up</h2>
+  <p>
+    Open the panel and the model is already there. Plumline works out which
+    cells are the quantities to decide, which total is the goal, and which
+    limits apply — and names them using the labels already written in your
+    sheet, not cell addresses. If it reads something wrong, you correct it;
+    you never have to build it from nothing.
+  </p>
+</section>
+
+<section>
+  <h2>It proves the answer</h2>
+  <p>
+    A solver is one of the few tools whose output you cannot check by looking
+    at it — you asked precisely because you did not know the answer. So
+    Plumline does not ask to be trusted. It writes the solution into your
+    sheet, lets Sheets recalculate on its own, and shows you that the two
+    numbers agree. Every constraint is listed with how much of it you used and
+    how much is left over, so you can see which limit is the one holding you
+    back.
+  </p>
+  <p>
+    When a model cannot be solved, it says which cell and why, in plain terms:
+    a cell that multiplies two decision variables together, a total that does
+    not move when the quantities move, two limits that contradict each other.
+    It will not return a confident number it cannot stand behind.
+  </p>
+</section>
+
+<section>
+  <h2>Permissions</h2>
+  <p>
+    Plumline can see the spreadsheet it is installed in, and nothing else. Not
+    your Drive, not your other spreadsheets, and no outside service. Google
+    adds two further permissions — your email address and basic profile — to
+    every listing on the Marketplace; neither is requested by Plumline and
+    neither is used by it.
+  </p>
+  <table>
+    <tr><th>Permission</th><th>Why</th></tr>
+    <tr>
+      <td class="perm">View and manage spreadsheets that this application has been installed in</td>
+      <td>To read the formulas of the sheet you are working on and write the solution back.</td>
+    </tr>
+    <tr>
+      <td class="perm">Display and run third-party web content in prompts and sidebars</td>
+      <td>To show the side panel.</td>
+    </tr>
+  </table>
+  <p class="note">
+    Your figures are never sent to a server of ours, because there is no
+    server of ours. The whole calculation runs inside your own spreadsheet.
+  </p>
+</section>
+
+<section>
+  <h2>What it cannot do</h2>
+  <p>
+    Plumline solves linear problems: totals built from quantities multiplied
+    by fixed rates, added up. That covers most production, purchasing,
+    blending, staffing and budget-allocation models.
+  </p>
+  <p>
+    It does not solve models where two decision variables multiply each other,
+    or where a condition tests a quantity being decided. Those are genuinely
+    non-linear and no method of this kind can handle them. Plumline tells you
+    when it hits one instead of returning an approximation without saying so.
+  </p>
+  <p>
+    Quantities can come back as whole numbers when they have to. Tick "whole
+    numbers only" and Plumline searches for the best combination of integers
+    rather than rounding a fractional answer, which is not the same thing and
+    is usually worse. If the search runs out of time with a valid answer in
+    hand, it says the answer is the best it found rather than the best there is.
+  </p>
+</section>
+
+<footer>
+  <a href="privacy.html">Privacy policy</a>
+  <a href="terms.html">Terms of service</a>
+  <p class="note" style="margin-top:14px">
+    Plumline is an independent add-on and is not affiliated with or endorsed by
+    Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.
+  </p>
+</footer>
+
+</div>
+</body>
+</html>
