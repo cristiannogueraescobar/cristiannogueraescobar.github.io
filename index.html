@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plumline — a solver for Google Sheets that proves its answer</title>
-<meta name="description" content="Plumline is a Google Sheets add-on that solves resource-allocation problems. It reads the model from your formulas, shows what it understood, and checks the answer against your own sheet — with nothing sent to any server.">
+<title>Plumline: a solver for Google Sheets that proves its answer</title>
+<meta name="description" content="A Google Sheets add-on that finds the best way to split limited resources. It reads your model from the sheet, solves it, and checks the answer against your own formulas. Nothing is sent to any server.">
 <style>
 /*  Plumline — single-file, zero third-party.
     No web fonts, no external requests. All style lives here so it can never
@@ -215,11 +215,11 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
 
     <section class="hero">
       <p class="eyebrow">Optimisation for Google Sheets</p>
-      <h1>The solver that hands back an answer you can <span class="em">check</span>.</h1>
+      <h1>Find the best answer. Then see it checked.</h1>
       <p class="lead">
-        Plumline works out the best allocation your spreadsheet allows — how much
-        to make, buy, ship or staff — then proves it against your own formulas
-        instead of asking you to trust it.
+        You have a spreadsheet, a goal, and a few limits. Plumline finds the
+        best way to hit that goal without breaking a limit, writes it into your
+        sheet, and shows you the number checks out. No setup, no jargon.
       </p>
 
       <div class="solver" id="solver">
@@ -257,7 +257,7 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
           </div>
         </div>
       </div>
-      <p class="playhint">runs in your browser — the real add-on runs in your sheet</p>
+      <p class="playhint">this demo runs in your browser. the real add-on runs in your sheet.</p>
 
       <div class="row">
         <a class="btn" href="#how">See how it reads your sheet</a>
@@ -271,8 +271,8 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
 
   <section class="bob feat" id="how">
     <p class="eyebrow">Nothing to set up</p>
-    <h2>It reads the model out of the sheet you already built.</h2>
-    <p>Open the panel and the problem is already there. Plumline works out which cells are the quantities to decide, which total is the goal, and which limits apply — and it names them with the labels you wrote, not with cell addresses. If it reads something wrong, you correct it. You never build the model from scratch, and you never see “no model defined”.</p>
+    <h2>You built the spreadsheet. It reads the rest.</h2>
+    <p>Open the panel and your problem is already laid out. Plumline spots which cells you're deciding, which total you're chasing, and which limits it has to respect. It labels them with the words you typed, not with cell references like B2:B4. Read something wrong? Fix it in a click. You never start from a blank form, and you never get "no model defined".</p>
     <div class="detail">
       Objective&nbsp; → &nbsp;Total profit (D6, maximise)<br>
       Decide&nbsp;&nbsp;&nbsp;&nbsp; → &nbsp;A, B, C (B2:B4)<br>
@@ -282,28 +282,28 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
 
   <section class="bob feat">
     <p class="eyebrow">The part that matters</p>
-    <h2>Then it proves the answer against your own sheet.</h2>
-    <p>A solver is one of the few tools whose output you cannot check by looking at it — you asked precisely because you did not know the answer. So Plumline does not ask for trust. It writes the solution back, lets Sheets recalculate on its own, and shows you both numbers agree. Every limit is listed with how much you used and how much is left, so you can see which one is actually holding you back.</p>
+    <h2>It shows its working.</h2>
+    <p>Most tools hand you a number and expect you to believe it. But a solver's whole point is that you didn't know the answer, so how would you check it? Plumline writes its answer into your sheet, lets Google Sheets add it up on its own, and shows you the two totals match. It also lists every limit with how much you used and how much is spare, so you can see exactly what's holding the result back.</p>
     <div class="detail true"><b>✓ Written.</b> The sheet recalculates 1,760, which matches the value Plumline computed.</div>
   </section>
 
   <section class="bob feat">
     <p class="eyebrow">When it can't</p>
-    <h2>It tells you which cell, and why — never a quiet guess.</h2>
-    <p>The real complaint about the solvers in this category isn't that they fail. It's that they fail without saying why — or worse, work one day and quietly stop respecting a limit the next — and you lose an afternoon doubting your own spreadsheet. When a model can't be solved, Plumline names the cell and the reason in plain terms, every time, the same way.</p>
-    <div class="detail bad"><b>D9 can't be linearised</b> — it multiplies two decision variables (B2 × B3). No solver of this kind can handle that; Plumline says so instead of approximating in silence.</div>
+    <h2>When it can’t solve something, it says so.</h2>
+    <p>Read the reviews of the other solvers and you'll see the same story: it failed, gave no reason, and someone lost an afternoon second-guessing their own spreadsheet. Or worse, it worked one day and quietly ignored a limit the next. Plumline points at the exact cell and explains the problem in plain words. Same input, same answer, every time.</p>
+    <div class="detail bad"><b>D9 can't be linearised.</b> It multiplies two decision variables (B2 × B3). No solver of this kind can handle that, so Plumline says so instead of quietly approximating.</div>
   </section>
 
   <section class="bob feat">
     <p class="eyebrow">Whole numbers when you need them</p>
-    <h2>Trucks and shifts don't come in thirds.</h2>
-    <p>Tick <em>whole units only</em> and Plumline searches for the best integer combination instead of rounding a fractional answer — which is not the same thing, and is usually worse. Try it on the example above: set the hours to 30. The fractional best makes 1.67 of product C; the whole-number best rebuilds the mix entirely rather than rounding that 1.67. If the search runs out of time holding a valid answer, Plumline tells you it's the best it found, not the best there is.</p>
+    <h2>Whole numbers, when the real world needs them.</h2>
+    <p>You can't ship 1.67 trucks or roster 4.5 people. Tick <em>whole units only</em> and Plumline looks for the best whole-number answer, which isn't the same as rounding the fractional one. Try it above: drop the hours to 30. The fractional answer makes 1.67 of product C; the whole-number answer reshuffles the whole plan instead of rounding that 1.67 up or down. And if it runs out of time, it's honest about it, telling you it's the best found so far, not necessarily the best possible.</p>
   </section>
 
   <section class="bob" id="versus">
     <p class="eyebrow">Why it's different</p>
-    <h2>Built against the two things people actually complain about.</h2>
-    <p style="color:var(--ink-2)">These aren't strawmen. They're the failures that fill the reviews of the solvers already in the store.</p>
+    <h2>Everything here comes from a real review.</h2>
+    <p style="color:var(--ink-2)">We didn't invent these frustrations. They're pulled from the actual reviews of the solvers already in the store.</p>
     <div class="versus">
       <div class="vcard them">
         <div class="vh">The usual experience</div>
@@ -332,8 +332,8 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
 
   <section class="bob" id="compare">
     <p class="eyebrow">Side by side</p>
-    <h2>The deepest difference is what it can reach.</h2>
-    <p style="color:var(--ink-2)">Every solver here does the maths. What separates them is how much of your account they ask for, and whether your figures ever leave your spreadsheet.</p>
+    <h2>The real difference: what it can touch.</h2>
+    <p style="color:var(--ink-2)">They all do the maths. The question worth asking is how much of your Google account each one wants, and whether your numbers ever leave the sheet.</p>
     <table class="cmp">
       <thead><tr><th>&nbsp;</th><th class="hus">Plumline</th><th>Typical alternative</th></tr></thead>
       <tbody>
@@ -352,10 +352,10 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
     <p class="eyebrow">Questions</p>
     <h2>Fair things to ask before installing.</h2>
     <div class="faq">
-      <details open><summary>Does my data leave the spreadsheet?</summary><p>No. There is no Plumline server. The whole calculation runs inside your own spreadsheet through Google Apps Script — no analytics, no cookies, no third-party requests. Plumline can see the spreadsheet it's installed in and nothing else: not your Drive, not your other files.</p></details>
-      <details><summary>What kinds of problems does it solve?</summary><p>Linear and integer optimisation: production planning, purchasing, blending, staffing rotas, transport volumes, budget allocation — any problem shaped as “how much of each, given these limits”. It doesn't solve genuinely non-linear models (a decision multiplied by another decision), and it tells you plainly when it meets one.</p></details>
-      <details><summary>What permissions does it request?</summary><p>Two: to read and write the spreadsheet it's installed in, and to show its side panel. Google adds an email and profile permission to every Marketplace listing by default; Plumline neither requests nor uses them. It asks for nothing else — no Drive, no Gmail, no external service.</p></details>
-      <details><summary>How big a problem can it handle?</summary><p>The free tier handles models up to 50 decision variables and 20 limits, which covers the great majority of real spreadsheet problems. Because it runs inside Sheets rather than queuing on a server, there's no waiting in line and no 30-second server cut-off.</p></details>
+      <details open><summary>Does my data leave the spreadsheet?</summary><p>No. There's no Plumline server for it to go to. Everything happens inside your own spreadsheet through Google Apps Script. No analytics, no cookies, no outside requests. Plumline can see the one sheet you opened it in, and nothing else. Not your Drive, not your other files.</p></details>
+      <details><summary>What kinds of problems does it solve?</summary><p>Anything shaped like "how much of each, given these limits": production runs, purchasing, blends and mixes, staff rotas, delivery loads, splitting a budget across channels. It handles both fractional and whole-number answers. It can't solve truly non-linear problems, like one decision multiplied by another, and it'll tell you straight when it hits one.</p></details>
+      <details><summary>What permissions does it request?</summary><p>Two. One to read and write the sheet it's installed in, one to show its side panel. Google tacks an email and profile permission onto every Marketplace listing automatically; Plumline doesn't ask for those and doesn't use them. Nothing else: no Drive, no Gmail, no outside connection.</p></details>
+      <details><summary>How big a problem can it handle?</summary><p>The free version handles up to 50 decisions and 20 limits, which covers most everyday spreadsheet problems comfortably. And because it runs inside Sheets instead of queuing on someone's server, there's no waiting your turn and no cut-off halfway through.</p></details>
       <details><summary>How much does it cost?</summary><p>It's free.</p></details>
     </div>
   </section>
@@ -366,8 +366,8 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
   <div class="plumb">
     <section class="band">
       <p class="eyebrow">Plumline</p>
-      <h2>Put a number in front of your next decision.</h2>
-      <p>A free add-on for Google Sheets. Reads your model, solves it, and proves the result against your own formulas.</p>
+      <h2>Stop guessing. Start with the number.</h2>
+      <p>A free Google Sheets add-on that reads your model, solves it, and proves the result against your own formulas.</p>
       <div class="row"><a class="btn" href="#how">See how it works</a></div>
     </section>
   </div>
@@ -423,7 +423,7 @@ footer .fine{max-width:60ch;line-height:1.5;color:rgba(245,242,235,.5)}
     var frac=!whole&&(Math.abs(s.a-Math.round(s.a))>1e-6||Math.abs(s.c-Math.round(s.c))>1e-6);
     check.classList.toggle('warn',frac);
     check.querySelector('b').textContent=frac?'!':'✓';
-    t.textContent=frac?'Matches — but this answer isn\u2019t whole. Tick “whole units only” for a usable mix.':'The sheet recalculates '+fmt(round(s.profit))+', which matches.';
+    t.textContent=frac?'Matches, but this answer isn\u2019t whole. Tick “whole units only” for a usable mix.':'The sheet recalculates '+fmt(round(s.profit))+', which matches.';
   }
   ['hrs','capb','whole'].forEach(function(id){el(id).addEventListener('input',render)});
   el('resolve').addEventListener('click',function(){var b=this;b.textContent='Solved';setTimeout(function(){b.textContent='Solve again'},700);render()});
