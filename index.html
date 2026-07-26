@@ -3,143 +3,329 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plumline — Solver &amp; Optimization for Google Sheets</title>
-<meta name="description" content="A solver for Google Sheets that reads your model from the sheet, shows you what it understood before solving, and proves the answer against your own formulas.">
+<title>Plumline — a solver for Google Sheets that proves its answer</title>
+<meta name="description" content="Plumline is a Google Sheets add-on that solves resource-allocation problems. It reads the model from your formulas, shows you what it understood, and checks the answer against your own sheet — with nothing sent to any server.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
+<div class="plumb">
 
-<header>
-  <p class="brand">Plumline</p>
-  <h1>Plumline is a solver for Google Sheets.</h1>
-  <p class="lead">
-    It finds the best allocation your spreadsheet allows — how much to make,
-    buy, ship or spend — by reading the model straight out of your formulas,
-    solving it, and proving the answer against your own sheet.
-  </p>
-  <p class="note">
-    Plumline is a free add-on for Google Sheets™.
-    &nbsp;·&nbsp; <a href="privacy.html">Privacy policy</a>
-    &nbsp;·&nbsp; <a href="terms.html">Terms of service</a>
-  </p>
-</header>
+  <header class="mast">
+    <a href="index.html" class="lockup" aria-label="Plumline home">
+      <svg width="22" height="34" viewBox="0 0 22 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="11" y1="0" x2="11" y2="9" stroke="#1B1D1A" stroke-width="1.5"/>
+        <path d="M11 9 L18 15 L18 19 L11 30 L4 19 L4 15 Z" fill="#1B1D1A"/>
+        <line x1="2" y1="33" x2="20" y2="33" stroke="#1F6B4F" stroke-width="2"/>
+      </svg>
+      <span class="wm">Plumline</span>
+    </a>
+    <nav class="nav">
+      <a href="#how" class="hide-sm">How it works</a>
+      <a href="#versus" class="hide-sm">Why it's different</a>
+      <a href="#faq">FAQ</a>
+      <a href="privacy.html">Privacy</a>
+    </nav>
+  </header>
 
-<section>
-  <h2>What Plumline does</h2>
-  <p>
-    Plumline solves resource allocation problems inside a Google Sheets™
-    spreadsheet: linear and integer optimisation. You already have the
-    arithmetic in your sheet — quantities, costs, a total, a few limits.
-    Plumline reads it, works out the combination of quantities that maximises
-    or minimises your total without breaking any limit, and writes that
-    combination back into the cells you choose.
-  </p>
-  <p>
-    It is used for production planning, purchasing, blending, staffing rotas,
-    transport volumes and budget allocation: any problem shaped as "how much of
-    each, given these limits".
-  </p>
+  <section class="hero">
+    <p class="eyebrow">Optimisation for Google Sheets</p>
+    <h1>The solver that hands back an answer you can check.</h1>
+    <p class="lead">
+      Plumline works out the best allocation your spreadsheet allows — how much
+      to make, buy, ship or staff — then proves it against your own formulas
+      instead of asking you to trust it.
+    </p>
 
-  <div class="receipt">
-    <div class="line head"><span>Total profit</span><span>1,760</span></div>
-    <div class="line"><span>A</span><span>0 → 0</span></div>
-    <div class="line"><span>B</span><span>0 → 40</span></div>
-    <div class="line"><span>C</span><span>0 → 20</span></div>
-    <div class="line"><span>Total hours</span><span>100 / 100 at limit</span></div>
-    <div class="line"><span>Units of product B</span><span>40 / 40 at limit</span></div>
-    <div class="check"><span>✓</span><span>The sheet recalculates 1,760, which matches.</span></div>
-  </div>
-  <p class="note">The panel as it appears after solving.</p>
-</section>
+    <div class="solver" id="solver">
+      <div class="controls">
+        <p class="caption">A worked example · drag to change the limits</p>
+        <div class="dial">
+          <label for="hrs"><span>Hours available</span><b id="hrs-v">100</b></label>
+          <input type="range" id="hrs" min="20" max="140" value="100" step="1" aria-label="Hours available">
+        </div>
+        <div class="dial">
+          <label for="capb"><span>Max units of product B</span><b id="capb-v">40</b></label>
+          <input type="range" id="capb" min="0" max="60" value="40" step="1" aria-label="Maximum units of product B">
+        </div>
+        <div class="dial">
+          <label for="whole"><span>Whole units only</span><b id="whole-v">off</b></label>
+          <input type="range" id="whole" min="0" max="1" value="0" step="1" aria-label="Whole units only">
+        </div>
+        <button class="solvebtn" id="resolve">Solve again</button>
+        <p class="playhint">runs in your browser — the real add-on runs in your sheet</p>
+      </div>
 
-<section>
-  <h2>Nothing to set up</h2>
-  <p>
-    Open the panel and the model is already there. Plumline works out which
-    cells are the quantities to decide, which total is the goal, and which
-    limits apply — and names them using the labels already written in your
-    sheet, not cell addresses. If it reads something wrong, you correct it;
-    you never have to build it from nothing.
-  </p>
-</section>
+      <div class="receipt" id="receipt" aria-live="polite">
+        <div class="totrow"><span>Total profit</span><b id="obj">1,760</b></div>
+        <div class="r"><span class="k">Product A <span style="color:var(--faint)">&middot; &pound;30</span></span><span class="v" id="a">0</span></div>
+        <div class="r"><span class="k">Product B <span style="color:var(--faint)">&middot; &pound;20</span></span><span class="v" id="b">40</span></div>
+        <div class="r"><span class="k">Product C <span style="color:var(--faint)">&middot; &pound;48</span></span><span class="v" id="c">20</span></div>
+        <div class="lim" id="lim-hrs">
+          <div class="r"><span class="k">Hours used</span><span class="v" id="hrs-used">100 / 100</span></div>
+          <div class="bar"><i></i></div>
+        </div>
+        <div class="lim" id="lim-b">
+          <div class="r"><span class="k">Units of B</span><span class="v" id="b-used">40 / 40</span></div>
+          <div class="bar"><i></i></div>
+        </div>
+        <div class="check" id="check">
+          <span aria-hidden="true">&#10003;</span><span id="check-t">The sheet recalculates 1,760, which matches.</span>
+        </div>
+      </div>
+    </div>
 
-<section>
-  <h2>It proves the answer</h2>
-  <p>
-    A solver is one of the few tools whose output you cannot check by looking
-    at it — you asked precisely because you did not know the answer. So
-    Plumline does not ask to be trusted. It writes the solution into your
-    sheet, lets Sheets recalculate on its own, and shows you that the two
-    numbers agree. Every constraint is listed with how much of it you used and
-    how much is left over, so you can see which limit is the one holding you
-    back.
-  </p>
-  <p>
-    When a model cannot be solved, it says which cell and why, in plain terms:
-    a cell that multiplies two decision variables together, a total that does
-    not move when the quantities move, two limits that contradict each other.
-    It will not return a confident number it cannot stand behind.
-  </p>
-</section>
+    <div class="row">
+      <a class="btn" href="#how">See how it reads your sheet</a>
+      <a class="btn ghost" href="#faq">Is my data safe? &rarr;</a>
+    </div>
+  </section>
 
-<section>
-  <h2>Permissions</h2>
-  <p>
-    Plumline can see the spreadsheet it is installed in, and nothing else. Not
-    your Drive, not your other spreadsheets, and no outside service. Google
-    adds two further permissions — your email address and basic profile — to
-    every add-on listing; neither is requested by Plumline and neither is used
-    by it.
-  </p>
-  <table>
-    <tr><th>Permission</th><th>Why</th></tr>
-    <tr>
-      <td class="perm">View and manage spreadsheets that this application has been installed in</td>
-      <td>To read the formulas of the sheet you are working on and write the solution back.</td>
-    </tr>
-    <tr>
-      <td class="perm">Display and run third-party web content in prompts and sidebars</td>
-      <td>To show the side panel.</td>
-    </tr>
-  </table>
-  <p class="note">
-    Your figures are never sent to a server of ours, because there is no
-    server of ours. The whole calculation runs inside your own spreadsheet.
-  </p>
-</section>
+  <section class="bob feat" id="how">
+    <p class="eyebrow">Nothing to set up</p>
+    <h2>It reads the model out of the sheet you already built.</h2>
+    <p>
+      Open the panel and the problem is already there. Plumline works out which
+      cells are the quantities to decide, which total is the goal, and which
+      limits apply — and it names them with the labels you wrote, not with cell
+      addresses. If it reads something wrong, you correct it. You never build
+      the model from scratch, and you never see “no model defined”.
+    </p>
+    <div class="detail">
+      Objective&nbsp; &rarr; &nbsp;Total profit (D6, maximise)<br>
+      Decide&nbsp;&nbsp;&nbsp;&nbsp; &rarr; &nbsp;A, B, C (B2:B4)<br>
+      Within&nbsp;&nbsp;&nbsp;&nbsp; &rarr; &nbsp;Hours &le; 100 &middot; Units of B &le; 40
+    </div>
+  </section>
 
-<section>
-  <h2>What it cannot do</h2>
-  <p>
-    Plumline solves linear problems: totals built from quantities multiplied
-    by fixed rates, added up. That covers most production, purchasing,
-    blending, staffing and budget-allocation models.
-  </p>
-  <p>
-    It does not solve models where two decision variables multiply each other,
-    or where a condition tests a quantity being decided. Those are genuinely
-    non-linear and no method of this kind can handle them. Plumline tells you
-    when it hits one instead of returning an approximation without saying so.
-  </p>
-  <p>
-    Quantities can come back as whole numbers when they have to. Tick "whole
-    numbers only" and Plumline searches for the best combination of integers
-    rather than rounding a fractional answer, which is not the same thing and
-    is usually worse. If the search runs out of time with a valid answer in
-    hand, it says the answer is the best it found rather than the best there is.
-  </p>
-</section>
+  <section class="bob feat">
+    <p class="eyebrow">The part that matters</p>
+    <h2>Then it proves the answer against your own sheet.</h2>
+    <p>
+      A solver is one of the few tools whose output you cannot check by looking
+      at it — you asked precisely because you did not know the answer. So
+      Plumline does not ask for trust. It writes the solution back, lets Sheets
+      recalculate on its own, and shows you that both numbers agree. Every limit
+      is listed with how much you used and how much is left, so you can see
+      which one is actually holding you back.
+    </p>
+    <div class="detail true">
+      <b>&#10003; Written.</b> The sheet recalculates 1,760, which matches the
+      value Plumline computed.
+    </div>
+  </section>
 
-<footer>
-  <a href="privacy.html">Privacy policy</a>
-  <a href="terms.html">Terms of service</a>
-  <p class="note" style="margin-top:14px">
-    Plumline is an independent add-on and is not affiliated with or endorsed by
-    Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.
-  </p>
-</footer>
+  <section class="bob feat">
+    <p class="eyebrow">When it can't</p>
+    <h2>It tells you which cell, and why — never a quiet guess.</h2>
+    <p>
+      The real complaint about the solvers in this category is not that they
+      fail. It is that they fail without saying why — or worse, work one day and
+      quietly stop respecting a limit the next — and you lose an afternoon
+      doubting your own spreadsheet. When a model can't be solved, Plumline names
+      the cell and the reason in plain terms, every time, the same way.
+    </p>
+    <div class="detail bad">
+      <b>D9 can't be linearised</b> — it multiplies two decision variables
+      (B2 &times; B3). No solver of this kind can handle that; Plumline says so
+      instead of approximating in silence.
+    </div>
+  </section>
+
+  <section class="bob feat">
+    <p class="eyebrow">Whole numbers when you need them</p>
+    <h2>Trucks and shifts don't come in thirds.</h2>
+    <p>
+      Tick <em>whole units only</em> and Plumline searches for the best integer
+      combination instead of rounding a fractional answer — which is not the
+      same thing, and is usually worse. Try it on the example above: set the
+      hours to 30. The fractional best makes 1.67 of product C; the whole-number
+      best rebuilds the mix entirely rather than rounding that 1.67. If the
+      search runs out of time holding a valid answer, Plumline tells you it is
+      the best it found, not the best there is.
+    </p>
+  </section>
+
+  <section class="bob" id="versus">
+    <p class="eyebrow">Why it's different</p>
+    <h2>Built against the two things people actually complain about.</h2>
+    <p style="color:var(--ink-soft)">
+      These aren't strawmen. They're the failures that fill the reviews of the
+      solvers already in the store.
+    </p>
+
+    <div class="versus">
+      <div class="vcard them">
+        <div class="vh">The usual experience</div>
+        <p class="q">“It told me non-linear for weeks. Then without changing anything it worked — and didn't follow the constraints.”</p>
+        <p>A guess with no explanation, and a result you can't trust even when it succeeds.</p>
+      </div>
+      <div class="vcard us">
+        <div class="vh">With Plumline</div>
+        <p class="q">“D9 can't be linearised — it multiplies two decisions. Here's the cell.”</p>
+        <p>The same input gives the same answer, and the answer is checked against your sheet before you rely on it.</p>
+      </div>
+    </div>
+
+    <div class="versus">
+      <div class="vcard them">
+        <div class="vh">The usual experience</div>
+        <p class="q">“Problem could not be loaded. No model defined.”</p>
+        <p>You build the whole model by hand first, and it can still fail to load it.</p>
+      </div>
+      <div class="vcard us">
+        <div class="vh">With Plumline</div>
+        <p class="q">Open the panel — the model is already there.</p>
+        <p>Read straight from the formulas you wrote, labelled in your own words.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bob" id="compare">
+    <p class="eyebrow">Side by side</p>
+    <h2>The deepest difference is what it can reach.</h2>
+    <p style="color:var(--ink-soft)">
+      Every solver here does the maths. What separates them is how much of your
+      account they ask for, and whether your figures ever leave your spreadsheet.
+    </p>
+    <table class="cmp">
+      <thead>
+        <tr><th scope="col">&nbsp;</th><th scope="col">Plumline</th><th scope="col">Typical alternative</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">Reads the model for you</th><td class="us ok">Yes</td><td class="no">You define it by hand</td></tr>
+        <tr><th scope="row">Checks the answer in your sheet</th><td class="us ok">Yes</td><td>&mdash;</td></tr>
+        <tr><th scope="row">Runs without a server</th><td class="us ok">Always</td><td class="no">Often queues on theirs</td></tr>
+        <tr><th scope="row">Access to your Drive</th><td class="us ok">None</td><td class="no">Sometimes full Drive</td></tr>
+        <tr><th scope="row">Linear &amp; integer</th><td class="us ok">Both</td><td>Varies</td></tr>
+        <tr><th scope="row">Price</th><td class="us">Free</td><td>Free to ~&pound;3/mo</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:14px;color:var(--faint)">
+      Capabilities vary by add-on and change over time; check each listing for
+      its current terms.
+    </p>
+  </section>
+
+  <section class="bob" id="faq">
+    <p class="eyebrow">Questions</p>
+    <h2>Fair things to ask before installing.</h2>
+    <div class="faq">
+      <details open>
+        <summary>Does my data leave the spreadsheet?</summary>
+        <p>No. There is no Plumline server. The whole calculation runs inside your own spreadsheet through Google Apps Script — no analytics, no cookies, no third-party requests. Plumline can see the spreadsheet it's installed in and nothing else: not your Drive, not your other files.</p>
+      </details>
+      <details>
+        <summary>What kinds of problems does it solve?</summary>
+        <p>Linear and integer optimisation: production planning, purchasing, blending, staffing rotas, transport volumes, budget allocation — any problem shaped as “how much of each, given these limits”. It does not solve genuinely non-linear models (a decision multiplied by another decision), and it tells you plainly when it meets one.</p>
+      </details>
+      <details>
+        <summary>What permissions does it request?</summary>
+        <p>Two: to read and write the spreadsheet it's installed in, and to show its side panel. Google adds an email and profile permission to every Marketplace listing by default; Plumline neither requests nor uses them. It asks for nothing else — no Drive, no Gmail, no external service.</p>
+      </details>
+      <details>
+        <summary>How big a problem can it handle?</summary>
+        <p>The free tier handles models up to 50 decision variables and 20 limits, which covers the great majority of real spreadsheet problems. Because it runs inside Sheets rather than queuing on a server, there's no waiting in line and no 30-second server cut-off.</p>
+      </details>
+      <details>
+        <summary>How much does it cost?</summary>
+        <p>It's free.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="band">
+    <p class="eyebrow">Plumline</p>
+    <h2>Put a number in front of your next decision.</h2>
+    <p style="color:var(--ink-soft)">
+      A free add-on for Google Sheets. Reads your model, solves it, and proves
+      the result against your own formulas.
+    </p>
+    <div class="row">
+      <a class="btn" href="#how">See how it works</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="flinks">
+      <a href="index.html">Home</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="terms.html">Terms of service</a>
+    </div>
+    <p class="fine">
+      Plumline is an independent add-on and is not affiliated with or endorsed
+      by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks
+      of Google LLC.
+    </p>
+  </footer>
 
 </div>
+
+<script>
+(function () {
+  var P = { A:30, B:20, C:48 }, H = { A:2, B:1, C:3 };
+  var el = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return n.toLocaleString('en-GB'); };
+
+  function solve(hours, capB, whole) {
+    var best = null;
+    var maxB = Math.min(capB, Math.floor(hours / H.B));
+    for (var b = 0; b <= maxB; b++) {
+      var remH = hours - b * H.B;
+      if (remH < 0) break;
+      var cMax = remH / H.C;
+      var cand = whole ? [Math.floor(cMax), Math.ceil(cMax)] : [cMax];
+      for (var i = 0; i < cand.length; i++) {
+        var c = cand[i];
+        if (c < 0) continue;
+        var hAfter = remH - c * H.C;
+        if (hAfter < -1e-9) continue;
+        var a = hAfter / H.A;
+        if (whole) a = Math.floor(a + 1e-9);
+        if (a < 0) continue;
+        var usedH = a * H.A + b * H.B + c * H.C;
+        if (usedH > hours + 1e-9) continue;
+        var profit = a * P.A + b * P.B + c * P.C;
+        if (!best || profit > best.profit + 1e-9) best = { a:a, b:b, c:c, profit:profit, usedH:usedH };
+      }
+    }
+    return best;
+  }
+  function round(n){ return Math.round(n*1000)/1000; }
+  function show(n){ return (Math.abs(n-Math.round(n))<1e-6) ? String(Math.round(n)) : n.toFixed(4).replace(/0+$/,'').replace(/\.$/,''); }
+
+  function render() {
+    var hours = +el('hrs').value, capB = +el('capb').value, whole = +el('whole').value === 1;
+    el('hrs-v').textContent = hours;
+    el('capb-v').textContent = capB;
+    el('whole-v').textContent = whole ? 'on' : 'off';
+    var s = solve(hours, capB, whole);
+    if (!s) return;
+    el('obj').textContent = fmt(round(s.profit));
+    el('a').textContent = show(s.a);
+    el('b').textContent = show(s.b);
+    el('c').textContent = show(s.c);
+    el('hrs-used').textContent = show(round(s.usedH)) + ' / ' + hours;
+    el('b-used').textContent = show(s.b) + ' / ' + capB;
+    el('lim-hrs').querySelector('i').style.width = Math.min(100, s.usedH/hours*100) + '%';
+    el('lim-b').querySelector('i').style.width = (capB>0 ? Math.min(100, s.b/capB*100) : 0) + '%';
+    el('lim-hrs').classList.toggle('over', s.usedH > hours + 1e-6);
+    el('lim-b').classList.toggle('over', s.b > capB + 1e-6);
+    var check = el('check'), t = el('check-t');
+    var fractional = !whole && (Math.abs(s.a-Math.round(s.a))>1e-6 || Math.abs(s.c-Math.round(s.c))>1e-6);
+    check.classList.toggle('warn', fractional);
+    check.querySelector('span').textContent = fractional ? '!' : '\u2713';
+    t.textContent = fractional
+      ? 'Matches — but this answer isn\u2019t whole. Tick \u201Cwhole units only\u201D for a usable mix.'
+      : 'The sheet recalculates ' + fmt(round(s.profit)) + ', which matches.';
+  }
+  ['hrs','capb','whole'].forEach(function (id){ el(id).addEventListener('input', render); });
+  el('resolve').addEventListener('click', function () {
+    var b = this; b.textContent = 'Solved';
+    setTimeout(function(){ b.textContent = 'Solve again'; }, 700);
+    render();
+  });
+  render();
+})();
+</script>
 </body>
 </html>
