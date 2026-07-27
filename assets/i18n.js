@@ -1225,10 +1225,22 @@
     }
   };
 
+  function saved() {
+    // Remember the user's choice across pages and visits. try/catch because
+    // localStorage can throw in private mode or with storage disabled.
+    try { return localStorage.getItem('plumline_lang'); } catch (e) { return null; }
+  }
+  function remember(lang) {
+    try { localStorage.setItem('plumline_lang', lang); } catch (e) {}
+  }
+
   function pick() {
+    // Priority: an explicit ?lang= in the URL (a shared link) wins, then the
+    // user's saved choice, then the browser language, then English.
     var url = (location.search.match(/[?&]lang=(\w\w)/) || [])[1];
+    var store = saved();
     var nav = (global.navigator && (navigator.language || 'en')).slice(0, 2);
-    var lang = url || nav || 'en';
+    var lang = url || store || nav || 'en';
     return DICT[lang] ? lang : 'en';
   }
 
@@ -1257,12 +1269,17 @@
     },
     init: function (page) {
       var lang = pick();
+      // If the URL carried an explicit ?lang=, treat it as a deliberate choice
+      // and remember it, so navigating to other pages keeps it.
+      var urlLang = (location.search.match(/[?&]lang=(\w\w)/) || [])[1];
+      if (urlLang && DICT[urlLang]) remember(urlLang);
       apply(lang, page);
       var sel = document.getElementById('lang');
       if (sel) {
         sel.value = lang;
         sel.addEventListener('change', function () {
           apply(sel.value, page);
+          remember(sel.value);
           try { history.replaceState(null, '', '?lang=' + sel.value); } catch (e) {}
         });
       }
