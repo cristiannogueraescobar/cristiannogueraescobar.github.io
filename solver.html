@@ -4,9 +4,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Free online solver — linear &amp; integer optimisation | Plumline</title>
+    <title>Linear Programming Solver Online — Free LP &amp; Integer Optimization | Plumline</title>
+    <meta name="keywords"
+        content="linear programming solver, LP solver online, integer programming, optimization calculator, simplex method, feasible region, shadow price, operations research">
+    <meta property="og:title" content="Linear Programming Solver Online — Free">
+    <meta property="og:description"
+        content="Solve linear and integer optimization in your browser. Optimal solution, shadow prices, and a feasible-region graph. Nothing uploaded.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://plumline.online/solver.html">
+    <link rel="canonical" href="https://plumline.online/solver.html">
     <meta name="description"
-        content="A free online optimisation solver. Type your problem into the grid like a spreadsheet, and Plumline finds the best allocation, proves it, and shows which limit holds you back. Runs entirely in your browser — nothing is uploaded.">
+        content="Free online linear programming solver. Solve LP and integer optimization problems in your browser: enter your model like a spreadsheet, get the optimal solution, shadow prices, and a feasible-region graph. No sign-up, nothing uploaded.">
     <style>
         :root {
             --paper: #F5F2EB;
@@ -452,6 +460,71 @@
             fill: var(--faint)
         }
 
+        .steps {
+            margin-top: 16px;
+            max-width: 460px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--panel);
+            padding: 0 16px
+        }
+
+        .steps summary {
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 13px 0;
+            cursor: pointer;
+            color: var(--true)
+        }
+
+        .steps summary::-webkit-details-marker {
+            color: var(--true)
+        }
+
+        .steps p {
+            font-size: 13px;
+            color: var(--ink-2);
+            margin: 10px 0
+        }
+
+        .steps .stepnote {
+            color: var(--faint);
+            font-size: 12px;
+            padding-bottom: 14px
+        }
+
+        .steptable {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--mono);
+            font-size: 12px;
+            margin: 8px 0
+        }
+
+        .steptable th {
+            text-align: left;
+            color: var(--faint);
+            font-weight: 500;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .steptable td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--line-fine);
+            color: var(--ink-2)
+        }
+
+        .steptable tr.win td {
+            color: var(--true);
+            font-weight: 600;
+            background: var(--true-lo)
+        }
+
         .trouble {
             border: 1px solid #E7CFC9;
             background: #F7EEEB;
@@ -608,1852 +681,1882 @@
                 independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; is a trademark
                 of Google LLC.</p>
         </div>
-        </div>
+    </footer>
 
-        <script>
-            /* === Plumline engine: the exact same code as the Google Sheets add-on === */
-            /**
-             * Engine.gs — model extraction and optimisation
-             * ---------------------------------------------
-             * Validated on 2026-07-24 against real Google Sheets:
-             *   - 200 variables and 50 constraints extracted in 1.58 s, 0 recalculations
-             *   - 85% of a realistic formula battery usable; the rest genuinely non-linear
-             *   - solutions verified against the value Sheets itself recalculates
-             *
-             * Nothing in this file talks to the user. It reads a grid, turns cells into
-             * linear forms, and solves. Keep it that way.
-             */
+    <script>
+        /* === Plumline engine: the exact same code as the Google Sheets add-on === */
+        /**
+         * Engine.gs — model extraction and optimisation
+         * ---------------------------------------------
+         * Validated on 2026-07-24 against real Google Sheets:
+         *   - 200 variables and 50 constraints extracted in 1.58 s, 0 recalculations
+         *   - 85% of a realistic formula battery usable; the rest genuinely non-linear
+         *   - solutions verified against the value Sheets itself recalculates
+         *
+         * Nothing in this file talks to the user. It reads a grid, turns cells into
+         * linear forms, and solves. Keep it that way.
+         */
 
-            const ENGINE = {
-                MAX_DEPTH: 40,
-                BRANCH_NODES: 4000,
-                BRANCH_DEPTH: 60,
-                BRANCH_MILLIS: 20000,
-                EPSILON: 1e-9,
-                PIVOT_TOLERANCE: 1e-7,
-                MAX_ITERATIONS: 20000,
+        const ENGINE = {
+            MAX_DEPTH: 40,
+            BRANCH_NODES: 4000,
+            BRANCH_DEPTH: 60,
+            BRANCH_MILLIS: 20000,
+            EPSILON: 1e-9,
+            PIVOT_TOLERANCE: 1e-7,
+            MAX_ITERATIONS: 20000,
+        };
+
+
+        /* ================================================================== */
+        /* Branch and bound — whole-number solutions                           */
+        /* ================================================================== */
+
+        /**
+         * Entry point for the add-on. Solves the relaxation when every quantity may
+         * be fractional, and branches when some of them must come out whole.
+         */
+        function optimise_(model) {
+            const wanted = integerIndices_(model);
+            if (!wanted.length) return solveLinearProgram_(model);
+            return solveIntegerProgram_(model, wanted);
+        }
+
+        function integerIndices_(model) {
+            if (!model.integer) return [];
+            if (model.integer === true) {
+                const all = [];
+                for (let i = 0; i < model.objective.length; i++) all.push(i);
+                return all;
+            }
+            return model.integer;
+        }
+
+        function isWhole_(value) {
+            return Math.abs(value - Math.round(value)) < 1e-6;
+        }
+
+        /**
+         * Depth-first branch and bound. Each branch adds one bound on the variable
+         * that came back fractional and re-solves.
+         *
+         * The search is bounded by node count, depth and elapsed time. When a limit
+         * stops it while a whole-number solution has already been found, the result
+         * is returned with status "feasible" rather than "optimal": the answer is
+         * valid and satisfies every constraint, but it has not been proven best.
+         * Saying so is the point — a solver that cannot tell the difference is how
+         * users end up trusting a number they should not.
+         */
+        function solveIntegerProgram_(model, wanted) {
+            const deadline = Date.now() + ENGINE.BRANCH_MILLIS;
+            let best = null;
+            let nodes = 0;
+            let exhausted = true;
+
+            function explore(extra, depth) {
+                if (nodes++ > ENGINE.BRANCH_NODES || depth > ENGINE.BRANCH_DEPTH ||
+                    Date.now() > deadline) {
+                    exhausted = false;
+                    return;
+                }
+
+                const relaxed = solveLinearProgram_({
+                    maximize: model.maximize,
+                    objective: model.objective,
+                    constant: model.constant,
+                    constraints: model.constraints.concat(extra),
+                });
+                if (relaxed.status !== 'optimal') return;
+
+                if (best) {
+                    const better = model.maximize
+                        ? relaxed.objective > best.objective + 1e-9
+                        : relaxed.objective < best.objective - 1e-9;
+                    if (!better) return;   // this branch cannot beat what we hold
+                }
+
+                let fractional = -1;
+                for (let i = 0; i < wanted.length; i++) {
+                    if (!isWhole_(relaxed.values[wanted[i]])) {fractional = wanted[i]; break;}
+                }
+
+                if (fractional === -1) {
+                    best = {
+                        objective: relaxed.objective,
+                        values: relaxed.values.map(function (v) {return Math.round(v * 1e9) / 1e9;}),
+                    };
+                    return;
+                }
+
+                const value = relaxed.values[fractional];
+                const unit = [];
+                for (let i = 0; i < model.objective.length; i++) unit.push(i === fractional ? 1 : 0);
+
+                // Ceiling side first: on a maximisation it tends to hold the better
+                // solutions, so an incumbent appears sooner and prunes more of the tree.
+                explore(extra.concat([{coefficients: unit, relation: '>=', rhs: Math.ceil(value)}]),
+                    depth + 1);
+                explore(extra.concat([{coefficients: unit, relation: '<=', rhs: Math.floor(value)}]),
+                    depth + 1);
+            }
+
+            explore([], 0);
+
+            if (!best) {
+                return {status: exhausted ? 'infeasible' : 'no whole-number solution found in time'};
+            }
+            return {
+                status: exhausted ? 'optimal' : 'feasible',
+                values: best.values,
+                objective: best.objective,
+                nodes: nodes,
             };
-
-
-            /* ================================================================== */
-            /* Branch and bound — whole-number solutions                           */
-            /* ================================================================== */
-
-            /**
-             * Entry point for the add-on. Solves the relaxation when every quantity may
-             * be fractional, and branches when some of them must come out whole.
-             */
-            function optimise_(model) {
-                const wanted = integerIndices_(model);
-                if (!wanted.length) return solveLinearProgram_(model);
-                return solveIntegerProgram_(model, wanted);
-            }
-
-            function integerIndices_(model) {
-                if (!model.integer) return [];
-                if (model.integer === true) {
-                    const all = [];
-                    for (let i = 0; i < model.objective.length; i++) all.push(i);
-                    return all;
-                }
-                return model.integer;
-            }
-
-            function isWhole_(value) {
-                return Math.abs(value - Math.round(value)) < 1e-6;
-            }
-
-            /**
-             * Depth-first branch and bound. Each branch adds one bound on the variable
-             * that came back fractional and re-solves.
-             *
-             * The search is bounded by node count, depth and elapsed time. When a limit
-             * stops it while a whole-number solution has already been found, the result
-             * is returned with status "feasible" rather than "optimal": the answer is
-             * valid and satisfies every constraint, but it has not been proven best.
-             * Saying so is the point — a solver that cannot tell the difference is how
-             * users end up trusting a number they should not.
-             */
-            function solveIntegerProgram_(model, wanted) {
-                const deadline = Date.now() + ENGINE.BRANCH_MILLIS;
-                let best = null;
-                let nodes = 0;
-                let exhausted = true;
-
-                function explore(extra, depth) {
-                    if (nodes++ > ENGINE.BRANCH_NODES || depth > ENGINE.BRANCH_DEPTH ||
-                        Date.now() > deadline) {
-                        exhausted = false;
-                        return;
-                    }
-
-                    const relaxed = solveLinearProgram_({
-                        maximize: model.maximize,
-                        objective: model.objective,
-                        constant: model.constant,
-                        constraints: model.constraints.concat(extra),
-                    });
-                    if (relaxed.status !== 'optimal') return;
-
-                    if (best) {
-                        const better = model.maximize
-                            ? relaxed.objective > best.objective + 1e-9
-                            : relaxed.objective < best.objective - 1e-9;
-                        if (!better) return;   // this branch cannot beat what we hold
-                    }
-
-                    let fractional = -1;
-                    for (let i = 0; i < wanted.length; i++) {
-                        if (!isWhole_(relaxed.values[wanted[i]])) {fractional = wanted[i]; break;}
-                    }
-
-                    if (fractional === -1) {
-                        best = {
-                            objective: relaxed.objective,
-                            values: relaxed.values.map(function (v) {return Math.round(v * 1e9) / 1e9;}),
-                        };
-                        return;
-                    }
-
-                    const value = relaxed.values[fractional];
-                    const unit = [];
-                    for (let i = 0; i < model.objective.length; i++) unit.push(i === fractional ? 1 : 0);
-
-                    // Ceiling side first: on a maximisation it tends to hold the better
-                    // solutions, so an incumbent appears sooner and prunes more of the tree.
-                    explore(extra.concat([{coefficients: unit, relation: '>=', rhs: Math.ceil(value)}]),
-                        depth + 1);
-                    explore(extra.concat([{coefficients: unit, relation: '<=', rhs: Math.floor(value)}]),
-                        depth + 1);
-                }
-
-                explore([], 0);
-
-                if (!best) {
-                    return {status: exhausted ? 'infeasible' : 'no whole-number solution found in time'};
-                }
-                return {
-                    status: exhausted ? 'optimal' : 'feasible',
-                    values: best.values,
-                    objective: best.objective,
-                    nodes: nodes,
-                };
-            }
-
-            /* ================================================================== */
-            /* Two-phase simplex                                                   */
-            /* ================================================================== */
-
-            function solveLinearProgram_(model) {
-                const n = model.objective.length;
-                const constraints = model.constraints.map(normalizeConstraint_);
-
-                let extra = 0;
-                let artificials = 0;
-                constraints.forEach(function (c) {
-                    if (c.relation !== '=') extra++;
-                    if (c.relation !== '<=') artificials++;
-                });
-                const total = n + extra + artificials;
-
-                const tableau = [];
-                const basis = [];
-                const isArtificial = [];
-                for (let j = 0; j < total; j++) isArtificial.push(false);
-
-                let extraColumn = n;
-                let artificialColumn = n + extra;
-
-                constraints.forEach(function (c) {
-                    const row = [];
-                    for (let j = 0; j <= total; j++) row.push(0);
-                    for (let j = 0; j < n; j++) row[j] = c.coefficients[j] || 0;
-                    row[total] = c.rhs;
-
-                    if (c.relation === '<=') {
-                        row[extraColumn] = 1;
-                        basis.push(extraColumn);
-                        extraColumn++;
-                    } else if (c.relation === '>=') {
-                        row[extraColumn] = -1;
-                        extraColumn++;
-                        row[artificialColumn] = 1;
-                        isArtificial[artificialColumn] = true;
-                        basis.push(artificialColumn);
-                        artificialColumn++;
-                    } else {
-                        row[artificialColumn] = 1;
-                        isArtificial[artificialColumn] = true;
-                        basis.push(artificialColumn);
-                        artificialColumn++;
-                    }
-                    tableau.push(row);
-                });
-
-                if (artificials > 0) {
-                    const phaseOneCost = [];
-                    for (let j = 0; j < total; j++) phaseOneCost.push(isArtificial[j] ? 1 : 0);
-                    iterate_(tableau, basis, phaseOneCost, total, null);
-
-                    let residual = 0;
-                    for (let i = 0; i < basis.length; i++) {
-                        if (isArtificial[basis[i]]) residual += tableau[i][total];
-                    }
-                    if (residual > 1e-6) return {status: 'infeasible'};
-                }
-
-                const sign = model.maximize ? -1 : 1;
-                const phaseTwoCost = [];
-                for (let j = 0; j < total; j++) phaseTwoCost.push(0);
-                for (let j = 0; j < n; j++) phaseTwoCost[j] = sign * (model.objective[j] || 0);
-
-                const status = iterate_(tableau, basis, phaseTwoCost, total, isArtificial);
-                if (status !== 'optimal') return {status: status};
-
-                const values = [];
-                for (let j = 0; j < n; j++) values.push(0);
-                for (let i = 0; i < basis.length; i++) {
-                    if (basis[i] < n) values[basis[i]] = tableau[i][total];
-                }
-
-                let objective = model.constant || 0;
-                for (let j = 0; j < n; j++) objective += (model.objective[j] || 0) * values[j];
-
-                return {status: 'optimal', values: values, objective: objective};
-            }
-
-            function normalizeConstraint_(c) {
-                if (c.rhs >= 0) {
-                    return {coefficients: c.coefficients.slice(), relation: c.relation, rhs: c.rhs};
-                }
-                const flipped = {'<=': '>=', '>=': '<=', '=': '='};
-                return {
-                    coefficients: c.coefficients.map(function (v) {return -v;}),
-                    relation: flipped[c.relation],
-                    rhs: -c.rhs,
-                };
-            }
-
-            function iterate_(tableau, basis, cost, total, forbidden) {
-                for (let iteration = 0; iteration < ENGINE.MAX_ITERATIONS; iteration++) {
-                    let entering = -1;
-                    for (let j = 0; j < total; j++) {
-                        if (forbidden && forbidden[j]) continue;
-                        let reduced = cost[j];
-                        for (let i = 0; i < tableau.length; i++) {
-                            reduced -= cost[basis[i]] * tableau[i][j];
-                        }
-                        if (reduced < -ENGINE.PIVOT_TOLERANCE) {entering = j; break;}
-                    }
-                    if (entering === -1) return 'optimal';
-
-                    let leaving = -1;
-                    let best = Infinity;
-                    for (let i = 0; i < tableau.length; i++) {
-                        const coefficient = tableau[i][entering];
-                        if (coefficient > ENGINE.EPSILON) {
-                            const ratio = tableau[i][total] / coefficient;
-                            const tie = Math.abs(ratio - best) < ENGINE.EPSILON;
-                            if (ratio < best - ENGINE.EPSILON ||
-                                (tie && leaving !== -1 && basis[i] < basis[leaving])) {
-                                best = ratio;
-                                leaving = i;
-                            }
-                        }
-                    }
-                    if (leaving === -1) return 'unbounded';
-
-                    pivot_(tableau, leaving, entering);
-                    basis[leaving] = entering;
-                }
-                return 'iteration limit reached';
-            }
-
-            function pivot_(tableau, row, column) {
-                const pivotValue = tableau[row][column];
-                for (let j = 0; j < tableau[row].length; j++) tableau[row][j] /= pivotValue;
-                for (let i = 0; i < tableau.length; i++) {
-                    if (i === row) continue;
-                    const factor = tableau[i][column];
-                    if (Math.abs(factor) < ENGINE.EPSILON) continue;
-                    for (let j = 0; j < tableau[i].length; j++) {
-                        tableau[i][j] -= factor * tableau[row][j];
-                    }
-                }
-            }
-
-            /* ================================================================== */
-            /* Grid — the whole sheet read in one call                             */
-            /* ================================================================== */
-
-            function loadGrid_(sheet) {
-                const range = sheet.getDataRange();
-                const formulas = range.getFormulas();
-                const values = range.getValues();
-                const columns = formulas.length ? formulas[0].length : 0;
-                return {
-                    firstRow: range.getRow(),
-                    firstColumn: range.getColumn(),
-                    rows: formulas.length,
-                    columns: columns,
-                    cellCount: formulas.length * columns,
-                    formulas: formulas,
-                    values: values,
-                };
-            }
-
-            function cellAt_(grid, a1) {
-                const address = parseAddress_(a1);
-                const r = address.row - grid.firstRow;
-                const c = address.column - grid.firstColumn;
-                if (r < 0 || c < 0 || r >= grid.rows || c >= grid.columns) {
-                    return {formula: '', value: 0};
-                }
-                return {formula: grid.formulas[r][c], value: grid.values[r][c]};
-            }
-
-            function parseAddress_(a1) {
-                const match = /^([A-Z]+)(\d+)$/.exec(a1.replace(/\$/g, '').toUpperCase());
-                if (!match) throw new Error('bad cell reference "' + a1 + '"');
-                return {column: columnIndex_(match[1]), row: parseInt(match[2], 10)};
-            }
-
-            function columnIndex_(letters) {
-                let index = 0;
-                for (let i = 0; i < letters.length; i++) {
-                    index = index * 26 + (letters.charCodeAt(i) - 64);
-                }
-                return index;
-            }
-
-            function columnLetter_(index) {
-                let letter = '';
-                let n = index;
-                while (n > 0) {
-                    const remainder = (n - 1) % 26;
-                    letter = String.fromCharCode(65 + remainder) + letter;
-                    n = Math.floor((n - 1) / 26);
-                }
-                return letter;
-            }
-
-            function expandRange_(grid, a1) {
-                const clean = a1.replace(/\$/g, '').toUpperCase();
-                const parts = clean.split(':');
-                const start = parseAddress_(parts[0]);
-                const end = parts.length > 1 ? parseAddress_(parts[1]) : start;
-                const cells = [];
-                for (let r = start.row; r <= end.row; r++) {
-                    for (let c = start.column; c <= end.column; c++) {
-                        cells.push(columnLetter_(c) + r);
-                    }
-                }
-                return cells;
-            }
-
-            function toSet_(list) {
-                const set = {};
-                list.forEach(function (item) {set[item] = true;});
-                return set;
-            }
-
-            function newContext_(grid, variables) {
-                return {
-                    grid: grid,
-                    variables: toSet_(variables),
-                    memo: {},
-                    dependsMemo: {},
-                    constantFallbacks: [],
-                };
-            }
-
-            /* ================================================================== */
-            /* Dependency analysis — does this cell lead back to a variable?       */
-            /* ================================================================== */
-
-            /**
-             * Extracts the cell and range references from a formula. String literals are
-             * blanked first so that text like "A2" inside SUMIF is not mistaken for a
-             * reference, and matches preceded by a letter are skipped so that the "G10"
-             * inside a name like LOG10 is not either.
-             */
-            function referencedCells_(formula) {
-                const source = formula.replace(/"[^"]*"/g, '""');
-                const pattern = /\$?[A-Z]{1,3}\$?\d{1,7}(?::\$?[A-Z]{1,3}\$?\d{1,7})?/gi;
-                const references = [];
-                let match;
-                while ((match = pattern.exec(source)) !== null) {
-                    const previous = match.index > 0 ? source.charAt(match.index - 1) : '';
-                    if (/[A-Za-z_]/.test(previous)) continue;
-                    references.push(match[0].replace(/\$/g, '').toUpperCase());
-                }
-                return references;
-            }
-
-            function dependsOnVariables_(context, a1, seen) {
-                const cell = a1.replace(/\$/g, '').toUpperCase();
-                if (context.variables[cell]) return true;
-                if (context.dependsMemo[cell] !== undefined) return context.dependsMemo[cell];
-                if (seen[cell]) return false;
-                seen[cell] = true;
-
-                const entry = cellAt_(context.grid, cell);
-                if (!entry.formula) {
-                    context.dependsMemo[cell] = false;
-                    return false;
-                }
-
-                let result = false;
-                const references = referencedCells_(entry.formula);
-                for (let i = 0; i < references.length && !result; i++) {
-                    const targets = references[i].indexOf(':') !== -1
-                        ? expandRange_(context.grid, references[i])
-                        : [references[i]];
-                    for (let j = 0; j < targets.length; j++) {
-                        if (dependsOnVariables_(context, targets[j], seen)) {result = true; break;}
-                    }
-                }
-
-                context.dependsMemo[cell] = result;
-                return result;
-            }
-
-            /* ================================================================== */
-            /* Linear form: { constant, terms }                                    */
-            /* ================================================================== */
-
-            function constantForm_(value) {
-                return {constant: value, terms: {}};
-            }
-
-            /** Text constants ride along in `text`; arithmetically they count as zero. */
-            function stringForm_(text) {
-                return {constant: 0, terms: {}, text: text};
-            }
-
-            /** The raw comparable value of a constant form: its text if any, else a number. */
-            function rawValue_(form) {
-                return form.text !== undefined ? form.text : form.constant;
-            }
-
-            function compareValues_(left, operator, right) {
-                const bothNumbers = typeof left === 'number' && typeof right === 'number';
-                const a = bothNumbers ? left : String(left).toLowerCase();
-                const b = bothNumbers ? right : String(right).toLowerCase();
-                switch (operator) {
-                    case '=': return a === b;
-                    case '<>': return a !== b;
-                    case '<': return a < b;
-                    case '>': return a > b;
-                    case '<=': return a <= b;
-                    case '>=': return a >= b;
-                    default: throw new Error('unknown comparison "' + operator + '"');
-                }
-            }
-
-            /** Matches a SUMIF/COUNTIF criterion such as "standard", ">10" or "<>0". */
-            function matchesCriterion_(value, criterion) {
-                if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
-                const text = String(criterion).trim();
-                const match = /^(<=|>=|<>|<|>|=)\s*(.*)$/.exec(text);
-                if (!match) return compareValues_(value, '=', text);
-                const operand = match[2];
-                const numeric = parseFloat(operand);
-                const comparable = (operand !== '' && !isNaN(numeric) && String(numeric) === operand)
-                    ? numeric : operand;
-                return compareValues_(value, match[1], comparable);
-            }
-
-            function variableForm_(cell) {
-                const terms = {};
-                terms[cell] = 1;
-                return {constant: 0, terms: terms};
-            }
-
-            function isConstant_(form) {
-                for (const key in form.terms) if (form.terms[key]) return false;
-                return true;
-            }
-
-            function addForms_(a, b, sign) {
-                const result = {constant: a.constant + sign * b.constant, terms: {}};
-                for (const k in a.terms) result.terms[k] = a.terms[k];
-                for (const k in b.terms) {
-                    result.terms[k] = (result.terms[k] || 0) + sign * b.terms[k];
-                }
-                return result;
-            }
-
-            function multiplyForms_(a, b) {
-                if (!isConstant_(a) && !isConstant_(b)) {
-                    throw new Error('non-linear: a variable is multiplied by another variable');
-                }
-                const scalar = isConstant_(a) ? a.constant : b.constant;
-                const other = isConstant_(a) ? b : a;
-                const result = {constant: other.constant * scalar, terms: {}};
-                for (const k in other.terms) result.terms[k] = other.terms[k] * scalar;
-                return result;
-            }
-
-            function divideForms_(a, b) {
-                if (!isConstant_(b)) throw new Error('non-linear: division by a variable');
-                if (b.constant === 0) throw new Error('division by zero');
-                return multiplyForms_(a, constantForm_(1 / b.constant));
-            }
-
-
-            /* ================================================================== */
-            /* Cell -> linear form                                                 */
-            /* ================================================================== */
-
-            function linearize_(context, a1, depth) {
-                if (depth > ENGINE.MAX_DEPTH) throw new Error('reference cycle or too deep');
-                const cell = a1.replace(/\$/g, '').toUpperCase();
-
-                if (context.variables[cell]) return variableForm_(cell);
-                if (context.memo[cell]) return context.memo[cell];
-
-                const entry = cellAt_(context.grid, cell);
-
-                let form;
-                if (!entry.formula) {
-                    if (typeof entry.value === 'number') form = constantForm_(entry.value);
-                    else if (typeof entry.value === 'string' && entry.value !== '') {
-                        form = stringForm_(entry.value);
-                    } else form = constantForm_(0);
+        }
+
+        /* ================================================================== */
+        /* Two-phase simplex                                                   */
+        /* ================================================================== */
+
+        function solveLinearProgram_(model) {
+            const n = model.objective.length;
+            const constraints = model.constraints.map(normalizeConstraint_);
+
+            let extra = 0;
+            let artificials = 0;
+            constraints.forEach(function (c) {
+                if (c.relation !== '=') extra++;
+                if (c.relation !== '<=') artificials++;
+            });
+            const total = n + extra + artificials;
+
+            const tableau = [];
+            const basis = [];
+            const isArtificial = [];
+            for (let j = 0; j < total; j++) isArtificial.push(false);
+
+            let extraColumn = n;
+            let artificialColumn = n + extra;
+
+            constraints.forEach(function (c) {
+                const row = [];
+                for (let j = 0; j <= total; j++) row.push(0);
+                for (let j = 0; j < n; j++) row[j] = c.coefficients[j] || 0;
+                row[total] = c.rhs;
+
+                if (c.relation === '<=') {
+                    row[extraColumn] = 1;
+                    basis.push(extraColumn);
+                    extraColumn++;
+                } else if (c.relation === '>=') {
+                    row[extraColumn] = -1;
+                    extraColumn++;
+                    row[artificialColumn] = 1;
+                    isArtificial[artificialColumn] = true;
+                    basis.push(artificialColumn);
+                    artificialColumn++;
                 } else {
-                    try {
-                        const tokens = tokenize_(entry.formula.replace(/^=/, ''));
-                        const parser = {tokens: tokens, position: 0, context: context, depth: depth};
-                        form = parseComparison_(parser);
-                        if (parser.position < parser.tokens.length) {
-                            throw new Error('unexpected token "' +
-                                parser.tokens[parser.position].text + '"');
-                        }
-                    } catch (err) {
-                        // Anything the parser cannot handle is still usable as long as it does
-                        // not lead back to a decision variable: the cached value is then exact.
-                        if (!dependsOnVariables_(context, cell, {})) {
-                            const cached = entry.value;
-                            if (typeof cached !== 'number') {
-                                throw new Error(cell + ' has no numeric value to fall back on');
-                            }
-                            context.constantFallbacks.push(cell);
-                            form = constantForm_(cached);
-                        } else {
-                            throw new Error(cell + ' depends on the decision variables and ' +
-                                'cannot be linearised (' + err.message + ')');
+                    row[artificialColumn] = 1;
+                    isArtificial[artificialColumn] = true;
+                    basis.push(artificialColumn);
+                    artificialColumn++;
+                }
+                tableau.push(row);
+            });
+
+            if (artificials > 0) {
+                const phaseOneCost = [];
+                for (let j = 0; j < total; j++) phaseOneCost.push(isArtificial[j] ? 1 : 0);
+                iterate_(tableau, basis, phaseOneCost, total, null);
+
+                let residual = 0;
+                for (let i = 0; i < basis.length; i++) {
+                    if (isArtificial[basis[i]]) residual += tableau[i][total];
+                }
+                if (residual > 1e-6) return {status: 'infeasible'};
+            }
+
+            const sign = model.maximize ? -1 : 1;
+            const phaseTwoCost = [];
+            for (let j = 0; j < total; j++) phaseTwoCost.push(0);
+            for (let j = 0; j < n; j++) phaseTwoCost[j] = sign * (model.objective[j] || 0);
+
+            const status = iterate_(tableau, basis, phaseTwoCost, total, isArtificial);
+            if (status !== 'optimal') return {status: status};
+
+            const values = [];
+            for (let j = 0; j < n; j++) values.push(0);
+            for (let i = 0; i < basis.length; i++) {
+                if (basis[i] < n) values[basis[i]] = tableau[i][total];
+            }
+
+            let objective = model.constant || 0;
+            for (let j = 0; j < n; j++) objective += (model.objective[j] || 0) * values[j];
+
+            return {status: 'optimal', values: values, objective: objective};
+        }
+
+        function normalizeConstraint_(c) {
+            if (c.rhs >= 0) {
+                return {coefficients: c.coefficients.slice(), relation: c.relation, rhs: c.rhs};
+            }
+            const flipped = {'<=': '>=', '>=': '<=', '=': '='};
+            return {
+                coefficients: c.coefficients.map(function (v) {return -v;}),
+                relation: flipped[c.relation],
+                rhs: -c.rhs,
+            };
+        }
+
+        function iterate_(tableau, basis, cost, total, forbidden) {
+            for (let iteration = 0; iteration < ENGINE.MAX_ITERATIONS; iteration++) {
+                let entering = -1;
+                for (let j = 0; j < total; j++) {
+                    if (forbidden && forbidden[j]) continue;
+                    let reduced = cost[j];
+                    for (let i = 0; i < tableau.length; i++) {
+                        reduced -= cost[basis[i]] * tableau[i][j];
+                    }
+                    if (reduced < -ENGINE.PIVOT_TOLERANCE) {entering = j; break;}
+                }
+                if (entering === -1) return 'optimal';
+
+                let leaving = -1;
+                let best = Infinity;
+                for (let i = 0; i < tableau.length; i++) {
+                    const coefficient = tableau[i][entering];
+                    if (coefficient > ENGINE.EPSILON) {
+                        const ratio = tableau[i][total] / coefficient;
+                        const tie = Math.abs(ratio - best) < ENGINE.EPSILON;
+                        if (ratio < best - ENGINE.EPSILON ||
+                            (tie && leaving !== -1 && basis[i] < basis[leaving])) {
+                            best = ratio;
+                            leaving = i;
                         }
                     }
                 }
+                if (leaving === -1) return 'unbounded';
 
-                context.memo[cell] = form;
+                pivot_(tableau, leaving, entering);
+                basis[leaving] = entering;
+            }
+            return 'iteration limit reached';
+        }
+
+        function pivot_(tableau, row, column) {
+            const pivotValue = tableau[row][column];
+            for (let j = 0; j < tableau[row].length; j++) tableau[row][j] /= pivotValue;
+            for (let i = 0; i < tableau.length; i++) {
+                if (i === row) continue;
+                const factor = tableau[i][column];
+                if (Math.abs(factor) < ENGINE.EPSILON) continue;
+                for (let j = 0; j < tableau[i].length; j++) {
+                    tableau[i][j] -= factor * tableau[row][j];
+                }
+            }
+        }
+
+        /* ================================================================== */
+        /* Grid — the whole sheet read in one call                             */
+        /* ================================================================== */
+
+        function loadGrid_(sheet) {
+            const range = sheet.getDataRange();
+            const formulas = range.getFormulas();
+            const values = range.getValues();
+            const columns = formulas.length ? formulas[0].length : 0;
+            return {
+                firstRow: range.getRow(),
+                firstColumn: range.getColumn(),
+                rows: formulas.length,
+                columns: columns,
+                cellCount: formulas.length * columns,
+                formulas: formulas,
+                values: values,
+            };
+        }
+
+        function cellAt_(grid, a1) {
+            const address = parseAddress_(a1);
+            const r = address.row - grid.firstRow;
+            const c = address.column - grid.firstColumn;
+            if (r < 0 || c < 0 || r >= grid.rows || c >= grid.columns) {
+                return {formula: '', value: 0};
+            }
+            return {formula: grid.formulas[r][c], value: grid.values[r][c]};
+        }
+
+        function parseAddress_(a1) {
+            const match = /^([A-Z]+)(\d+)$/.exec(a1.replace(/\$/g, '').toUpperCase());
+            if (!match) throw new Error('bad cell reference "' + a1 + '"');
+            return {column: columnIndex_(match[1]), row: parseInt(match[2], 10)};
+        }
+
+        function columnIndex_(letters) {
+            let index = 0;
+            for (let i = 0; i < letters.length; i++) {
+                index = index * 26 + (letters.charCodeAt(i) - 64);
+            }
+            return index;
+        }
+
+        function columnLetter_(index) {
+            let letter = '';
+            let n = index;
+            while (n > 0) {
+                const remainder = (n - 1) % 26;
+                letter = String.fromCharCode(65 + remainder) + letter;
+                n = Math.floor((n - 1) / 26);
+            }
+            return letter;
+        }
+
+        function expandRange_(grid, a1) {
+            const clean = a1.replace(/\$/g, '').toUpperCase();
+            const parts = clean.split(':');
+            const start = parseAddress_(parts[0]);
+            const end = parts.length > 1 ? parseAddress_(parts[1]) : start;
+            const cells = [];
+            for (let r = start.row; r <= end.row; r++) {
+                for (let c = start.column; c <= end.column; c++) {
+                    cells.push(columnLetter_(c) + r);
+                }
+            }
+            return cells;
+        }
+
+        function toSet_(list) {
+            const set = {};
+            list.forEach(function (item) {set[item] = true;});
+            return set;
+        }
+
+        function newContext_(grid, variables) {
+            return {
+                grid: grid,
+                variables: toSet_(variables),
+                memo: {},
+                dependsMemo: {},
+                constantFallbacks: [],
+            };
+        }
+
+        /* ================================================================== */
+        /* Dependency analysis — does this cell lead back to a variable?       */
+        /* ================================================================== */
+
+        /**
+         * Extracts the cell and range references from a formula. String literals are
+         * blanked first so that text like "A2" inside SUMIF is not mistaken for a
+         * reference, and matches preceded by a letter are skipped so that the "G10"
+         * inside a name like LOG10 is not either.
+         */
+        function referencedCells_(formula) {
+            const source = formula.replace(/"[^"]*"/g, '""');
+            const pattern = /\$?[A-Z]{1,3}\$?\d{1,7}(?::\$?[A-Z]{1,3}\$?\d{1,7})?/gi;
+            const references = [];
+            let match;
+            while ((match = pattern.exec(source)) !== null) {
+                const previous = match.index > 0 ? source.charAt(match.index - 1) : '';
+                if (/[A-Za-z_]/.test(previous)) continue;
+                references.push(match[0].replace(/\$/g, '').toUpperCase());
+            }
+            return references;
+        }
+
+        function dependsOnVariables_(context, a1, seen) {
+            const cell = a1.replace(/\$/g, '').toUpperCase();
+            if (context.variables[cell]) return true;
+            if (context.dependsMemo[cell] !== undefined) return context.dependsMemo[cell];
+            if (seen[cell]) return false;
+            seen[cell] = true;
+
+            const entry = cellAt_(context.grid, cell);
+            if (!entry.formula) {
+                context.dependsMemo[cell] = false;
+                return false;
+            }
+
+            let result = false;
+            const references = referencedCells_(entry.formula);
+            for (let i = 0; i < references.length && !result; i++) {
+                const targets = references[i].indexOf(':') !== -1
+                    ? expandRange_(context.grid, references[i])
+                    : [references[i]];
+                for (let j = 0; j < targets.length; j++) {
+                    if (dependsOnVariables_(context, targets[j], seen)) {result = true; break;}
+                }
+            }
+
+            context.dependsMemo[cell] = result;
+            return result;
+        }
+
+        /* ================================================================== */
+        /* Linear form: { constant, terms }                                    */
+        /* ================================================================== */
+
+        function constantForm_(value) {
+            return {constant: value, terms: {}};
+        }
+
+        /** Text constants ride along in `text`; arithmetically they count as zero. */
+        function stringForm_(text) {
+            return {constant: 0, terms: {}, text: text};
+        }
+
+        /** The raw comparable value of a constant form: its text if any, else a number. */
+        function rawValue_(form) {
+            return form.text !== undefined ? form.text : form.constant;
+        }
+
+        function compareValues_(left, operator, right) {
+            const bothNumbers = typeof left === 'number' && typeof right === 'number';
+            const a = bothNumbers ? left : String(left).toLowerCase();
+            const b = bothNumbers ? right : String(right).toLowerCase();
+            switch (operator) {
+                case '=': return a === b;
+                case '<>': return a !== b;
+                case '<': return a < b;
+                case '>': return a > b;
+                case '<=': return a <= b;
+                case '>=': return a >= b;
+                default: throw new Error('unknown comparison "' + operator + '"');
+            }
+        }
+
+        /** Matches a SUMIF/COUNTIF criterion such as "standard", ">10" or "<>0". */
+        function matchesCriterion_(value, criterion) {
+            if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
+            const text = String(criterion).trim();
+            const match = /^(<=|>=|<>|<|>|=)\s*(.*)$/.exec(text);
+            if (!match) return compareValues_(value, '=', text);
+            const operand = match[2];
+            const numeric = parseFloat(operand);
+            const comparable = (operand !== '' && !isNaN(numeric) && String(numeric) === operand)
+                ? numeric : operand;
+            return compareValues_(value, match[1], comparable);
+        }
+
+        function variableForm_(cell) {
+            const terms = {};
+            terms[cell] = 1;
+            return {constant: 0, terms: terms};
+        }
+
+        function isConstant_(form) {
+            for (const key in form.terms) if (form.terms[key]) return false;
+            return true;
+        }
+
+        function addForms_(a, b, sign) {
+            const result = {constant: a.constant + sign * b.constant, terms: {}};
+            for (const k in a.terms) result.terms[k] = a.terms[k];
+            for (const k in b.terms) {
+                result.terms[k] = (result.terms[k] || 0) + sign * b.terms[k];
+            }
+            return result;
+        }
+
+        function multiplyForms_(a, b) {
+            if (!isConstant_(a) && !isConstant_(b)) {
+                throw new Error('non-linear: a variable is multiplied by another variable');
+            }
+            const scalar = isConstant_(a) ? a.constant : b.constant;
+            const other = isConstant_(a) ? b : a;
+            const result = {constant: other.constant * scalar, terms: {}};
+            for (const k in other.terms) result.terms[k] = other.terms[k] * scalar;
+            return result;
+        }
+
+        function divideForms_(a, b) {
+            if (!isConstant_(b)) throw new Error('non-linear: division by a variable');
+            if (b.constant === 0) throw new Error('division by zero');
+            return multiplyForms_(a, constantForm_(1 / b.constant));
+        }
+
+
+        /* ================================================================== */
+        /* Cell -> linear form                                                 */
+        /* ================================================================== */
+
+        function linearize_(context, a1, depth) {
+            if (depth > ENGINE.MAX_DEPTH) throw new Error('reference cycle or too deep');
+            const cell = a1.replace(/\$/g, '').toUpperCase();
+
+            if (context.variables[cell]) return variableForm_(cell);
+            if (context.memo[cell]) return context.memo[cell];
+
+            const entry = cellAt_(context.grid, cell);
+
+            let form;
+            if (!entry.formula) {
+                if (typeof entry.value === 'number') form = constantForm_(entry.value);
+                else if (typeof entry.value === 'string' && entry.value !== '') {
+                    form = stringForm_(entry.value);
+                } else form = constantForm_(0);
+            } else {
+                try {
+                    const tokens = tokenize_(entry.formula.replace(/^=/, ''));
+                    const parser = {tokens: tokens, position: 0, context: context, depth: depth};
+                    form = parseComparison_(parser);
+                    if (parser.position < parser.tokens.length) {
+                        throw new Error('unexpected token "' +
+                            parser.tokens[parser.position].text + '"');
+                    }
+                } catch (err) {
+                    // Anything the parser cannot handle is still usable as long as it does
+                    // not lead back to a decision variable: the cached value is then exact.
+                    if (!dependsOnVariables_(context, cell, {})) {
+                        const cached = entry.value;
+                        if (typeof cached !== 'number') {
+                            throw new Error(cell + ' has no numeric value to fall back on');
+                        }
+                        context.constantFallbacks.push(cell);
+                        form = constantForm_(cached);
+                    } else {
+                        throw new Error(cell + ' depends on the decision variables and ' +
+                            'cannot be linearised (' + err.message + ')');
+                    }
+                }
+            }
+
+            context.memo[cell] = form;
+            return form;
+        }
+
+        /* ================================================================== */
+        /* Tokenizer                                                           */
+        /* ================================================================== */
+
+        function tokenize_(source) {
+            const tokens = [];
+            const pattern = /\s*("[^"]*"|\$?[A-Z]{1,3}\$?\d{1,7}(?::\$?[A-Z]{1,3}\$?\d{1,7})?|[A-Z][A-Z0-9._]*\s*\(|\d+(?:\.\d+)?|<=|>=|<>|[()+\-*/,<>=])/gi;
+            let match;
+            let consumed = 0;
+
+            while ((match = pattern.exec(source)) !== null) {
+                if (match.index !== consumed) {
+                    throw new Error('unsupported syntax near "' +
+                        source.substring(consumed, match.index + 1).trim() + '"');
+                }
+                consumed = pattern.lastIndex;
+                const text = match[1].trim();
+
+                if (text.charAt(0) === '"') {
+                    tokens.push({type: 'string', text: text.substring(1, text.length - 1)});
+                } else if (/\($/.test(text) && !/^\($/.test(text)) {
+                    tokens.push({type: 'function', text: text.replace(/\s*\($/, '').toUpperCase()});
+                    tokens.push({type: 'punct', text: '('});
+                } else if (/^\d/.test(text)) {
+                    tokens.push({type: 'number', text: text});
+                } else if (/\d/.test(text) && /^[$A-Z]/i.test(text)) {
+                    tokens.push({type: 'ref', text: text.replace(/\$/g, '').toUpperCase()});
+                } else {
+                    tokens.push({type: 'punct', text: text});
+                }
+            }
+
+            if (consumed < source.trim().length) {
+                throw new Error('unsupported syntax near "' + source.substring(consumed).trim() + '"');
+            }
+            return tokens;
+        }
+
+        /* ================================================================== */
+        /* Recursive descent parser                                            */
+        /* ================================================================== */
+
+        function peek_(parser) {
+            return parser.position < parser.tokens.length ? parser.tokens[parser.position] : null;
+        }
+
+        function consume_(parser, text) {
+            const token = peek_(parser);
+            if (!token || (text && token.text !== text)) {
+                throw new Error('expected "' + text + '"');
+            }
+            parser.position++;
+            return token;
+        }
+
+        /**
+         * A comparison yields 1 or 0. Both sides must be constant: comparing a
+         * decision variable would make the model non-linear, and that is reported
+         * rather than silently approximated.
+         */
+        function parseComparison_(parser) {
+            const left = parseExpression_(parser);
+            const token = peek_(parser);
+            const operators = ['=', '<>', '<', '>', '<=', '>='];
+            if (!token || token.type !== 'punct' || operators.indexOf(token.text) === -1) {
+                return left;
+            }
+            parser.position++;
+            const right = parseExpression_(parser);
+            if (!isConstant_(left) || !isConstant_(right)) {
+                throw new Error('a comparison involves a decision variable');
+            }
+            return constantForm_(
+                compareValues_(rawValue_(left), token.text, rawValue_(right)) ? 1 : 0);
+        }
+
+        /** Advances past one function argument, respecting nested parentheses. */
+        function skipArgument_(parser) {
+            let depth = 0;
+            while (parser.position < parser.tokens.length) {
+                const token = parser.tokens[parser.position];
+                if (token.type === 'punct') {
+                    if (token.text === '(') depth++;
+                    else if (token.text === ')') {
+                        if (depth === 0) return;
+                        depth--;
+                    } else if (token.text === ',' && depth === 0) return;
+                }
+                parser.position++;
+            }
+        }
+
+        function parseExpression_(parser) {
+            let form = parseTerm_(parser);
+            for (; ;) {
+                const token = peek_(parser);
+                if (!token || (token.text !== '+' && token.text !== '-')) return form;
+                parser.position++;
+                form = addForms_(form, parseTerm_(parser), token.text === '+' ? 1 : -1);
+            }
+        }
+
+        function parseTerm_(parser) {
+            let form = parseFactor_(parser);
+            for (; ;) {
+                const token = peek_(parser);
+                if (!token || (token.text !== '*' && token.text !== '/')) return form;
+                parser.position++;
+                const right = parseFactor_(parser);
+                form = token.text === '*' ? multiplyForms_(form, right) : divideForms_(form, right);
+            }
+        }
+
+        function parseFactor_(parser) {
+            const token = peek_(parser);
+            if (!token) throw new Error('unexpected end of formula');
+
+            if (token.text === '-') {
+                parser.position++;
+                return multiplyForms_(parseFactor_(parser), constantForm_(-1));
+            }
+            if (token.text === '+') {
+                parser.position++;
+                return parseFactor_(parser);
+            }
+            if (token.text === '(') {
+                parser.position++;
+                const form = parseComparison_(parser);
+                consume_(parser, ')');
                 return form;
             }
-
-            /* ================================================================== */
-            /* Tokenizer                                                           */
-            /* ================================================================== */
-
-            function tokenize_(source) {
-                const tokens = [];
-                const pattern = /\s*("[^"]*"|\$?[A-Z]{1,3}\$?\d{1,7}(?::\$?[A-Z]{1,3}\$?\d{1,7})?|[A-Z][A-Z0-9._]*\s*\(|\d+(?:\.\d+)?|<=|>=|<>|[()+\-*/,<>=])/gi;
-                let match;
-                let consumed = 0;
-
-                while ((match = pattern.exec(source)) !== null) {
-                    if (match.index !== consumed) {
-                        throw new Error('unsupported syntax near "' +
-                            source.substring(consumed, match.index + 1).trim() + '"');
-                    }
-                    consumed = pattern.lastIndex;
-                    const text = match[1].trim();
-
-                    if (text.charAt(0) === '"') {
-                        tokens.push({type: 'string', text: text.substring(1, text.length - 1)});
-                    } else if (/\($/.test(text) && !/^\($/.test(text)) {
-                        tokens.push({type: 'function', text: text.replace(/\s*\($/, '').toUpperCase()});
-                        tokens.push({type: 'punct', text: '('});
-                    } else if (/^\d/.test(text)) {
-                        tokens.push({type: 'number', text: text});
-                    } else if (/\d/.test(text) && /^[$A-Z]/i.test(text)) {
-                        tokens.push({type: 'ref', text: text.replace(/\$/g, '').toUpperCase()});
-                    } else {
-                        tokens.push({type: 'punct', text: text});
-                    }
-                }
-
-                if (consumed < source.trim().length) {
-                    throw new Error('unsupported syntax near "' + source.substring(consumed).trim() + '"');
-                }
-                return tokens;
-            }
-
-            /* ================================================================== */
-            /* Recursive descent parser                                            */
-            /* ================================================================== */
-
-            function peek_(parser) {
-                return parser.position < parser.tokens.length ? parser.tokens[parser.position] : null;
-            }
-
-            function consume_(parser, text) {
-                const token = peek_(parser);
-                if (!token || (text && token.text !== text)) {
-                    throw new Error('expected "' + text + '"');
-                }
+            if (token.type === 'number') {
                 parser.position++;
-                return token;
+                return constantForm_(parseFloat(token.text));
             }
-
-            /**
-             * A comparison yields 1 or 0. Both sides must be constant: comparing a
-             * decision variable would make the model non-linear, and that is reported
-             * rather than silently approximated.
-             */
-            function parseComparison_(parser) {
-                const left = parseExpression_(parser);
-                const token = peek_(parser);
-                const operators = ['=', '<>', '<', '>', '<=', '>='];
-                if (!token || token.type !== 'punct' || operators.indexOf(token.text) === -1) {
-                    return left;
-                }
+            if (token.type === 'string') {
                 parser.position++;
-                const right = parseExpression_(parser);
-                if (!isConstant_(left) || !isConstant_(right)) {
-                    throw new Error('a comparison involves a decision variable');
+                return stringForm_(token.text);
+            }
+            if (token.type === 'function') {
+                return parseFunction_(parser);
+            }
+            if (token.type === 'ref') {
+                parser.position++;
+                if (token.text.indexOf(':') !== -1) {
+                    throw new Error('a range is only valid inside SUM or SUMPRODUCT');
                 }
-                return constantForm_(
-                    compareValues_(rawValue_(left), token.text, rawValue_(right)) ? 1 : 0);
+                return linearize_(parser.context, token.text, parser.depth + 1);
+            }
+            throw new Error('unexpected token "' + token.text + '"');
+        }
+
+        function parseFunction_(parser) {
+            const name = consume_(parser).text;
+            consume_(parser, '(');
+
+            if (name === 'SUM') {
+                let total = constantForm_(0);
+                do {
+                    total = addForms_(total, parseArgumentAsSum_(parser), 1);
+                } while (peek_(parser) && peek_(parser).text === ',' && consume_(parser, ','));
+                consume_(parser, ')');
+                return total;
             }
 
-            /** Advances past one function argument, respecting nested parentheses. */
-            function skipArgument_(parser) {
-                let depth = 0;
-                while (parser.position < parser.tokens.length) {
-                    const token = parser.tokens[parser.position];
-                    if (token.type === 'punct') {
-                        if (token.text === '(') depth++;
-                        else if (token.text === ')') {
-                            if (depth === 0) return;
-                            depth--;
-                        } else if (token.text === ',' && depth === 0) return;
-                    }
-                    parser.position++;
+            if (name === 'SUMPRODUCT') {
+                const left = collectCells_(parser);
+                consume_(parser, ',');
+                const right = collectCells_(parser);
+                consume_(parser, ')');
+                if (left.length !== right.length) {
+                    throw new Error('SUMPRODUCT ranges have different sizes');
                 }
-            }
-
-            function parseExpression_(parser) {
-                let form = parseTerm_(parser);
-                for (; ;) {
-                    const token = peek_(parser);
-                    if (!token || (token.text !== '+' && token.text !== '-')) return form;
-                    parser.position++;
-                    form = addForms_(form, parseTerm_(parser), token.text === '+' ? 1 : -1);
-                }
-            }
-
-            function parseTerm_(parser) {
-                let form = parseFactor_(parser);
-                for (; ;) {
-                    const token = peek_(parser);
-                    if (!token || (token.text !== '*' && token.text !== '/')) return form;
-                    parser.position++;
-                    const right = parseFactor_(parser);
-                    form = token.text === '*' ? multiplyForms_(form, right) : divideForms_(form, right);
-                }
-            }
-
-            function parseFactor_(parser) {
-                const token = peek_(parser);
-                if (!token) throw new Error('unexpected end of formula');
-
-                if (token.text === '-') {
-                    parser.position++;
-                    return multiplyForms_(parseFactor_(parser), constantForm_(-1));
-                }
-                if (token.text === '+') {
-                    parser.position++;
-                    return parseFactor_(parser);
-                }
-                if (token.text === '(') {
-                    parser.position++;
-                    const form = parseComparison_(parser);
-                    consume_(parser, ')');
-                    return form;
-                }
-                if (token.type === 'number') {
-                    parser.position++;
-                    return constantForm_(parseFloat(token.text));
-                }
-                if (token.type === 'string') {
-                    parser.position++;
-                    return stringForm_(token.text);
-                }
-                if (token.type === 'function') {
-                    return parseFunction_(parser);
-                }
-                if (token.type === 'ref') {
-                    parser.position++;
-                    if (token.text.indexOf(':') !== -1) {
-                        throw new Error('a range is only valid inside SUM or SUMPRODUCT');
-                    }
-                    return linearize_(parser.context, token.text, parser.depth + 1);
-                }
-                throw new Error('unexpected token "' + token.text + '"');
-            }
-
-            function parseFunction_(parser) {
-                const name = consume_(parser).text;
-                consume_(parser, '(');
-
-                if (name === 'SUM') {
-                    let total = constantForm_(0);
-                    do {
-                        total = addForms_(total, parseArgumentAsSum_(parser), 1);
-                    } while (peek_(parser) && peek_(parser).text === ',' && consume_(parser, ','));
-                    consume_(parser, ')');
-                    return total;
-                }
-
-                if (name === 'SUMPRODUCT') {
-                    const left = collectCells_(parser);
-                    consume_(parser, ',');
-                    const right = collectCells_(parser);
-                    consume_(parser, ')');
-                    if (left.length !== right.length) {
-                        throw new Error('SUMPRODUCT ranges have different sizes');
-                    }
-                    let total = constantForm_(0);
-                    for (let i = 0; i < left.length; i++) {
-                        const a = linearize_(parser.context, left[i], parser.depth + 1);
-                        const b = linearize_(parser.context, right[i], parser.depth + 1);
-                        total = addForms_(total, multiplyForms_(a, b), 1);
-                    }
-                    return total;
-                }
-
-                if (name === 'IF') {
-                    const condition = parseComparison_(parser);
-                    if (!isConstant_(condition)) {
-                        throw new Error('IF() tests a decision variable');
-                    }
-                    consume_(parser, ',');
-                    let result;
-                    if (rawValue_(condition)) {
-                        result = parseComparison_(parser);
-                        if (peek_(parser) && peek_(parser).text === ',') {
-                            consume_(parser, ',');
-                            skipArgument_(parser);
-                        }
-                    } else {
-                        skipArgument_(parser);
-                        if (peek_(parser) && peek_(parser).text === ',') {
-                            consume_(parser, ',');
-                            result = parseComparison_(parser);
-                        } else {
-                            result = constantForm_(0);
-                        }
-                    }
-                    consume_(parser, ')');
-                    return result;
-                }
-
-                if (name === 'SUMIF') {
-                    const criteriaCells = collectCells_(parser);
-                    consume_(parser, ',');
-                    const criterionForm = parseComparison_(parser);
-                    if (!isConstant_(criterionForm)) {
-                        throw new Error('the SUMIF criterion depends on a decision variable');
-                    }
-                    const criterion = rawValue_(criterionForm);
-
-                    let sumCells = criteriaCells;
-                    if (peek_(parser) && peek_(parser).text === ',') {
-                        consume_(parser, ',');
-                        sumCells = collectCells_(parser);
-                    }
-                    consume_(parser, ')');
-                    if (sumCells.length !== criteriaCells.length) {
-                        throw new Error('SUMIF ranges have different sizes');
-                    }
-
-                    let total = constantForm_(0);
-                    for (let i = 0; i < criteriaCells.length; i++) {
-                        const probe = linearize_(parser.context, criteriaCells[i], parser.depth + 1);
-                        if (!isConstant_(probe)) {
-                            throw new Error('the SUMIF criteria range depends on a decision variable');
-                        }
-                        if (matchesCriterion_(rawValue_(probe), criterion)) {
-                            total = addForms_(total,
-                                linearize_(parser.context, sumCells[i], parser.depth + 1), 1);
-                        }
-                    }
-                    return total;
-                }
-
-                const handler = CONSTANT_FUNCTIONS[name];
-                if (handler) {
-                    const args = collectConstantArguments_(parser);
-                    consume_(parser, ')');
-                    return constantForm_(handler(args));
-                }
-
-                throw new Error('unsupported function ' + name + '()');
-            }
-
-            /**
-             * Functions evaluated directly, provided none of their arguments touch a
-             * decision variable. MIN over variables, for instance, is genuinely
-             * non-linear and is refused rather than approximated.
-             */
-            const CONSTANT_FUNCTIONS = {
-                MIN: function (values) {return Math.min.apply(null, numbersOnly_(values));},
-                MAX: function (values) {return Math.max.apply(null, numbersOnly_(values));},
-                ABS: function (values) {return Math.abs(Number(values[0]));},
-                SQRT: function (values) {return Math.sqrt(Number(values[0]));},
-                INT: function (values) {return Math.floor(Number(values[0]));},
-                ROUND: function (values) {return roundTo_(values[0], values[1]);},
-                ROUNDUP: function (values) {return directedRound_(values[0], values[1], Math.ceil);},
-                ROUNDDOWN: function (values) {return directedRound_(values[0], values[1], Math.floor);},
-                AVERAGE: function (values) {
-                    const numbers = numbersOnly_(values);
-                    if (!numbers.length) return 0;
-                    let total = 0;
-                    numbers.forEach(function (v) {total += v;});
-                    return total / numbers.length;
-                },
-                COUNT: function (values) {return numbersOnly_(values).length;},
-                AND: function (values) {return values.every(truthy_) ? 1 : 0;},
-                OR: function (values) {return values.some(truthy_) ? 1 : 0;},
-                NOT: function (values) {return truthy_(values[0]) ? 0 : 1;},
-            };
-
-            function numbersOnly_(values) {
-                return values.filter(function (v) {return typeof v === 'number' && !isNaN(v);});
-            }
-
-            function truthy_(value) {
-                return typeof value === 'number' ? value !== 0 : Boolean(value);
-            }
-
-            function roundTo_(value, digits) {
-                const factor = Math.pow(10, Number(digits) || 0);
-                return Math.round(Number(value) * factor) / factor;
-            }
-
-            function directedRound_(value, digits, operation) {
-                const factor = Math.pow(10, Number(digits) || 0);
-                const scaled = Number(value) * factor;
-                return (scaled < 0 ? -operation(-scaled) : operation(scaled)) / factor;
-            }
-
-            /** Reads function arguments that must all evaluate to constants. */
-            function collectConstantArguments_(parser) {
-                const values = [];
-                for (; ;) {
-                    const token = peek_(parser);
-                    if (token && token.type === 'ref' && token.text.indexOf(':') !== -1) {
-                        parser.position++;
-                        expandRange_(parser.context.grid, token.text).forEach(function (cell) {
-                            const form = linearize_(parser.context, cell, parser.depth + 1);
-                            if (!isConstant_(form)) {
-                                throw new Error('an argument depends on a decision variable');
-                            }
-                            values.push(rawValue_(form));
-                        });
-                    } else {
-                        const form = parseComparison_(parser);
-                        if (!isConstant_(form)) {
-                            throw new Error('an argument depends on a decision variable');
-                        }
-                        values.push(rawValue_(form));
-                    }
-                    const next = peek_(parser);
-                    if (next && next.text === ',') {parser.position++; continue;}
-                    break;
-                }
-                return values;
-            }
-
-            function parseArgumentAsSum_(parser) {
-                const token = peek_(parser);
-                if (token && token.type === 'ref' && token.text.indexOf(':') !== -1) {
-                    parser.position++;
-                    let total = constantForm_(0);
-                    expandRange_(parser.context.grid, token.text).forEach(function (cell) {
-                        total = addForms_(total, linearize_(parser.context, cell, parser.depth + 1), 1);
-                    });
-                    return total;
-                }
-                return parseExpression_(parser);
-            }
-
-            function collectCells_(parser) {
-                const token = consume_(parser);
-                if (token.type !== 'ref') throw new Error('SUMPRODUCT expects ranges');
-                return token.text.indexOf(':') !== -1
-                    ? expandRange_(parser.context.grid, token.text)
-                    : [token.text];
-            }
-
-
-            const MAXIMISE_HINTS = [
-                'profit', 'revenue', 'margin', 'income', 'contribution', 'return', 'value',
-                'benefit', 'output', 'yield', 'sales',
-                'beneficio', 'ingreso', 'ingresos', 'margen', 'ganancia', 'ventas', 'valor',
-            ];
-            const MINIMISE_HINTS = [
-                'cost', 'costs', 'expense', 'spend', 'waste', 'time', 'distance', 'loss',
-                'coste', 'costo', 'costes', 'gasto', 'gastos', 'tiempo', 'perdida', 'merma',
-            ];
-            const RELATION_TOKENS = {
-                '<=': '<=', '=<': '<=', '≤': '<=', '<': '<=',
-                '>=': '>=', '=>': '>=', '≥': '>=', '>': '>=',
-                '=': '=', '==': '=',
-            };
-            const APP = {
-                NAME: 'Solver',
-                SIDEBAR_TITLE: 'Solver',
-                MODEL_KEY: 'model:',
-                UNDO_KEY: 'undo:',
-                REVIEW_KEY: 'reviewPrompt',   // per-user: 'done' once shown, so we never nag
-                MAX_SCAN_COLUMNS: 4,      // how far right to look for a relation and a limit
-                MAX_DETECTED_CONSTRAINTS: 12,
-                FREE_VARIABLE_LIMIT: 50,  // matches the paid competitor's published ceiling
-                FREE_CONSTRAINT_LIMIT: 20,
-            };
-
-
-
-            function solveModel_(sheet, model) {
-                const started = Date.now();
-                const grid = loadGrid_(sheet);
-                const variables = expandRange_(grid, model.variables);
-                const context = newContext_(grid, variables);
-
-                const objectiveForm = safeLinearize_(context, model.objective.cell,
-                    'the objective');
-
-                const constraints = [];
-                (model.constraints || []).forEach(function (item, index) {
-                    const form = safeLinearize_(context, item.cell,
-                        'constraint ' + (index + 1));
-                    constraints.push({
-                        coefficients: coefficientVector_(form, variables),
-                        relation: item.relation,
-                        rhs: Number(item.limit) - form.constant,
-                        constant: form.constant,
-                        cell: item.cell,
-                        label: labelFor_(grid, item.cell),
-                        limit: Number(item.limit),
-                    });
-                });
-
-                const solution = optimise_({
-                    maximize: model.objective.sense !== 'min',
-                    objective: coefficientVector_(objectiveForm, variables),
-                    constant: objectiveForm.constant,
-                    constraints: constraints,
-                    integer: model.wholeNumbers === true,
-                });
-
-                const result = {
-                    status: solution.status,
-                    objectiveLabel: labelFor_(grid, model.objective.cell),
-                    elapsedMs: Date.now() - started,
-                    variables: variables,
-                    labels: readLabels_(grid, model.variables, variables),
-                    previous: variables.map(function (cell) {
-                        const value = cellAt_(grid, cell).value;
-                        return typeof value === 'number' ? value : 0;
-                    }),
-                    foldedConstants: context.constantFallbacks.length,
-                };
-
-                if (solution.status !== 'optimal' && solution.status !== 'feasible') {
-                    result.explanation = explainStatus_(solution.status, model);
-                    return result;
-                }
-                if (solution.status === 'feasible') {
-                    result.caveat = 'This answer satisfies every limit, but the search ran out ' +
-                        'of time before proving it is the best one. A slightly better whole-number ' +
-                        'combination may exist.';
-                }
-
-                result.values = solution.values.map(round_);
-                result.objective = round_(solution.objective);
-                result.objectiveBefore = round_(Number(cellAt_(grid, model.objective.cell).value) || 0);
-                result.constraints = constraints.map(function (c, i) {
-                    const used = round_(dotProduct_(c.coefficients, solution.values) + c.constant);
-                    const slack = round_(c.limit - used);
-                    const reported = {
-                        label: c.label,
-                        cell: c.cell,
-                        relation: c.relation,
-                        used: used,
-                        limit: c.limit,
-                        slack: slack,
-                        binding: Math.abs(slack) < 1e-6,
-                        satisfied: isSatisfied_(used, c.relation, c.limit),
-                    };
-                    // For a two-variable model, expose the line so a client can draw the
-                    // feasible region. Kept off larger models to keep the payload lean.
-                    if (variables.length === 2) {
-                        reported.coefficients = c.coefficients;
-                        reported.constant = c.constant;
-                    }
-                    return reported;
-                });
-
-                if (variables.length === 2) {
-                    result.plot = {
-                        objective: coefficientVector_(objectiveForm, variables),
-                        variableLabels: result.labels,
-                    };
-                }
-
-                // Sensitivity: for each binding limit, what would one more unit of it be
-                // worth? We answer it the honest way — re-solve with that single limit
-                // relaxed by one and measure the change in the objective. This is the
-                // "shadow price", the number the paid tools call a sensitivity report.
-                // Only meaningful for the continuous relaxation, so we skip it for integer
-                // models, and we cap the extra solves so a large model stays responsive.
-                if (solution.status === 'optimal' && model.wholeNumbers !== true) {
-                    addShadowPrices_(result.constraints, constraints, {
-                        maximize: model.objective.sense !== 'min',
-                        objective: coefficientVector_(objectiveForm, variables),
-                        constant: objectiveForm.constant,
-                    }, result.objective);
-                }
-
-                return result;
-            }
-
-            function addShadowPrices_(reported, constraints, base, baseObjective) {
-                const MAX_PROBES = 20;             // keep large models snappy
-                let probes = 0;
-                for (let i = 0; i < reported.length; i++) {
-                    if (!reported[i].binding) continue;
-                    if (probes++ >= MAX_PROBES) break;
-
-                    const perturbed = constraints.map(function (c) {
-                        return {
-                            coefficients: c.coefficients,
-                            relation: c.relation,
-                            rhs: c.rhs,
-                        };
-                    });
-                    // Relax this limit by one unit in the direction that loosens it.
-                    const loosen = reported[i].relation === '>=' ? -1 : 1;
-                    perturbed[i].rhs += loosen;
-
-                    const probe = optimise_({
-                        maximize: base.maximize,
-                        objective: base.objective,
-                        constant: base.constant,
-                        constraints: perturbed,
-                    });
-                    if (probe.status !== 'optimal') continue;
-
-                    const gain = round_((probe.objective - baseObjective) * loosen);
-                    // Report the marginal value of one more unit of headroom.
-                    reported[i].shadowPrice = Math.abs(gain) < 1e-6 ? 0 : Math.abs(gain);
-                }
-            }
-
-            function safeLinearize_(context, cell, role) {
-                try {
-                    return linearize_(context, cell, 0);
-                } catch (err) {
-                    throw new Error(capitalise_(role) + ' (' + cell + ') could not be read. ' +
-                        String(err.message || err));
-                }
-            }
-
-            function explainStatus_(status, model) {
-                if (status === 'infeasible') {
-                    return 'No combination of values satisfies every constraint at once. ' +
-                        'Two or more limits contradict each other — try relaxing the tightest one.';
-                }
-                if (status === 'no whole-number solution found in time') {
-                    return 'No whole-number combination was found within the time available. ' +
-                        'Try relaxing a limit, or turn off "whole numbers only" to see the ' +
-                        'fractional answer.';
-                }
-                if (status === 'unbounded') {
-                    return 'The objective can grow forever because nothing limits it. ' +
-                        'Add a constraint on ' + model.variables + ' or on a total that uses it.';
-                }
-                return 'The solver stopped before reaching an optimum.';
-            }
-
-            function isSatisfied_(used, relation, limit) {
-                const tolerance = 1e-6;
-                if (relation === '<=') return used <= limit + tolerance;
-                if (relation === '>=') return used >= limit - tolerance;
-                return Math.abs(used - limit) < tolerance;
-            }
-
-            function dotProduct_(coefficients, values) {
-                let total = 0;
-                for (let i = 0; i < coefficients.length; i++) {
-                    total += (coefficients[i] || 0) * (values[i] || 0);
+                let total = constantForm_(0);
+                for (let i = 0; i < left.length; i++) {
+                    const a = linearize_(parser.context, left[i], parser.depth + 1);
+                    const b = linearize_(parser.context, right[i], parser.depth + 1);
+                    total = addForms_(total, multiplyForms_(a, b), 1);
                 }
                 return total;
             }
 
-            function coefficientVector_(form, variables) {
-                return variables.map(function (cell) {return form.terms[cell] || 0;});
-            }
-
-            function round_(value) {
-                const rounded = Math.round(Number(value) * 1e9) / 1e9;
-                return Math.abs(rounded) < 1e-9 ? 0 : rounded;
-            }
-
-            function reshape_(values, rows, columns) {
-                const block = [];
-                let index = 0;
-                for (let r = 0; r < rows; r++) {
-                    const row = [];
-                    for (let c = 0; c < columns; c++) row.push(values[index++] || 0);
-                    block.push(row);
+            if (name === 'IF') {
+                const condition = parseComparison_(parser);
+                if (!isConstant_(condition)) {
+                    throw new Error('IF() tests a decision variable');
                 }
-                return block;
+                consume_(parser, ',');
+                let result;
+                if (rawValue_(condition)) {
+                    result = parseComparison_(parser);
+                    if (peek_(parser) && peek_(parser).text === ',') {
+                        consume_(parser, ',');
+                        skipArgument_(parser);
+                    }
+                } else {
+                    skipArgument_(parser);
+                    if (peek_(parser) && peek_(parser).text === ',') {
+                        consume_(parser, ',');
+                        result = parseComparison_(parser);
+                    } else {
+                        result = constantForm_(0);
+                    }
+                }
+                consume_(parser, ')');
+                return result;
             }
 
-            function capitalise_(text) {
-                return text.charAt(0).toUpperCase() + text.slice(1);
-            }
+            if (name === 'SUMIF') {
+                const criteriaCells = collectCells_(parser);
+                consume_(parser, ',');
+                const criterionForm = parseComparison_(parser);
+                if (!isConstant_(criterionForm)) {
+                    throw new Error('the SUMIF criterion depends on a decision variable');
+                }
+                const criterion = rawValue_(criterionForm);
 
-            function detectModel_(sheet) {
-                const grid = loadGrid_(sheet);
-                const formulaCells = listFormulaCells_(grid);
-                if (!formulaCells.length) {
-                    throw new Error('This sheet has no formulas, so there is no model to read. ' +
-                        'Build the calculation first, then come back.');
+                let sumCells = criteriaCells;
+                if (peek_(parser) && peek_(parser).text === ',') {
+                    consume_(parser, ',');
+                    sumCells = collectCells_(parser);
+                }
+                consume_(parser, ')');
+                if (sumCells.length !== criteriaCells.length) {
+                    throw new Error('SUMIF ranges have different sizes');
                 }
 
-                const referenced = {};
-                formulaCells.forEach(function (cell) {
-                    referencedCells_(cellAt_(grid, cell).formula).forEach(function (reference) {
-                        expandReference_(grid, reference).forEach(function (target) {
-                            referenced[target] = true;
-                        });
+                let total = constantForm_(0);
+                for (let i = 0; i < criteriaCells.length; i++) {
+                    const probe = linearize_(parser.context, criteriaCells[i], parser.depth + 1);
+                    if (!isConstant_(probe)) {
+                        throw new Error('the SUMIF criteria range depends on a decision variable');
+                    }
+                    if (matchesCriterion_(rawValue_(probe), criterion)) {
+                        total = addForms_(total,
+                            linearize_(parser.context, sumCells[i], parser.depth + 1), 1);
+                    }
+                }
+                return total;
+            }
+
+            const handler = CONSTANT_FUNCTIONS[name];
+            if (handler) {
+                const args = collectConstantArguments_(parser);
+                consume_(parser, ')');
+                return constantForm_(handler(args));
+            }
+
+            throw new Error('unsupported function ' + name + '()');
+        }
+
+        /**
+         * Functions evaluated directly, provided none of their arguments touch a
+         * decision variable. MIN over variables, for instance, is genuinely
+         * non-linear and is refused rather than approximated.
+         */
+        const CONSTANT_FUNCTIONS = {
+            MIN: function (values) {return Math.min.apply(null, numbersOnly_(values));},
+            MAX: function (values) {return Math.max.apply(null, numbersOnly_(values));},
+            ABS: function (values) {return Math.abs(Number(values[0]));},
+            SQRT: function (values) {return Math.sqrt(Number(values[0]));},
+            INT: function (values) {return Math.floor(Number(values[0]));},
+            ROUND: function (values) {return roundTo_(values[0], values[1]);},
+            ROUNDUP: function (values) {return directedRound_(values[0], values[1], Math.ceil);},
+            ROUNDDOWN: function (values) {return directedRound_(values[0], values[1], Math.floor);},
+            AVERAGE: function (values) {
+                const numbers = numbersOnly_(values);
+                if (!numbers.length) return 0;
+                let total = 0;
+                numbers.forEach(function (v) {total += v;});
+                return total / numbers.length;
+            },
+            COUNT: function (values) {return numbersOnly_(values).length;},
+            AND: function (values) {return values.every(truthy_) ? 1 : 0;},
+            OR: function (values) {return values.some(truthy_) ? 1 : 0;},
+            NOT: function (values) {return truthy_(values[0]) ? 0 : 1;},
+        };
+
+        function numbersOnly_(values) {
+            return values.filter(function (v) {return typeof v === 'number' && !isNaN(v);});
+        }
+
+        function truthy_(value) {
+            return typeof value === 'number' ? value !== 0 : Boolean(value);
+        }
+
+        function roundTo_(value, digits) {
+            const factor = Math.pow(10, Number(digits) || 0);
+            return Math.round(Number(value) * factor) / factor;
+        }
+
+        function directedRound_(value, digits, operation) {
+            const factor = Math.pow(10, Number(digits) || 0);
+            const scaled = Number(value) * factor;
+            return (scaled < 0 ? -operation(-scaled) : operation(scaled)) / factor;
+        }
+
+        /** Reads function arguments that must all evaluate to constants. */
+        function collectConstantArguments_(parser) {
+            const values = [];
+            for (; ;) {
+                const token = peek_(parser);
+                if (token && token.type === 'ref' && token.text.indexOf(':') !== -1) {
+                    parser.position++;
+                    expandRange_(parser.context.grid, token.text).forEach(function (cell) {
+                        const form = linearize_(parser.context, cell, parser.depth + 1);
+                        if (!isConstant_(form)) {
+                            throw new Error('an argument depends on a decision variable');
+                        }
+                        values.push(rawValue_(form));
                     });
-                });
-
-                const outputs = formulaCells.filter(function (cell) {return !referenced[cell];});
-                if (!outputs.length) {
-                    throw new Error('Every formula on this sheet feeds another one, so none of ' +
-                        'them looks like a final total. Pick the objective yourself.');
+                } else {
+                    const form = parseComparison_(parser);
+                    if (!isConstant_(form)) {
+                        throw new Error('an argument depends on a decision variable');
+                    }
+                    values.push(rawValue_(form));
                 }
+                const next = peek_(parser);
+                if (next && next.text === ',') {parser.position++; continue;}
+                break;
+            }
+            return values;
+        }
 
-                // Constant cells reachable from each output, grouped into contiguous blocks.
-                const blockReach = {};
-                const blockCells = {};
-                outputs.forEach(function (output) {
-                    const constants = reachableConstants_(grid, output, {});
-                    contiguousBlocks_(grid, constants).forEach(function (block) {
-                        blockReach[block] = (blockReach[block] || 0) + 1;
-                        blockCells[block] = expandRange_(grid, block);
-                    });
+        function parseArgumentAsSum_(parser) {
+            const token = peek_(parser);
+            if (token && token.type === 'ref' && token.text.indexOf(':') !== -1) {
+                parser.position++;
+                let total = constantForm_(0);
+                expandRange_(parser.context.grid, token.text).forEach(function (cell) {
+                    total = addForms_(total, linearize_(parser.context, cell, parser.depth + 1), 1);
                 });
+                return total;
+            }
+            return parseExpression_(parser);
+        }
 
-                let variables = null;
-                let bestScore = -1;
-                Object.keys(blockCells).forEach(function (block) {
-                    const size = blockCells[block].length;
-                    if (size < 2) return;
-                    const score = blockReach[block] * 1000 + size;
-                    if (score > bestScore) {bestScore = score; variables = block;}
+        function collectCells_(parser) {
+            const token = consume_(parser);
+            if (token.type !== 'ref') throw new Error('SUMPRODUCT expects ranges');
+            return token.text.indexOf(':') !== -1
+                ? expandRange_(parser.context.grid, token.text)
+                : [token.text];
+        }
+
+
+        const MAXIMISE_HINTS = [
+            'profit', 'revenue', 'margin', 'income', 'contribution', 'return', 'value',
+            'benefit', 'output', 'yield', 'sales',
+            'beneficio', 'ingreso', 'ingresos', 'margen', 'ganancia', 'ventas', 'valor',
+        ];
+        const MINIMISE_HINTS = [
+            'cost', 'costs', 'expense', 'spend', 'waste', 'time', 'distance', 'loss',
+            'coste', 'costo', 'costes', 'gasto', 'gastos', 'tiempo', 'perdida', 'merma',
+        ];
+        const RELATION_TOKENS = {
+            '<=': '<=', '=<': '<=', '≤': '<=', '<': '<=',
+            '>=': '>=', '=>': '>=', '≥': '>=', '>': '>=',
+            '=': '=', '==': '=',
+        };
+        const APP = {
+            NAME: 'Solver',
+            SIDEBAR_TITLE: 'Solver',
+            MODEL_KEY: 'model:',
+            UNDO_KEY: 'undo:',
+            REVIEW_KEY: 'reviewPrompt',   // per-user: 'done' once shown, so we never nag
+            MAX_SCAN_COLUMNS: 4,      // how far right to look for a relation and a limit
+            MAX_DETECTED_CONSTRAINTS: 12,
+            FREE_VARIABLE_LIMIT: 50,  // matches the paid competitor's published ceiling
+            FREE_CONSTRAINT_LIMIT: 20,
+        };
+
+
+
+        function solveModel_(sheet, model) {
+            const started = Date.now();
+            const grid = loadGrid_(sheet);
+            const variables = expandRange_(grid, model.variables);
+            const context = newContext_(grid, variables);
+
+            const objectiveForm = safeLinearize_(context, model.objective.cell,
+                'the objective');
+
+            const constraints = [];
+            (model.constraints || []).forEach(function (item, index) {
+                const form = safeLinearize_(context, item.cell,
+                    'constraint ' + (index + 1));
+                constraints.push({
+                    coefficients: coefficientVector_(form, variables),
+                    relation: item.relation,
+                    rhs: Number(item.limit) - form.constant,
+                    constant: form.constant,
+                    cell: item.cell,
+                    label: labelFor_(grid, item.cell),
+                    limit: Number(item.limit),
                 });
-                if (!variables) {
-                    throw new Error('No block of input cells feeds several totals, so the ' +
-                        'quantities to decide are not obvious. Select them yourself.');
+            });
+
+            const solution = optimise_({
+                maximize: model.objective.sense !== 'min',
+                objective: coefficientVector_(objectiveForm, variables),
+                constant: objectiveForm.constant,
+                constraints: constraints,
+                integer: model.wholeNumbers === true,
+            });
+
+            const result = {
+                status: solution.status,
+                objectiveLabel: labelFor_(grid, model.objective.cell),
+                elapsedMs: Date.now() - started,
+                variables: variables,
+                labels: readLabels_(grid, model.variables, variables),
+                previous: variables.map(function (cell) {
+                    const value = cellAt_(grid, cell).value;
+                    return typeof value === 'number' ? value : 0;
+                }),
+                foldedConstants: context.constantFallbacks.length,
+            };
+
+            if (solution.status !== 'optimal' && solution.status !== 'feasible') {
+                result.explanation = explainStatus_(solution.status, model);
+                return result;
+            }
+            if (solution.status === 'feasible') {
+                result.caveat = 'This answer satisfies every limit, but the search ran out ' +
+                    'of time before proving it is the best one. A slightly better whole-number ' +
+                    'combination may exist.';
+            }
+
+            result.values = solution.values.map(round_);
+            result.objective = round_(solution.objective);
+            result.objectiveBefore = round_(Number(cellAt_(grid, model.objective.cell).value) || 0);
+            result.constraints = constraints.map(function (c, i) {
+                const used = round_(dotProduct_(c.coefficients, solution.values) + c.constant);
+                const slack = round_(c.limit - used);
+                const reported = {
+                    label: c.label,
+                    cell: c.cell,
+                    relation: c.relation,
+                    used: used,
+                    limit: c.limit,
+                    slack: slack,
+                    binding: Math.abs(slack) < 1e-6,
+                    satisfied: isSatisfied_(used, c.relation, c.limit),
+                };
+                // For a two-variable model, expose the line so a client can draw the
+                // feasible region. Kept off larger models to keep the payload lean.
+                if (variables.length === 2) {
+                    reported.coefficients = c.coefficients;
+                    reported.constant = c.constant;
                 }
+                return reported;
+            });
 
-                const variableCells = toSet_(blockCells[variables]);
-                const dependent = outputs.filter(function (output) {
-                    return reachableConstants_(grid, output, {}).some(function (cell) {
-                        return variableCells[cell];
-                    });
-                });
-
-                const objectiveCell = pickObjective_(grid, dependent);
-                const label = labelFor_(grid, objectiveCell);
-
-                const constraints = [];
-                dependent.forEach(function (cell) {
-                    if (cell === objectiveCell) return;
-                    if (constraints.length >= APP.MAX_DETECTED_CONSTRAINTS) return;
-                    constraints.push(readConstraint_(grid, cell));
-                });
-
-                return {
-                    variables: variables,
-                    objective: {
-                        cell: objectiveCell,
-                        sense: senseFor_(label),
-                        label: label,
-                    },
-                    constraints: constraints,
+            if (variables.length === 2) {
+                result.plot = {
+                    objective: coefficientVector_(objectiveForm, variables),
+                    variableLabels: result.labels,
                 };
             }
 
-            function listFormulaCells_(grid) {
-                const cells = [];
-                for (let r = 0; r < grid.rows; r++) {
-                    for (let c = 0; c < grid.columns; c++) {
-                        if (grid.formulas[r][c]) {
-                            cells.push(columnLetter_(grid.firstColumn + c) + (grid.firstRow + r));
-                        }
-                    }
-                }
-                return cells;
+            // Sensitivity: for each binding limit, what would one more unit of it be
+            // worth? We answer it the honest way — re-solve with that single limit
+            // relaxed by one and measure the change in the objective. This is the
+            // "shadow price", the number the paid tools call a sensitivity report.
+            // Only meaningful for the continuous relaxation, so we skip it for integer
+            // models, and we cap the extra solves so a large model stays responsive.
+            if (solution.status === 'optimal' && model.wholeNumbers !== true) {
+                addShadowPrices_(result.constraints, constraints, {
+                    maximize: model.objective.sense !== 'min',
+                    objective: coefficientVector_(objectiveForm, variables),
+                    constant: objectiveForm.constant,
+                }, result.objective);
             }
 
-            function expandReference_(grid, reference) {
-                return reference.indexOf(':') !== -1
-                    ? expandRange_(grid, reference)
-                    : [reference];
+            return result;
+        }
+
+        function addShadowPrices_(reported, constraints, base, baseObjective) {
+            const MAX_PROBES = 20;             // keep large models snappy
+            let probes = 0;
+            for (let i = 0; i < reported.length; i++) {
+                if (!reported[i].binding) continue;
+                if (probes++ >= MAX_PROBES) break;
+
+                const perturbed = constraints.map(function (c) {
+                    return {
+                        coefficients: c.coefficients,
+                        relation: c.relation,
+                        rhs: c.rhs,
+                    };
+                });
+                // Relax this limit by one unit in the direction that loosens it.
+                const loosen = reported[i].relation === '>=' ? -1 : 1;
+                perturbed[i].rhs += loosen;
+
+                const probe = optimise_({
+                    maximize: base.maximize,
+                    objective: base.objective,
+                    constant: base.constant,
+                    constraints: perturbed,
+                });
+                if (probe.status !== 'optimal') continue;
+
+                const gain = round_((probe.objective - baseObjective) * loosen);
+                // Report the marginal value of one more unit of headroom.
+                reported[i].shadowPrice = Math.abs(gain) < 1e-6 ? 0 : Math.abs(gain);
+            }
+        }
+
+        function safeLinearize_(context, cell, role) {
+            try {
+                return linearize_(context, cell, 0);
+            } catch (err) {
+                throw new Error(capitalise_(role) + ' (' + cell + ') could not be read. ' +
+                    String(err.message || err));
+            }
+        }
+
+        function explainStatus_(status, model) {
+            if (status === 'infeasible') {
+                return 'No combination of values satisfies every constraint at once. ' +
+                    'Two or more limits contradict each other — try relaxing the tightest one.';
+            }
+            if (status === 'no whole-number solution found in time') {
+                return 'No whole-number combination was found within the time available. ' +
+                    'Try relaxing a limit, or turn off "whole numbers only" to see the ' +
+                    'fractional answer.';
+            }
+            if (status === 'unbounded') {
+                return 'The objective can grow forever because nothing limits it. ' +
+                    'Add a constraint on ' + model.variables + ' or on a total that uses it.';
+            }
+            return 'The solver stopped before reaching an optimum.';
+        }
+
+        function isSatisfied_(used, relation, limit) {
+            const tolerance = 1e-6;
+            if (relation === '<=') return used <= limit + tolerance;
+            if (relation === '>=') return used >= limit - tolerance;
+            return Math.abs(used - limit) < tolerance;
+        }
+
+        function dotProduct_(coefficients, values) {
+            let total = 0;
+            for (let i = 0; i < coefficients.length; i++) {
+                total += (coefficients[i] || 0) * (values[i] || 0);
+            }
+            return total;
+        }
+
+        function coefficientVector_(form, variables) {
+            return variables.map(function (cell) {return form.terms[cell] || 0;});
+        }
+
+        function round_(value) {
+            const rounded = Math.round(Number(value) * 1e9) / 1e9;
+            return Math.abs(rounded) < 1e-9 ? 0 : rounded;
+        }
+
+        function reshape_(values, rows, columns) {
+            const block = [];
+            let index = 0;
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < columns; c++) row.push(values[index++] || 0);
+                block.push(row);
+            }
+            return block;
+        }
+
+        function capitalise_(text) {
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        function detectModel_(sheet) {
+            const grid = loadGrid_(sheet);
+            const formulaCells = listFormulaCells_(grid);
+            if (!formulaCells.length) {
+                throw new Error('This sheet has no formulas, so there is no model to read. ' +
+                    'Build the calculation first, then come back.');
             }
 
-            function reachableConstants_(grid, a1, seen) {
-                const cell = a1.replace(/\$/g, '').toUpperCase();
-                if (seen[cell]) return [];
-                seen[cell] = true;
-
-                const entry = cellAt_(grid, cell);
-                if (!entry.formula) {
-                    return typeof entry.value === 'number' ? [cell] : [];
-                }
-
-                let found = [];
-                referencedCells_(entry.formula).forEach(function (reference) {
+            const referenced = {};
+            formulaCells.forEach(function (cell) {
+                referencedCells_(cellAt_(grid, cell).formula).forEach(function (reference) {
                     expandReference_(grid, reference).forEach(function (target) {
-                        found = found.concat(reachableConstants_(grid, target, seen));
+                        referenced[target] = true;
                     });
                 });
-                return found;
+            });
+
+            const outputs = formulaCells.filter(function (cell) {return !referenced[cell];});
+            if (!outputs.length) {
+                throw new Error('Every formula on this sheet feeds another one, so none of ' +
+                    'them looks like a final total. Pick the objective yourself.');
             }
 
-            function contiguousBlocks_(grid, cells) {
-                const lines = {column: {}, row: {}};
-                cells.forEach(function (cell) {
-                    const address = parseAddress_(cell);
-                    push_(lines.column, address.column, address.row);
-                    push_(lines.row, address.row, address.column);
+            // Constant cells reachable from each output, grouped into contiguous blocks.
+            const blockReach = {};
+            const blockCells = {};
+            outputs.forEach(function (output) {
+                const constants = reachableConstants_(grid, output, {});
+                contiguousBlocks_(grid, constants).forEach(function (block) {
+                    blockReach[block] = (blockReach[block] || 0) + 1;
+                    blockCells[block] = expandRange_(grid, block);
                 });
+            });
 
-                const blocks = [];
-                Object.keys(lines.column).forEach(function (column) {
-                    runs_(grid, lines.column[column], function (row) {
-                        return columnLetter_(Number(column)) + row;
-                    }).forEach(function (run) {blocks.push(run);});
-                });
-                Object.keys(lines.row).forEach(function (row) {
-                    runs_(grid, lines.row[row], function (column) {
-                        return columnLetter_(column) + row;
-                    }).forEach(function (run) {blocks.push(run);});
-                });
-                return blocks;
+            let variables = null;
+            let bestScore = -1;
+            Object.keys(blockCells).forEach(function (block) {
+                const size = blockCells[block].length;
+                if (size < 2) return;
+                const score = blockReach[block] * 1000 + size;
+                if (score > bestScore) {bestScore = score; variables = block;}
+            });
+            if (!variables) {
+                throw new Error('No block of input cells feeds several totals, so the ' +
+                    'quantities to decide are not obvious. Select them yourself.');
             }
 
-            function push_(map, key, value) {
-                if (!map[key]) map[key] = [];
-                map[key].push(value);
-            }
+            const variableCells = toSet_(blockCells[variables]);
+            const dependent = outputs.filter(function (output) {
+                return reachableConstants_(grid, output, {}).some(function (cell) {
+                    return variableCells[cell];
+                });
+            });
 
-            function runs_(grid, positions, addressAt) {
-                const sorted = positions.slice().sort(function (a, b) {return a - b;});
-                const found = [];
-                let start = sorted[0];
-                let previous = sorted[0];
+            const objectiveCell = pickObjective_(grid, dependent);
+            const label = labelFor_(grid, objectiveCell);
 
-                for (let i = 1; i <= sorted.length; i++) {
-                    const position = sorted[i];
-                    const bridged = position !== undefined && position > previous &&
-                        gapIsEmpty_(grid, addressAt, previous, position);
-                    if (!bridged) {
-                        if (previous !== start) {
-                            found.push(addressAt(start) + ':' + addressAt(previous));
-                        }
-                        start = position;
+            const constraints = [];
+            dependent.forEach(function (cell) {
+                if (cell === objectiveCell) return;
+                if (constraints.length >= APP.MAX_DETECTED_CONSTRAINTS) return;
+                constraints.push(readConstraint_(grid, cell));
+            });
+
+            return {
+                variables: variables,
+                objective: {
+                    cell: objectiveCell,
+                    sense: senseFor_(label),
+                    label: label,
+                },
+                constraints: constraints,
+            };
+        }
+
+        function listFormulaCells_(grid) {
+            const cells = [];
+            for (let r = 0; r < grid.rows; r++) {
+                for (let c = 0; c < grid.columns; c++) {
+                    if (grid.formulas[r][c]) {
+                        cells.push(columnLetter_(grid.firstColumn + c) + (grid.firstRow + r));
                     }
-                    previous = position;
                 }
-                return found;
+            }
+            return cells;
+        }
+
+        function expandReference_(grid, reference) {
+            return reference.indexOf(':') !== -1
+                ? expandRange_(grid, reference)
+                : [reference];
+        }
+
+        function reachableConstants_(grid, a1, seen) {
+            const cell = a1.replace(/\$/g, '').toUpperCase();
+            if (seen[cell]) return [];
+            seen[cell] = true;
+
+            const entry = cellAt_(grid, cell);
+            if (!entry.formula) {
+                return typeof entry.value === 'number' ? [cell] : [];
             }
 
-            function labelFor_(grid, a1) {
-                const address = parseAddress_(a1);
-                for (let column = address.column - 1; column >= grid.firstColumn; column--) {
-                    const value = cellAt_(grid, columnLetter_(column) + address.row).value;
-                    if (typeof value === 'string' && value.trim()) return value.trim();
-                }
-                return a1;
-            }
+            let found = [];
+            referencedCells_(entry.formula).forEach(function (reference) {
+                expandReference_(grid, reference).forEach(function (target) {
+                    found = found.concat(reachableConstants_(grid, target, seen));
+                });
+            });
+            return found;
+        }
 
-            function describeModel_(sheet, model) {
-                const grid = loadGrid_(sheet);
-                const variables = expandRange_(grid, model.variables);
-                const context = newContext_(grid, variables);
+        function contiguousBlocks_(grid, cells) {
+            const lines = {column: {}, row: {}};
+            cells.forEach(function (cell) {
+                const address = parseAddress_(cell);
+                push_(lines.column, address.column, address.row);
+                push_(lines.row, address.row, address.column);
+            });
 
-                const summary = {
-                    variableCount: variables.length,
-                    variableLabels: readLabels_(grid, model.variables, variables).slice(0, 6),
-                    objective: {
-                        cell: model.objective.cell,
-                        label: labelFor_(grid, model.objective.cell),
-                        sense: model.objective.sense
-                    },
-                    constraints: [],
-                    problems: [],
-                    wholeNumbers: model.wholeNumbers === true,
-                    overFreeLimit: variables.length > APP.FREE_VARIABLE_LIMIT ||
-                        (model.constraints || []).length > APP.FREE_CONSTRAINT_LIMIT,
-                };
+            const blocks = [];
+            Object.keys(lines.column).forEach(function (column) {
+                runs_(grid, lines.column[column], function (row) {
+                    return columnLetter_(Number(column)) + row;
+                }).forEach(function (run) {blocks.push(run);});
+            });
+            Object.keys(lines.row).forEach(function (row) {
+                runs_(grid, lines.row[row], function (column) {
+                    return columnLetter_(column) + row;
+                }).forEach(function (run) {blocks.push(run);});
+            });
+            return blocks;
+        }
 
-                try {
-                    const form = linearize_(context, model.objective.cell, 0);
-                    summary.objective.terms = countTerms_(form);
-                    if (summary.objective.terms === 0) {
-                        summary.problems.push({
-                            cell: model.objective.cell,
-                            role: 'objective',
-                            message: inertMessage_('This total', model.variables),
-                        });
+        function push_(map, key, value) {
+            if (!map[key]) map[key] = [];
+            map[key].push(value);
+        }
+
+        function runs_(grid, positions, addressAt) {
+            const sorted = positions.slice().sort(function (a, b) {return a - b;});
+            const found = [];
+            let start = sorted[0];
+            let previous = sorted[0];
+
+            for (let i = 1; i <= sorted.length; i++) {
+                const position = sorted[i];
+                const bridged = position !== undefined && position > previous &&
+                    gapIsEmpty_(grid, addressAt, previous, position);
+                if (!bridged) {
+                    if (previous !== start) {
+                        found.push(addressAt(start) + ':' + addressAt(previous));
                     }
-                } catch (err) {
+                    start = position;
+                }
+                previous = position;
+            }
+            return found;
+        }
+
+        function labelFor_(grid, a1) {
+            const address = parseAddress_(a1);
+            for (let column = address.column - 1; column >= grid.firstColumn; column--) {
+                const value = cellAt_(grid, columnLetter_(column) + address.row).value;
+                if (typeof value === 'string' && value.trim()) return value.trim();
+            }
+            return a1;
+        }
+
+        function describeModel_(sheet, model) {
+            const grid = loadGrid_(sheet);
+            const variables = expandRange_(grid, model.variables);
+            const context = newContext_(grid, variables);
+
+            const summary = {
+                variableCount: variables.length,
+                variableLabels: readLabels_(grid, model.variables, variables).slice(0, 6),
+                objective: {
+                    cell: model.objective.cell,
+                    label: labelFor_(grid, model.objective.cell),
+                    sense: model.objective.sense
+                },
+                constraints: [],
+                problems: [],
+                wholeNumbers: model.wholeNumbers === true,
+                overFreeLimit: variables.length > APP.FREE_VARIABLE_LIMIT ||
+                    (model.constraints || []).length > APP.FREE_CONSTRAINT_LIMIT,
+            };
+
+            try {
+                const form = linearize_(context, model.objective.cell, 0);
+                summary.objective.terms = countTerms_(form);
+                if (summary.objective.terms === 0) {
                     summary.problems.push({
                         cell: model.objective.cell,
                         role: 'objective',
-                        message: String(err.message || err),
+                        message: inertMessage_('This total', model.variables),
                     });
                 }
+            } catch (err) {
+                summary.problems.push({
+                    cell: model.objective.cell,
+                    role: 'objective',
+                    message: String(err.message || err),
+                });
+            }
 
-                (model.constraints || []).forEach(function (item) {
-                    const entry = {
-                        cell: item.cell, label: labelFor_(grid, item.cell),
-                        relation: item.relation, limit: item.limit, guessed: item.guessed,
-                    };
-                    try {
-                        const form = linearize_(context, item.cell, 0);
-                        if (countTerms_(form) === 0) {
-                            entry.problem = inertMessage_('This limit', model.variables);
-                            summary.problems.push({
-                                cell: item.cell, role: 'constraint', message: entry.problem,
-                            });
-                        }
-                    } catch (err) {
-                        entry.problem = String(err.message || err);
+            (model.constraints || []).forEach(function (item) {
+                const entry = {
+                    cell: item.cell, label: labelFor_(grid, item.cell),
+                    relation: item.relation, limit: item.limit, guessed: item.guessed,
+                };
+                try {
+                    const form = linearize_(context, item.cell, 0);
+                    if (countTerms_(form) === 0) {
+                        entry.problem = inertMessage_('This limit', model.variables);
                         summary.problems.push({
                             cell: item.cell, role: 'constraint', message: entry.problem,
                         });
                     }
-                    summary.constraints.push(entry);
-                });
+                } catch (err) {
+                    entry.problem = String(err.message || err);
+                    summary.problems.push({
+                        cell: item.cell, role: 'constraint', message: entry.problem,
+                    });
+                }
+                summary.constraints.push(entry);
+            });
 
-                summary.foldedConstants = context.constantFallbacks.length;
-                return summary;
+            summary.foldedConstants = context.constantFallbacks.length;
+            return summary;
+        }
+
+        function readLabels_(grid, rangeA1, variables) {
+            const cells = expandRange_(grid, rangeA1);
+            return variables.map(function (variable, index) {
+                return labelFor_(grid, cells[index] || variable);
+            });
+        }
+
+        function readConstraint_(grid, a1) {
+            const address = parseAddress_(a1);
+            const label = labelFor_(grid, a1);
+            let relation = null;
+            let limit = null;
+
+            for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
+                const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
+                if (relation === null && typeof value === 'string') {
+                    const token = RELATION_TOKENS[value.trim()];
+                    if (token) {relation = token; continue;}
+                }
+                if (relation !== null && typeof value === 'number') {limit = value; break;}
             }
 
-            function readLabels_(grid, rangeA1, variables) {
-                const cells = expandRange_(grid, rangeA1);
-                return variables.map(function (variable, index) {
-                    return labelFor_(grid, cells[index] || variable);
-                });
+            const current = cellAt_(grid, a1).value;
+            return {
+                cell: a1,
+                label: label,
+                relation: relation === null ? '<=' : relation,
+                limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
+                guessed: relation === null || limit === null,
+            };
+        }
+
+        function inertMessage_(subject, variables) {
+            return subject + ' does not change when ' + variables + ' change, ' +
+                'so there is nothing to optimise. The usual cause is a number stored as ' +
+                'text in one of the columns it multiplies — check for values that sit on ' +
+                'the left of their cell.';
+        }
+
+        function senseFor_(label) {
+            const text = String(label).toLowerCase();
+            if (matchesAnyHint_(text, MINIMISE_HINTS)) return 'min';
+            return 'max';
+        }
+
+        function gapIsEmpty_(grid, addressAt, from, to) {
+            if (to - from > 3) return false;
+            for (let position = from + 1; position < to; position++) {
+                const entry = cellAt_(grid, addressAt(position));
+                if (entry.formula) return false;
+                if (entry.value !== '' && entry.value !== null && entry.value !== undefined) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function pickObjective_(grid, candidates) {
+            const unlimited = candidates.filter(function (cell) {
+                return readConstraint_(grid, cell).guessed;
+            });
+            const pool = unlimited.length ? unlimited : candidates;
+
+            let best = pool[0];
+            let bestScore = -1;
+            pool.forEach(function (cell) {
+                const label = labelFor_(grid, cell).toLowerCase();
+                let score = 0;
+                if (matchesAnyHint_(label, MAXIMISE_HINTS)) score += 10;
+                if (matchesAnyHint_(label, MINIMISE_HINTS)) score += 10;
+                if (label.indexOf('total') !== -1) score += 3;
+                if (score > bestScore) {bestScore = score; best = cell;}
+            });
+            return best;
+        }
+
+        function countTerms_(form) {
+            let count = 0;
+            for (const key in form.terms) if (form.terms[key]) count++;
+            return count;
+        }
+
+        function matchesAnyHint_(label, hints) {
+            for (let i = 0; i < hints.length; i++) {
+                if (label.indexOf(hints[i]) !== -1) return true;
+            }
+            return false;
+        }
+
+        /* === Web app: a spreadsheet-like grid that feeds the engine === */
+        (function () {
+            var ROWS = 12, COLS = 6;
+            var data = [];            // data[r][c] = string (formula or value)
+            function blank() {data = []; for (var r = 0; r < ROWS; r++) {var row = []; for (var c = 0; c < COLS; c++)row.push(''); data.push(row);} }
+
+            var EXAMPLES = {
+                production: [
+                    ['Product', 'Units', 'Profit', 'Contribution', 'Hours', ''],
+                    ['A', '0', '30', '=B2*C2', '2', ''],
+                    ['B', '0', '20', '=B3*C3', '1', ''],
+                    ['C', '0', '48', '=B4*C4', '3', ''],
+                    ['', '', '', '', '', ''],
+                    ['Total profit', '', '', '=SUM(D2:D4)', '', ''],
+                    ['Total hours', '', '', '=SUMPRODUCT(B2:B4,E2:E4)', '<=', '100'],
+                    ['Units of B', '', '', '=B3', '<=', '40']
+                ],
+                blend: [
+                    ['Ingredient', 'Kg', 'Cost/kg', 'Spend', 'Protein%', 'Fibre%'],
+                    ['Barley', '0', '0.30', '=B2*C2', '12', '5'],
+                    ['Soybean', '0', '0.60', '=B3*C3', '44', '7'],
+                    ['Maize', '0', '0.25', '=B4*C4', '9', '2'],
+                    ['', '', '', '', '', ''],
+                    ['Total cost', '', '', '=SUM(D2:D4)', '', ''],
+                    ['Total kg', '', '', '=SUM(B2:B4)', '<=', '100'],
+                    ['Protein', '', '', '=SUMPRODUCT(B2:B4,E2:E4)', '>=', '1800'],
+                    ['Fibre', '', '', '=SUMPRODUCT(B2:B4,F2:F4)', '>=', '350']
+                ],
+                workshop: [
+                    ['Item', 'Make', 'Profit', 'Total', 'Wood', 'Labour'],
+                    ['Chairs', '0', '30', '=B2*C2', '2', '3'],
+                    ['Tables', '0', '40', '=B3*C3', '4', '2'],
+                    ['', '', '', '', '', ''],
+                    ['Total profit', '', '', '=SUM(D2:D3)', '', ''],
+                    ['Wood used', '', '', '=SUMPRODUCT(B2:B3,E2:E3)', '<=', '80'],
+                    ['Labour used', '', '', '=SUMPRODUCT(B2:B3,F2:F3)', '<=', '60']
+                ],
+                budget: [
+                    ['Channel', 'Spend', 'Return/£', 'Return', '', ''],
+                    ['Search', '0', '3.2', '=B2*C2', '', ''],
+                    ['Social', '0', '2.1', '=B3*C3', '', ''],
+                    ['Email', '0', '5.0', '=B4*C4', '', ''],
+                    ['', '', '', '', '', ''],
+                    ['Total return', '', '', '=SUM(D2:D4)', '', ''],
+                    ['Total budget', '', '', '=SUM(B2:B4)', '<=', '8000'],
+                    ['Email spend', '', '', '=B4', '<=', '1500']
+                ]
+            };
+
+            function loadExample(name) {
+                blank();
+                if (name !== 'blank') {
+                    var ex = EXAMPLES[name];
+                    for (var r = 0; r < ex.length; r++)for (var c = 0; c < ex[r].length; c++)data[r][c] = String(ex[r][c]);
+                }
+                render();
+                document.getElementById('result').classList.remove('show');
             }
 
-            function readConstraint_(grid, a1) {
-                const address = parseAddress_(a1);
-                const label = labelFor_(grid, a1);
-                let relation = null;
-                let limit = null;
+            function colLetter(i) {var s = '', n = i; while (n > 0) {var r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26);} return s;}
 
-                for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
-                    const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
-                    if (relation === null && typeof value === 'string') {
-                        const token = RELATION_TOKENS[value.trim()];
-                        if (token) {relation = token; continue;}
+            function render() {
+                var t = document.getElementById('grid');
+                var html = '<tr><th class="corner"></th>';
+                for (var c = 0; c < COLS; c++)html += '<th>' + colLetter(c + 1) + '</th>';
+                html += '</tr>';
+                for (var r = 0; r < ROWS; r++) {
+                    html += '<tr><td class="rownum">' + (r + 1) + '</td>';
+                    for (var c = 0; c < COLS; c++) {
+                        var v = (data[r] && data[r][c]) || '';
+                        html += '<td><input data-r="' + r + '" data-c="' + c + '" value="' + v.replace(/"/g, '&quot;') + '"></td>';
                     }
-                    if (relation !== null && typeof value === 'number') {limit = value; break;}
-                }
-
-                const current = cellAt_(grid, a1).value;
-                return {
-                    cell: a1,
-                    label: label,
-                    relation: relation === null ? '<=' : relation,
-                    limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
-                    guessed: relation === null || limit === null,
-                };
-            }
-
-            function inertMessage_(subject, variables) {
-                return subject + ' does not change when ' + variables + ' change, ' +
-                    'so there is nothing to optimise. The usual cause is a number stored as ' +
-                    'text in one of the columns it multiplies — check for values that sit on ' +
-                    'the left of their cell.';
-            }
-
-            function senseFor_(label) {
-                const text = String(label).toLowerCase();
-                if (matchesAnyHint_(text, MINIMISE_HINTS)) return 'min';
-                return 'max';
-            }
-
-            function gapIsEmpty_(grid, addressAt, from, to) {
-                if (to - from > 3) return false;
-                for (let position = from + 1; position < to; position++) {
-                    const entry = cellAt_(grid, addressAt(position));
-                    if (entry.formula) return false;
-                    if (entry.value !== '' && entry.value !== null && entry.value !== undefined) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            function pickObjective_(grid, candidates) {
-                const unlimited = candidates.filter(function (cell) {
-                    return readConstraint_(grid, cell).guessed;
-                });
-                const pool = unlimited.length ? unlimited : candidates;
-
-                let best = pool[0];
-                let bestScore = -1;
-                pool.forEach(function (cell) {
-                    const label = labelFor_(grid, cell).toLowerCase();
-                    let score = 0;
-                    if (matchesAnyHint_(label, MAXIMISE_HINTS)) score += 10;
-                    if (matchesAnyHint_(label, MINIMISE_HINTS)) score += 10;
-                    if (label.indexOf('total') !== -1) score += 3;
-                    if (score > bestScore) {bestScore = score; best = cell;}
-                });
-                return best;
-            }
-
-            function countTerms_(form) {
-                let count = 0;
-                for (const key in form.terms) if (form.terms[key]) count++;
-                return count;
-            }
-
-            function matchesAnyHint_(label, hints) {
-                for (let i = 0; i < hints.length; i++) {
-                    if (label.indexOf(hints[i]) !== -1) return true;
-                }
-                return false;
-            }
-
-            /* === Web app: a spreadsheet-like grid that feeds the engine === */
-            (function () {
-                var ROWS = 12, COLS = 6;
-                var data = [];            // data[r][c] = string (formula or value)
-                function blank() {data = []; for (var r = 0; r < ROWS; r++) {var row = []; for (var c = 0; c < COLS; c++)row.push(''); data.push(row);} }
-
-                var EXAMPLES = {
-                    production: [
-                        ['Product', 'Units', 'Profit', 'Contribution', 'Hours', ''],
-                        ['A', '0', '30', '=B2*C2', '2', ''],
-                        ['B', '0', '20', '=B3*C3', '1', ''],
-                        ['C', '0', '48', '=B4*C4', '3', ''],
-                        ['', '', '', '', '', ''],
-                        ['Total profit', '', '', '=SUM(D2:D4)', '', ''],
-                        ['Total hours', '', '', '=SUMPRODUCT(B2:B4,E2:E4)', '<=', '100'],
-                        ['Units of B', '', '', '=B3', '<=', '40']
-                    ],
-                    blend: [
-                        ['Ingredient', 'Kg', 'Cost/kg', 'Spend', 'Protein%', 'Fibre%'],
-                        ['Barley', '0', '0.30', '=B2*C2', '12', '5'],
-                        ['Soybean', '0', '0.60', '=B3*C3', '44', '7'],
-                        ['Maize', '0', '0.25', '=B4*C4', '9', '2'],
-                        ['', '', '', '', '', ''],
-                        ['Total cost', '', '', '=SUM(D2:D4)', '', ''],
-                        ['Total kg', '', '', '=SUM(B2:B4)', '<=', '100'],
-                        ['Protein', '', '', '=SUMPRODUCT(B2:B4,E2:E4)', '>=', '1800'],
-                        ['Fibre', '', '', '=SUMPRODUCT(B2:B4,F2:F4)', '>=', '350']
-                    ],
-                    workshop: [
-                        ['Item', 'Make', 'Profit', 'Total', 'Wood', 'Labour'],
-                        ['Chairs', '0', '30', '=B2*C2', '2', '3'],
-                        ['Tables', '0', '40', '=B3*C3', '4', '2'],
-                        ['', '', '', '', '', ''],
-                        ['Total profit', '', '', '=SUM(D2:D3)', '', ''],
-                        ['Wood used', '', '', '=SUMPRODUCT(B2:B3,E2:E3)', '<=', '80'],
-                        ['Labour used', '', '', '=SUMPRODUCT(B2:B3,F2:F3)', '<=', '60']
-                    ],
-                    budget: [
-                        ['Channel', 'Spend', 'Return/£', 'Return', '', ''],
-                        ['Search', '0', '3.2', '=B2*C2', '', ''],
-                        ['Social', '0', '2.1', '=B3*C3', '', ''],
-                        ['Email', '0', '5.0', '=B4*C4', '', ''],
-                        ['', '', '', '', '', ''],
-                        ['Total return', '', '', '=SUM(D2:D4)', '', ''],
-                        ['Total budget', '', '', '=SUM(B2:B4)', '<=', '8000'],
-                        ['Email spend', '', '', '=B4', '<=', '1500']
-                    ]
-                };
-
-                function loadExample(name) {
-                    blank();
-                    if (name !== 'blank') {
-                        var ex = EXAMPLES[name];
-                        for (var r = 0; r < ex.length; r++)for (var c = 0; c < ex[r].length; c++)data[r][c] = String(ex[r][c]);
-                    }
-                    render();
-                    document.getElementById('result').classList.remove('show');
-                }
-
-                function colLetter(i) {var s = '', n = i; while (n > 0) {var r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26);} return s;}
-
-                function render() {
-                    var t = document.getElementById('grid');
-                    var html = '<tr><th class="corner"></th>';
-                    for (var c = 0; c < COLS; c++)html += '<th>' + colLetter(c + 1) + '</th>';
                     html += '</tr>';
-                    for (var r = 0; r < ROWS; r++) {
-                        html += '<tr><td class="rownum">' + (r + 1) + '</td>';
-                        for (var c = 0; c < COLS; c++) {
-                            var v = (data[r] && data[r][c]) || '';
-                            html += '<td><input data-r="' + r + '" data-c="' + c + '" value="' + v.replace(/"/g, '&quot;') + '"></td>';
-                        }
-                        html += '</tr>';
-                    }
-                    t.innerHTML = html;
-                    var inputs = t.querySelectorAll('input');
-                    for (var i = 0; i < inputs.length; i++) {
-                        inputs[i].addEventListener('input', function (e) {
-                            data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')] = e.target.value;
-                        });
-                    }
                 }
-
-                // Build the sheet object the engine expects from the current grid.
-                function sheetFromGrid() {
-                    var isF = function (x) {return typeof x === 'string' && x.charAt(0) === '=';};
-                    var formulas = [], values = [];
-                    for (var r = 0; r < ROWS; r++) {
-                        var fr = [], vr = [];
-                        for (var c = 0; c < COLS; c++) {
-                            var raw = (data[r] && data[r][c] != null) ? String(data[r][c]) : '';
-                            if (isF(raw)) {fr.push(raw); vr.push(0);}
-                            else {
-                                fr.push('');
-                                var num = raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
-                                vr.push(num);
-                            }
-                        }
-                        formulas.push(fr); values.push(vr);
-                    }
-                    return {
-                        getDataRange: function () {
-                            return {
-                                getRow: function () {return 1;}, getColumn: function () {return 1;},
-                                getFormulas: function () {return formulas;}, getValues: function () {return values;}
-                            };
-                        }
-                    };
-                }
-
-                function fmt(n) {if (n == null || isNaN(n)) return '—'; return Number(n).toLocaleString('en-GB', {maximumFractionDigits: 4});}
-
-                function solve() {
-                    var res = document.getElementById('result');
-                    var sheet = sheetFromGrid();
-                    var model;
-                    try {model = detectModel_(sheet);}
-                    catch (err) {return showTrouble('Could not read the grid', String(err.message || err));}
-                    model.wholeNumbers = document.getElementById('whole').checked;
-
-                    var out;
-                    try {out = solveModel_(sheet, model);}
-                    catch (err) {return showTrouble('Could not solve', String(err.message || err));}
-
-                    if (out.status !== 'optimal' && out.status !== 'feasible') {
-                        return showTrouble('No solution', out.explanation || ('The model came back ' + out.status + '.'));
-                    }
-                    renderReceipt(out, model);
-                }
-
-                function showTrouble(title, msg) {
-                    var res = document.getElementById('result');
-                    res.innerHTML = '<div class="trouble"><b>' + title + '.</b> ' + msg + '</div>';
-                    res.classList.add('show'); res.scrollIntoView({behavior: 'smooth', block: 'nearest'});
-                }
-
-                function renderReceipt(out, model) {
-                    var res = document.getElementById('result');
-                    var money = ''; // we don't assume currency
-                    var h = '<div class="receipt">';
-                    h += '<div class="tot"><span>' + (out.objectiveLabel || 'Result') + '</span><b>' + fmt(out.objective) + '</b></div>';
-                    (out.labels || []).forEach(function (lb, i) {
-                        h += '<div class="r"><span class="k">' + esc(lb) + '</span><span class="v">' + fmt(out.previous[i]) + ' &rarr; ' + fmt(out.values[i]) + '</span></div>';
+                t.innerHTML = html;
+                var inputs = t.querySelectorAll('input');
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].addEventListener('input', function (e) {
+                        data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')] = e.target.value;
                     });
-                    (out.constraints || []).forEach(function (c) {
-                        var pct = c.limit ? Math.min(100, Math.abs(c.used / c.limit) * 100) : 0;
-                        h += '<div class="lim' + (c.satisfied ? '' : ' over') + '"><div class="r"><span class="k">' + esc(c.label) + '</span><span class="v">' + fmt(c.used) + ' / ' + fmt(c.limit) + (c.binding ? ' at limit' : '') + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
-                        if (c.binding && typeof c.shadowPrice === 'number' && c.shadowPrice > 0)
-                            h += '<div class="shadow">One more raises the result by ' + fmt(c.shadowPrice) + '</div>';
-                        h += '</div>';
-                    });
-                    if (out.caveat) h += '<div class="check bad">' + esc(out.caveat) + '</div>';
-                    else h += '<div class="check">&#10003; Solved, and every limit is respected.</div>';
+                }
+            }
+
+            // Build the sheet object the engine expects from the current grid.
+            function sheetFromGrid() {
+                var isF = function (x) {return typeof x === 'string' && x.charAt(0) === '=';};
+                var formulas = [], values = [];
+                for (var r = 0; r < ROWS; r++) {
+                    var fr = [], vr = [];
+                    for (var c = 0; c < COLS; c++) {
+                        var raw = (data[r] && data[r][c] != null) ? String(data[r][c]) : '';
+                        if (isF(raw)) {fr.push(raw); vr.push(0);}
+                        else {
+                            fr.push('');
+                            var num = raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw;
+                            vr.push(num);
+                        }
+                    }
+                    formulas.push(fr); values.push(vr);
+                }
+                return {
+                    getDataRange: function () {
+                        return {
+                            getRow: function () {return 1;}, getColumn: function () {return 1;},
+                            getFormulas: function () {return formulas;}, getValues: function () {return values;}
+                        };
+                    }
+                };
+            }
+
+            function fmt(n) {if (n == null || isNaN(n)) return '—'; return Number(n).toLocaleString('en-GB', {maximumFractionDigits: 4});}
+
+            function solve() {
+                var res = document.getElementById('result');
+                var sheet = sheetFromGrid();
+                var model;
+                try {model = detectModel_(sheet);}
+                catch (err) {return showTrouble('Could not read the grid', String(err.message || err));}
+                model.wholeNumbers = document.getElementById('whole').checked;
+
+                var out;
+                try {out = solveModel_(sheet, model);}
+                catch (err) {return showTrouble('Could not solve', String(err.message || err));}
+
+                if (out.status !== 'optimal' && out.status !== 'feasible') {
+                    return showTrouble('No solution', out.explanation || ('The model came back ' + out.status + '.'));
+                }
+                renderReceipt(out, model);
+            }
+
+            function showTrouble(title, msg) {
+                var res = document.getElementById('result');
+                res.innerHTML = '<div class="trouble"><b>' + title + '.</b> ' + msg + '</div>';
+                res.classList.add('show'); res.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+
+            function renderReceipt(out, model) {
+                var res = document.getElementById('result');
+                var money = ''; // we don't assume currency
+                var h = '<div class="receipt">';
+                h += '<div class="tot"><span>' + (out.objectiveLabel || 'Result') + '</span><b>' + fmt(out.objective) + '</b></div>';
+                (out.labels || []).forEach(function (lb, i) {
+                    h += '<div class="r"><span class="k">' + esc(lb) + '</span><span class="v">' + fmt(out.previous[i]) + ' &rarr; ' + fmt(out.values[i]) + '</span></div>';
+                });
+                (out.constraints || []).forEach(function (c) {
+                    var pct = c.limit ? Math.min(100, Math.abs(c.used / c.limit) * 100) : 0;
+                    h += '<div class="lim' + (c.satisfied ? '' : ' over') + '"><div class="r"><span class="k">' + esc(c.label) + '</span><span class="v">' + fmt(c.used) + ' / ' + fmt(c.limit) + (c.binding ? ' at limit' : '') + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
+                    if (c.binding && typeof c.shadowPrice === 'number' && c.shadowPrice > 0)
+                        h += '<div class="shadow">One more raises the result by ' + fmt(c.shadowPrice) + '</div>';
                     h += '</div>';
-                    h += '<div class="exports"><span class="ex">Export</span>' +
-                        '<button class="chip" id="exp-csv">CSV</button>' +
-                        '<button class="chip" id="exp-xls">Excel</button>' +
-                        '<button class="chip" id="exp-txt">Copy summary</button></div>';
-                    res.innerHTML = h; res.classList.add('show'); res.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+                });
+                if (out.caveat) h += '<div class="check bad">' + esc(out.caveat) + '</div>';
+                else h += '<div class="check">&#10003; Solved, and every limit is respected.</div>';
+                h += '</div>';
+                h += '<div class="exports"><span class="ex">Export</span>' +
+                    '<button class="chip" id="exp-csv">CSV</button>' +
+                    '<button class="chip" id="exp-xls">Excel</button>' +
+                    '<button class="chip" id="exp-txt">Copy summary</button></div>';
+                res.innerHTML = h; res.classList.add('show'); res.scrollIntoView({behavior: 'smooth', block: 'nearest'});
 
-                    lastResult = out;  // remember for the export buttons
-                    document.getElementById('exp-csv').addEventListener('click', exportCSV);
-                    document.getElementById('exp-xls').addEventListener('click', exportExcel);
-                    document.getElementById('exp-txt').addEventListener('click', copySummary);
+                lastResult = out;  // remember for the export buttons
+                document.getElementById('exp-csv').addEventListener('click', exportCSV);
+                document.getElementById('exp-xls').addEventListener('click', exportExcel);
+                document.getElementById('exp-txt').addEventListener('click', copySummary);
 
-                    // If this is a two-variable model, draw the feasible region. It's the one
-                    // picture that makes an optimisation click: here's everything you're
-                    // allowed to do, and here's the best corner of it.
-                    if (out.plot && out.values && out.values.length === 2) {
-                        drawFeasibleRegion(out);
-                    }
+                // If this is a two-variable model, draw the feasible region. It's the one
+                // picture that makes an optimisation click: here's everything you're
+                // allowed to do, and here's the best corner of it.
+                if (out.plot && out.values && out.values.length === 2) {
+                    drawFeasibleRegion(out);
                 }
+            }
 
-                function drawFeasibleRegion(out) {
-                    var cons = (out.constraints || []).filter(function (c) {return c.coefficients && c.coefficients.length === 2;})
-                        .map(function (c) {return {x: c.coefficients[0], y: c.coefficients[1], op: c.relation, b: c.limit - (c.constant || 0), label: c.label, binding: c.binding};});
-                    if (!cons.length) return;
-                    var obj = {x: out.plot.objective[0], y: out.plot.objective[1]};
-                    var maximize = true; // objective sense already baked into detection; corners test both
-                    var geo = solve2D(obj, cons);
-                    if (!geo.vertices.length) return;
+            function drawFeasibleRegion(out) {
+                var cons = (out.constraints || []).filter(function (c) {return c.coefficients && c.coefficients.length === 2;})
+                    .map(function (c) {return {x: c.coefficients[0], y: c.coefficients[1], op: c.relation, b: c.limit - (c.constant || 0), label: c.label, binding: c.binding};});
+                if (!cons.length) return;
+                var obj = {x: out.plot.objective[0], y: out.plot.objective[1]};
+                var maximize = true; // objective sense already baked into detection; corners test both
+                var geo = solve2D(obj, cons);
+                if (!geo.vertices.length) return;
 
-                    var xs = geo.vertices.map(function (p) {return p.x;}), ys = geo.vertices.map(function (p) {return p.y;});
-                    var maxX = Math.max.apply(null, xs.concat([out.values[0]])) * 1.15 + 1;
-                    var maxY = Math.max.apply(null, ys.concat([out.values[1]])) * 1.15 + 1;
-                    var W = 440, H = 340, pad = 34;
-                    function sx(x) {return pad + x / maxX * (W - 2 * pad);}
-                    function sy(y) {return H - pad - y / maxY * (H - 2 * pad);}
+                var xs = geo.vertices.map(function (p) {return p.x;}), ys = geo.vertices.map(function (p) {return p.y;});
+                var maxX = Math.max.apply(null, xs.concat([out.values[0]])) * 1.15 + 1;
+                var maxY = Math.max.apply(null, ys.concat([out.values[1]])) * 1.15 + 1;
+                var W = 440, H = 340, pad = 34;
+                function sx(x) {return pad + x / maxX * (W - 2 * pad);}
+                function sy(y) {return H - pad - y / maxY * (H - 2 * pad);}
 
-                    var poly = geo.vertices.map(function (p) {return sx(p.x) + ',' + sy(p.y);}).join(' ');
-                    var lab = out.plot.variableLabels || ['x', 'y'];
+                var poly = geo.vertices.map(function (p) {return sx(p.x) + ',' + sy(p.y);}).join(' ');
+                var lab = out.plot.variableLabels || ['x', 'y'];
 
-                    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="plot" role="img" aria-label="Feasible region">';
-                    // axes
-                    svg += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" class="ax"/>';
-                    svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (H - pad) + '" class="ax"/>';
-                    // feasible polygon
-                    svg += '<polygon points="' + poly + '" class="region"/>';
-                    // constraint lines
-                    cons.forEach(function (c) {
-                        var p = lineAcrossBox(c, maxX, maxY);
-                        if (p) svg += '<line x1="' + sx(p.x1) + '" y1="' + sy(p.y1) + '" x2="' + sx(p.x2) + '" y2="' + sy(p.y2) + '" class="cline' + (c.binding ? ' bind' : '') + '"/>';
-                    });
-                    // optimum star
-                    var ox = sx(out.values[0]), oy = sy(out.values[1]);
-                    svg += '<circle cx="' + ox + '" cy="' + oy + '" r="6" class="opt"/>';
-                    svg += '<text x="' + (ox + 10) + '" y="' + (oy - 8) + '" class="optlab">(' + fmt(out.values[0]) + ', ' + fmt(out.values[1]) + ')</text>';
-                    // axis labels
-                    svg += '<text x="' + (W - pad) + '" y="' + (H - pad + 18) + '" class="axlab" text-anchor="end">' + esc(lab[0] || 'x') + '</text>';
-                    svg += '<text x="' + (pad - 6) + '" y="' + (pad - 8) + '" class="axlab">' + esc(lab[1] || 'y') + '</text>';
-                    svg += '</svg>';
+                var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="plot" role="img" aria-label="Feasible region">';
+                // axes
+                svg += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" class="ax"/>';
+                svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (H - pad) + '" class="ax"/>';
+                // feasible polygon
+                svg += '<polygon points="' + poly + '" class="region"/>';
+                // constraint lines
+                cons.forEach(function (c) {
+                    var p = lineAcrossBox(c, maxX, maxY);
+                    if (p) svg += '<line x1="' + sx(p.x1) + '" y1="' + sy(p.y1) + '" x2="' + sx(p.x2) + '" y2="' + sy(p.y2) + '" class="cline' + (c.binding ? ' bind' : '') + '"/>';
+                });
+                // optimum star
+                var ox = sx(out.values[0]), oy = sy(out.values[1]);
+                svg += '<circle cx="' + ox + '" cy="' + oy + '" r="6" class="opt"/>';
+                svg += '<text x="' + (ox + 10) + '" y="' + (oy - 8) + '" class="optlab">(' + fmt(out.values[0]) + ', ' + fmt(out.values[1]) + ')</text>';
+                // axis labels
+                svg += '<text x="' + (W - pad) + '" y="' + (H - pad + 18) + '" class="axlab" text-anchor="end">' + esc(lab[0] || 'x') + '</text>';
+                svg += '<text x="' + (pad - 6) + '" y="' + (pad - 8) + '" class="axlab">' + esc(lab[1] || 'y') + '</text>';
+                svg += '</svg>';
 
-                    var box = document.createElement('div');
-                    box.className = 'plotwrap';
-                    box.innerHTML = '<p class="plotcap">The feasible region — every allocation your limits allow. The star is the best one.</p>' + svg;
-                    document.getElementById('result').appendChild(box);
+                var box = document.createElement('div');
+                box.className = 'plotwrap';
+                box.innerHTML = '<p class="plotcap">The feasible region — every allocation your limits allow. The star is the best one.</p>' + svg;
+                document.getElementById('result').appendChild(box);
+
+                // Optional worked steps: the corner-point method, the way it's taught.
+                // Collapsed by default so it never clutters the answer; the student who
+                // wants to see the working opens it.
+                addWorkedSteps(out, geo, obj);
+            }
+
+            function addWorkedSteps(out, geo, obj) {
+                if (!geo.vertices.length) return;
+                var lab = out.plot.variableLabels || ['x', 'y'];
+                var rows = geo.vertices.map(function (v) {
+                    var z = obj.x * v.x + obj.y * v.y;
+                    var isOpt = Math.abs(v.x - out.values[0]) < 1e-6 && Math.abs(v.y - out.values[1]) < 1e-6;
+                    return '<tr' + (isOpt ? ' class="win"' : '') + '><td>(' + fmt(v.x) + ', ' + fmt(v.y) + ')</td><td>' +
+                        fmt(obj.x) + '·' + fmt(v.x) + ' + ' + fmt(obj.y) + '·' + fmt(v.y) + '</td><td>' + fmt(z) +
+                        (isOpt ? ' &larr; best' : '') + '</td></tr>';
+                }).join('');
+                var det = document.createElement('details');
+                det.className = 'steps';
+                det.innerHTML =
+                    '<summary>Show the working (corner-point method)</summary>' +
+                    '<p>A linear problem is always won at a corner of the feasible region. ' +
+                    'So we find every corner, work out the objective at each, and keep the best.</p>' +
+                    '<table class="steptable"><thead><tr><th>Corner (' + esc(lab[0]) + ', ' + esc(lab[1]) + ')</th>' +
+                    '<th>' + esc(out.objectiveLabel || 'Objective') + '</th><th>Value</th></tr></thead>' +
+                    '<tbody>' + rows + '</tbody></table>' +
+                    '<p class="stepnote">The same answer the solver reached, shown the long way. ' +
+                    'For problems with more than two decisions the corners can\\u2019t be drawn, ' +
+                    'but the method is identical — Plumline just does it with the simplex algorithm instead.</p>';
+                document.getElementById('result').appendChild(det);
+            }
+
+            // Clip a constraint line a*x + b*y = c to the visible box for drawing.
+            function lineAcrossBox(c, maxX, maxY) {
+                var pts = [];
+                if (Math.abs(c.y) > 1e-9) { // y at x=0 and x=maxX
+                    pts.push({x: 0, y: (c.b - c.x * 0) / c.y});
+                    pts.push({x: maxX, y: (c.b - c.x * maxX) / c.y});
                 }
-
-                // Clip a constraint line a*x + b*y = c to the visible box for drawing.
-                function lineAcrossBox(c, maxX, maxY) {
-                    var pts = [];
-                    if (Math.abs(c.y) > 1e-9) { // y at x=0 and x=maxX
-                        pts.push({x: 0, y: (c.b - c.x * 0) / c.y});
-                        pts.push({x: maxX, y: (c.b - c.x * maxX) / c.y});
-                    }
-                    if (Math.abs(c.x) > 1e-9) { // x at y=0 and y=maxY
-                        pts.push({x: (c.b - c.y * 0) / c.x, y: 0});
-                        pts.push({x: (c.b - c.y * maxY) / c.x, y: maxY});
-                    }
-                    var inb = pts.filter(function (p) {return p.x >= -1e-6 && p.x <= maxX + 1e-6 && p.y >= -1e-6 && p.y <= maxY + 1e-6;});
-                    if (inb.length < 2) return null;
-                    return {x1: inb[0].x, y1: inb[0].y, x2: inb[1].x, y2: inb[1].y};
+                if (Math.abs(c.x) > 1e-9) { // x at y=0 and y=maxY
+                    pts.push({x: (c.b - c.y * 0) / c.x, y: 0});
+                    pts.push({x: (c.b - c.y * maxY) / c.x, y: maxY});
                 }
+                var inb = pts.filter(function (p) {return p.x >= -1e-6 && p.x <= maxX + 1e-6 && p.y >= -1e-6 && p.y <= maxY + 1e-6;});
+                if (inb.length < 2) return null;
+                return {x1: inb[0].x, y1: inb[0].y, x2: inb[1].x, y2: inb[1].y};
+            }
 
-                // 2-variable vertex geometry (verified separately).
-                function solve2D(obj, cons) {
-                    var lines = cons.slice();
-                    lines.push({x: 1, y: 0, op: '>=', b: 0});
-                    lines.push({x: 0, y: 1, op: '>=', b: 0});
-                    function intersect(L1, L2) {
-                        var det = L1.x * L2.y - L2.x * L1.y; if (Math.abs(det) < 1e-12) return null;
-                        return {x: (L1.b * L2.y - L2.b * L1.y) / det, y: (L1.x * L2.b - L2.x * L1.b) / det};
-                    }
-                    function feasible(p) {
-                        return cons.every(function (c) {
-                            var v = c.x * p.x + c.y * p.y;
-                            if (c.op === '<=') return v <= c.b + 1e-6;
-                            if (c.op === '>=') return v >= c.b - 1e-6;
-                            return Math.abs(v - c.b) < 1e-6;
-                        }) && p.x >= -1e-6 && p.y >= -1e-6;
-                    }
-                    var verts = [];
-                    for (var i = 0; i < lines.length; i++)for (var j = i + 1; j < lines.length; j++) {
-                        var p = intersect(lines[i], lines[j]);
-                        if (p && feasible(p) && !verts.some(function (q) {return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6;}))
-                            verts.push(p);
-                    }
-                    if (verts.length) {
-                        var cx = verts.reduce(function (s, p) {return s + p.x;}, 0) / verts.length;
-                        var cy = verts.reduce(function (s, p) {return s + p.y;}, 0) / verts.length;
-                        verts.sort(function (a, b) {return Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx);});
-                    }
-                    return {vertices: verts};
+            // 2-variable vertex geometry (verified separately).
+            function solve2D(obj, cons) {
+                var lines = cons.slice();
+                lines.push({x: 1, y: 0, op: '>=', b: 0});
+                lines.push({x: 0, y: 1, op: '>=', b: 0});
+                function intersect(L1, L2) {
+                    var det = L1.x * L2.y - L2.x * L1.y; if (Math.abs(det) < 1e-12) return null;
+                    return {x: (L1.b * L2.y - L2.b * L1.y) / det, y: (L1.x * L2.b - L2.x * L1.b) / det};
                 }
-
-                // --- Export. All client-side: the solution never leaves the browser. ---
-                var lastResult = null;
-
-                function solutionRows(out) {
-                    // a clean, labelled table anyone can open: the answer, then the limits
-                    var rows = [['Result', out.objectiveLabel || 'Objective', num(out.objective)]];
-                    rows.push([]);
-                    rows.push(['Decision', 'From', 'To']);
-                    (out.labels || []).forEach(function (lb, i) {rows.push([lb, num(out.previous[i]), num(out.values[i])]);});
-                    rows.push([]);
-                    rows.push(['Limit', 'Used', 'Cap', 'At limit', 'Value of one more']);
-                    (out.constraints || []).forEach(function (c) {
-                        rows.push([c.label, num(c.used), num(c.limit), c.binding ? 'yes' : 'no',
-                        (c.binding && c.shadowPrice > 0) ? num(c.shadowPrice) : '']);
-                    });
-                    return rows;
+                function feasible(p) {
+                    return cons.every(function (c) {
+                        var v = c.x * p.x + c.y * p.y;
+                        if (c.op === '<=') return v <= c.b + 1e-6;
+                        if (c.op === '>=') return v >= c.b - 1e-6;
+                        return Math.abs(v - c.b) < 1e-6;
+                    }) && p.x >= -1e-6 && p.y >= -1e-6;
                 }
-                function num(n) {return (n == null || isNaN(n)) ? '' : Math.round(n * 10000) / 10000;}
-
-                function download(name, mime, text) {
-                    var blob = new Blob([text], {type: mime});
-                    var url = URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url; a.download = name; document.body.appendChild(a); a.click();
-                    document.body.removeChild(a); URL.revokeObjectURL(url);
+                var verts = [];
+                for (var i = 0; i < lines.length; i++)for (var j = i + 1; j < lines.length; j++) {
+                    var p = intersect(lines[i], lines[j]);
+                    if (p && feasible(p) && !verts.some(function (q) {return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6;}))
+                        verts.push(p);
                 }
-
-                function exportCSV() {
-                    if (!lastResult) return;
-                    var csv = solutionRows(lastResult).map(function (r) {
-                        return r.map(function (cell) {
-                            var s = String(cell);
-                            return /[",\\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-                        }).join(',');
-                    }).join('\\r\\n');
-                    download('plumline-solution.csv', 'text/csv', csv);
+                if (verts.length) {
+                    var cx = verts.reduce(function (s, p) {return s + p.x;}, 0) / verts.length;
+                    var cy = verts.reduce(function (s, p) {return s + p.y;}, 0) / verts.length;
+                    verts.sort(function (a, b) {return Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx);});
                 }
+                return {vertices: verts};
+            }
 
-                function exportExcel() {
-                    if (!lastResult) return;
-                    // SpreadsheetML: opens natively in Excel and Google Sheets, no library.
-                    var rows = solutionRows(lastResult).map(function (r) {
-                        return '<Row>' + r.map(function (cell) {
-                            var isNum = cell !== '' && !isNaN(Number(cell)) && typeof cell !== 'boolean';
-                            var t = isNum ? 'Number' : 'String';
-                            var v = String(cell).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                            return '<Cell><Data ss:Type="' + t + '">' + v + '</Data></Cell>';
-                        }).join('') + '</Row>';
-                    }).join('');
-                    var xml = '<?xml version="1.0"?>' +
-                        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
-                        'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
-                        '<Worksheet ss:Name="Plumline solution"><Table>' + rows + '</Table></Worksheet></Workbook>';
-                    download('plumline-solution.xls', 'application/vnd.ms-excel', xml);
+            // --- Export. All client-side: the solution never leaves the browser. ---
+            var lastResult = null;
+
+            function solutionRows(out) {
+                // a clean, labelled table anyone can open: the answer, then the limits
+                var rows = [['Result', out.objectiveLabel || 'Objective', num(out.objective)]];
+                rows.push([]);
+                rows.push(['Decision', 'From', 'To']);
+                (out.labels || []).forEach(function (lb, i) {rows.push([lb, num(out.previous[i]), num(out.values[i])]);});
+                rows.push([]);
+                rows.push(['Limit', 'Used', 'Cap', 'At limit', 'Value of one more']);
+                (out.constraints || []).forEach(function (c) {
+                    rows.push([c.label, num(c.used), num(c.limit), c.binding ? 'yes' : 'no',
+                    (c.binding && c.shadowPrice > 0) ? num(c.shadowPrice) : '']);
+                });
+                return rows;
+            }
+            function num(n) {return (n == null || isNaN(n)) ? '' : Math.round(n * 10000) / 10000;}
+
+            function download(name, mime, text) {
+                var blob = new Blob([text], {type: mime});
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url; a.download = name; document.body.appendChild(a); a.click();
+                document.body.removeChild(a); URL.revokeObjectURL(url);
+            }
+
+            function exportCSV() {
+                if (!lastResult) return;
+                var csv = solutionRows(lastResult).map(function (r) {
+                    return r.map(function (cell) {
+                        var s = String(cell);
+                        return /[",\\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+                    }).join(',');
+                }).join('\\r\\n');
+                download('plumline-solution.csv', 'text/csv', csv);
+            }
+
+            function exportExcel() {
+                if (!lastResult) return;
+                // SpreadsheetML: opens natively in Excel and Google Sheets, no library.
+                var rows = solutionRows(lastResult).map(function (r) {
+                    return '<Row>' + r.map(function (cell) {
+                        var isNum = cell !== '' && !isNaN(Number(cell)) && typeof cell !== 'boolean';
+                        var t = isNum ? 'Number' : 'String';
+                        var v = String(cell).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                        return '<Cell><Data ss:Type="' + t + '">' + v + '</Data></Cell>';
+                    }).join('') + '</Row>';
+                }).join('');
+                var xml = '<?xml version="1.0"?>' +
+                    '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+                    'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+                    '<Worksheet ss:Name="Plumline solution"><Table>' + rows + '</Table></Worksheet></Workbook>';
+                download('plumline-solution.xls', 'application/vnd.ms-excel', xml);
+            }
+
+            function copySummary() {
+                if (!lastResult) return;
+                var out = lastResult, lines = [];
+                lines.push((out.objectiveLabel || 'Result') + ': ' + fmt(out.objective));
+                (out.labels || []).forEach(function (lb, i) {lines.push('  ' + lb + ': ' + fmt(out.values[i]));});
+                (out.constraints || []).forEach(function (c) {
+                    var s = '  ' + c.label + ' ' + fmt(c.used) + '/' + fmt(c.limit) + (c.binding ? ' (at limit' : ' (');
+                    if (c.binding && c.shadowPrice > 0) s += ', one more worth ' + fmt(c.shadowPrice);
+                    lines.push(s + ')');
+                });
+                var text = lines.join('\\n');
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function () {flash('exp-txt', 'Copied');});
+                } else {
+                    download('plumline-solution.txt', 'text/plain', text);
                 }
+            }
+            function flash(id, label) {
+                var b = document.getElementById(id), old = b.textContent;
+                b.textContent = label; setTimeout(function () {b.textContent = old;}, 1200);
+            }
+            function esc(s) {return String(s).replace(/[&<>"]/g, function (c) {return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];});}
 
-                function copySummary() {
-                    if (!lastResult) return;
-                    var out = lastResult, lines = [];
-                    lines.push((out.objectiveLabel || 'Result') + ': ' + fmt(out.objective));
-                    (out.labels || []).forEach(function (lb, i) {lines.push('  ' + lb + ': ' + fmt(out.values[i]));});
-                    (out.constraints || []).forEach(function (c) {
-                        var s = '  ' + c.label + ' ' + fmt(c.used) + '/' + fmt(c.limit) + (c.binding ? ' (at limit' : ' (');
-                        if (c.binding && c.shadowPrice > 0) s += ', one more worth ' + fmt(c.shadowPrice);
-                        lines.push(s + ')');
-                    });
-                    var text = lines.join('\\n');
-                    if (navigator.clipboard) {
-                        navigator.clipboard.writeText(text).then(function () {flash('exp-txt', 'Copied');});
-                    } else {
-                        download('plumline-solution.txt', 'text/plain', text);
+            var chips = document.querySelectorAll('[data-ex]');
+            for (var i = 0; i < chips.length; i++)chips[i].addEventListener('click', function (e) {loadExample(e.target.getAttribute('data-ex'));});
+            document.getElementById('solve').addEventListener('click', solve);
+            document.getElementById('clear').addEventListener('click', function () {loadExample('blank');});
+
+
+            // --- Self-check: proves the engine works end to end, in plain language ---
+            function runSelfTest() {
+                var out = document.getElementById('selftest-out'); out.innerHTML = '';
+                function line(ok, label, detail) {
+                    var d = document.createElement('div');
+                    d.innerHTML = (ok ? '<span style="color:var(--true)">PASS</span>' : '<span style="color:var(--wrong)">FAIL</span>') +
+                        ' &nbsp;' + label + (detail ? ' <span style="color:var(--faint)">' + detail + '</span>' : '');
+                    out.appendChild(d);
+                }
+                function sheetFrom(ex) {
+                    var isF = function (x) {return typeof x === 'string' && x.charAt(0) === '=';};
+                    var F = [], V = [];
+                    for (var r = 0; r < ex.length; r++) {
+                        var fr = [], vr = []; for (var c = 0; c < ex[r].length; c++) {
+                            var raw = String(ex[r][c]);
+                            if (isF(raw)) {fr.push(raw); vr.push(0);} else {fr.push(''); vr.push(raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw);}
+                        } F.push(fr); V.push(vr);
                     }
+                    return {getDataRange: function () {return {getRow: function () {return 1;}, getColumn: function () {return 1;}, getFormulas: function () {return F;}, getValues: function () {return V;}};}};
                 }
-                function flash(id, label) {
-                    var b = document.getElementById(id), old = b.textContent;
-                    b.textContent = label; setTimeout(function () {b.textContent = old;}, 1200);
+                function trySolve(ex, whole) {
+                    try {var sh = sheetFrom(ex); var m = detectModel_(sh); if (whole) m.wholeNumbers = true; return solveModel_(sh, m);}
+                    catch (e) {return {status: 'error', error: String(e.message || e)};}
                 }
-                function esc(s) {return String(s).replace(/[&<>"]/g, function (c) {return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c];});}
+                // 1: production optimum
+                var p = trySolve(EXAMPLES.production, false);
+                line(p.status === 'optimal' && Math.round(p.objective) === 1760, 'Production example solves', 'got ' + fmt(p.objective) + ', expected 1,760');
+                // 2: shadow price present
+                var hasShadow = (p.constraints || []).some(function (c) {return c.binding && c.shadowPrice > 0;});
+                line(hasShadow, 'Sensitivity (shadow price) is computed', hasShadow ? 'a binding limit shows its value' : 'none found');
+                // 3: blend exact
+                var b = trySolve(EXAMPLES.blend, false);
+                line(b.status === 'optimal' && Math.abs(b.objective - 27.35) < 0.1, 'Blend example solves', 'got £' + fmt(b.objective) + ', expected ~£27.35');
+                // 4: budget
+                var g = trySolve(EXAMPLES.budget, false);
+                line(g.status === 'optimal' && Math.round(g.objective) === 28300, 'Budget example solves', 'got ' + fmt(g.objective) + ', expected 28,300');
+                // 5: integer differs from continuous
+                var ci = trySolve(EXAMPLES.production, true);
+                line(ci.status === 'optimal', 'Whole-numbers mode runs', 'objective ' + fmt(ci.objective));
+                // 6: impossible model is caught, not crashed or faked
+                var imp = trySolve([['Item', 'Make', 'Profit', 'Total', '', ''], ['X', '0', '10', '=B2*C2', '', ''], ['Y', '0', '8', '=B3*C3', '', ''], ['', '', '', '', '', ''], ['Total profit', '', '', '=SUM(D2:D3)', '', ''], ['Min make', '', '', '=B2', '>=', '100'], ['Max make', '', '', '=B2', '<=', '20']], false);
+                var caught = (imp.status === 'infeasible');
+                line(caught, 'Contradictory limits are caught cleanly', 'reported: ' + (imp.status || imp.error || '?'));
+                var allPass = out.querySelectorAll('span[style*="wrong"]').length === 0;
+                var summary = document.createElement('div');
+                summary.style.marginTop = '10px'; summary.style.fontWeight = '600';
+                summary.style.color = allPass ? 'var(--true)' : 'var(--wrong)';
+                summary.textContent = allPass ? 'All checks passed. The solver works.' : 'Something failed above.';
+                out.appendChild(summary);
+            }
+            document.getElementById('selftest').addEventListener('click', runSelfTest);
 
-                var chips = document.querySelectorAll('[data-ex]');
-                for (var i = 0; i < chips.length; i++)chips[i].addEventListener('click', function (e) {loadExample(e.target.getAttribute('data-ex'));});
-                document.getElementById('solve').addEventListener('click', solve);
-                document.getElementById('clear').addEventListener('click', function () {loadExample('blank');});
-
-
-                // --- Self-check: proves the engine works end to end, in plain language ---
-                function runSelfTest() {
-                    var out = document.getElementById('selftest-out'); out.innerHTML = '';
-                    function line(ok, label, detail) {
-                        var d = document.createElement('div');
-                        d.innerHTML = (ok ? '<span style="color:var(--true)">PASS</span>' : '<span style="color:var(--wrong)">FAIL</span>') +
-                            ' &nbsp;' + label + (detail ? ' <span style="color:var(--faint)">' + detail + '</span>' : '');
-                        out.appendChild(d);
-                    }
-                    function sheetFrom(ex) {
-                        var isF = function (x) {return typeof x === 'string' && x.charAt(0) === '=';};
-                        var F = [], V = [];
-                        for (var r = 0; r < ex.length; r++) {
-                            var fr = [], vr = []; for (var c = 0; c < ex[r].length; c++) {
-                                var raw = String(ex[r][c]);
-                                if (isF(raw)) {fr.push(raw); vr.push(0);} else {fr.push(''); vr.push(raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw);}
-                            } F.push(fr); V.push(vr);
-                        }
-                        return {getDataRange: function () {return {getRow: function () {return 1;}, getColumn: function () {return 1;}, getFormulas: function () {return F;}, getValues: function () {return V;}};}};
-                    }
-                    function trySolve(ex, whole) {
-                        try {var sh = sheetFrom(ex); var m = detectModel_(sh); if (whole) m.wholeNumbers = true; return solveModel_(sh, m);}
-                        catch (e) {return {status: 'error', error: String(e.message || e)};}
-                    }
-                    // 1: production optimum
-                    var p = trySolve(EXAMPLES.production, false);
-                    line(p.status === 'optimal' && Math.round(p.objective) === 1760, 'Production example solves', 'got ' + fmt(p.objective) + ', expected 1,760');
-                    // 2: shadow price present
-                    var hasShadow = (p.constraints || []).some(function (c) {return c.binding && c.shadowPrice > 0;});
-                    line(hasShadow, 'Sensitivity (shadow price) is computed', hasShadow ? 'a binding limit shows its value' : 'none found');
-                    // 3: blend exact
-                    var b = trySolve(EXAMPLES.blend, false);
-                    line(b.status === 'optimal' && Math.abs(b.objective - 27.35) < 0.1, 'Blend example solves', 'got £' + fmt(b.objective) + ', expected ~£27.35');
-                    // 4: budget
-                    var g = trySolve(EXAMPLES.budget, false);
-                    line(g.status === 'optimal' && Math.round(g.objective) === 28300, 'Budget example solves', 'got ' + fmt(g.objective) + ', expected 28,300');
-                    // 5: integer differs from continuous
-                    var ci = trySolve(EXAMPLES.production, true);
-                    line(ci.status === 'optimal', 'Whole-numbers mode runs', 'objective ' + fmt(ci.objective));
-                    // 6: impossible model is caught, not crashed or faked
-                    var imp = trySolve([['Item', 'Make', 'Profit', 'Total', '', ''], ['X', '0', '10', '=B2*C2', '', ''], ['Y', '0', '8', '=B3*C3', '', ''], ['', '', '', '', '', ''], ['Total profit', '', '', '=SUM(D2:D3)', '', ''], ['Min make', '', '', '=B2', '>=', '100'], ['Max make', '', '', '=B2', '<=', '20']], false);
-                    var caught = (imp.status === 'infeasible');
-                    line(caught, 'Contradictory limits are caught cleanly', 'reported: ' + (imp.status || imp.error || '?'));
-                    var allPass = out.querySelectorAll('span[style*="wrong"]').length === 0;
-                    var summary = document.createElement('div');
-                    summary.style.marginTop = '10px'; summary.style.fontWeight = '600';
-                    summary.style.color = allPass ? 'var(--true)' : 'var(--wrong)';
-                    summary.textContent = allPass ? 'All checks passed. The solver works.' : 'Something failed above.';
-                    out.appendChild(summary);
-                }
-                document.getElementById('selftest').addEventListener('click', runSelfTest);
-
-                loadExample('production');
-            })();
-        </script>
+            loadExample('production');
+        })();
+    </script>
 </body>
 
 </html>
