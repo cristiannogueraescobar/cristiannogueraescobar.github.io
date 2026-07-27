@@ -42,7 +42,8 @@
         f3P:'For every limit that holds you back, the shadow price: how much more you\u2019d gain from one more unit. The report the paid tools charge for.',
         ctaTitle:'Put a number in front of your next decision.',
         ctaP:'Free. Nothing sent to any server.',
-        ctaBtn:'Open the solver'
+        ctaBtn:'Open the solver',
+        proofTotal:'Total profit', proofHours:'Hours used', proofShadow:'One more hour is worth £16', proofCheck:'The sheet recalculates 1,760, which matches.'
       }
     },
 
@@ -79,7 +80,8 @@
         f3P:'Para cada l\u00edmite que te frena, el precio sombra: cu\u00e1nto ganar\u00edas con una unidad m\u00e1s. El informe que las de pago cobran.',
         ctaTitle:'Pon un n\u00famero delante de tu pr\u00f3xima decisi\u00f3n.',
         ctaP:'Gratis. No se env\u00eda nada a ning\u00fan servidor.',
-        ctaBtn:'Abrir el solver'
+        ctaBtn:'Abrir el solver',
+        proofTotal:'Beneficio total', proofHours:'Horas usadas', proofShadow:'Una hora más vale 16 £', proofCheck:'La hoja recalcula 1.760, que coincide.'
       }
     },
 
@@ -116,7 +118,8 @@
         f3P:'Para cada limite que te trava, o pre\u00e7o-sombra: quanto voc\u00ea ganharia com mais uma unidade. O relat\u00f3rio que as pagas cobram.',
         ctaTitle:'Coloque um n\u00famero diante da sua pr\u00f3xima decis\u00e3o.',
         ctaP:'Gr\u00e1tis. Nada enviado a nenhum servidor.',
-        ctaBtn:'Abrir o solver'
+        ctaBtn:'Abrir o solver',
+        proofTotal:'Lucro total', proofHours:'Horas usadas', proofShadow:'Mais uma hora vale £16', proofCheck:'A planilha recalcula 1.760, que confere.'
       }
     },
 
@@ -153,7 +156,8 @@
         f3P:'F\u00fcr jede bremsende Grenze der Schattenpreis: wie viel mehr eine zus\u00e4tzliche Einheit bringt. Der Bericht, den die kostenpflichtigen Tools verkaufen.',
         ctaTitle:'Stell deiner n\u00e4chsten Entscheidung eine Zahl voran.',
         ctaP:'Kostenlos. Nichts wird an einen Server gesendet.',
-        ctaBtn:'Solver \u00f6ffnen'
+        ctaBtn:'Solver \u00f6ffnen',
+        proofTotal:'Gesamtgewinn', proofHours:'Verwendete Stunden', proofShadow:'Eine Stunde mehr ist £16 wert', proofCheck:'Die Tabelle rechnet 1.760 — stimmt überein.'
       }
     },
 
@@ -190,7 +194,8 @@
         f3P:'Pour chaque limite qui vous bloque, le prix indicatif : ce que rapporterait une unit\u00e9 de plus. Le rapport que les outils payants font payer.',
         ctaTitle:'Mettez un chiffre devant votre prochaine d\u00e9cision.',
         ctaP:'Gratuit. Rien n\u2019est envoy\u00e9 \u00e0 un serveur.',
-        ctaBtn:'Ouvrir le solveur'
+        ctaBtn:'Ouvrir le solveur',
+        proofTotal:'Bénéfice total', proofHours:'Heures utilisées', proofShadow:'Une heure de plus vaut 16 £', proofCheck:'La feuille recalcule 1 760, ce qui concorde.'
       }
     }
   };

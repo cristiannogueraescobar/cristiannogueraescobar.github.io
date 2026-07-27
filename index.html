@@ -1,128 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plumline — Optimization Solver for Spreadsheets (Free, Online &amp; in Google Sheets)</title>
-<meta name="description" content="Plumline finds the best way to split limited resources and proves the answer against your own numbers. Use the free online linear &amp; integer programming solver, or the Google Sheets add-on. Nothing sent to any server.">
-<meta name="keywords" content="linear programming solver, optimization, Google Sheets solver, integer programming, LP solver online, shadow price, operations research">
-<meta property="og:title" content="Plumline — Optimization Solver for Spreadsheets">
-<meta property="og:description" content="Find the best allocation and prove it against your own numbers. Free online solver and Google Sheets add-on.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://plumline.online/">
-<link rel="canonical" href="https://plumline.online/">
-<link rel="stylesheet" href="assets/plumline.css?v=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plumline — Optimization Solver for Spreadsheets (Free, Online &amp; in Google Sheets)</title>
+  <meta name="description"
+    content="Plumline finds the best way to split limited resources and proves the answer against your own numbers. Use the free online linear &amp; integer programming solver, or the Google Sheets add-on. Nothing sent to any server.">
+  <meta name="keywords"
+    content="linear programming solver, optimization, Google Sheets solver, integer programming, LP solver online, shadow price, operations research">
+  <meta property="og:title" content="Plumline — Optimization Solver for Spreadsheets">
+  <meta property="og:description"
+    content="Find the best allocation and prove it against your own numbers. Free online solver and Google Sheets add-on.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://plumline.online/">
+  <link rel="canonical" href="https://plumline.online/">
+  <link rel="stylesheet" href="assets/plumline.css?v=1">
 </head>
+
 <body data-page="home">
 
-<div class="field-deep">
-  <div class="plumb">
-    <header class="mast">
-      <a href="index.html" class="lockup" aria-label="Plumline home">
-        <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
-          <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A"/>
-          <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2"/>
-        </svg>
-        <span class="wm">Plumline</span>
-      </a>
-      <nav class="nav">
-        <a href="solver.html" data-i18n="navSolver">Solver</a>
-        <a href="index.html" aria-current="page" data-i18n="navAddon">Add-on</a>
-        <select class="lang" id="lang" aria-label="Language">
-          <option value="en">EN</option><option value="es">ES</option>
-          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
-        </select>
-      </nav>
-    </header>
+  <div class="field-deep">
+    <div class="plumb">
+      <header class="mast">
+        <a href="index.html" class="lockup" aria-label="Plumline home">
+          <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+            <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5" />
+            <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A" />
+            <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2" />
+          </svg>
+          <span class="wm">Plumline</span>
+        </a>
+        <nav class="nav">
+          <a href="solver.html" data-i18n="navSolver">Solver</a>
+          <a href="index.html" aria-current="page" data-i18n="navAddon">Add-on</a>
+          <select class="lang" id="lang" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="es">ES</option>
+            <option value="pt">PT</option>
+            <option value="de">DE</option>
+            <option value="fr">FR</option>
+          </select>
+        </nav>
+      </header>
 
-    <section class="section" style="padding:44px 0 72px">
-      <p class="eyebrow" data-i18n="heroEyebrow">Optimisation, made legible</p>
-      <h1 style="max-width:16ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
-      <p class="lead" style="margin-top:22px;color:rgba(245,242,235,.82)" data-i18n="heroLead">Plumline finds the best way to split limited resources — how much to make, buy, ship or staff — and proves the result against your own numbers. Use it free in your browser, or inside Google Sheets.</p>
-      <div class="row">
-        <a class="btn" href="solver.html" data-i18n="heroSolver">Open the online solver</a>
-        <a class="btn ghost" href="#addon" data-i18n="heroAddon">Get the Sheets add-on</a>
-      </div>
-    </section>
+      <section class="hero-split">
+        <div>
+          <p class="eyebrow" data-i18n="heroEyebrow">Optimisation, made legible</p>
+          <h1 style="max-width:14ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
+          <p class="lead" style="margin-top:22px" data-i18n="heroLead">Plumline finds the best way to split limited
+            resources — how much to make, buy, ship or staff — and proves the result against your own numbers. Use it
+            free in your browser, or inside Google Sheets.</p>
+          <div class="row">
+            <a class="btn" href="solver.html" data-i18n="heroSolver">Open the online solver</a>
+            <a class="btn ghost" href="#addon" data-i18n="heroAddon">Get the Sheets add-on</a>
+          </div>
+        </div>
+        <div class="proof" aria-hidden="true">
+          <div class="ptot"><span data-i18n="proofTotal">Total profit</span><b>1,760</b></div>
+          <div class="pr"><span class="k">Product A · £30</span><span class="v">0</span></div>
+          <div class="pr"><span class="k">Product B · £20</span><span class="v">40</span></div>
+          <div class="pr"><span class="k">Product C · £48</span><span class="v">20</span></div>
+          <div style="margin-top:9px">
+            <div class="pr"><span class="k" data-i18n="proofHours">Hours used</span><span class="v">100 / 100</span>
+            </div>
+            <div class="pbar"><i style="width:100%"></i></div>
+            <div class="pshadow" data-i18n="proofShadow">One more hour is worth £16</div>
+          </div>
+          <div class="pcheck"><b aria-hidden="true">✓</b><span data-i18n="proofCheck">The sheet recalculates 1,760,
+              which matches.</span></div>
+        </div>
+      </section>
+    </div>
   </div>
-</div>
 
-<div class="plumb">
-
-  <section class="bob section">
-    <p class="eyebrow" data-i18n="pillarsEyebrow">Two ways to use it</p>
-    <h2 data-i18n="pillarsTitle">The same engine, wherever you work.</h2>
-    <div class="versus" style="margin-top:26px">
-      <div class="card brass">
-        <h3 data-i18n="pillarSolverH">Online solver</h3>
-        <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Type your problem into a grid like a spreadsheet and solve it in the browser. Nothing to install, nothing uploaded. Free, in five languages.</p>
-        <a href="solver.html" style="font-weight:600;color:var(--true);text-decoration:none;font-size:14px" data-i18n="pillarSolverCta">Solve something now →</a>
-      </div>
-      <div class="card true" id="addon">
-        <h3 data-i18n="pillarAddonH">Google Sheets add-on</h3>
-        <p class="muted" style="font-size:15px" data-i18n="pillarAddonP">Reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free.</p>
-        <a href="#how" style="font-weight:600;color:var(--true);text-decoration:none;font-size:14px" data-i18n="pillarAddonCta">See the add-on →</a>
-      </div>
-    </div>
-  </section>
-
-  <section class="bob section" id="how">
-    <p class="eyebrow" data-i18n="whyEyebrow">Why it's different</p>
-    <h2 style="max-width:20ch" data-i18n="whyTitle">It hands back an answer you can check.</h2>
-    <p data-i18n="whyP">A solver is one of the few tools whose output you can't eyeball — you asked because you didn't know the answer. So Plumline doesn't ask for trust. It shows what it understood, proves the result against your own formulas, and tells you which limit is holding you back.</p>
-
-    <div class="versus" style="grid-template-columns:1fr 1fr 1fr;margin-top:28px">
-      <div>
-        <h3 data-i18n="f1H">It reads your model</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f1P">No blank form to fill. Plumline finds the goal, the quantities and the limits in the sheet you already have, named in your own words.</p>
-      </div>
-      <div>
-        <h3 data-i18n="f2H">It proves the answer</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f2P">It writes the solution back and lets the sheet recalculate, so you see both numbers agree before you rely on it.</p>
-      </div>
-      <div>
-        <h3 data-i18n="f3H">It shows what one more is worth</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, the shadow price: how much more you'd gain from one more unit. The report the paid tools charge for.</p>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<div class="field-deep" style="margin-top:40px">
   <div class="plumb">
-    <section class="section" style="padding:56px 0 60px">
+
+    <section class="bob section">
       <p class="eyebrow" data-i18n="pillarsEyebrow">Two ways to use it</p>
-      <h2 style="max-width:18ch" data-i18n="ctaTitle">Put a number in front of your next decision.</h2>
-      <p style="color:rgba(245,242,235,.8)" data-i18n="ctaP">Free. Nothing sent to any server.</p>
-      <div class="row"><a class="btn" href="solver.html" data-i18n="ctaBtn">Open the solver</a></div>
+      <h2 data-i18n="pillarsTitle">The same engine, wherever you work.</h2>
+      <div class="versus" style="margin-top:26px">
+        <div class="card brass">
+          <h3 data-i18n="pillarSolverH">Online solver</h3>
+          <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Type your problem into a grid like a
+            spreadsheet and solve it in the browser. Nothing to install, nothing uploaded. Free, in five languages.</p>
+          <a href="solver.html" style="font-weight:600;color:var(--true);text-decoration:none;font-size:14px"
+            data-i18n="pillarSolverCta">Solve something now →</a>
+        </div>
+        <div class="card true" id="addon">
+          <h3 data-i18n="pillarAddonH">Google Sheets add-on</h3>
+          <p class="muted" style="font-size:15px" data-i18n="pillarAddonP">Reads the model straight from the sheet you
+            already built, solves it, and writes the answer back so Sheets can check it. Free.</p>
+          <a href="#how" style="font-weight:600;color:var(--true);text-decoration:none;font-size:14px"
+            data-i18n="pillarAddonCta">See the add-on →</a>
+        </div>
+      </div>
     </section>
-  </div>
-</div>
 
-<footer class="foot">
-  <div class="plumb"><div class="in">
-    <div class="cols">
-      <div class="col">
-        <h4 data-i18n="footTool">Tool</h4>
-        <a href="solver.html" data-i18n="footSolver">Online solver</a>
+    <section class="bob section" id="how">
+      <p class="eyebrow" data-i18n="whyEyebrow">Why it's different</p>
+      <h2 style="max-width:20ch" data-i18n="whyTitle">It hands back an answer you can check.</h2>
+      <p data-i18n="whyP">A solver is one of the few tools whose output you can't eyeball — you asked because you didn't
+        know the answer. So Plumline doesn't ask for trust. It shows what it understood, proves the result against your
+        own formulas, and tells you which limit is holding you back.</p>
+
+      <div class="versus" style="grid-template-columns:1fr 1fr 1fr;margin-top:28px">
+        <div>
+          <h3 data-i18n="f1H">It reads your model</h3>
+          <p class="muted" style="font-size:14.5px" data-i18n="f1P">No blank form to fill. Plumline finds the goal, the
+            quantities and the limits in the sheet you already have, named in your own words.</p>
+        </div>
+        <div>
+          <h3 data-i18n="f2H">It proves the answer</h3>
+          <p class="muted" style="font-size:14.5px" data-i18n="f2P">It writes the solution back and lets the sheet
+            recalculate, so you see both numbers agree before you rely on it.</p>
+        </div>
+        <div>
+          <h3 data-i18n="f3H">It shows what one more is worth</h3>
+          <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, the shadow
+            price: how much more you'd gain from one more unit. The report the paid tools charge for.</p>
+        </div>
       </div>
-      <div class="col">
-        <h4 data-i18n="footProduct">Product</h4>
-        <a href="index.html" data-i18n="footAddon">Sheets add-on</a>
-      </div>
-      <div class="col">
-        <h4 data-i18n="footLegal">Legal</h4>
-        <a href="privacy.html" data-i18n="footPrivacy">Privacy</a>
-        <a href="terms.html" data-i18n="footTerms">Terms</a>
+    </section>
+
+  </div>
+
+  <div class="field-deep" style="margin-top:40px">
+    <div class="plumb">
+      <section class="section" style="padding:56px 0 60px">
+        <p class="eyebrow" data-i18n="pillarsEyebrow">Two ways to use it</p>
+        <h2 style="max-width:18ch" data-i18n="ctaTitle">Put a number in front of your next decision.</h2>
+        <p style="color:rgba(245,242,235,.8)" data-i18n="ctaP">Free. Nothing sent to any server.</p>
+        <div class="row"><a class="btn" href="solver.html" data-i18n="ctaBtn">Open the solver</a></div>
+      </section>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="plumb">
+      <div class="in">
+        <div class="cols">
+          <div class="col">
+            <h4 data-i18n="footTool">Tool</h4>
+            <a href="solver.html" data-i18n="footSolver">Online solver</a>
+          </div>
+          <div class="col">
+            <h4 data-i18n="footProduct">Product</h4>
+            <a href="index.html" data-i18n="footAddon">Sheets add-on</a>
+          </div>
+          <div class="col">
+            <h4 data-i18n="footLegal">Legal</h4>
+            <a href="privacy.html" data-i18n="footPrivacy">Privacy</a>
+            <a href="terms.html" data-i18n="footTerms">Terms</a>
+          </div>
+        </div>
+        <p class="fine" data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by
+          Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</p>
       </div>
     </div>
-    <p class="fine" data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</p>
-  </div></div>
-</footer>
+  </footer>
 
-<script src="assets/i18n.js"></script>
-<script>Plumline.i18n.init('home');</script>
+  <script src="assets/i18n.js"></script>
+  <script>Plumline.i18n.init('home');</script>
 </body>
+
 </html>
