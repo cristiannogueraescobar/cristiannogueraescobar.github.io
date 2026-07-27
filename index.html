@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Plumline: Optimization Solver for Spreadsheets (Free, Online &amp; in Google Sheets)</title>
-<meta name="description" content="Plumline finds the best way to split limited resources and proves the answer against your own numbers. Use the free online linear &amp; integer programming solver, or the Google Sheets add-on. Nothing sent to any server.">
+<meta name="description" content="Plumline finds the best way to split limited resources and verifies the result against your own numbers. A free online linear &amp; integer programming solver that runs in your browser. A Google Sheets add-on is coming soon.">
 <meta name="keywords" content="linear programming solver, optimization, Google Sheets solver, integer programming, LP solver online, shadow price, operations research">
 <meta property="og:title" content="Plumline: Optimization Solver for Spreadsheets">
-<meta property="og:description" content="Find the best allocation and prove it against your own numbers. Free online solver and Google Sheets add-on.">
+<meta property="og:description" content="Find the best allocation and verify it against your own numbers. Free online linear and integer solver that runs in your browser.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/">
 <link rel="canonical" href="https://plumline.online/">
@@ -42,7 +42,7 @@
       <div>
         <p class="eyebrow" data-i18n="heroEyebrow">Optimisation, made legible</p>
         <h1 style="max-width:14ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
-        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves linear and integer models, then proves the result against your own numbers. Free, in your browser.</p>
+        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves linear and integer models, then verifies the result against your own numbers. Free, in your browser.</p>
         <div class="row">
           <a class="btn big" href="solver.html" data-i18n="heroSolver">Open the online solver</a>
           <a class="btn ghost addon-waitlist" href="mailto:cristiannogueraescobar@gmail.com" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
@@ -80,7 +80,7 @@
       <div class="card brass">
         <h3 data-i18n="pillarSolverH">Online solver</h3>
         <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Type your problem into a grid like a spreadsheet and solve it in the browser. Nothing to install, nothing uploaded. Free, in five languages.</p>
-        <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now &rarr;</a>
+        <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now →</a>
       </div>
       <div class="card true" id="addon">
         <span class="chip" data-i18n="addonSoon">Coming soon to Google Sheets</span>
@@ -93,9 +93,9 @@
 
   <section class="section" id="how">
     <div class="sec-head">
-      <p class="eyebrow" data-i18n="whyEyebrow">Why it's different</p>
+      <p class="eyebrow" data-i18n="whyEyebrow">Why it’s different</p>
       <h2 data-i18n="whyTitle">It hands back an answer you can check.</h2>
-      <p class="muted" data-i18n="whyP" style="margin:0 auto">A solver is one of the few tools whose output you can't eyeball. You asked because you didn't know the answer. So Plumline doesn't ask for trust. It shows what it understood, proves the result against your own formulas, and tells you which limit is holding you back.</p>
+      <p class="muted" data-i18n="whyP" style="margin:0 auto">A solver is one of the few tools whose output you can’t eyeball. You asked because you didn’t know the answer. So Plumline doesn’t ask for trust. It shows what it understood, verifies the result against your own formulas, and tells you which limit is holding you back.</p>
     </div>
     <div class="grid-3">
       <div class="card">
@@ -105,13 +105,13 @@
       </div>
       <div class="card">
         <div class="cardnum">02</div>
-        <h3 data-i18n="f2H">It proves the answer</h3>
+        <h3 data-i18n="f2H">It verifies the answer</h3>
         <p class="muted" style="font-size:14.5px" data-i18n="f2P">It writes the solution back and lets the sheet recalculate, so you see both numbers agree before you rely on it.</p>
       </div>
       <div class="card">
         <div class="cardnum">03</div>
         <h3 data-i18n="f3H">It shows what one more is worth</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, the shadow price: how much more you'd gain from one more unit. The report the paid tools charge for.</p>
+        <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, its estimated one-unit impact (the shadow price): how much more you'd gain from one more unit, while the model stays the same. The report the paid tools charge for.</p>
       </div>
     </div>
   </section>
@@ -119,7 +119,7 @@
   <section class="section" id="example">
     <div class="sec-head">
       <p class="eyebrow" data-i18n="exampleEyebrow">See it work</p>
-      <h2 data-i18n="exampleTitle">From a spreadsheet to a proven answer.</h2>
+      <h2 data-i18n="exampleTitle">From a spreadsheet to a verified answer.</h2>
       <p class="muted" data-i18n="exampleLead" style="margin:0 auto">You write the problem the way you already write a spreadsheet: labels in the first column, numbers in the cells, ordinary formulas. No special syntax, no new language. Here is a small one, a workshop deciding how many chairs and tables to make.</p>
     </div>
     <div class="example">
@@ -147,7 +147,7 @@
           <div class="rlim">
             <div class="rr"><span class="k" data-i18n="exLimitWood">Wood hours</span><span>80 / 80</span></div>
             <div class="rr"><span class="k" data-i18n="exLimitAssembly">Assembly hours</span><span>60 / 60</span></div>
-            <div class="rshadow" data-i18n="exShadow">One more wood hour would add 4 to the profit.</div>
+            <div class="rshadow" data-i18n="exShadow">One more wood hour would add about 4 to the profit, while the model structure stays the same.</div>
           </div>
           <div class="rcheck"><b aria-hidden="true">&#10003;</b><span data-i18n="exCheck">Your own formula recalculates 900. The answer matches.</span></div>
         </div>
@@ -169,7 +169,7 @@
       <div class="benefit">
         <div class="bmark">&#8635;</div>
         <h3 data-i18n="benefit1H">Stop tweaking by hand</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="benefit1P">No more trying combinations in a spreadsheet to see which earns most. Plumline checks every allowed option and returns the best one.</p>
+        <p class="muted" style="font-size:14.5px" data-i18n="benefit1P">No more trying combinations in a spreadsheet to see which earns most. Plumline searches the feasible solutions and returns the best result it can prove within its solving limits.</p>
       </div>
       <div class="benefit">
         <div class="bmark">&#8721;</div>
@@ -179,7 +179,7 @@
       <div class="benefit">
         <div class="bmark">&#10003;</div>
         <h3 data-i18n="benefit3H">Trust the answer</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="benefit3P">It proves the result against your own formulas, so you are not asked to take a black box on faith.</p>
+        <p class="muted" style="font-size:14.5px" data-i18n="benefit3P">It verifies the result against your own formulas, so you are not asked to take a black box on faith.</p>
       </div>
     </div>
   </section>
@@ -190,7 +190,7 @@
       <h2 data-i18n="faqTitle">Before you try it.</h2>
     </div>
     <div class="faq">
-      <details open><summary data-i18n="faq1Q">Do I need to install anything?</summary><p data-i18n="faq1A">For the online solver, no. It runs in your browser at plumline.online. The Google Sheets version is a free add-on you install once from the Workspace Marketplace.</p></details>
+      <details open><summary data-i18n="faq1Q">Do I need to install anything?</summary><p data-i18n="faq1A">For the online solver, no. It runs in your browser at plumline.online. A Google Sheets add-on is on the way and will be a free, one-time install from the Workspace Marketplace once it's approved.</p></details>
       <details><summary data-i18n="faq2Q">How do I write the model?</summary><p data-i18n="faq2A">With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax.</p></details>
       <details><summary data-i18n="faq3Q">What kinds of problems does it solve?</summary><p data-i18n="faq3A">Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one.</p></details>
       <details><summary data-i18n="faq4Q">Are my numbers safe?</summary><p data-i18n="faq4A">Yes. The online solver runs entirely in your browser and uploads nothing. The add-on reads only the spreadsheet it is installed in, sends nothing to any server, and asks for no account.</p></details>
@@ -204,7 +204,7 @@
   <div class="plumb">
     <section class="section" style="text-align:center">
       <h2 style="max-width:20ch;margin:0 auto 10px" data-i18n="ctaTitle">Put a number in front of your next decision.</h2>
-      <p style="color:rgba(245,242,235,.8);margin:0 auto 26px" data-i18n="ctaP">Free. Nothing sent to any server.</p>
+      <p style="color:rgba(245,242,235,.8);margin:0 auto 26px" data-i18n="ctaP">Free. The online solver runs in your browser and uploads nothing.</p>
       <div class="row" style="justify-content:center;margin-top:0">
         <a class="btn" href="solver.html" data-i18n="ctaBtn">Open the solver</a>
         <a class="btn ghost addon-waitlist" href="mailto:cristiannogueraescobar@gmail.com" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
@@ -221,7 +221,7 @@
       <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
       <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
     </div>
-    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</span></p>
+    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
   </div></div>
 </footer>
 

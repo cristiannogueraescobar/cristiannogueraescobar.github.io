@@ -68,7 +68,7 @@
       <div class="card"><div class="cardnum">1</div><p style="margin:0;font-size:15px" data-i18n="gStep1">Write your decisions as a column, one row each, starting at zero.</p></div>
       <div class="card"><div class="cardnum">2</div><p style="margin:0;font-size:15px" data-i18n="gStep2">Write the goal as a cell that totals the value of those decisions.</p></div>
       <div class="card"><div class="cardnum">3</div><p style="margin:0;font-size:15px" data-i18n="gStep3">Write each limit as a row: what it uses, an operator, and the cap.</p></div>
-      <div class="card"><div class="cardnum">4</div><p style="margin:0;font-size:15px" data-i18n="gStep4">Hand it to a solver. It searches every allowed combination and returns the one that makes the goal best, along with which limits are binding.</p></div>
+      <div class="card"><div class="cardnum">4</div><p style="margin:0;font-size:15px" data-i18n="gStep4">Hand it to a solver. It searches the feasible solutions and returns the best result it can prove within its solving limits, along with which limits are binding.</p></div>
     </div>
   </section>
 
@@ -82,8 +82,8 @@
 
   <section class="section" style="padding-top:0">
     <div class="sec-head">
-      <h2 data-i18n="gWhyH">Why prove the answer</h2>
-      <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the shadow price of each binding limit: how much more you would gain from one more unit of it.</p>
+      <h2 data-i18n="gWhyH">Why verify the answer</h2>
+      <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the estimated one-unit impact of each binding limit: how much more you would gain from one more unit of it, while the model stays the same.</p>
     </div>
   </section>
 
@@ -116,7 +116,7 @@
       <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
       <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
     </div>
-    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</span></p>
+    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
   </div></div>
 </footer>
 
