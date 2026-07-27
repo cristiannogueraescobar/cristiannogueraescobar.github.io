@@ -166,6 +166,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 .solving .spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--true);
   border-radius:50%;animation:spin .7s linear infinite;flex:none}
 .cancel-solve{margin-left:auto;padding:8px 14px;font-size:13px;min-height:44px}
+.compat-solve{margin-left:12px;padding:8px 14px;font-size:13px;min-height:44px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .shadow-note{font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5;font-style:italic}
 </style>
@@ -276,7 +277,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=21"></script>
+<script src="assets/i18n.js?v=22"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2019,6 +2020,7 @@ function matchesAnyHint_(label, hints) {
 
   function doUndo(){
     if(!lastUndo) return;
+    modelChanged();   // undo changes the model too: invalidate any solve/result
     restore(lastUndo);
     lastUndo=null;
     var u=document.getElementById('undoGrid'); if(u) u.style.display='none';
@@ -2177,7 +2179,7 @@ function matchesAnyHint_(label, hints) {
     var wholeNumbers=document.getElementById('whole').checked;
 
     var w=buildWorker();
-    if(!w){ solveMainThread(); return; }   // no worker support: fall back
+    if(!w){ offerCompatMode(); return; }   // no worker support: ask before a sync solve
 
     // Show a solving state with a Cancel button, so a long solve never traps
     // the user and never freezes the page.
@@ -2210,12 +2212,7 @@ function matchesAnyHint_(label, hints) {
       if(btn){ btn.disabled=false; }
       // Don't silently run a solve that could freeze the page. Let the user
       // choose compatibility mode (synchronous main-thread solve).
-      var res=document.getElementById('result');
-      res.innerHTML='<div class="trouble">'+t('workerFailedBody')+
-        ' <button class="ghost" id="compatSolve" style="margin-left:12px;padding:8px 14px;font-size:13px;min-height:44px">'+t('compatRetry')+'</button></div>';
-      res.classList.add('show');
-      var cb=document.getElementById('compatSolve');
-      if(cb) cb.addEventListener('click',function(){ solveMainThread(); });
+      offerCompatMode();
     };
 
     var payload=sheetToArrays(sheet);
@@ -2242,11 +2239,31 @@ function matchesAnyHint_(label, hints) {
     res.classList.add('show');
   }
 
-  // Any edit to the model invalidates an in-flight solve: the result would
-  // belong to the old model but appear to describe the new one. Cancel it.
-  // (Undo handling stays with each caller — some edits set an undo point.)
+  // Any edit to the model invalidates an in-flight solve AND any finished
+  // result already on screen: both would belong to the old model but appear
+  // to describe the new one. Cancel the run, clear the stale receipt, and drop
+  // lastResult so the export buttons can't emit an outdated answer.
   function modelChanged(){
-    if(workerBusy) cancelSolve(true);
+    if(workerBusy){
+      cancelSolve(true);
+    } else {
+      var res=document.getElementById('result');
+      if(res && res.classList.contains('show')){
+        res.innerHTML='<div class="trouble">'+t('modelChangedBody')+'</div>';
+      }
+    }
+    lastResult=null;
+  }
+
+  // Ask the user before running a synchronous solve that could briefly freeze
+  // the page — used both when the worker errors and when it isn't supported.
+  function offerCompatMode(){
+    var res=document.getElementById('result');
+    res.innerHTML='<div class="trouble">'+t('workerFailedBody')+
+      ' <button class="ghost compat-solve" id="compatSolve">'+t('compatRetry')+'</button></div>';
+    res.classList.add('show');
+    var cb=document.getElementById('compatSolve');
+    if(cb) cb.addEventListener('click',function(){ solveMainThread(); });
   }
 
   // Fallback: solve synchronously on the main thread (original behaviour).
