@@ -392,6 +392,66 @@
             margin-right: 2px
         }
 
+        .plotwrap {
+            margin-top: 22px;
+            max-width: 460px
+        }
+
+        .plotcap {
+            font-size: 12px;
+            color: var(--soft);
+            margin-bottom: 8px
+        }
+
+        svg.plot {
+            width: 100%;
+            height: auto;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 6px
+        }
+
+        svg.plot .ax {
+            stroke: var(--ink);
+            stroke-width: 1
+        }
+
+        svg.plot .region {
+            fill: rgba(181, 130, 46, .16);
+            stroke: var(--brass);
+            stroke-width: 1.5
+        }
+
+        svg.plot .cline {
+            stroke: var(--line);
+            stroke-width: 1;
+            stroke-dasharray: 3 3
+        }
+
+        svg.plot .cline.bind {
+            stroke: var(--true);
+            stroke-width: 1.5;
+            stroke-dasharray: none
+        }
+
+        svg.plot .opt {
+            fill: var(--true);
+            stroke: #fff;
+            stroke-width: 2
+        }
+
+        svg.plot .optlab {
+            font-family: var(--mono);
+            font-size: 11px;
+            fill: var(--ink)
+        }
+
+        svg.plot .axlab {
+            font-family: var(--mono);
+            font-size: 11px;
+            fill: var(--faint)
+        }
+
         .trouble {
             border: 1px solid #E7CFC9;
             background: #F7EEEB;
@@ -500,6 +560,7 @@
                 <button class="chip" data-ex="production">Production plan</button>
                 <button class="chip" data-ex="blend">Cheapest blend</button>
                 <button class="chip" data-ex="budget">Budget split</button>
+                <button class="chip" data-ex="workshop">Workshop (2-var, shows a chart)</button>
                 <button class="chip" data-ex="blank">Blank grid</button>
             </div>
 
@@ -1464,6 +1525,7 @@
             };
 
 
+
             function solveModel_(sheet, model) {
                 const started = Date.now();
                 const grid = loadGrid_(sheet);
@@ -1525,7 +1587,7 @@
                 result.constraints = constraints.map(function (c, i) {
                     const used = round_(dotProduct_(c.coefficients, solution.values) + c.constant);
                     const slack = round_(c.limit - used);
-                    return {
+                    const reported = {
                         label: c.label,
                         cell: c.cell,
                         relation: c.relation,
@@ -1535,7 +1597,21 @@
                         binding: Math.abs(slack) < 1e-6,
                         satisfied: isSatisfied_(used, c.relation, c.limit),
                     };
+                    // For a two-variable model, expose the line so a client can draw the
+                    // feasible region. Kept off larger models to keep the payload lean.
+                    if (variables.length === 2) {
+                        reported.coefficients = c.coefficients;
+                        reported.constant = c.constant;
+                    }
+                    return reported;
                 });
+
+                if (variables.length === 2) {
+                    result.plot = {
+                        objective: coefficientVector_(objectiveForm, variables),
+                        variableLabels: result.labels,
+                    };
+                }
 
                 // Sensitivity: for each binding limit, what would one more unit of it be
                 // worth? We answer it the honest way — re-solve with that single limit
@@ -1891,56 +1967,6 @@
                 });
             }
 
-            function countTerms_(form) {
-                let count = 0;
-                for (const key in form.terms) if (form.terms[key]) count++;
-                return count;
-            }
-
-            function inertMessage_(subject, variables) {
-                return subject + ' does not change when ' + variables + ' change, ' +
-                    'so there is nothing to optimise. The usual cause is a number stored as ' +
-                    'text in one of the columns it multiplies — check for values that sit on ' +
-                    'the left of their cell.';
-            }
-
-            function gapIsEmpty_(grid, addressAt, from, to) {
-                if (to - from > 3) return false;
-                for (let position = from + 1; position < to; position++) {
-                    const entry = cellAt_(grid, addressAt(position));
-                    if (entry.formula) return false;
-                    if (entry.value !== '' && entry.value !== null && entry.value !== undefined) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            function senseFor_(label) {
-                const text = String(label).toLowerCase();
-                if (matchesAnyHint_(text, MINIMISE_HINTS)) return 'min';
-                return 'max';
-            }
-
-            function pickObjective_(grid, candidates) {
-                const unlimited = candidates.filter(function (cell) {
-                    return readConstraint_(grid, cell).guessed;
-                });
-                const pool = unlimited.length ? unlimited : candidates;
-
-                let best = pool[0];
-                let bestScore = -1;
-                pool.forEach(function (cell) {
-                    const label = labelFor_(grid, cell).toLowerCase();
-                    let score = 0;
-                    if (matchesAnyHint_(label, MAXIMISE_HINTS)) score += 10;
-                    if (matchesAnyHint_(label, MINIMISE_HINTS)) score += 10;
-                    if (label.indexOf('total') !== -1) score += 3;
-                    if (score > bestScore) {bestScore = score; best = cell;}
-                });
-                return best;
-            }
-
             function readConstraint_(grid, a1) {
                 const address = parseAddress_(a1);
                 const label = labelFor_(grid, a1);
@@ -1964,6 +1990,56 @@
                     limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
                     guessed: relation === null || limit === null,
                 };
+            }
+
+            function inertMessage_(subject, variables) {
+                return subject + ' does not change when ' + variables + ' change, ' +
+                    'so there is nothing to optimise. The usual cause is a number stored as ' +
+                    'text in one of the columns it multiplies — check for values that sit on ' +
+                    'the left of their cell.';
+            }
+
+            function senseFor_(label) {
+                const text = String(label).toLowerCase();
+                if (matchesAnyHint_(text, MINIMISE_HINTS)) return 'min';
+                return 'max';
+            }
+
+            function gapIsEmpty_(grid, addressAt, from, to) {
+                if (to - from > 3) return false;
+                for (let position = from + 1; position < to; position++) {
+                    const entry = cellAt_(grid, addressAt(position));
+                    if (entry.formula) return false;
+                    if (entry.value !== '' && entry.value !== null && entry.value !== undefined) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function pickObjective_(grid, candidates) {
+                const unlimited = candidates.filter(function (cell) {
+                    return readConstraint_(grid, cell).guessed;
+                });
+                const pool = unlimited.length ? unlimited : candidates;
+
+                let best = pool[0];
+                let bestScore = -1;
+                pool.forEach(function (cell) {
+                    const label = labelFor_(grid, cell).toLowerCase();
+                    let score = 0;
+                    if (matchesAnyHint_(label, MAXIMISE_HINTS)) score += 10;
+                    if (matchesAnyHint_(label, MINIMISE_HINTS)) score += 10;
+                    if (label.indexOf('total') !== -1) score += 3;
+                    if (score > bestScore) {bestScore = score; best = cell;}
+                });
+                return best;
+            }
+
+            function countTerms_(form) {
+                let count = 0;
+                for (const key in form.terms) if (form.terms[key]) count++;
+                return count;
             }
 
             function matchesAnyHint_(label, hints) {
@@ -2000,6 +2076,15 @@
                         ['Total kg', '', '', '=SUM(B2:B4)', '<=', '100'],
                         ['Protein', '', '', '=SUMPRODUCT(B2:B4,E2:E4)', '>=', '1800'],
                         ['Fibre', '', '', '=SUMPRODUCT(B2:B4,F2:F4)', '>=', '350']
+                    ],
+                    workshop: [
+                        ['Item', 'Make', 'Profit', 'Total', 'Wood', 'Labour'],
+                        ['Chairs', '0', '30', '=B2*C2', '2', '3'],
+                        ['Tables', '0', '40', '=B3*C3', '4', '2'],
+                        ['', '', '', '', '', ''],
+                        ['Total profit', '', '', '=SUM(D2:D3)', '', ''],
+                        ['Wood used', '', '', '=SUMPRODUCT(B2:B3,E2:E3)', '<=', '80'],
+                        ['Labour used', '', '', '=SUMPRODUCT(B2:B3,F2:F3)', '<=', '60']
                     ],
                     budget: [
                         ['Channel', 'Spend', 'Return/£', 'Return', '', ''],
@@ -2128,6 +2213,105 @@
                     document.getElementById('exp-csv').addEventListener('click', exportCSV);
                     document.getElementById('exp-xls').addEventListener('click', exportExcel);
                     document.getElementById('exp-txt').addEventListener('click', copySummary);
+
+                    // If this is a two-variable model, draw the feasible region. It's the one
+                    // picture that makes an optimisation click: here's everything you're
+                    // allowed to do, and here's the best corner of it.
+                    if (out.plot && out.values && out.values.length === 2) {
+                        drawFeasibleRegion(out);
+                    }
+                }
+
+                function drawFeasibleRegion(out) {
+                    var cons = (out.constraints || []).filter(function (c) {return c.coefficients && c.coefficients.length === 2;})
+                        .map(function (c) {return {x: c.coefficients[0], y: c.coefficients[1], op: c.relation, b: c.limit - (c.constant || 0), label: c.label, binding: c.binding};});
+                    if (!cons.length) return;
+                    var obj = {x: out.plot.objective[0], y: out.plot.objective[1]};
+                    var maximize = true; // objective sense already baked into detection; corners test both
+                    var geo = solve2D(obj, cons);
+                    if (!geo.vertices.length) return;
+
+                    var xs = geo.vertices.map(function (p) {return p.x;}), ys = geo.vertices.map(function (p) {return p.y;});
+                    var maxX = Math.max.apply(null, xs.concat([out.values[0]])) * 1.15 + 1;
+                    var maxY = Math.max.apply(null, ys.concat([out.values[1]])) * 1.15 + 1;
+                    var W = 440, H = 340, pad = 34;
+                    function sx(x) {return pad + x / maxX * (W - 2 * pad);}
+                    function sy(y) {return H - pad - y / maxY * (H - 2 * pad);}
+
+                    var poly = geo.vertices.map(function (p) {return sx(p.x) + ',' + sy(p.y);}).join(' ');
+                    var lab = out.plot.variableLabels || ['x', 'y'];
+
+                    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="plot" role="img" aria-label="Feasible region">';
+                    // axes
+                    svg += '<line x1="' + pad + '" y1="' + (H - pad) + '" x2="' + (W - pad) + '" y2="' + (H - pad) + '" class="ax"/>';
+                    svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (H - pad) + '" class="ax"/>';
+                    // feasible polygon
+                    svg += '<polygon points="' + poly + '" class="region"/>';
+                    // constraint lines
+                    cons.forEach(function (c) {
+                        var p = lineAcrossBox(c, maxX, maxY);
+                        if (p) svg += '<line x1="' + sx(p.x1) + '" y1="' + sy(p.y1) + '" x2="' + sx(p.x2) + '" y2="' + sy(p.y2) + '" class="cline' + (c.binding ? ' bind' : '') + '"/>';
+                    });
+                    // optimum star
+                    var ox = sx(out.values[0]), oy = sy(out.values[1]);
+                    svg += '<circle cx="' + ox + '" cy="' + oy + '" r="6" class="opt"/>';
+                    svg += '<text x="' + (ox + 10) + '" y="' + (oy - 8) + '" class="optlab">(' + fmt(out.values[0]) + ', ' + fmt(out.values[1]) + ')</text>';
+                    // axis labels
+                    svg += '<text x="' + (W - pad) + '" y="' + (H - pad + 18) + '" class="axlab" text-anchor="end">' + esc(lab[0] || 'x') + '</text>';
+                    svg += '<text x="' + (pad - 6) + '" y="' + (pad - 8) + '" class="axlab">' + esc(lab[1] || 'y') + '</text>';
+                    svg += '</svg>';
+
+                    var box = document.createElement('div');
+                    box.className = 'plotwrap';
+                    box.innerHTML = '<p class="plotcap">The feasible region — every allocation your limits allow. The star is the best one.</p>' + svg;
+                    document.getElementById('result').appendChild(box);
+                }
+
+                // Clip a constraint line a*x + b*y = c to the visible box for drawing.
+                function lineAcrossBox(c, maxX, maxY) {
+                    var pts = [];
+                    if (Math.abs(c.y) > 1e-9) { // y at x=0 and x=maxX
+                        pts.push({x: 0, y: (c.b - c.x * 0) / c.y});
+                        pts.push({x: maxX, y: (c.b - c.x * maxX) / c.y});
+                    }
+                    if (Math.abs(c.x) > 1e-9) { // x at y=0 and y=maxY
+                        pts.push({x: (c.b - c.y * 0) / c.x, y: 0});
+                        pts.push({x: (c.b - c.y * maxY) / c.x, y: maxY});
+                    }
+                    var inb = pts.filter(function (p) {return p.x >= -1e-6 && p.x <= maxX + 1e-6 && p.y >= -1e-6 && p.y <= maxY + 1e-6;});
+                    if (inb.length < 2) return null;
+                    return {x1: inb[0].x, y1: inb[0].y, x2: inb[1].x, y2: inb[1].y};
+                }
+
+                // 2-variable vertex geometry (verified separately).
+                function solve2D(obj, cons) {
+                    var lines = cons.slice();
+                    lines.push({x: 1, y: 0, op: '>=', b: 0});
+                    lines.push({x: 0, y: 1, op: '>=', b: 0});
+                    function intersect(L1, L2) {
+                        var det = L1.x * L2.y - L2.x * L1.y; if (Math.abs(det) < 1e-12) return null;
+                        return {x: (L1.b * L2.y - L2.b * L1.y) / det, y: (L1.x * L2.b - L2.x * L1.b) / det};
+                    }
+                    function feasible(p) {
+                        return cons.every(function (c) {
+                            var v = c.x * p.x + c.y * p.y;
+                            if (c.op === '<=') return v <= c.b + 1e-6;
+                            if (c.op === '>=') return v >= c.b - 1e-6;
+                            return Math.abs(v - c.b) < 1e-6;
+                        }) && p.x >= -1e-6 && p.y >= -1e-6;
+                    }
+                    var verts = [];
+                    for (var i = 0; i < lines.length; i++)for (var j = i + 1; j < lines.length; j++) {
+                        var p = intersect(lines[i], lines[j]);
+                        if (p && feasible(p) && !verts.some(function (q) {return Math.abs(q.x - p.x) < 1e-6 && Math.abs(q.y - p.y) < 1e-6;}))
+                            verts.push(p);
+                    }
+                    if (verts.length) {
+                        var cx = verts.reduce(function (s, p) {return s + p.x;}, 0) / verts.length;
+                        var cy = verts.reduce(function (s, p) {return s + p.y;}, 0) / verts.length;
+                        verts.sort(function (a, b) {return Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx);});
+                    }
+                    return {vertices: verts};
                 }
 
                 // --- Export. All client-side: the solution never leaves the browser. ---
