@@ -277,7 +277,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=22"></script>
+<script src="assets/i18n.js?v=23"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2188,13 +2188,18 @@ function matchesAnyHint_(label, hints) {
     res.classList.add('show');
     if(btn){ btn.disabled=true; }
     workerBusy=true;
+    lastResult=null;   // drop any prior answer up front, so an errored run can't leave a stale one exportable
     var myToken=++workerToken;
 
     var cancelBtn=document.getElementById('cancelSolve');
     if(cancelBtn) cancelBtn.addEventListener('click',function(){ cancelSolve(); });
 
     w.onmessage=function(e){
-      if(e.data.token!==myToken) return;   // stale message from a cancelled run
+      // Discard any message that isn't from the run that's still current. Check
+      // against the GLOBAL workerToken (not the captured myToken): cancelling or
+      // editing bumps workerToken, and a message already queued before
+      // terminate() must still be dropped. This matches the onerror guard.
+      if(e.data.token!==workerToken) return;
       workerBusy=false;
       if(btn){ btn.disabled=false; }
       if(e.data.ok){ presentResult(e.data.out, {wholeNumbers:e.data.wholeNumbers}); }
