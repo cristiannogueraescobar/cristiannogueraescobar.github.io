@@ -30,6 +30,7 @@
         <a href="solver.html" data-i18n="navSolver">Solver</a>
         <a href="index.html" aria-current="page" data-i18n="navAddon">Add-on</a>
         <a href="guide.html" data-i18n="navGuide">Guide</a>
+        <a href="#faq" class="hide-sm" data-i18n="faqEyebrow">Questions</a>
         <select class="lang" id="lang" aria-label="Language">
           <option value="en">EN</option><option value="es">ES</option>
           <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
@@ -74,12 +75,12 @@
       <div class="card brass">
         <h3 data-i18n="pillarSolverH">Online solver</h3>
         <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Type your problem into a grid like a spreadsheet and solve it in the browser. Nothing to install, nothing uploaded. Free, in five languages.</p>
-        <a href="solver.html" class="cardlink" data-i18n="pillarSolverCta">Solve something now &rarr;</a>
+        <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now &rarr;</a>
       </div>
       <div class="card true" id="addon">
         <h3 data-i18n="pillarAddonH">Google Sheets add-on</h3>
         <p class="muted" style="font-size:15px" data-i18n="pillarAddonP">Reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free.</p>
-        <a href="#how" class="cardlink" data-i18n="pillarAddonCta">See the add-on &rarr;</a>
+        <a href="#example" class="btn ghost" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarAddonCta">See the add-on &rarr;</a>
       </div>
     </div>
   </section>
@@ -106,6 +107,86 @@
         <h3 data-i18n="f3H">It shows what one more is worth</h3>
         <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, the shadow price: how much more you'd gain from one more unit. The report the paid tools charge for.</p>
       </div>
+    </div>
+  </section>
+
+  <section class="section" id="example">
+    <div class="sec-head">
+      <p class="eyebrow" data-i18n="exampleEyebrow">See it work</p>
+      <h2 data-i18n="exampleTitle">From a spreadsheet to a proven answer.</h2>
+      <p class="muted" data-i18n="exampleLead" style="margin:0 auto">You write the problem the way you already write a spreadsheet: labels in the first column, numbers in the cells, ordinary formulas. No special syntax, no new language. Here is a small one, a workshop deciding how many chairs and tables to make.</p>
+    </div>
+    <div class="example">
+      <div>
+        <p class="ex-cap" data-i18n="exGridCap">What you type (ordinary spreadsheet formulas)</p>
+        <table class="minigrid">
+          <thead><tr><th>&nbsp;</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Item</td><td>Make</td><td>Profit</td><td>Total</td></tr>
+            <tr class="decide"><td>2</td><td data-i18n="exRowChairs">Chairs</td><td class="num">10</td><td class="num">30</td><td class="f">=B2*C2</td></tr>
+            <tr class="decide"><td>3</td><td data-i18n="exRowTables">Tables</td><td class="num">15</td><td class="num">40</td><td class="f">=B3*C3</td></tr>
+            <tr><td>4</td><td>Profit</td><td></td><td></td><td class="f">=SUM(D2:D3)</td></tr>
+            <tr><td>5</td><td data-i18n="exLimitWood">Wood hours</td><td class="f">=2*B2+4*B3</td><td>&le;</td><td class="num">80</td></tr>
+            <tr><td>6</td><td data-i18n="exLimitAssembly">Assembly hours</td><td class="f">=3*B2+2*B3</td><td>&le;</td><td class="num">60</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p class="ex-cap" data-i18n="exResultCap">What Plumline gives back</p>
+        <div class="ex-receipt">
+          <div class="rtot"><span data-i18n="exResultTotal">Best weekly profit</span><b>900</b></div>
+          <div class="rr"><span class="k" data-i18n="exRowChairs">Chairs</span><span>10</span></div>
+          <div class="rr"><span class="k" data-i18n="exRowTables">Tables</span><span>15</span></div>
+          <div class="rlim">
+            <div class="rr"><span class="k" data-i18n="exLimitWood">Wood hours</span><span>80 / 80</span></div>
+            <div class="rr"><span class="k" data-i18n="exLimitAssembly">Assembly hours</span><span>60 / 60</span></div>
+            <div class="rshadow" data-i18n="exShadow">One more wood hour would add 4 to the profit.</div>
+          </div>
+          <div class="rcheck"><b aria-hidden="true">&#10003;</b><span data-i18n="exCheck">Your own formula recalculates 900. The answer matches.</span></div>
+        </div>
+        <p class="ex-note" data-i18n="exNote">Change any number and solve again. Nothing installs, nothing uploads.</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:36px">
+      <a class="btn" href="solver.html?ex=workshop" data-i18n="heroSolver">Open the online solver</a>
+    </div>
+  </section>
+
+  <section class="section" id="benefits">
+    <div class="sec-head">
+      <p class="eyebrow" data-i18n="benefitsEyebrow">Why people use it</p>
+      <h2 data-i18n="benefitsTitle">Stop guessing at the best split.</h2>
+    </div>
+    <div class="grid-3">
+      <div class="benefit">
+        <div class="bmark">&#8635;</div>
+        <h3 data-i18n="benefit1H">Stop tweaking by hand</h3>
+        <p class="muted" style="font-size:14.5px" data-i18n="benefit1P">No more trying combinations in a spreadsheet to see which earns most. Plumline checks every allowed option and returns the best one.</p>
+      </div>
+      <div class="benefit">
+        <div class="bmark">&#8721;</div>
+        <h3 data-i18n="benefit2H">Decide with numbers, not a hunch</h3>
+        <p class="muted" style="font-size:14.5px" data-i18n="benefit2P">See the exact quantities, the profit they earn, and which limit is stopping you from earning more.</p>
+      </div>
+      <div class="benefit">
+        <div class="bmark">&#10003;</div>
+        <h3 data-i18n="benefit3H">Trust the answer</h3>
+        <p class="muted" style="font-size:14.5px" data-i18n="benefit3P">It proves the result against your own formulas, so you are not asked to take a black box on faith.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="sec-head">
+      <p class="eyebrow" data-i18n="faqEyebrow">Questions</p>
+      <h2 data-i18n="faqTitle">Before you try it.</h2>
+    </div>
+    <div class="faq">
+      <details open><summary data-i18n="faq1Q">Do I need to install anything?</summary><p data-i18n="faq1A">For the online solver, no. It runs in your browser at plumline.online. The Google Sheets version is a free add-on you install once from the Workspace Marketplace.</p></details>
+      <details><summary data-i18n="faq2Q">How do I write the model?</summary><p data-i18n="faq2A">With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax.</p></details>
+      <details><summary data-i18n="faq3Q">What kinds of problems does it solve?</summary><p data-i18n="faq3A">Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one.</p></details>
+      <details><summary data-i18n="faq4Q">Are my numbers safe?</summary><p data-i18n="faq4A">Yes. The online solver runs entirely in your browser and uploads nothing. The add-on reads only the spreadsheet it is installed in, sends nothing to any server, and asks for no account.</p></details>
+      <details><summary data-i18n="faq5Q">How much does it cost?</summary><p data-i18n="faq5A">Nothing. Both the online solver and the add-on are free.</p></details>
     </div>
   </section>
 

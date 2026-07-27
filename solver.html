@@ -2106,7 +2106,8 @@ function matchesAnyHint_(label, hints) {
   var sel=document.getElementById('lang');
   if(sel) sel.addEventListener('change',function(){ LANG = sel.value; });
 
-  loadExample('production');
+  var _ex=(location.search.match(/[?&]ex=(\w+)/)||[])[1];
+  loadExample(EXAMPLES[_ex] ? _ex : 'production');
 })();
 </script>
 </body>

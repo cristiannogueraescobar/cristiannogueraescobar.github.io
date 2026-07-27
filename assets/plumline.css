@@ -290,3 +290,46 @@ a:hover{text-decoration-color:var(--brass)}
 .card:hover{transform:translateY(-2px);box-shadow:0 14px 34px -18px rgba(0,0,0,.25)}
 .sec-head .lead,.sec-head p.muted{max-width:52ch}
 .sec-head.center p{margin-left:auto;margin-right:auto}
+
+/* ---- worked example: mini spreadsheet grid + result receipt, side by side --- */
+.example{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:start}
+@media(max-width:900px){.example{grid-template-columns:1fr;gap:24px}}
+.ex-cap{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:12px}
+.minigrid{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.minigrid th{background:var(--paper);color:var(--faint);font-weight:500;font-size:10px;
+  padding:6px 8px;text-align:left;border:1px solid var(--line-fine)}
+.minigrid td{padding:8px 10px;border:1px solid var(--line-fine);color:var(--ink)}
+.minigrid td.f{color:var(--brass)}
+.minigrid tr.decide td:first-child{border-left:3px solid var(--brass-hi)}
+.minigrid td.num{text-align:right}
+.ex-receipt{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:22px 24px;font-family:var(--mono);font-size:13px;
+  box-shadow:0 20px 44px -24px rgba(0,0,0,.28)}
+.ex-receipt .rtot{display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:12px;margin-bottom:12px;border-bottom:2px solid var(--ink)}
+.ex-receipt .rtot span{font-family:var(--sans);font-size:13px;color:var(--soft)}
+.ex-receipt .rtot b{font-size:28px;letter-spacing:-.02em}
+.ex-receipt .rr{display:flex;justify-content:space-between;padding:5px 0}
+.ex-receipt .rr .k{color:var(--soft)}
+.ex-receipt .rlim{margin-top:10px;padding-top:10px;border-top:1px solid var(--line-fine)}
+.ex-receipt .rcheck{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);
+  color:var(--true);font-family:var(--sans);font-size:13px;font-weight:500;display:flex;gap:8px;align-items:flex-start}
+.ex-receipt .rshadow{color:var(--true);font-size:11.5px;margin-top:6px}
+.ex-note{font-size:13px;color:var(--faint);margin-top:14px;text-align:center}
+
+/* ---- FAQ ------------------------------------------------------------------ */
+.faq{max-width:760px;margin:0 auto;border-top:1px solid var(--line-fine)}
+.faq details{border-bottom:1px solid var(--line-fine)}
+.faq summary{font-family:var(--serif);font-size:19px;font-weight:500;padding:20px 0;cursor:pointer;
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font-family:var(--mono);color:var(--brass);font-size:22px;flex:none;transition:.2s}
+.faq details[open] summary::after{content:'\2013'}
+.faq details p{padding:0 0 20px;color:var(--ink-2);max-width:64ch}
+
+/* ---- benefit cards with a check bullet ------------------------------------ */
+.benefit{background:var(--panel);border:1px solid var(--line-fine);border-radius:10px;padding:26px 24px}
+.benefit .bmark{width:34px;height:34px;border-radius:8px;background:var(--true-lo);color:var(--true);
+  display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
