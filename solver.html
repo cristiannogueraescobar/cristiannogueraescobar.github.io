@@ -500,6 +500,13 @@
 
             <div class="result" id="result"></div>
 
+            <div style="margin-top:26px">
+                <button class="ghost" id="selftest">Run a quick self-check</button>
+                <div id="selftest-out" style="margin-top:12px;font-family:var(--mono);font-size:13px;line-height:1.9">
+                </div>
+            </div>
+
+
             <div class="explain" id="how">
                 <h2>How it reads your grid</h2>
                 <p>Plumline looks for one cell that totals the others: that becomes the goal. The cells that total feeds
@@ -2102,6 +2109,59 @@
                 for (var i = 0; i < chips.length; i++)chips[i].addEventListener('click', function (e) {loadExample(e.target.getAttribute('data-ex'));});
                 document.getElementById('solve').addEventListener('click', solve);
                 document.getElementById('clear').addEventListener('click', function () {loadExample('blank');});
+
+
+                // --- Self-check: proves the engine works end to end, in plain language ---
+                function runSelfTest() {
+                    var out = document.getElementById('selftest-out'); out.innerHTML = '';
+                    function line(ok, label, detail) {
+                        var d = document.createElement('div');
+                        d.innerHTML = (ok ? '<span style="color:var(--true)">PASS</span>' : '<span style="color:var(--wrong)">FAIL</span>') +
+                            ' &nbsp;' + label + (detail ? ' <span style="color:var(--faint)">' + detail + '</span>' : '');
+                        out.appendChild(d);
+                    }
+                    function sheetFrom(ex) {
+                        var isF = function (x) {return typeof x === 'string' && x.charAt(0) === '=';};
+                        var F = [], V = [];
+                        for (var r = 0; r < ex.length; r++) {
+                            var fr = [], vr = []; for (var c = 0; c < ex[r].length; c++) {
+                                var raw = String(ex[r][c]);
+                                if (isF(raw)) {fr.push(raw); vr.push(0);} else {fr.push(''); vr.push(raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw);}
+                            } F.push(fr); V.push(vr);
+                        }
+                        return {getDataRange: function () {return {getRow: function () {return 1;}, getColumn: function () {return 1;}, getFormulas: function () {return F;}, getValues: function () {return V;}};}};
+                    }
+                    function trySolve(ex, whole) {
+                        try {var sh = sheetFrom(ex); var m = detectModel_(sh); if (whole) m.wholeNumbers = true; return solveModel_(sh, m);}
+                        catch (e) {return {status: 'error', error: String(e.message || e)};}
+                    }
+                    // 1: production optimum
+                    var p = trySolve(EXAMPLES.production, false);
+                    line(p.status === 'optimal' && Math.round(p.objective) === 1760, 'Production example solves', 'got ' + fmt(p.objective) + ', expected 1,760');
+                    // 2: shadow price present
+                    var hasShadow = (p.constraints || []).some(function (c) {return c.binding && c.shadowPrice > 0;});
+                    line(hasShadow, 'Sensitivity (shadow price) is computed', hasShadow ? 'a binding limit shows its value' : 'none found');
+                    // 3: blend exact
+                    var b = trySolve(EXAMPLES.blend, false);
+                    line(b.status === 'optimal' && Math.abs(b.objective - 27.35) < 0.1, 'Blend example solves', 'got £' + fmt(b.objective) + ', expected ~£27.35');
+                    // 4: budget
+                    var g = trySolve(EXAMPLES.budget, false);
+                    line(g.status === 'optimal' && Math.round(g.objective) === 28300, 'Budget example solves', 'got ' + fmt(g.objective) + ', expected 28,300');
+                    // 5: integer differs from continuous
+                    var ci = trySolve(EXAMPLES.production, true);
+                    line(ci.status === 'optimal', 'Whole-numbers mode runs', 'objective ' + fmt(ci.objective));
+                    // 6: impossible model is caught, not crashed or faked
+                    var imp = trySolve([['Item', 'Qty', 'Value', 'Total', '', ''], ['X', '0', '10', '=B2*C2', '', ''], ['', '', '', '', '', ''], ['Total', '', '', '=SUM(D2)', '', ''], ['Cap', '', '', '=B2', '<=', '5'], ['Floor', '', '', '=B2', '>=', '20']], false);
+                    var caught = (imp.status !== 'optimal' && imp.status !== 'feasible');
+                    line(caught, 'Impossible model is refused, not faked', 'reported: ' + (imp.status || imp.error));
+                    var allPass = out.querySelectorAll('span[style*="wrong"]').length === 0;
+                    var summary = document.createElement('div');
+                    summary.style.marginTop = '10px'; summary.style.fontWeight = '600';
+                    summary.style.color = allPass ? 'var(--true)' : 'var(--wrong)';
+                    summary.textContent = allPass ? 'All checks passed. The solver works.' : 'Something failed above.';
+                    out.appendChild(summary);
+                }
+                document.getElementById('selftest').addEventListener('click', runSelfTest);
 
                 loadExample('production');
             })();
