@@ -16,6 +16,13 @@
         footSolver:'Online solver', footAddon:'Sheets add-on', footGuide:'Guide',
         footPrivacy:'Privacy', footTerms:'Terms', footHome:'Home',
         footFine:'Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets\u2122 and Google Workspace\u2122 are trademarks of Google LLC.'
+      ,
+        navUse:'Use it',
+        navLearn:'Learn',
+        navAbout:'About',
+        footBuilt:'Plumline is built and maintained by one developer.',
+        footContact:'Contact',
+        footEmail:'Email'
       },
       home: {
         heroEyebrow:'Optimisation, made legible',
@@ -93,6 +100,7 @@
         exBlank:'Blank grid',
         gridNote:'Yellow cells are the quantities to decide. Put an operator (≤, ≥, =) and a number to the right of a limit. Edit anything and solve again.',
         solve:'Solve',
+        solving:'Solving…',
         wholeNumbers:'Whole numbers only',
         clearGrid:'Clear grid',
         placeholder:'Your answer will appear here, checked against your own numbers.',
@@ -144,6 +152,14 @@
         gTryH:'Try it with your own numbers',
         gTryP:'The solver reads a grid like a spreadsheet. Type your goal, your decisions and your limits in plain words, and solve. Nothing is uploaded, and it is free.',
         gTryCta:'Open the solver'
+      ,
+        limitsH:'What it can and can\'t do',
+        limitsHandles:'Handles',
+        limitsHandlesP:'Linear problems (maximise or minimise a weighted total) and integer problems (whole-number quantities). Production mix, purchasing, blending, staffing rotas, transport, budget allocation. Small to medium models solve instantly in the browser.',
+        limitsCant:'Does not handle',
+        limitsCantP:'Genuinely non-linear relationships, such as one decision multiplied by another, or curves and diminishing returns. Plumline detects these and points at the cell rather than returning a wrong answer.',
+        limitsSize:'On size',
+        limitsSizeP:'There is no fixed cap on variables or limits, but very large models can be slow or hit an internal safety ceiling. If you need to solve something large or non-linear, a dedicated operations-research tool is the right choice, and Plumline will tell you when it is out of its depth.'
       },
       legal: {
         pvTitle:'Privacy policy',
@@ -201,6 +217,20 @@
         tmTrademarkP:'Plumline is independent and is not affiliated with, sponsored by or endorsed by Google. Google Sheets™, Google Workspace™ and Google Apps Script™ are trademarks of Google LLC.',
         tmContactH:'Contact',
         tmContactP:'Questions about these terms can be sent to'
+      },
+      about: {
+        aboutEyebrow:'About',
+        aboutTitle:'One tool, built to be trusted.',
+        aboutLead:'Plumline is an independent optimisation tool made by one developer. It exists because the solvers that already work are written for people who studied operations research, and the ones written for everyone else quietly hide how they reached the answer.',
+        aboutWhoH:'Who makes it',
+        aboutWhoP:'Plumline is built and maintained by a single developer, not a company. There is no team, no funding round, and no plan to sell your attention. If something is broken or missing, the person who can fix it is the one reading your email.',
+        aboutWhyH:'Why it works this way',
+        aboutWhyP:'A solver asks you to trust a number you could not work out yourself. Plumline answers that by showing its work: it writes the solution back into your own formulas, lets them recalculate, and shows you the check. You do not have to believe it. You can see it.',
+        aboutPrivacyH:'On your data',
+        aboutPrivacyP:'The online solver runs entirely in your browser and uploads nothing. The Google Sheets add-on reads only the sheet it is installed in and sends nothing to any server. There is no account and no tracking. The full detail is in the privacy policy.',
+        aboutContactH:'Get in touch',
+        aboutContactP:'Bug reports, questions, and feature requests are welcome. The fastest way to reach the developer is by email:',
+        aboutCta:'Try the online solver'
       }
     },
 
@@ -211,6 +241,13 @@
         footSolver:'Solver online', footAddon:'Complemento de Sheets', footGuide:'Gu\u00eda',
         footPrivacy:'Privacidad', footTerms:'T\u00e9rminos', footHome:'Inicio',
         footFine:'Plumline es una herramienta independiente y no est\u00e1 afiliada ni respaldada por Google. Google Sheets\u2122 y Google Workspace\u2122 son marcas de Google LLC.'
+      ,
+        navUse:'Úsalo',
+        navLearn:'Aprende',
+        navAbout:'Sobre',
+        footBuilt:'Plumline lo crea y mantiene un solo desarrollador.',
+        footContact:'Contacto',
+        footEmail:'Correo'
       },
       home: {
         heroEyebrow:'Optimizaci\u00f3n, hecha legible',
@@ -288,6 +325,7 @@
         exBlank:'Cuadrícula en blanco',
         gridNote:'Las celdas amarillas son las cantidades a decidir. Pon un operador (≤, ≥, =) y un número a la derecha de un límite. Edita lo que quieras y vuelve a resolver.',
         solve:'Resolver',
+        solving:'Resolviendo…',
         wholeNumbers:'Solo números enteros',
         clearGrid:'Vaciar cuadrícula',
         placeholder:'Tu respuesta aparecerá aquí, comprobada con tus propios números.',
@@ -339,6 +377,14 @@
         gTryH:'Pruébalo con tus propios números',
         gTryP:'El solver lee una cuadrícula como una hoja de cálculo. Escribe tu objetivo, tus decisiones y tus límites en palabras claras, y resuelve. No se sube nada, y es gratis.',
         gTryCta:'Abrir el solver'
+      ,
+        limitsH:'Qué puede y qué no puede hacer',
+        limitsHandles:'Resuelve',
+        limitsHandlesP:'Problemas lineales (maximizar o minimizar un total ponderado) y problemas enteros (cantidades de números enteros). Mezcla de producción, compras, mezclas, turnos, transporte, reparto de presupuesto. Los modelos pequeños y medianos se resuelven al instante en el navegador.',
+        limitsCant:'No resuelve',
+        limitsCantP:'Relaciones realmente no lineales, como una decisión multiplicada por otra, o curvas y rendimientos decrecientes. Plumline las detecta y señala la celda en vez de devolver una respuesta errónea.',
+        limitsSize:'Sobre el tamaño',
+        limitsSizeP:'No hay un tope fijo de variables o límites, pero los modelos muy grandes pueden ir lentos o alcanzar un techo de seguridad interno. Si necesitas resolver algo grande o no lineal, una herramienta especializada de investigación operativa es la opción correcta, y Plumline te avisa cuando algo se le escapa.'
       },
       legal: {
         pvTitle:'Política de privacidad',
@@ -396,6 +442,20 @@
         tmTrademarkP:'Plumline es independiente y no está afiliada, patrocinada ni respaldada por Google. Google Sheets™, Google Workspace™ y Google Apps Script™ son marcas de Google LLC.',
         tmContactH:'Contacto',
         tmContactP:'Las preguntas sobre estos términos pueden enviarse a'
+      },
+      about: {
+        aboutEyebrow:'Sobre',
+        aboutTitle:'Una herramienta, hecha para confiar en ella.',
+        aboutLead:'Plumline es una herramienta de optimización independiente hecha por un solo desarrollador. Existe porque los solvers que ya funcionan están escritos para quien estudió investigación operativa, y los escritos para el resto ocultan en silencio cómo llegaron a la respuesta.',
+        aboutWhoH:'Quién lo hace',
+        aboutWhoP:'Plumline lo crea y mantiene un único desarrollador, no una empresa. No hay equipo, ni ronda de financiación, ni plan de vender tu atención. Si algo está roto o falta, la persona que puede arreglarlo es la que lee tu correo.',
+        aboutWhyH:'Por qué funciona así',
+        aboutWhyP:'Un solver te pide confiar en un número que no podrías calcular tú mismo. Plumline responde a eso mostrando su trabajo: escribe la solución en tus propias fórmulas, deja que recalculen y te enseña la comprobación. No tienes que creerlo. Puedes verlo.',
+        aboutPrivacyH:'Sobre tus datos',
+        aboutPrivacyP:'El solver online funciona entero en tu navegador y no sube nada. El complemento de Google Sheets lee solo la hoja en la que está instalado y no envía nada a ningún servidor. No hay cuenta ni seguimiento. El detalle completo está en la política de privacidad.',
+        aboutContactH:'Ponte en contacto',
+        aboutContactP:'Los informes de errores, las preguntas y las peticiones de funciones son bienvenidos. La forma más rápida de llegar al desarrollador es por correo:',
+        aboutCta:'Prueba el solver online'
       }
     },
 
@@ -406,6 +466,13 @@
         footSolver:'Solver online', footAddon:'Complemento do Sheets', footGuide:'Guia',
         footPrivacy:'Privacidade', footTerms:'Termos', footHome:'In\u00edcio',
         footFine:'O Plumline \u00e9 uma ferramenta independente e n\u00e3o \u00e9 afiliada nem endossada pela Google. Google Sheets\u2122 e Google Workspace\u2122 s\u00e3o marcas da Google LLC.'
+      ,
+        navUse:'Use',
+        navLearn:'Aprenda',
+        navAbout:'Sobre',
+        footBuilt:'O Plumline é criado e mantido por um só desenvolvedor.',
+        footContact:'Contacto',
+        footEmail:'E-mail'
       },
       home: {
         heroEyebrow:'Otimiza\u00e7\u00e3o, tornada leg\u00edvel',
@@ -483,6 +550,7 @@
         exBlank:'Grade em branco',
         gridNote:'As células amarelas são as quantidades a decidir. Coloque um operador (≤, ≥, =) e um número à direita de um limite. Edite o que quiser e resolva de novo.',
         solve:'Resolver',
+        solving:'Resolvendo…',
         wholeNumbers:'Apenas números inteiros',
         clearGrid:'Limpar grade',
         placeholder:'A sua resposta aparecerá aqui, verificada com os seus próprios números.',
@@ -534,6 +602,14 @@
         gTryH:'Experimente com os seus números',
         gTryP:'O solver lê uma grade como uma planilha. Escreva o seu objetivo, as suas decisões e os seus limites em palavras claras, e resolva. Nada é enviado, e é grátis.',
         gTryCta:'Abrir o solver'
+      ,
+        limitsH:'O que ele pode e não pode fazer',
+        limitsHandles:'Resolve',
+        limitsHandlesP:'Problemas lineares (maximizar ou minimizar um total ponderado) e problemas inteiros (quantidades inteiras). Mix de produção, compras, misturas, escalas, transporte, alocação de orçamento. Modelos pequenos e médios resolvem na hora no navegador.',
+        limitsCant:'Não resolve',
+        limitsCantP:'Relações realmente não lineares, como uma decisão multiplicada por outra, ou curvas e retornos decrescentes. O Plumline as detecta e aponta a célula em vez de devolver uma resposta errada.',
+        limitsSize:'Sobre o tamanho',
+        limitsSizeP:'Não há teto fixo de variáveis ou limites, mas modelos muito grandes podem ficar lentos ou atingir um teto de segurança interno. Se você precisa resolver algo grande ou não linear, uma ferramenta dedicada de investigação operacional é a escolha certa, e o Plumline avisa quando algo foge do seu alcance.'
       },
       legal: {
         pvTitle:'Política de privacidade',
@@ -591,6 +667,20 @@
         tmTrademarkP:'O Plumline é independente e não é afiliado, patrocinado nem endossado pela Google. Google Sheets™, Google Workspace™ e Google Apps Script™ são marcas da Google LLC.',
         tmContactH:'Contacto',
         tmContactP:'Questões sobre estes termos podem ser enviadas para'
+      },
+      about: {
+        aboutEyebrow:'Sobre',
+        aboutTitle:'Uma ferramenta, feita para se confiar.',
+        aboutLead:'O Plumline é uma ferramenta de otimização independente feita por um só desenvolvedor. Existe porque os solvers que já funcionam são escritos para quem estudou investigação operacional, e os escritos para os demais escondem em silêncio como chegaram à resposta.',
+        aboutWhoH:'Quem faz',
+        aboutWhoP:'O Plumline é criado e mantido por um único desenvolvedor, não uma empresa. Não há equipa, nem ronda de financiamento, nem plano de vender a sua atenção. Se algo estiver partido ou em falta, a pessoa que pode consertar é a que lê o seu e-mail.',
+        aboutWhyH:'Por que funciona assim',
+        aboutWhyP:'Um solver pede que você confie num número que não conseguiria calcular sozinho. O Plumline responde a isso mostrando o seu trabalho: escreve a solução nas suas próprias fórmulas, deixa recalcular e mostra a conferência. Você não precisa acreditar. Você pode ver.',
+        aboutPrivacyH:'Sobre os seus dados',
+        aboutPrivacyP:'O solver online roda inteiramente no seu navegador e não envia nada. O complemento do Google Sheets lê apenas a planilha em que está instalado e não envia nada a nenhum servidor. Não há conta nem rastreamento. O detalhe completo está na política de privacidade.',
+        aboutContactH:'Entre em contacto',
+        aboutContactP:'Relatórios de erros, perguntas e pedidos de funcionalidades são bem-vindos. A forma mais rápida de chegar ao desenvolvedor é por e-mail:',
+        aboutCta:'Experimente o solver online'
       }
     },
 
@@ -601,6 +691,13 @@
         footSolver:'Online-Solver', footAddon:'Sheets-Add-on', footGuide:'Anleitung',
         footPrivacy:'Datenschutz', footTerms:'Bedingungen', footHome:'Start',
         footFine:'Plumline ist ein unabh\u00e4ngiges Werkzeug und steht in keiner Verbindung zu Google. Google Sheets\u2122 und Google Workspace\u2122 sind Marken von Google LLC.'
+      ,
+        navUse:'Nutzen',
+        navLearn:'Lernen',
+        navAbout:'Über',
+        footBuilt:'Plumline wird von einem einzelnen Entwickler gebaut und gepflegt.',
+        footContact:'Kontakt',
+        footEmail:'E-Mail'
       },
       home: {
         heroEyebrow:'Optimierung, lesbar gemacht',
@@ -678,6 +775,7 @@
         exBlank:'Leeres Raster',
         gridNote:'Gelbe Zellen sind die zu bestimmenden Mengen. Setze einen Operator (≤, ≥, =) und eine Zahl rechts neben eine Grenze. Ändere alles und löse erneut.',
         solve:'Lösen',
+        solving:'Wird gelöst…',
         wholeNumbers:'Nur ganze Zahlen',
         clearGrid:'Raster leeren',
         placeholder:'Deine Antwort erscheint hier, geprüft gegen deine eigenen Zahlen.',
@@ -729,6 +827,14 @@
         gTryH:'Probier es mit deinen eigenen Zahlen',
         gTryP:'Der Solver liest ein Raster wie eine Tabelle. Trag dein Ziel, deine Entscheidungen und deine Grenzen in klaren Worten ein und löse. Nichts wird hochgeladen, und es ist kostenlos.',
         gTryCta:'Solver öffnen'
+      ,
+        limitsH:'Was es kann und was nicht',
+        limitsHandles:'Löst',
+        limitsHandlesP:'Lineare Probleme (eine gewichtete Summe maximieren oder minimieren) und ganzzahlige Probleme (ganzzahlige Mengen). Produktionsmix, Einkauf, Mischungen, Schichtpläne, Transport, Budgetverteilung. Kleine bis mittlere Modelle lösen sofort im Browser.',
+        limitsCant:'Löst nicht',
+        limitsCantP:'Echte nichtlineare Beziehungen, etwa eine Entscheidung mal eine andere, oder Kurven und abnehmende Erträge. Plumline erkennt diese und zeigt auf die Zelle, statt eine falsche Antwort zu liefern.',
+        limitsSize:'Zur Größe',
+        limitsSizeP:'Es gibt keine feste Obergrenze für Variablen oder Grenzen, aber sehr große Modelle können langsam sein oder eine interne Sicherheitsgrenze erreichen. Wenn du etwas Großes oder Nichtlineares lösen musst, ist ein spezialisiertes Operations-Research-Werkzeug die richtige Wahl, und Plumline sagt dir, wenn etwas seinen Rahmen sprengt.'
       },
       legal: {
         pvTitle:'Datenschutzerklärung',
@@ -786,6 +892,20 @@
         tmTrademarkP:'Plumline ist unabhängig und steht in keiner Verbindung zu Google, wird von Google weder gesponsert noch unterstützt. Google Sheets™, Google Workspace™ und Google Apps Script™ sind Marken von Google LLC.',
         tmContactH:'Kontakt',
         tmContactP:'Fragen zu diesen Bedingungen können gesendet werden an'
+      },
+      about: {
+        aboutEyebrow:'Über',
+        aboutTitle:'Ein Werkzeug, gebaut, um vertraut zu werden.',
+        aboutLead:'Plumline ist ein unabhängiges Optimierungswerkzeug, gemacht von einem einzelnen Entwickler. Es existiert, weil die Solver, die bereits funktionieren, für Menschen geschrieben sind, die Operations Research studiert haben, und die für alle anderen still verbergen, wie sie zur Antwort kamen.',
+        aboutWhoH:'Wer es macht',
+        aboutWhoP:'Plumline wird von einem einzigen Entwickler gebaut und gepflegt, keiner Firma. Es gibt kein Team, keine Finanzierungsrunde und keinen Plan, deine Aufmerksamkeit zu verkaufen. Wenn etwas kaputt ist oder fehlt, ist die Person, die es beheben kann, dieselbe, die deine E-Mail liest.',
+        aboutWhyH:'Warum es so funktioniert',
+        aboutWhyP:'Ein Solver bittet dich, einer Zahl zu vertrauen, die du selbst nicht ausrechnen könntest. Plumline beantwortet das, indem es seine Arbeit zeigt: Es schreibt die Lösung in deine eigenen Formeln, lässt sie neu rechnen und zeigt dir die Prüfung. Du musst es nicht glauben. Du kannst es sehen.',
+        aboutPrivacyH:'Zu deinen Daten',
+        aboutPrivacyP:'Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Google-Sheets-Add-on liest nur die Tabelle, in der es installiert ist, und sendet nichts an einen Server. Es gibt kein Konto und kein Tracking. Alle Details stehen in der Datenschutzerklärung.',
+        aboutContactH:'Kontakt aufnehmen',
+        aboutContactP:'Fehlerberichte, Fragen und Funktionswünsche sind willkommen. Am schnellsten erreichst du den Entwickler per E-Mail:',
+        aboutCta:'Online-Solver ausprobieren'
       }
     },
 
@@ -796,6 +916,13 @@
         footSolver:'Solveur en ligne', footAddon:'Module Sheets', footGuide:'Guide',
         footPrivacy:'Confidentialit\u00e9', footTerms:'Conditions', footHome:'Accueil',
         footFine:'Plumline est un outil ind\u00e9pendant, sans lien ni approbation de Google. Google Sheets\u2122 et Google Workspace\u2122 sont des marques de Google LLC.'
+      ,
+        navUse:'Utiliser',
+        navLearn:'Apprendre',
+        navAbout:'À propos',
+        footBuilt:'Plumline est créé et maintenu par un seul développeur.',
+        footContact:'Contact',
+        footEmail:'E-mail'
       },
       home: {
         heroEyebrow:'L\u2019optimisation, rendue lisible',
@@ -873,6 +1000,7 @@
         exBlank:'Grille vide',
         gridNote:'Les cellules jaunes sont les quantités à décider. Mettez un opérateur (≤, ≥, =) et un nombre à droite d’une limite. Modifiez ce que vous voulez et résolvez à nouveau.',
         solve:'Résoudre',
+        solving:'Résolution…',
         wholeNumbers:'Nombres entiers uniquement',
         clearGrid:'Vider la grille',
         placeholder:'Votre réponse apparaîtra ici, vérifiée avec vos propres chiffres.',
@@ -924,6 +1052,14 @@
         gTryH:'Essayez avec vos propres chiffres',
         gTryP:'Le solveur lit une grille comme un tableur. Saisissez votre objectif, vos décisions et vos limites en mots clairs, et résolvez. Rien n’est envoyé, et c’est gratuit.',
         gTryCta:'Ouvrir le solveur'
+      ,
+        limitsH:'Ce qu’il peut et ne peut pas faire',
+        limitsHandles:'Résout',
+        limitsHandlesP:'Les problèmes linéaires (maximiser ou minimiser un total pondéré) et les problèmes entiers (quantités en nombres entiers). Mix de production, achats, mélanges, plannings, transport, répartition de budget. Les modèles petits à moyens se résolvent instantanément dans le navigateur.',
+        limitsCant:'Ne résout pas',
+        limitsCantP:'Les relations vraiment non linéaires, comme une décision multipliée par une autre, ou les courbes et rendements décroissants. Plumline les détecte et désigne la cellule au lieu de renvoyer une mauvaise réponse.',
+        limitsSize:'Sur la taille',
+        limitsSizeP:'Il n’y a pas de plafond fixe de variables ou de limites, mais les très gros modèles peuvent être lents ou atteindre un plafond de sécurité interne. Si vous devez résoudre quelque chose de grand ou de non linéaire, un outil dédié de recherche opérationnelle est le bon choix, et Plumline vous prévient quand quelque chose le dépasse.'
       },
       legal: {
         pvTitle:'Politique de confidentialité',
@@ -981,6 +1117,20 @@
         tmTrademarkP:'Plumline est indépendant et n’est ni affilié à Google, ni parrainé ni approuvé par Google. Google Sheets™, Google Workspace™ et Google Apps Script™ sont des marques de Google LLC.',
         tmContactH:'Contact',
         tmContactP:'Les questions sur ces conditions peuvent être envoyées à'
+      },
+      about: {
+        aboutEyebrow:'À propos',
+        aboutTitle:'Un outil, conçu pour inspirer confiance.',
+        aboutLead:'Plumline est un outil d’optimisation indépendant créé par un seul développeur. Il existe parce que les solveurs qui fonctionnent déjà sont écrits pour ceux qui ont étudié la recherche opérationnelle, et ceux écrits pour les autres cachent discrètement comment ils sont arrivés à la réponse.',
+        aboutWhoH:'Qui le fait',
+        aboutWhoP:'Plumline est créé et maintenu par un seul développeur, pas une entreprise. Il n’y a pas d’équipe, pas de levée de fonds, et aucun projet de vendre votre attention. Si quelque chose est cassé ou manquant, la personne qui peut le réparer est celle qui lit votre e-mail.',
+        aboutWhyH:'Pourquoi ça marche ainsi',
+        aboutWhyP:'Un solveur vous demande de faire confiance à un nombre que vous ne pourriez pas calculer vous-même. Plumline y répond en montrant son travail : il réécrit la solution dans vos propres formules, les laisse recalculer et vous montre la vérification. Vous n’avez pas à le croire. Vous pouvez le voir.',
+        aboutPrivacyH:'À propos de vos données',
+        aboutPrivacyP:'Le solveur en ligne fonctionne entièrement dans votre navigateur et n’envoie rien. Le module Google Sheets ne lit que la feuille où il est installé et n’envoie rien à aucun serveur. Il n’y a ni compte ni suivi. Le détail complet est dans la politique de confidentialité.',
+        aboutContactH:'Nous contacter',
+        aboutContactP:'Les rapports de bugs, les questions et les demandes de fonctionnalités sont les bienvenus. Le moyen le plus rapide de joindre le développeur est l’e-mail :',
+        aboutCta:'Essayer le solveur en ligne'
       }
     }
   };

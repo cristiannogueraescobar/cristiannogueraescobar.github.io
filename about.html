@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Plumline: Who Makes It, and Why It Proves Its Answers</title>
+<meta name="description" content="Plumline is an independent optimisation tool built by one developer. It shows its work instead of asking for trust: it proves each answer against your own formulas. No account, no tracking, free.">
+<meta property="og:title" content="About Plumline">
+<meta property="og:description" content="An independent optimisation tool that proves its answers against your own numbers.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://plumline.online/about.html">
+<link rel="canonical" href="https://plumline.online/about.html">
+<link rel="stylesheet" href="assets/plumline.css?v=3">
+</head>
+<body data-page="about">
+
+<div class="field-deep">
+  <div class="plumb">
+    <header class="mast">
+      <a href="index.html" class="lockup" aria-label="Plumline home">
+        <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
+          <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A"/>
+          <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2"/>
+        </svg>
+        <span class="wm">Plumline</span>
+      </a>
+      <nav class="nav">
+        <a href="solver.html" data-i18n="navSolver">Solver</a>
+        <a href="index.html" data-i18n="navAddon">Add-on</a>
+        <a href="guide.html" data-i18n="navGuide">Guide</a>
+        <a href="about.html" aria-current="page" data-i18n="navAbout">About</a>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="en">EN</option><option value="es">ES</option>
+          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
+        </select>
+      </nav>
+    </header>
+
+    <section class="section" style="padding:40px 0 64px">
+      <p class="eyebrow" data-i18n="aboutEyebrow">About</p>
+      <h1 style="max-width:18ch" data-i18n="aboutTitle">One tool, built to be trusted.</h1>
+      <p class="lead" style="margin-top:22px" data-i18n="aboutLead">Plumline is an independent optimisation tool made by one developer. It exists because the solvers that already work are written for people who studied operations research, and the ones written for everyone else quietly hide how they reached the answer.</p>
+    </section>
+  </div>
+</div>
+
+<div class="plumb">
+  <section class="section">
+    <div class="grid-2" style="gap:40px">
+      <div class="card"><h3 data-i18n="aboutWhoH">Who makes it</h3><p class="muted" style="font-size:15px" data-i18n="aboutWhoP">Plumline is built and maintained by a single developer, not a company. There is no team, no funding round, and no plan to sell your attention. If something is broken or missing, the person who can fix it is the one reading your email.</p></div>
+      <div class="card"><h3 data-i18n="aboutWhyH">Why it works this way</h3><p class="muted" style="font-size:15px" data-i18n="aboutWhyP">A solver asks you to trust a number you could not work out yourself. Plumline answers that by showing its work: it writes the solution back into your own formulas, lets them recalculate, and shows you the check. You do not have to believe it. You can see it.</p></div>
+      <div class="card"><h3 data-i18n="aboutPrivacyH">On your data</h3><p class="muted" style="font-size:15px" data-i18n="aboutPrivacyP">The online solver runs entirely in your browser and uploads nothing. The Google Sheets add-on reads only the sheet it is installed in and sends nothing to any server. There is no account and no tracking. The full detail is in the privacy policy.</p></div>
+      <div class="card brass"><h3 data-i18n="aboutContactH">Get in touch</h3><p class="muted" style="font-size:15px" data-i18n="aboutContactP">Bug reports, questions, and feature requests are welcome. The fastest way to reach the developer is by email:</p><a href="mailto:cristiannogueraescobar@gmail.com" style="font-family:var(--mono);font-size:14px;color:var(--true);font-weight:600">cristiannogueraescobar@gmail.com</a></div>
+    </div>
+    <div style="text-align:center;margin-top:44px">
+      <a class="btn" href="solver.html" data-i18n="aboutCta">Try the online solver</a>
+    </div>
+  </section>
+</div>
+
+<footer class="foot">
+  <div class="plumb"><div class="in">
+    <div class="cols">
+      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
+      <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
+      <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
+    </div>
+    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</span></p>
+  </div></div>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script>Plumline.i18n.init('about');</script>
+</body>
+</html>

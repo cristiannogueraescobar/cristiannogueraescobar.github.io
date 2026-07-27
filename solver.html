@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://plumline.online/solver.html">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online linear programming solver. Solve LP and integer optimization problems in your browser: enter your model like a spreadsheet, get the optimal solution, shadow prices, and a feasible-region graph. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=2">
+<link rel="stylesheet" href="assets/plumline.css?v=3">
 <style>
 :root{
   --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#93958A;
@@ -136,6 +136,11 @@ footer{background:var(--deep);color:rgba(245,242,235,.6);margin-top:50px}
 footer .wrap{padding:26px 24px 50px;font-size:13px}
 footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text-decoration:none;margin-right:18px}
 @media(max-width:640px){table.grid th{min-width:64px}}
+.solving{display:flex;align-items:center;gap:12px;padding:22px 24px;font-family:var(--mono);
+  font-size:14px;color:var(--soft);border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+.solving .spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--true);
+  border-radius:50%;animation:spin .7s linear infinite;flex:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body data-page="solver">
@@ -152,6 +157,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <nav>
     <a href="index.html" data-i18n="navAddon">The add-on</a>
     <a href="guide.html" data-i18n="navGuide">Guide</a>
+    <a href="about.html" data-i18n="navAbout">About</a>
     <a href="#how" data-i18n="navHow">How to use</a>
     <select id="lang" aria-label="Language">
       <option value="en">EN</option>
@@ -220,12 +226,15 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   </div>
 </div></div>
 
-<footer><div class="wrap">
-  <a href="index.html">Home</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="terms.html">Terms</a>
-  <p style="margin-top:14px;max-width:60ch;line-height:1.5">Everything runs in your browser. Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; is a trademark of Google LLC.</p>
-</div></footer>
+<footer class="foot"><div class="plumb"><div class="in">
+  <div class="cols">
+    <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+    <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
+    <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
+    <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
+  </div>
+  <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</span></p>
+</div></div></footer>
 
 <script src="assets/i18n.js"></script>
 <script>
@@ -1787,6 +1796,18 @@ function matchesAnyHint_(label, hints) {
   function fmt(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('en-GB',{maximumFractionDigits:4});}
 
   function solve(){
+    var res=document.getElementById('result');
+    var btn=document.getElementById('solve');
+    // Show a solving state immediately, then compute on the next frame so the
+    // browser paints it first. Most models finish in well under a second, but
+    // this makes the tool feel instant and never looks frozen.
+    res.innerHTML='<div class="solving"><span class="spin" aria-hidden="true"></span>'+t('solving')+'</div>';
+    res.classList.add('show');
+    if(btn){ btn.disabled=true; }
+    setTimeout(function(){ runSolve(); if(btn){ btn.disabled=false; } }, 30);
+  }
+
+  function runSolve(){
     var res=document.getElementById('result');
     var sheet=sheetFromGrid();
     var model;
