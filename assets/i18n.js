@@ -20,7 +20,7 @@
       home: {
         heroEyebrow:'Optimisation, made legible',
         heroTitle:'Find the best answer. Then see it checked.',
-        heroLead:'Plumline finds the best way to split limited resources \u2014 how much to make, buy, ship or staff \u2014 and proves the result against your own numbers. Use it free in your browser, or inside Google Sheets.',
+        heroLead:'Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. Then it proves the result against your own numbers. Use it free in your browser, or inside Google Sheets.',
         heroSolver:'Open the online solver',
         heroAddon:'Get the Sheets add-on',
         pillarsEyebrow:'Two ways to use it',
@@ -33,7 +33,7 @@
         pillarAddonCta:'See the add-on \u2192',
         whyEyebrow:'Why it\u2019s different',
         whyTitle:'It hands back an answer you can check.',
-        whyP:'A solver is one of the few tools whose output you can\u2019t eyeball \u2014 you asked because you didn\u2019t know the answer. So Plumline doesn\u2019t ask for trust. It shows what it understood, proves the result against your own formulas, and tells you which limit is holding you back.',
+        whyP:'A solver is one of the few tools whose output you can\u2019t eyeball. You asked because you didn\u2019t know the answer. So Plumline doesn\u2019t ask for trust. It shows what it understood, proves the result against your own formulas, and tells you which limit is holding you back.',
         f1H:'It reads your model',
         f1P:'No blank form to fill. Plumline finds the goal, the quantities and the limits in the sheet you already have, named in your own words.',
         f2H:'It proves the answer',
@@ -58,7 +58,7 @@
       home: {
         heroEyebrow:'Optimizaci\u00f3n, hecha legible',
         heroTitle:'Encuentra la mejor respuesta. Y compru\u00e9bala.',
-        heroLead:'Plumline encuentra la mejor forma de repartir recursos limitados \u2014 cu\u00e1nto fabricar, comprar, enviar o asignar \u2014 y demuestra el resultado con tus propios n\u00fameros. \u00dasalo gratis en el navegador, o dentro de Google Sheets.',
+        heroLead:'Plumline encuentra la mejor forma de repartir recursos limitados: cu\u00e1nto fabricar, comprar, enviar o asignar. Y demuestra el resultado con tus propios n\u00fameros. \u00dasalo gratis en el navegador, o dentro de Google Sheets.',
         heroSolver:'Abrir el solver online',
         heroAddon:'Conseguir el complemento',
         pillarsEyebrow:'Dos formas de usarlo',
@@ -96,7 +96,7 @@
       home: {
         heroEyebrow:'Otimiza\u00e7\u00e3o, tornada leg\u00edvel',
         heroTitle:'Encontre a melhor resposta. E confirme-a.',
-        heroLead:'O Plumline encontra a melhor forma de dividir recursos limitados \u2014 quanto produzir, comprar, enviar ou alocar \u2014 e prova o resultado com os seus pr\u00f3prios n\u00fameros. Use gr\u00e1tis no navegador, ou dentro do Google Sheets.',
+        heroLead:'O Plumline encontra a melhor forma de dividir recursos limitados: quanto produzir, comprar, enviar ou alocar. E prova o resultado com os seus pr\u00f3prios n\u00fameros. Use gr\u00e1tis no navegador, ou dentro do Google Sheets.',
         heroSolver:'Abrir o solver online',
         heroAddon:'Obter o complemento',
         pillarsEyebrow:'Duas formas de usar',
@@ -134,7 +134,7 @@
       home: {
         heroEyebrow:'Optimierung, lesbar gemacht',
         heroTitle:'Finde die beste Antwort. Und pr\u00fcfe sie.',
-        heroLead:'Plumline findet den besten Weg, begrenzte Ressourcen aufzuteilen \u2014 wie viel herstellen, kaufen, liefern oder einplanen \u2014 und beweist das Ergebnis mit deinen eigenen Zahlen. Kostenlos im Browser oder in Google Sheets.',
+        heroLead:'Plumline findet den besten Weg, begrenzte Ressourcen aufzuteilen: wie viel herstellen, kaufen, liefern oder einplanen. Und es beweist das Ergebnis mit deinen eigenen Zahlen. Kostenlos im Browser oder in Google Sheets.',
         heroSolver:'Online-Solver \u00f6ffnen',
         heroAddon:'Add-on holen',
         pillarsEyebrow:'Zwei Wege, es zu nutzen',
@@ -147,7 +147,7 @@
         pillarAddonCta:'Add-on ansehen \u2192',
         whyEyebrow:'Warum es anders ist',
         whyTitle:'Es liefert eine Antwort, die du pr\u00fcfen kannst.',
-        whyP:'Ein Solver ist eines der wenigen Werkzeuge, dessen Ergebnis du nicht \u00fcberschlagen kannst \u2014 du hast gefragt, weil du die Antwort nicht wusstest. Also verlangt Plumline kein Vertrauen. Es zeigt, was es verstanden hat, beweist das Ergebnis mit deinen eigenen Formeln und sagt dir, welche Grenze dich bremst.',
+        whyP:'Ein Solver ist eines der wenigen Werkzeuge, dessen Ergebnis du nicht \u00fcberschlagen kannst. Du hast gefragt, weil du die Antwort nicht wusstest. Also verlangt Plumline kein Vertrauen. Es zeigt, was es verstanden hat, beweist das Ergebnis mit deinen eigenen Formeln und sagt dir, welche Grenze dich bremst.',
         f1H:'Es liest dein Modell',
         f1P:'Kein leeres Formular. Plumline findet Ziel, Mengen und Grenzen in deiner vorhandenen Tabelle, in deinen eigenen Worten benannt.',
         f2H:'Es beweist die Antwort',
@@ -157,7 +157,7 @@
         ctaTitle:'Stell deiner n\u00e4chsten Entscheidung eine Zahl voran.',
         ctaP:'Kostenlos. Nichts wird an einen Server gesendet.',
         ctaBtn:'Solver \u00f6ffnen',
-        proofTotal:'Gesamtgewinn', proofHours:'Verwendete Stunden', proofShadow:'Eine Stunde mehr ist £16 wert', proofCheck:'Die Tabelle rechnet 1.760 — stimmt überein.'
+        proofTotal:'Gesamtgewinn', proofHours:'Verwendete Stunden', proofShadow:'Eine Stunde mehr ist £16 wert', proofCheck:'Die Tabelle rechnet 1.760, das stimmt überein.'
       }
     },
 
@@ -172,7 +172,7 @@
       home: {
         heroEyebrow:'L\u2019optimisation, rendue lisible',
         heroTitle:'Trouvez la meilleure r\u00e9ponse. Puis v\u00e9rifiez-la.',
-        heroLead:'Plumline trouve la meilleure fa\u00e7on de r\u00e9partir des ressources limit\u00e9es \u2014 combien produire, acheter, exp\u00e9dier ou affecter \u2014 et prouve le r\u00e9sultat avec vos propres chiffres. Gratuit dans le navigateur, ou dans Google Sheets.',
+        heroLead:'Plumline trouve la meilleure fa\u00e7on de r\u00e9partir des ressources limit\u00e9es : combien produire, acheter, exp\u00e9dier ou affecter. Puis il prouve le r\u00e9sultat avec vos propres chiffres. Gratuit dans le navigateur, ou dans Google Sheets.',
         heroSolver:'Ouvrir le solveur en ligne',
         heroAddon:'Obtenir le module',
         pillarsEyebrow:'Deux fa\u00e7ons de l\u2019utiliser',
