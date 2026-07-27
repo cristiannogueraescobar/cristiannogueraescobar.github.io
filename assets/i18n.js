@@ -137,6 +137,10 @@
         tRead:'Could not read the grid',
         tSolve:'Could not solve',
         tNo:'No solution',
+        tInfeasible:'No feasible solution',
+        tIncomplete:'Search incomplete',
+        tUnbounded:'Model unbounded',
+        tNumerical:'Numerical issue',
         result:'Result'
       ,
         shadowNote:'Estimated marginal value while the current model structure stays unchanged.'
@@ -380,6 +384,10 @@
         tRead:'No se pudo leer la cuadrícula',
         tSolve:'No se pudo resolver',
         tNo:'Sin solución',
+        tInfeasible:'No hay solución factible',
+        tIncomplete:'Búsqueda incompleta',
+        tUnbounded:'Modelo no acotado',
+        tNumerical:'Problema numérico',
         result:'Resultado'
       ,
         shadowNote:'Valor marginal estimado mientras la estructura del modelo no cambie.'
@@ -623,6 +631,10 @@
         tRead:'Não foi possível ler a grade',
         tSolve:'Não foi possível resolver',
         tNo:'Sem solução',
+        tInfeasible:'Nenhuma solução viável',
+        tIncomplete:'Busca incompleta',
+        tUnbounded:'Modelo ilimitado',
+        tNumerical:'Problema numérico',
         result:'Resultado'
       ,
         shadowNote:'Valor marginal estimado enquanto a estrutura do modelo não mudar.'
@@ -866,6 +878,10 @@
         tRead:'Raster konnte nicht gelesen werden',
         tSolve:'Konnte nicht gelöst werden',
         tNo:'Keine Lösung',
+        tInfeasible:'Keine zulässige Lösung',
+        tIncomplete:'Suche unvollständig',
+        tUnbounded:'Modell unbeschränkt',
+        tNumerical:'Numerisches Problem',
         result:'Ergebnis'
       ,
         shadowNote:'Geschätzter Grenzwert, solange die aktuelle Modellstruktur unverändert bleibt.'
@@ -1109,6 +1125,10 @@
         tRead:'Impossible de lire la grille',
         tSolve:'Impossible de résoudre',
         tNo:'Aucune solution',
+        tInfeasible:'Aucune solution réalisable',
+        tIncomplete:'Recherche incomplète',
+        tUnbounded:'Modèle non borné',
+        tNumerical:'Problème numérique',
         result:'Résultat'
       ,
         shadowNote:'Valeur marginale estimée tant que la structure actuelle du modèle reste inchangée.'
