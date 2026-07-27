@@ -96,11 +96,19 @@ table.grid input:focus{background:var(--brass-tint)}
 .vs-row{display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr;gap:10px;align-items:center;padding:5px 0}
 .vs-head{font-size:11px;color:var(--faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line-fine);padding-bottom:8px}
 .vs-name{font-size:14px;color:var(--ink)}
+.vs-field{display:contents}
+.vs-mlabel{display:none}
 .vs-row select,.vs-row input{font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
 .vs-row input:disabled{opacity:.5;cursor:not-allowed}
+.vs-stale{font-size:12px;color:var(--brass);margin:0 0 10px;font-family:var(--mono)}
+.vs-err{font-size:12px;color:#b4432f;margin:2px 0 8px;font-family:var(--mono)}
 @media(max-width:560px){
-  .vs-row{grid-template-columns:1fr 1fr;gap:8px}
+  .vs-row{grid-template-columns:1fr 1fr;gap:8px 10px}
   .vs-head{display:none}
+  .vs-name{grid-column:1 / -1;font-weight:600}
+  .vs-row select{grid-column:1 / -1}
+  .vs-field{display:flex;flex-direction:column;gap:3px}
+  .vs-mlabel{display:block;font-size:10px;color:var(--faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em}
   .vs-row select,.vs-row input{min-height:44px}
 }
 .grid-tools .gt{padding:4px 12px;font-size:13px}
@@ -297,7 +305,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=24"></script>
+<script src="assets/i18n.js?v=25"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -392,6 +400,31 @@ function applyBounds_(model) {
   return Object.assign({}, model, {
     constraints: (model.constraints || []).concat(extra),
   });
+}
+
+// Classify a model for display: 'continuous', 'integer', 'binary', or 'mixed'.
+// Uses the per-variable domains when present, else the global whole-numbers flag.
+function classifyModel_(domains, wholeToggle, n) {
+  if (!domains) return wholeToggle ? 'integer' : 'continuous';
+  const bounds = domains.bounds || [];
+  const intSpec = domains.integer;
+  const isIntIndex = {};
+  if (intSpec === true) { for (let i = 0; i < n; i++) isIntIndex[i] = true; }
+  else if (Array.isArray(intSpec)) { intSpec.forEach(function (i) { isIntIndex[i] = true; }); }
+  let hasCont = false, hasInt = false, hasBinary = false, allBinary = true;
+  for (let i = 0; i < n; i++) {
+    const isInt = !!isIntIndex[i];
+    const b = bounds[i] || {};
+    const isBin = isInt && b.lower === 0 && b.upper === 1;
+    if (!isInt) { hasCont = true; allBinary = false; }
+    else if (isBin) { hasBinary = true; }
+    else { hasInt = true; allBinary = false; }
+  }
+  if (!hasInt && !hasBinary) return 'continuous';
+  if (allBinary && hasBinary) return 'binary';
+  if (hasCont) return 'mixed';
+  if (hasBinary && hasInt) return 'mixed';
+  return 'integer';
 }
 
 function integerIndices_(model) {
@@ -1353,6 +1386,14 @@ function solveModel_(sheet, model) {
     bounds: domains ? domains.bounds : null,
   });
 
+  // Real integer-variable check (not just the global toggle): a panel-set
+  // integer or binary variable makes this a discrete model too.
+  const integerSpec = domains ? domains.integer : (model.wholeNumbers === true);
+  const hasIntegerVariables = integerSpec === true ||
+    (Array.isArray(integerSpec) && integerSpec.length > 0);
+  // Classify the model for display: continuous / integer / binary / mixed.
+  const modelType = classifyModel_(domains, model.wholeNumbers === true, variables.length);
+
   const result = {
     status: solution.status,
     stopReason: solution.stopReason || null,
@@ -1361,6 +1402,7 @@ function solveModel_(sheet, model) {
     objectiveLabel: labelFor_(grid, model.objective.cell),
     elapsedMs: Date.now() - started,
     variables: variables,
+    modelType: modelType,
     labels: readLabels_(grid, model.variables, variables),
     previous: variables.map(function (cell) {
       const value = cellAt_(grid, cell).value;
@@ -1425,7 +1467,7 @@ function solveModel_(sheet, model) {
   // "shadow price", the number the paid tools call a sensitivity report.
   // Only meaningful for the continuous relaxation, so we skip it for integer
   // models, and we cap the extra solves so a large model stays responsive.
-  if (solution.status === 'optimal' && model.wholeNumbers !== true) {
+  if (solution.status === 'optimal' && !hasIntegerVariables) {
     addShadowPrices_(result.constraints, constraints, {
       maximize: model.objective.sense !== 'min',
       objective: coefficientVector_(objectiveForm, variables),
@@ -1912,6 +1954,7 @@ function matchesAnyHint_(label, hints) {
 
   function loadExample(name){
     modelChanged();
+    resetVarPanel();   // full model replacement: old variable settings are void
     clearUndo();   // loading/clearing replaces the whole grid; old undo is void
     if(name!=='blank'){
       var ex=EXAMPLES[name];
@@ -2126,6 +2169,7 @@ function matchesAnyHint_(label, hints) {
     if(!block.length){ showTrouble(t('tCsvEmpty'), t('tCsvEmptyBody')); return; }
     // Replace the grid with the CSV, sized to fit (capped at MAX), from A1.
     modelChanged();
+    resetVarPanel();   // full model replacement: old variable settings are void
     saveUndo();
     var needRows=Math.min(MAX_ROWS, Math.max(MIN_ROWS, block.length));
     var needCols=Math.min(MAX_COLS, Math.max(MIN_COLS, block.reduce(function(m,r){return Math.max(m,r.length);},0)));
@@ -2247,6 +2291,23 @@ function matchesAnyHint_(label, hints) {
   // configuration survives re-detection as long as the cells line up.
   var varSettings={};          // { cellA1: {type:'continuous'|'integer'|'binary', min:num|null, max:num|null} }
   var detectedVars=[];         // [{cell, label}] from the last detection
+  var panelStale=false;        // grid changed since last detection
+
+  // A full model replacement (load example, clear, import CSV) makes old
+  // per-variable settings meaningless, since they're keyed by cell. Wipe them
+  // so a new model never silently inherits an old variable's type.
+  function resetVarPanel(){
+    varSettings={}; detectedVars=[]; panelStale=false;
+    var panel=document.getElementById('varSettings');
+    if(panel){ panel.style.display='none'; panel.open=false; }
+    var body=document.getElementById('varSettingsBody'); if(body) body.innerHTML='';
+    setDetectLabel(false);
+  }
+  // Switch the button between "Variable settings" and "Refresh variables".
+  function setDetectLabel(stale){
+    var b=document.getElementById('detectVars');
+    if(b) b.textContent = stale ? t('refreshVars') : t('detectVars');
+  }
 
   // Detect the model on the main thread (fast: no solving) to populate the
   // panel with one row per decision variable.
@@ -2258,6 +2319,8 @@ function matchesAnyHint_(label, hints) {
     var grid=loadGrid_(sheet);
     var cells=expandRange_(grid, model.variables);
     detectedVars=cells.map(function(cell){ return { cell:cell, label:labelFor_(grid, cell)||cell }; });
+    panelStale=false;
+    setDetectLabel(false);
     renderVarPanel();
     var panel=document.getElementById('varSettings');
     if(panel){ panel.style.display=''; panel.open=true; }
@@ -2266,6 +2329,47 @@ function matchesAnyHint_(label, hints) {
   function settingsFor(cell){
     if(!varSettings[cell]) varSettings[cell]={ type:'continuous', min:0, max:null };
     return varSettings[cell];
+  }
+
+  // Parse a bound field: empty -> null; reject NaN and infinities -> null.
+  function cleanBound(raw){
+    if(raw==='' || raw==null) return null;
+    var n=Number(raw);
+    if(!isFinite(n)) return null;   // NaN, Infinity, -Infinity all rejected
+    return n;
+  }
+
+  // Validate one variable's bounds and show/clear an inline message. Returns
+  // an error key or null. Variables are non-negative (the simplex assumes it),
+  // so a negative minimum is rejected rather than silently ignored.
+  function varError(s){
+    if(s.type==='binary') return null;
+    var lo=(typeof s.min==='number')?s.min:0;
+    var hi=(typeof s.max==='number')?s.max:null;
+    if(lo<0) return 'varErrNegative';
+    if(hi!=null && lo>hi) return 'varErrMinMax';
+    return null;
+  }
+  function showVarError(cell){
+    var row=document.querySelector('.vs-row[data-cell="'+cell+'"]');
+    if(!row) return;
+    var s=settingsFor(cell);
+    var err=varError(s);
+    var msgEl=row.parentNode.querySelector('.vs-err[data-for="'+cell+'"]');
+    if(err){
+      if(!msgEl){
+        msgEl=document.createElement('div');
+        msgEl.className='vs-err'; msgEl.setAttribute('data-for',cell);
+        row.parentNode.insertBefore(msgEl, row.nextSibling);
+      }
+      var label=(varSettings[cell]&&detectedVars.filter(function(v){return v.cell===cell;})[0]);
+      msgEl.textContent=t(err).replace('{name}', label?label.label:cell);
+    } else if(msgEl){ msgEl.parentNode.removeChild(msgEl); }
+  }
+  // Are any variable bounds invalid? Blocks solving with a clear message.
+  function anyVarError(){
+    for(var c in varSettings){ if(varSettings.hasOwnProperty(c) && varError(varSettings[c])) return true; }
+    return false;
   }
 
   function renderVarPanel(){
@@ -2280,13 +2384,16 @@ function matchesAnyHint_(label, hints) {
       return '<div class="vs-row" data-cell="'+esc(v.cell)+'">'+
         '<span class="vs-name">'+esc(v.label)+'</span>'+
         '<select class="vs-type" aria-label="'+esc(t('varType'))+' '+esc(v.label)+'">'+opts+'</select>'+
-        '<input class="vs-min" type="number" step="any" placeholder="0" value="'+esc(String(binLocked?0:minVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMin'))+' '+esc(v.label)+'">'+
-        '<input class="vs-max" type="number" step="any" placeholder="&#8734;" value="'+esc(String(binLocked?1:maxVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMax'))+' '+esc(v.label)+'">'+
+        '<label class="vs-field"><span class="vs-mlabel">'+esc(t('varMin'))+'</span>'+
+        '<input class="vs-min" type="number" step="any" placeholder="0" value="'+esc(String(binLocked?0:minVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMin'))+' '+esc(v.label)+'"></label>'+
+        '<label class="vs-field"><span class="vs-mlabel">'+esc(t('varMax'))+'</span>'+
+        '<input class="vs-max" type="number" step="any" placeholder="&#8734;" value="'+esc(String(binLocked?1:maxVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMax'))+' '+esc(v.label)+'"></label>'+
         '</div>';
     }).join('');
     var head='<div class="vs-row vs-head"><span class="vs-name">'+esc(t('varName'))+'</span>'+
       '<span>'+esc(t('varType'))+'</span><span>'+esc(t('varMin'))+'</span><span>'+esc(t('varMax'))+'</span></div>';
-    body.innerHTML=head+rows;
+    var staleNote=panelStale?'<div class="vs-stale">'+esc(t('varStale'))+'</div>':'';
+    body.innerHTML=staleNote+head+rows;
     // Wire each row's inputs to update varSettings.
     var rowEls=body.querySelectorAll('.vs-row[data-cell]');
     for(var k=0;k<rowEls.length;k++){
@@ -2298,10 +2405,21 @@ function matchesAnyHint_(label, hints) {
         typeSel.addEventListener('change',function(){
           var s=settingsFor(cell); s.type=typeSel.value;
           if(s.type==='binary'){ s.min=0; s.max=1; }
-          renderVarPanel();   // re-render to lock/unlock min/max
+          modelChanged(true);      // changing a domain invalidates any solve/result
+          renderVarPanel();    // re-render to lock/unlock min/max
         });
-        if(minIn) minIn.addEventListener('input',function(){ var s=settingsFor(cell); s.min=(minIn.value===''?null:Number(minIn.value)); });
-        if(maxIn) maxIn.addEventListener('input',function(){ var s=settingsFor(cell); s.max=(maxIn.value===''?null:Number(maxIn.value)); });
+        if(minIn) minIn.addEventListener('input',function(){
+          var s=settingsFor(cell);
+          s.min=cleanBound(minIn.value);
+          modelChanged(true);
+          showVarError(cell);
+        });
+        if(maxIn) maxIn.addEventListener('input',function(){
+          var s=settingsFor(cell);
+          s.max=cleanBound(maxIn.value);
+          modelChanged(true);
+          showVarError(cell);
+        });
       })(rowEls[k]);
     }
   }
@@ -2323,8 +2441,12 @@ function matchesAnyHint_(label, hints) {
       if(isInt){ integerIdx.push(j); anyInteger=true; }
       var lo=(s.type==='binary')?0:(typeof s.min==='number'?s.min:0);
       var hi=(s.type==='binary')?1:(typeof s.max==='number'?s.max:null);
+      // Variables are non-negative; a negative lower is clamped to 0 here as a
+      // safety net (the UI already rejects it, so this shouldn't trigger).
+      if(lo<0) lo=0;
       bounds.push({ lower:lo, upper:hi });
-      if(lo>0 || hi!=null) anyBound=true;
+      // A bound is "active" if it constrains beyond the default 0..inf.
+      if(lo>1e-9 || hi!=null) anyBound=true;
     }
     return { integer: anyInteger?integerIdx:false, bounds: anyBound?bounds:null };
   }
@@ -2332,6 +2454,11 @@ function matchesAnyHint_(label, hints) {
   function solve(){
     var res=document.getElementById('result');
     var btn=document.getElementById('solve');
+    if(anyVarError()){
+      res.innerHTML='<div class="trouble">'+t('varErrBlock')+'</div>';
+      res.classList.add('show');
+      return;
+    }
     var sheet=sheetFromGrid();
     var wholeNumbers=document.getElementById('whole').checked;
 
@@ -2416,7 +2543,7 @@ function matchesAnyHint_(label, hints) {
   // result already on screen: both would belong to the old model but appear
   // to describe the new one. Cancel the run, clear the stale receipt, and drop
   // lastResult so the export buttons can't emit an outdated answer.
-  function modelChanged(){
+  function modelChanged(fromPanel){
     if(workerBusy){
       cancelSolve(true);
     } else {
@@ -2426,6 +2553,19 @@ function matchesAnyHint_(label, hints) {
       }
     }
     lastResult=null;
+    // A GRID change (not a panel change) may invalidate the detected variables.
+    // Keep the settings, but flag the panel and offer to refresh.
+    if(!fromPanel && detectedVars.length && !panelStale){
+      panelStale=true;
+      setDetectLabel(true);
+      var body=document.getElementById('varSettingsBody');
+      if(body && !body.querySelector('.vs-stale')){
+        var note=document.createElement('div');
+        note.className='vs-stale';
+        note.textContent=t('varStale');
+        body.insertBefore(note, body.firstChild);
+      }
+    }
   }
 
   // Ask the user before running a synchronous solve that could briefly freeze
@@ -2507,7 +2647,9 @@ function matchesAnyHint_(label, hints) {
     rows.push([t('sdStatus'), statusName]);
     if(typeof out.elapsedMs==='number') rows.push([t('sdTime'), out.elapsedMs+' ms']);
     if(typeof out.nodesExplored==='number'&&out.nodesExplored!=null) rows.push([t('sdNodes'), String(out.nodesExplored)]);
-    rows.push([t('sdModelType'), (model.wholeNumbers===true)?t('sdInteger'):t('sdContinuous')]);
+    var typeNames={continuous:t('sdContinuous'),integer:t('sdInteger'),binary:t('sdBinary'),mixed:t('sdMixed')};
+    var mt=out.modelType || ((model && model.wholeNumbers===true)?'integer':'continuous');
+    rows.push([t('sdModelType'), typeNames[mt]||typeNames.continuous]);
     if(displayStopReason){
       var sr={node_limit:t('srNode'),time_limit:t('srTime'),iteration_limit:t('srIteration'),numerical_failure:t('srNumerical')}[displayStopReason]||displayStopReason;
       rows.push([t('sdStopped'), sr]);
@@ -2851,7 +2993,11 @@ function matchesAnyHint_(label, hints) {
   // Language: the shared engine wires the <select>, applies text, returns the lang.
   LANG = Plumline.i18n.init('solver');
   var sel=document.getElementById('lang');
-  if(sel) sel.addEventListener('change',function(){ LANG = sel.value; });
+  if(sel) sel.addEventListener('change',function(){
+    LANG = sel.value;
+    setDetectLabel(panelStale);              // button label follows the language
+    if(detectedVars.length) renderVarPanel(); // re-render dynamic panel in new language
+  });
 
   var _ex=(location.search.match(/[?&]ex=(\w+)/)||[])[1];
   loadExample(EXAMPLES[_ex] ? _ex : 'production');
