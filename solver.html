@@ -200,7 +200,9 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <button class="ghost gt" id="delRow" data-i18n="delRow">− Row</button>
       <button class="ghost gt" id="addCol" data-i18n="addCol">+ Column</button>
       <button class="ghost gt" id="delCol" data-i18n="delCol">− Column</button>
+      <button class="ghost gt" id="importCsv" data-i18n="importCsv">Import CSV</button>
       <button class="ghost gt" id="undoGrid" data-i18n="undoGrid" style="display:none">Undo</button>
+      <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none">
     </div>
 
     <div class="controls-row">
@@ -248,7 +250,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=13"></script>
+<script src="assets/i18n.js?v=14"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1985,6 +1987,59 @@ function matchesAnyHint_(label, hints) {
     lastUndo=null;
     var u=document.getElementById('undoGrid'); if(u) u.style.display='none';
   }
+
+  // --- CSV import -----------------------------------------------------------
+  // A correct CSV parser: fields may be quoted, and a quoted field can contain
+  // commas, newlines, and escaped quotes (""). Unquoted fields split on commas
+  // and rows split on newlines. Returns a 2D array of strings.
+  function parseCSV(text){
+    var t=String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    var rows=[], row=[], field='', inQuotes=false;
+    for(var i=0;i<t.length;i++){
+      var ch=t.charAt(i);
+      if(inQuotes){
+        if(ch==='"'){
+          if(t.charAt(i+1)==='"'){ field+='"'; i++; }   // escaped quote
+          else inQuotes=false;                           // closing quote
+        } else field+=ch;
+      } else {
+        if(ch==='"') inQuotes=true;
+        else if(ch===','){ row.push(field); field=''; }
+        else if(ch==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else field+=ch;
+      }
+    }
+    // flush the final field/row unless the text ended on a clean newline
+    if(field!==''||row.length){ row.push(field); rows.push(row); }
+    // drop a single trailing empty row (file ending in a newline)
+    if(rows.length && rows[rows.length-1].length===1 && rows[rows.length-1][0]==='') rows.pop();
+    return rows;
+  }
+
+  function importCSVText(text){
+    var block=parseCSV(text);
+    if(!block.length){ showTrouble(t('tCsvEmpty'), t('tCsvEmptyBody')); return; }
+    // Replace the grid with the CSV, sized to fit (capped at MAX), from A1.
+    saveUndo();
+    var needRows=Math.min(MAX_ROWS, Math.max(MIN_ROWS, block.length));
+    var needCols=Math.min(MAX_COLS, Math.max(MIN_COLS, block.reduce(function(m,r){return Math.max(m,r.length);},0)));
+    var clipped=(block.length>MAX_ROWS)||block.some(function(r){return r.length>MAX_COLS;});
+    ROWS=needRows; COLS=needCols; blank();
+    for(var r=0;r<block.length&&r<ROWS;r++)
+      for(var c=0;c<block[r].length&&c<COLS;c++)
+        data[r][c]=block[r][c];
+    render();
+    document.getElementById('result').classList.remove('show');
+    if(clipped) showTrouble(t('tPasteClipped'), t('tPasteClippedBody'));
+  }
+
+  function importCSVFile(file){
+    if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(e){ importCSVText(String(e.target.result||'')); };
+    reader.onerror=function(){ showTrouble(t('tCsvError'), t('tCsvErrorBody')); };
+    reader.readAsText(file);
+  }
   // Invalidate a stale undo point. Called after any NEW action that changes the
   // grid (editing a cell, adding/removing rows or columns, loading an example,
   // clearing), so Ctrl+Z can never jump back past those later changes. NOT
@@ -2315,6 +2370,15 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('addCol').addEventListener('click',addCol);
   document.getElementById('delCol').addEventListener('click',delCol);
   document.getElementById('undoGrid').addEventListener('click',doUndo);
+  // Import CSV: the button opens the hidden file picker; picking a file imports.
+  document.getElementById('importCsv').addEventListener('click',function(){
+    document.getElementById('csvFile').click();
+  });
+  document.getElementById('csvFile').addEventListener('change',function(e){
+    var f=e.target.files&&e.target.files[0];
+    importCSVFile(f);
+    e.target.value='';   // reset so the same file can be re-imported
+  });
   // Ctrl/Cmd+Z right after a paste or delete undoes it.
   document.addEventListener('keydown',function(e){
     if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')&&lastUndo){
