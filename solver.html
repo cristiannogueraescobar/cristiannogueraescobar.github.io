@@ -259,7 +259,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=15"></script>
+<script src="assets/i18n.js?v=16"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2118,14 +2118,15 @@ function matchesAnyHint_(label, hints) {
       else if(out.status==='unbounded'){ title=t('tUnbounded'); body=t('statusUnboundedBody'); }
       else if(out.status==='numerical_failure'){ title=t('tNumerical'); body=t('statusNumericalBody'); }
       else { title=t('tIncomplete'); body=t('statusUnknownBody'); }   // unknown, iteration_limit, time_limit, node_limit...
-      return showTrouble(title, body);
+      return showTrouble(title, body, out, model);
     }
     renderReceipt(out,model);
   }
 
-  function showTrouble(title,msg){
+  function showTrouble(title,msg,out,model){
     var res=document.getElementById('result');
-    res.innerHTML='<div class="trouble"><b>'+title+'.</b> '+msg+'</div>';
+    var extra=(out?solveDetailsHTML(out,model||{}):'');
+    res.innerHTML='<div class="trouble"><b>'+title+'.</b> '+msg+'</div>'+extra;
     res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 
@@ -2133,7 +2134,8 @@ function matchesAnyHint_(label, hints) {
   // status, time, nodes, model type, and (when relevant) why it stopped and
   // whether optimality was proven. Turns internal engine fields into visible value.
   function solveDetailsHTML(out,model){
-    var statusName={optimal:t('statOptimal'),feasible:t('statFeasible'),unknown:t('statUnknown')}[out.status]||out.status;
+    var statusName={optimal:t('statOptimal'),feasible:t('statFeasible'),unknown:t('statUnknown'),
+      infeasible:t('statInfeasible'),unbounded:t('tUnbounded'),numerical_failure:t('tNumerical')}[out.status]||out.status;
     var rows=[];
     rows.push([t('sdStatus'), statusName]);
     if(typeof out.elapsedMs==='number') rows.push([t('sdTime'), out.elapsedMs+' ms']);
