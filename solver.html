@@ -165,6 +165,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   font-size:14px;color:var(--soft);border:1px solid var(--line);border-radius:8px;background:var(--panel)}
 .solving .spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--true);
   border-radius:50%;animation:spin .7s linear infinite;flex:none}
+.cancel-solve{margin-left:auto;padding:8px 14px;font-size:13px;min-height:44px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .shadow-note{font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5;font-style:italic}
 </style>
@@ -275,7 +276,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=20"></script>
+<script src="assets/i18n.js?v=21"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1842,6 +1843,7 @@ function matchesAnyHint_(label, hints) {
   };
 
   function loadExample(name){
+    modelChanged();
     clearUndo();   // loading/clearing replaces the whole grid; old undo is void
     if(name!=='blank'){
       var ex=EXAMPLES[name];
@@ -1880,6 +1882,7 @@ function matchesAnyHint_(label, hints) {
     for(var i=0;i<inputs.length;i++){
       inputs[i].addEventListener('input',function(e){
         data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')]=e.target.value;
+        modelChanged();   // an in-flight solve is now stale
         clearUndo();   // a manual edit invalidates the previous paste/delete undo
       });
       inputs[i].addEventListener('paste',function(e){
@@ -1890,8 +1893,9 @@ function matchesAnyHint_(label, hints) {
         // Only intercept a genuine multi-cell block; a single value pastes
         // normally so the user can still edit one cell by hand.
         var multi=block.length>1||(block.length===1&&block[0].length>1);
-        if(!multi){ clearUndo(); return; }   // single-cell paste is a new edit
+        if(!multi){ modelChanged(); clearUndo(); return; }   // single-cell paste is a new edit
         e.preventDefault();
+        modelChanged();
         var startR=+e.target.getAttribute('data-r');
         var startC=+e.target.getAttribute('data-c');
         saveUndo();   // enable undo of this whole paste
@@ -1914,8 +1918,8 @@ function matchesAnyHint_(label, hints) {
     }
     data.length=ROWS;
   }
-  function addRow(){ if(ROWS>=MAX_ROWS) return; clearUndo(); ROWS++; ensureShape(); render(); }
-  function addCol(){ if(COLS>=MAX_COLS) return; clearUndo(); COLS++; ensureShape(); render(); }
+  function addRow(){ if(ROWS>=MAX_ROWS) return; modelChanged(); clearUndo(); ROWS++; ensureShape(); render(); }
+  function addCol(){ if(COLS>=MAX_COLS) return; modelChanged(); clearUndo(); COLS++; ensureShape(); render(); }
 
   // Does the last row / last column hold any non-empty cell? Used to warn
   // before a delete would discard real data.
@@ -1935,12 +1939,14 @@ function matchesAnyHint_(label, hints) {
     // Warn before discarding a row that still holds data. The delete is also
     // undoable, so this is a light confirm, not a hard block.
     if(lastRowHasData() && !confirm(t('confirmDelRow'))) return;
+    modelChanged();
     saveUndo();
     ROWS--; ensureShape(); render();
   }
   function delCol(){
     if(COLS<=MIN_COLS) return;
     if(lastColHasData() && !confirm(t('confirmDelCol'))) return;
+    modelChanged();
     saveUndo();
     COLS--; ensureShape(); render();
   }
@@ -2050,6 +2056,7 @@ function matchesAnyHint_(label, hints) {
     var block=parseCSV(text);
     if(!block.length){ showTrouble(t('tCsvEmpty'), t('tCsvEmptyBody')); return; }
     // Replace the grid with the CSV, sized to fit (capped at MAX), from A1.
+    modelChanged();
     saveUndo();
     var needRows=Math.min(MAX_ROWS, Math.max(MIN_ROWS, block.length));
     var needCols=Math.min(MAX_COLS, Math.max(MIN_COLS, block.reduce(function(m,r){return Math.max(m,r.length);},0)));
@@ -2142,7 +2149,9 @@ function matchesAnyHint_(label, hints) {
         '  }',
         '  try{',
         '    var sheet=mkSheet(d.formulas,d.values);',
-        '    var model=detectModel_(sheet);',
+        '    var model;',
+        '    try{ model=detectModel_(sheet); }',
+        '    catch(rerr){ rerr.__phase="read"; throw rerr; }',
         '    model.wholeNumbers=d.wholeNumbers===true;',
         '    var out=solveModel_(sheet,model);',
         '    self.postMessage({token:d.token,ok:true,out:out,wholeNumbers:model.wholeNumbers});',
@@ -2152,7 +2161,9 @@ function matchesAnyHint_(label, hints) {
         '};'
       ].join('\n');
       var blob=new Blob([src+'\n'+glue],{type:'application/javascript'});
-      engineWorker=new Worker(URL.createObjectURL(blob));
+      var workerUrl=URL.createObjectURL(blob);
+      engineWorker=new Worker(workerUrl);
+      URL.revokeObjectURL(workerUrl);   // the Worker has loaded its code; free the URL
     }catch(err){
       engineWorker=false;   // mark as unavailable; use the main-thread fallback
     }
@@ -2162,12 +2173,8 @@ function matchesAnyHint_(label, hints) {
   function solve(){
     var res=document.getElementById('result');
     var btn=document.getElementById('solve');
-    // Read + detect on the main thread (fast); solve on the worker (heavy).
     var sheet=sheetFromGrid();
-    var model;
-    try{ model=detectModel_(sheet); }
-    catch(err){ return showTrouble(t('tRead'), String(err.message||err)); }
-    model.wholeNumbers=document.getElementById('whole').checked;
+    var wholeNumbers=document.getElementById('whole').checked;
 
     var w=buildWorker();
     if(!w){ solveMainThread(); return; }   // no worker support: fall back
@@ -2175,7 +2182,7 @@ function matchesAnyHint_(label, hints) {
     // Show a solving state with a Cancel button, so a long solve never traps
     // the user and never freezes the page.
     res.innerHTML='<div class="solving"><span class="spin" aria-hidden="true"></span>'+t('solving')+
-      ' <button class="ghost" id="cancelSolve" style="margin-left:12px;padding:4px 12px;font-size:13px">'+t('cancelSolve')+'</button></div>';
+      ' <button class="ghost cancel-solve" id="cancelSolve">'+t('cancelSolve')+'</button></div>';
     res.classList.add('show');
     if(btn){ btn.disabled=true; }
     workerBusy=true;
@@ -2195,14 +2202,24 @@ function matchesAnyHint_(label, hints) {
       }
     };
     w.onerror=function(){
-      // Worker blew up unexpectedly: fall back to the main thread once.
-      workerBusy=false; engineWorker=false;
+      // Ignore an error tied to a run we've already superseded or cancelled.
+      if(myToken!==workerToken) return;
+      workerBusy=false;
+      if(engineWorker){ engineWorker.terminate(); }
+      engineWorker=false;   // don't rebuild the same broken worker automatically
       if(btn){ btn.disabled=false; }
-      solveMainThread();
+      // Don't silently run a solve that could freeze the page. Let the user
+      // choose compatibility mode (synchronous main-thread solve).
+      var res=document.getElementById('result');
+      res.innerHTML='<div class="trouble">'+t('workerFailedBody')+
+        ' <button class="ghost" id="compatSolve" style="margin-left:12px;padding:8px 14px;font-size:13px;min-height:44px">'+t('compatRetry')+'</button></div>';
+      res.classList.add('show');
+      var cb=document.getElementById('compatSolve');
+      if(cb) cb.addEventListener('click',function(){ solveMainThread(); });
     };
 
     var payload=sheetToArrays(sheet);
-    payload.wholeNumbers=model.wholeNumbers;
+    payload.wholeNumbers=wholeNumbers;
     payload.token=myToken;
     w.postMessage(payload);
   }
@@ -2214,15 +2231,22 @@ function matchesAnyHint_(label, hints) {
     return { formulas:dr.getFormulas(), values:dr.getValues() };
   }
 
-  function cancelSolve(){
+  function cancelSolve(silent){
     if(!workerBusy) return;
     workerToken++;             // any in-flight result is now stale and ignored
     if(engineWorker){ engineWorker.terminate(); engineWorker=null; }  // rebuild next time
     workerBusy=false;
     var btn=document.getElementById('solve'); if(btn){ btn.disabled=false; }
     var res=document.getElementById('result');
-    res.innerHTML='<div class="trouble">'+t('cancelledBody')+'</div>';
+    res.innerHTML='<div class="trouble">'+t(silent?'modelChangedBody':'cancelledBody')+'</div>';
     res.classList.add('show');
+  }
+
+  // Any edit to the model invalidates an in-flight solve: the result would
+  // belong to the old model but appear to describe the new one. Cancel it.
+  // (Undo handling stays with each caller — some edits set an undo point.)
+  function modelChanged(){
+    if(workerBusy) cancelSolve(true);
   }
 
   // Fallback: solve synchronously on the main thread (original behaviour).
@@ -2555,6 +2579,8 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('addCol').addEventListener('click',addCol);
   document.getElementById('delCol').addEventListener('click',delCol);
   document.getElementById('undoGrid').addEventListener('click',doUndo);
+  // Toggling integer mode changes the model; cancel any in-flight solve.
+  document.getElementById('whole').addEventListener('change',modelChanged);
   // Import CSV: the button opens the hidden file picker; picking a file imports.
   document.getElementById('importCsv').addEventListener('click',function(){
     document.getElementById('csvFile').click();
