@@ -200,7 +200,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <button class="ghost gt" id="delRow" data-i18n="delRow">− Row</button>
       <button class="ghost gt" id="addCol" data-i18n="addCol">+ Column</button>
       <button class="ghost gt" id="delCol" data-i18n="delCol">− Column</button>
-      <button class="ghost gt" id="undoPaste" data-i18n="undoPaste" style="display:none">Undo paste</button>
+      <button class="ghost gt" id="undoGrid" data-i18n="undoGrid" style="display:none">Undo</button>
     </div>
 
     <div class="controls-row">
@@ -248,7 +248,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=11"></script>
+<script src="assets/i18n.js?v=12"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1862,11 +1862,9 @@ function matchesAnyHint_(label, hints) {
         e.preventDefault();
         var startR=+e.target.getAttribute('data-r');
         var startC=+e.target.getAttribute('data-c');
-        lastPaste=snapshot();   // enable undo of this whole paste
+        saveUndo();   // enable undo of this whole paste
         var res=pasteBlock(block,startR,startC);
         render();
-        var u=document.getElementById('undoPaste');
-        if(u) u.style.display='';
         if(res.clipped) showTrouble(t('tPasteClipped'), t('tPasteClippedBody'));
       });
     }
@@ -1885,9 +1883,35 @@ function matchesAnyHint_(label, hints) {
     data.length=ROWS;
   }
   function addRow(){ if(ROWS>=MAX_ROWS) return; ROWS++; ensureShape(); render(); }
-  function delRow(){ if(ROWS<=MIN_ROWS) return; ROWS--; ensureShape(); render(); }
   function addCol(){ if(COLS>=MAX_COLS) return; COLS++; ensureShape(); render(); }
-  function delCol(){ if(COLS<=MIN_COLS) return; COLS--; ensureShape(); render(); }
+
+  // Does the last row / last column hold any non-empty cell? Used to warn
+  // before a delete would discard real data.
+  function lastRowHasData(){
+    var r=ROWS-1; if(!data[r]) return false;
+    for(var c=0;c<COLS;c++) if(data[r][c]!=null&&String(data[r][c]).trim()!=='') return true;
+    return false;
+  }
+  function lastColHasData(){
+    var c=COLS-1;
+    for(var r=0;r<ROWS;r++) if(data[r]&&data[r][c]!=null&&String(data[r][c]).trim()!=='') return true;
+    return false;
+  }
+
+  function delRow(){
+    if(ROWS<=MIN_ROWS) return;
+    // Warn before discarding a row that still holds data. The delete is also
+    // undoable, so this is a light confirm, not a hard block.
+    if(lastRowHasData() && !confirm(t('confirmDelRow'))) return;
+    saveUndo();
+    ROWS--; ensureShape(); render();
+  }
+  function delCol(){
+    if(COLS<=MIN_COLS) return;
+    if(lastColHasData() && !confirm(t('confirmDelCol'))) return;
+    saveUndo();
+    COLS--; ensureShape(); render();
+  }
 
   // Disable a button when its limit is reached, so the bounds are visible.
   function syncGridTools(){
@@ -1910,8 +1934,9 @@ function matchesAnyHint_(label, hints) {
     return rows.map(function(line){ return line.split('\t'); });
   }
 
-  // Remember the last paste so it can be undone in one step.
-  var lastPaste=null;   // { before: deep-copy of data, ROWS, COLS }
+  // Remember the last destructive operation (paste or delete) so it can be
+  // undone in one step.
+  var lastUndo=null;   // { data: deep-copy, ROWS, COLS }
 
   function snapshot(){
     return { data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS };
@@ -1920,6 +1945,11 @@ function matchesAnyHint_(label, hints) {
     ROWS=snap.ROWS; COLS=snap.COLS;
     data=snap.data.map(function(row){return row.slice();});
     render();
+  }
+  // Capture the current state as the undo point and reveal the Undo button.
+  function saveUndo(){
+    lastUndo=snapshot();
+    var u=document.getElementById('undoGrid'); if(u) u.style.display='';
   }
 
   // Paste a parsed block with its top-left at (startR, startC). Grows the grid
@@ -1947,11 +1977,11 @@ function matchesAnyHint_(label, hints) {
     return { clipped:clipped };
   }
 
-  function undoPaste(){
-    if(!lastPaste) return;
-    restore(lastPaste);
-    lastPaste=null;
-    var u=document.getElementById('undoPaste'); if(u) u.style.display='none';
+  function doUndo(){
+    if(!lastUndo) return;
+    restore(lastUndo);
+    lastUndo=null;
+    var u=document.getElementById('undoGrid'); if(u) u.style.display='none';
   }
 
   // Build the sheet object the engine expects from the current grid.
@@ -2274,11 +2304,11 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('delRow').addEventListener('click',delRow);
   document.getElementById('addCol').addEventListener('click',addCol);
   document.getElementById('delCol').addEventListener('click',delCol);
-  document.getElementById('undoPaste').addEventListener('click',undoPaste);
-  // Ctrl/Cmd+Z right after a paste undoes the whole block.
+  document.getElementById('undoGrid').addEventListener('click',doUndo);
+  // Ctrl/Cmd+Z right after a paste or delete undoes it.
   document.addEventListener('keydown',function(e){
-    if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')&&lastPaste){
-      e.preventDefault(); undoPaste();
+    if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')&&lastUndo){
+      e.preventDefault(); doUndo();
     }
   });
 
