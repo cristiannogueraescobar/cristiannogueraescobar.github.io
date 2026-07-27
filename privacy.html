@@ -23,6 +23,11 @@
       <nav class="nav">
         <a href="solver.html" data-i18n="navSolver">Solver</a>
         <a href="index.html" data-i18n="navAddon">Add-on</a>
+        <a href="guide.html" data-i18n="navGuide">Guide</a>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="en">EN</option><option value="es">ES</option>
+          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
+        </select>
       </nav>
     </header>
   </div>
@@ -30,90 +35,44 @@
 
 <div class="plumb">
   <main class="prose">
-    <h1>Privacy policy</h1>
-    <p class="updated">Last updated 25 July 2026</p>
+    <h1 data-i18n="pvTitle">Privacy policy</h1>
+    <p class="updated" data-i18n="updated">Last updated 25 July 2026</p>
 
-    <p>
-      Plumline does not collect, transmit, sell or store your data anywhere
-      outside the spreadsheet you use it in. There is no Plumline server, no
-      account, no analytics and no tracking. The rest of this page is that
-      sentence, in full.
-    </p>
+    <p data-i18n="pvIntro">Plumline does not collect, transmit, sell or store your data anywhere outside the spreadsheet you use it in. There is no Plumline server, no account, no analytics and no tracking. The rest of this page is that sentence, in full.</p>
 
-    <h2>What Plumline accesses</h2>
-    <p>
-      When you open the panel, Plumline reads the values and formulas of the
-      active spreadsheet to work out the model and solve it. It reads nothing
-      until you open the panel, and nothing outside the spreadsheet the add-on
-      is installed in. It holds two authorisations from your Google Account:
-    </p>
+    <h2 data-i18n="pvAccessH">What Plumline accesses</h2>
+    <p data-i18n="pvAccessP">When you open the panel, Plumline reads the values and formulas of the active spreadsheet to work out the model and solve it. It reads nothing until you open the panel, and nothing outside the spreadsheet the add-on is installed in. It holds two authorisations from your Google Account:</p>
     <ul>
-      <li><span class="mono">spreadsheets.currentonly</span>, access limited to the spreadsheet the add-on is installed in. It cannot reach any other file in your Drive.</li>
-      <li><span class="mono">script.container.ui</span>, permission to display the side panel.</li>
+      <li><span class="mono">spreadsheets.currentonly</span>, <span data-i18n="pvScope1">access limited to the spreadsheet the add-on is installed in. It cannot reach any other file in your Drive.</span></li>
+      <li><span class="mono">script.container.ui</span>, <span data-i18n="pvScope2">permission to display the side panel.</span></li>
     </ul>
-    <p>
-      It requests no access to Gmail, Drive at large, Calendar or Contacts, and
-      makes no requests to any external service.
-    </p>
+    <p data-i18n="pvAccessP2">It requests no access to Gmail, Drive at large, Calendar or Contacts, and makes no requests to any external service.</p>
 
-    <h2>What Plumline stores, and where</h2>
-    <p>
-      So you don't have to define your model again each time, Plumline saves its
-      definition, which cells are the quantities, which cell is the total, and
-      the limits, using the Apps Script document properties of that same
-      spreadsheet. It also keeps the previous values of the quantity cells so the
-      last write can be undone.
-    </p>
-    <p>
-      This stays attached to your spreadsheet, inside Google's infrastructure. It
-      is never sent to us or anyone else, and it is removed when you use “forget
-      this model”, uninstall the add-on, or delete the spreadsheet.
-    </p>
+    <h2 data-i18n="pvStoreH">What Plumline stores, and where</h2>
+    <p data-i18n="pvStoreP">So you don't have to define your model again each time, Plumline saves its definition, which cells are the quantities, which cell is the total, and the limits, using the Apps Script document properties of that same spreadsheet. It also keeps the previous values of the quantity cells so the last write can be undone.</p>
+    <p data-i18n="pvStoreP2">This stays attached to your spreadsheet, inside Google's infrastructure. It is never sent to us or anyone else, and it is removed when you use “forget this model”, uninstall the add-on, or delete the spreadsheet.</p>
 
-    <h2>What Plumline does not do</h2>
+    <h2 data-i18n="pvNotH">What Plumline does not do</h2>
     <ul>
-      <li>It does not transmit your spreadsheet contents anywhere.</li>
-      <li>It uses no cookies, analytics, advertising or tracking.</li>
-      <li>It creates no account and asks for no email address.</li>
-      <li>It does not use your data to train any model.</li>
-      <li>It shares and sells nothing, because it holds nothing to share or sell.</li>
+      <li data-i18n="pvNot1">It does not transmit your spreadsheet contents anywhere.</li>
+      <li data-i18n="pvNot2">It uses no cookies, analytics, advertising or tracking.</li>
+      <li data-i18n="pvNot3">It creates no account and asks for no email address.</li>
+      <li data-i18n="pvNot4">It does not use your data to train any model.</li>
+      <li data-i18n="pvNot5">It shares and sells nothing, because it holds nothing to share or sell.</li>
     </ul>
-    <p>This website carries no analytics and loads no third-party scripts or images.</p>
+    <p data-i18n="pvNotP">This website carries no analytics and loads no third-party scripts or images.</p>
 
-    <h2>Where the processing happens</h2>
-    <p>
-      Plumline runs as a Google Apps Script bound to your spreadsheet, so the
-      reading, the calculation and the writing all happen within Google's
-      infrastructure under your own account. Google's handling of that data is
-      governed by <a href="https://policies.google.com/privacy">Google's privacy
-      policy</a>. No third party is involved.
-    </p>
+    <h2 data-i18n="pvWhereH">Where the processing happens</h2>
+    <p><span data-i18n="pvWhereP">Plumline runs as a Google Apps Script bound to your spreadsheet, so the reading, the calculation and the writing all happen within Google's infrastructure under your own account. Google's handling of that data is governed by</span> <a href="https://policies.google.com/privacy" data-i18n="pvWhereLink">Google's privacy policy</a><span data-i18n="pvWhereEnd">. No third party is involved.</span></p>
 
-    <h2>Limited use</h2>
-    <p>
-      Plumline's use of information received from Google APIs adheres to the
-      <a href="https://developers.google.com/terms/api-services-user-data-policy">Google
-      API Services User Data Policy</a>, including the Limited Use requirements.
-      Data is used solely to provide the feature you invoked, is not transferred
-      to others, and is not used for advertising or any purpose other than
-      solving the model in front of you.
-    </p>
+    <h2 data-i18n="pvLimitedH">Limited use</h2>
+    <p><span data-i18n="pvLimitedP">Plumline's use of information received from Google APIs adheres to the</span> <a href="https://developers.google.com/terms/api-services-user-data-policy" data-i18n="pvLimitedLink">Google API Services User Data Policy</a><span data-i18n="pvLimitedEnd">, including the Limited Use requirements. Data is used solely to provide the feature you invoked, is not transferred to others, and is not used for advertising or any purpose other than solving the model in front of you.</span></p>
 
-    <h2>Your control</h2>
-    <p>
-      You can revoke Plumline's access at any time at
-      <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>,
-      or by uninstalling the add-on. Because no data leaves your spreadsheet,
-      there is nothing to request or delete from us.
-    </p>
+    <h2 data-i18n="pvControlH">Your control</h2>
+    <p><span data-i18n="pvControlP">You can revoke Plumline's access at any time at</span> <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a><span data-i18n="pvControlEnd">, or by uninstalling the add-on. Because no data leaves your spreadsheet, there is nothing to request or delete from us.</span></p>
 
-    <h2>Changes and contact</h2>
-    <p>
-      If this policy changes, the date at the top changes with it, and prior
-      versions remain in this site's public history. Questions about privacy can
-      be sent to
-      <a href="mailto:cristiannogueraescobar@gmail.com">cristiannogueraescobar@gmail.com</a>.
-    </p>
+    <h2 data-i18n="pvChangesH">Changes and contact</h2>
+    <p><span data-i18n="pvChangesP">If this policy changes, the date at the top changes with it, and prior versions remain in this site's public history. Questions about privacy can be sent to</span> <a href="mailto:cristiannogueraescobar@gmail.com">cristiannogueraescobar@gmail.com</a>.</p>
   </main>
 </div>
 

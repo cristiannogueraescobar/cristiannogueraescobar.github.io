@@ -23,6 +23,11 @@
       <nav class="nav">
         <a href="solver.html" data-i18n="navSolver">Solver</a>
         <a href="index.html" data-i18n="navAddon">Add-on</a>
+        <a href="guide.html" data-i18n="navGuide">Guide</a>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="en">EN</option><option value="es">ES</option>
+          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
+        </select>
       </nav>
     </header>
   </div>
@@ -30,86 +35,42 @@
 
 <div class="plumb">
   <main class="prose">
-    <h1>Terms of service</h1>
-    <p class="updated">Last updated 25 July 2026</p>
+    <h1 data-i18n="tmTitle">Terms of service</h1>
+    <p class="updated" data-i18n="updated">Last updated 25 July 2026</p>
 
-    <h2>Agreement</h2>
-    <p>
-      By installing or using Plumline (“the add-on”) you agree to these terms.
-      If you don't agree with them, don't install it. The add-on is free.
-    </p>
+    <h2 data-i18n="tmAgreeH">Agreement</h2>
+    <p data-i18n="tmAgreeP">By installing or using Plumline (“the add-on”) you agree to these terms. If you don't agree with them, don't install it. The add-on is free.</p>
 
-    <h2>What you may do</h2>
-    <p>
-      Use the add-on for personal or commercial purposes, in any number of
-      spreadsheets, without payment or registration.
-    </p>
+    <h2 data-i18n="tmMayH">What you may do</h2>
+    <p data-i18n="tmMayP">Use the add-on for personal or commercial purposes, in any number of spreadsheets, without payment or registration.</p>
 
-    <h2>What you may not do</h2>
+    <h2 data-i18n="tmNotH">What you may not do</h2>
     <ul>
-      <li>Redistribute or resell the add-on as your own.</li>
-      <li>Disrupt, overload or interfere with its operation for others.</li>
-      <li>Use it in violation of Google's terms or of applicable law.</li>
+      <li data-i18n="tmNot1">Redistribute or resell the add-on as your own.</li>
+      <li data-i18n="tmNot2">Disrupt, overload or interfere with its operation for others.</li>
+      <li data-i18n="tmNot3">Use it in violation of Google's terms or of applicable law.</li>
     </ul>
 
-    <h2>Results and responsibility</h2>
-    <p>
-      The add-on computes an optimal solution to the model it reads from your
-      spreadsheet. It cannot judge whether that model correctly represents your
-      situation. A model built on wrong figures, missing constraints or
-      mistranslated intent will produce an answer that is mathematically correct
-      and practically wrong.
-    </p>
-    <p>
-      Decisions taken on its output remain yours. Review the model the panel
-      shows you before solving, and the constraint check it shows you afterwards.
-    </p>
-    <p>
-      The add-on writes values into cells you designate. Google Sheets keeps its
-      own version history and the panel offers an undo for its most recent write,
-      but you are responsible for keeping copies of work you cannot afford to
-      lose.
-    </p>
+    <h2 data-i18n="tmResultH">Results and responsibility</h2>
+    <p data-i18n="tmResultP">The add-on computes an optimal solution to the model it reads from your spreadsheet. It cannot judge whether that model correctly represents your situation. A model built on wrong figures, missing constraints or mistranslated intent will produce an answer that is mathematically correct and practically wrong.</p>
+    <p data-i18n="tmResultP2">Decisions taken on its output remain yours. Review the model the panel shows you before solving, and the constraint check it shows you afterwards.</p>
+    <p data-i18n="tmResultP3">The add-on writes values into cells you designate. Google Sheets keeps its own version history and the panel offers an undo for its most recent write, but you are responsible for keeping copies of work you cannot afford to lose.</p>
 
-    <h2>No warranty</h2>
-    <p>
-      The add-on is provided “as is”, without warranty of any kind, express or
-      implied, including merchantability, fitness for a particular purpose and
-      non-infringement. It is not guaranteed to be uninterrupted, error-free, or
-      able to read every spreadsheet.
-    </p>
+    <h2 data-i18n="tmWarrantyH">No warranty</h2>
+    <p data-i18n="tmWarrantyP">The add-on is provided “as is”, without warranty of any kind, express or implied, including merchantability, fitness for a particular purpose and non-infringement. It is not guaranteed to be uninterrupted, error-free, or able to read every spreadsheet.</p>
 
-    <h2>Limitation of liability</h2>
-    <p>
-      To the maximum extent permitted by law, the developer shall not be liable
-      for any indirect, incidental, special or consequential damages, or for loss
-      of profits, revenue, data or business opportunity, arising from use of or
-      inability to use the add-on.
-    </p>
-    <p>
-      Nothing here excludes liability that cannot be excluded by law, including
-      for death or personal injury caused by negligence, or for fraud.
-    </p>
+    <h2 data-i18n="tmLiabilityH">Limitation of liability</h2>
+    <p data-i18n="tmLiabilityP">To the maximum extent permitted by law, the developer shall not be liable for any indirect, incidental, special or consequential damages, or for loss of profits, revenue, data or business opportunity, arising from use of or inability to use the add-on.</p>
+    <p data-i18n="tmLiabilityP2">Nothing here excludes liability that cannot be excluded by law, including for death or personal injury caused by negligence, or for fraud.</p>
 
-    <h2>Availability and changes</h2>
-    <p>
-      The add-on may be modified, suspended or discontinued at any time. These
-      terms may be updated; the date at the top will change and continued use
-      after that constitutes acceptance.
-    </p>
+    <h2 data-i18n="tmAvailH">Availability and changes</h2>
+    <p data-i18n="tmAvailP">The add-on may be modified, suspended or discontinued at any time. These terms may be updated; the date at the top will change and continued use after that constitutes acceptance.</p>
 
-    <h2>Trademarks</h2>
-    <p>
-      Plumline is independent and is not affiliated with, sponsored by or
-      endorsed by Google. Google Sheets™, Google Workspace™ and Google Apps
-      Script™ are trademarks of Google LLC.
-    </p>
+    <h2 data-i18n="tmTrademarkH">Trademarks</h2>
+    <p data-i18n="tmTrademarkP">Plumline is independent and is not affiliated with, sponsored by or endorsed by Google. Google Sheets™, Google Workspace™ and Google Apps Script™ are trademarks of Google LLC.</p>
 
-    <h2>Contact</h2>
-    <p>
-      Questions about these terms can be sent to
-      <a href="mailto:cristiannogueraescobar@gmail.com">cristiannogueraescobar@gmail.com</a>.
-    </p>
+    <h2 data-i18n="tmContactH">Contact</h2>
+    <p><span data-i18n="tmContactP">Questions about these terms can be sent to</span> <a href="mailto:cristiannogueraescobar@gmail.com">cristiannogueraescobar@gmail.com</a>.</p>
   </main>
 </div>
 
