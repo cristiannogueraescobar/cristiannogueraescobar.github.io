@@ -82,7 +82,7 @@
         faq3Q:'What kinds of problems does it solve?',
         faq3A:'Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one.',
         faq4Q:'Are my numbers safe?',
-        faq4A:'Yes. The online solver runs entirely in your browser and uploads nothing. The add-on reads only the spreadsheet it is installed in, sends nothing to any server, and asks for no account.',
+        faq4A:'Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google\'s infrastructure under your own account. There is no account to create and no tracking.',
         faq5Q:'How much does it cost?',
         faq5A:'Nothing. Both the online solver and the add-on are free.'
       ,
@@ -177,7 +177,7 @@
         limitsCant:'Does not handle',
         limitsCantP:'Genuinely non-linear relationships, such as one decision multiplied by another, or curves and diminishing returns. Plumline detects these and points at the cell rather than returning a wrong answer.',
         limitsSize:'On size',
-        limitsSizeP:'There is no fixed cap on variables or limits, but very large models can be slow or hit an internal safety ceiling. If you need to solve something large or non-linear, a dedicated operations-research tool is the right choice, and Plumline will tell you when it is out of its depth.'
+        limitsSizeP:'The online solver works on the grid you see (up to 12 rows by 6 columns), which fits most everyday problems. The add-on reads whatever model is in your sheet. Either way, very large or numerically awkward models can be slow or hit an internal safety ceiling; for those, or for non-linear ones, a dedicated operations-research tool is the right choice, and Plumline tells you when a problem is out of its depth.'
       },
       legal: {
         pvTitle:'Privacy policy',
@@ -213,7 +213,7 @@
         pvChangesP:'If this policy changes, the date at the top changes with it, and prior versions remain in this site\'s public history. Questions about privacy can be sent to',
         tmTitle:'Terms of service',
         tmAgreeH:'Agreement',
-        tmAgreeP:'By installing or using Plumline (“the add-on”) you agree to these terms. If you don\'t agree with them, don\'t install it. The add-on is free.',
+        tmAgreeP:'By using Plumline, the free online solver at plumline.online or the Google Sheets add-on, you agree to these terms. If you don\'t agree with them, don\'t use it. Plumline is free.',
         tmMayH:'What you may do',
         tmMayP:'Use the add-on for personal or commercial purposes, in any number of spreadsheets, without payment or registration.',
         tmNotH:'What you may not do',
@@ -221,7 +221,7 @@
         tmNot2:'Disrupt, overload or interfere with its operation for others.',
         tmNot3:'Use it in violation of Google\'s terms or of applicable law.',
         tmResultH:'Results and responsibility',
-        tmResultP:'The add-on computes an optimal solution to the model it reads from your spreadsheet. It cannot judge whether that model correctly represents your situation. A model built on wrong figures, missing constraints or mistranslated intent will produce an answer that is mathematically correct and practically wrong.',
+        tmResultP:'Plumline attempts to find the best solution supported by the model it reads from your spreadsheet. Depending on the model size, numerical conditions and solving limits, it may return an optimal solution, a feasible solution without proven optimality, or no result. It cannot judge whether the model correctly represents your situation: a model built on wrong figures, missing constraints or mistranslated intent will produce an answer that fits the model but not reality.',
         tmResultP2:'Decisions taken on its output remain yours. Review the model the panel shows you before solving, and the constraint check it shows you afterwards.',
         tmResultP3:'The add-on writes values into cells you designate. Google Sheets keeps its own version history and the panel offers an undo for its most recent write, but you are responsible for keeping copies of work you cannot afford to lose.',
         tmWarrantyH:'No warranty',
@@ -245,7 +245,7 @@
         aboutWhyH:'Why it works this way',
         aboutWhyP:'A solver asks you to trust a number you could not work out yourself. Plumline answers that by showing its work: it writes the solution back into your own formulas, lets them recalculate, and shows you the check. You do not have to believe it. You can see it.',
         aboutPrivacyH:'On your data',
-        aboutPrivacyP:'The online solver runs entirely in your browser and uploads nothing. The Google Sheets add-on reads only the sheet it is installed in and sends nothing to any server. There is no account and no tracking. The full detail is in the privacy policy.',
+        aboutPrivacyP:'The online solver runs entirely in your browser and uploads nothing. The Google Sheets add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google\'s infrastructure under your own account. There is no account and no tracking. The full detail is in the privacy policy.',
         aboutContactH:'Get in touch',
         aboutContactP:'Bug reports, questions, and feature requests are welcome. The fastest way to reach the developer is by email:',
         aboutCta:'Try the online solver'
@@ -325,7 +325,7 @@
         faq3Q:'¿Qué tipos de problemas resuelve?',
         faq3A:'Problemas lineales y enteros: mezcla de producción, compras, mezclas, turnos, transporte, reparto de presupuesto. No resuelve los realmente no lineales, como una cantidad multiplicada por otra cantidad, y te avisa si encuentra uno.',
         faq4Q:'¿Están seguros mis números?',
-        faq4A:'Sí. El solver online funciona entero en tu navegador y no sube nada. El complemento lee solo la hoja en la que está instalado, no envía nada a ningún servidor y no pide ninguna cuenta.',
+        faq4A:'Sí. El solver online funciona entero en tu navegador y no sube nada. El complemento no envía datos de tu hoja a Plumline ni a terceros; su procesamiento ocurre dentro de la infraestructura de Google, bajo tu propia cuenta. No hay cuenta que crear ni seguimiento.',
         faq5Q:'¿Cuánto cuesta?',
         faq5A:'Nada. Tanto el solver online como el complemento son gratuitos.'
       ,
@@ -420,7 +420,7 @@
         limitsCant:'No resuelve',
         limitsCantP:'Relaciones realmente no lineales, como una decisión multiplicada por otra, o curvas y rendimientos decrecientes. Plumline las detecta y señala la celda en vez de devolver una respuesta errónea.',
         limitsSize:'Sobre el tamaño',
-        limitsSizeP:'No hay un tope fijo de variables o límites, pero los modelos muy grandes pueden ir lentos o alcanzar un techo de seguridad interno. Si necesitas resolver algo grande o no lineal, una herramienta especializada de investigación operativa es la opción correcta, y Plumline te avisa cuando algo se le escapa.'
+        limitsSizeP:'El solver online trabaja sobre la cuadrícula que ves (hasta 12 filas por 6 columnas), que basta para la mayoría de los problemas del día a día. El complemento lee el modelo que haya en tu hoja. En cualquier caso, los modelos muy grandes o numéricamente complicados pueden ir lentos o alcanzar un techo de seguridad interno; para esos, o para los no lineales, una herramienta especializada de investigación operativa es la opción correcta, y Plumline te avisa cuando un problema se le escapa.'
       },
       legal: {
         pvTitle:'Política de privacidad',
@@ -456,7 +456,7 @@
         pvChangesP:'Si esta política cambia, la fecha de arriba cambia con ella, y las versiones anteriores permanecen en el historial público de este sitio. Las preguntas sobre privacidad pueden enviarse a',
         tmTitle:'Términos del servicio',
         tmAgreeH:'Aceptación',
-        tmAgreeP:'Al instalar o usar Plumline (“el complemento”) aceptas estos términos. Si no estás de acuerdo con ellos, no lo instales. El complemento es gratuito.',
+        tmAgreeP:'Al usar Plumline, el solver online gratuito en plumline.online o el complemento de Google Sheets, aceptas estos términos. Si no estás de acuerdo con ellos, no lo uses. Plumline es gratuito.',
         tmMayH:'Lo que puedes hacer',
         tmMayP:'Usar el complemento con fines personales o comerciales, en cualquier número de hojas de cálculo, sin pago ni registro.',
         tmNotH:'Lo que no puedes hacer',
@@ -464,7 +464,7 @@
         tmNot2:'Interrumpir, sobrecargar o interferir en su funcionamiento para otros.',
         tmNot3:'Usarlo en incumplimiento de los términos de Google o de la ley aplicable.',
         tmResultH:'Resultados y responsabilidad',
-        tmResultP:'El complemento calcula una solución óptima al modelo que lee de tu hoja de cálculo. No puede juzgar si ese modelo representa correctamente tu situación. Un modelo basado en cifras equivocadas, con restricciones que faltan o con una intención mal traducida producirá una respuesta matemáticamente correcta y prácticamente errónea.',
+        tmResultP:'Plumline intenta encontrar la mejor solución que el modelo permita, leído de tu hoja de cálculo. Según el tamaño del modelo, las condiciones numéricas y los límites de cálculo, puede devolver una solución óptima, una solución factible sin optimalidad demostrada, o ningún resultado. No puede juzgar si el modelo representa correctamente tu situación: un modelo con cifras equivocadas, restricciones que faltan o una intención mal traducida producirá una respuesta que encaja con el modelo pero no con la realidad.',
         tmResultP2:'Las decisiones que tomes con su resultado siguen siendo tuyas. Revisa el modelo que el panel te muestra antes de resolver, y la comprobación de restricciones que te muestra después.',
         tmResultP3:'El complemento escribe valores en las celdas que designes. Google Sheets mantiene su propio historial de versiones y el panel ofrece deshacer su escritura más reciente, pero tú eres responsable de guardar copias del trabajo que no te puedas permitir perder.',
         tmWarrantyH:'Sin garantía',
@@ -488,7 +488,7 @@
         aboutWhyH:'Por qué funciona así',
         aboutWhyP:'Un solver te pide confiar en un número que no podrías calcular tú mismo. Plumline responde a eso mostrando su trabajo: escribe la solución en tus propias fórmulas, deja que recalculen y te enseña la comprobación. No tienes que creerlo. Puedes verlo.',
         aboutPrivacyH:'Sobre tus datos',
-        aboutPrivacyP:'El solver online funciona entero en tu navegador y no sube nada. El complemento de Google Sheets lee solo la hoja en la que está instalado y no envía nada a ningún servidor. No hay cuenta ni seguimiento. El detalle completo está en la política de privacidad.',
+        aboutPrivacyP:'El solver online funciona entero en tu navegador y no sube nada. El complemento de Google Sheets no envía datos de tu hoja a Plumline ni a terceros; su procesamiento ocurre dentro de la infraestructura de Google, bajo tu propia cuenta. No hay cuenta ni seguimiento. El detalle completo está en la política de privacidad.',
         aboutContactH:'Ponte en contacto',
         aboutContactP:'Los informes de errores, las preguntas y las peticiones de funciones son bienvenidos. La forma más rápida de llegar al desarrollador es por correo:',
         aboutCta:'Prueba el solver online'
@@ -568,7 +568,7 @@
         faq3Q:'Que tipos de problema resolve?',
         faq3A:'Problemas lineares e inteiros: mix de produção, compras, misturas, escalas, transporte, divisão de orçamento. Não resolve os realmente não lineares, como uma quantidade multiplicada por outra, e avisa se encontrar um.',
         faq4Q:'Os meus números estão seguros?',
-        faq4A:'Sim. O solver online roda inteiramente no seu navegador e não envia nada. O complemento lê apenas a planilha em que está instalado, não envia nada a nenhum servidor e não pede conta.',
+        faq4A:'Sim. O solver online roda inteiramente no seu navegador e não envia nada. O complemento não envia dados da sua planilha ao Plumline nem a terceiros; o processamento ocorre dentro da infraestrutura da Google, sob a sua própria conta. Não há conta a criar nem rastreamento.',
         faq5Q:'Quanto custa?',
         faq5A:'Nada. Tanto o solver online quanto o complemento são gratuitos.'
       ,
@@ -663,7 +663,7 @@
         limitsCant:'Não resolve',
         limitsCantP:'Relações realmente não lineares, como uma decisão multiplicada por outra, ou curvas e retornos decrescentes. O Plumline as detecta e aponta a célula em vez de devolver uma resposta errada.',
         limitsSize:'Sobre o tamanho',
-        limitsSizeP:'Não há teto fixo de variáveis ou limites, mas modelos muito grandes podem ficar lentos ou atingir um teto de segurança interno. Se você precisa resolver algo grande ou não linear, uma ferramenta dedicada de investigação operacional é a escolha certa, e o Plumline avisa quando algo foge do seu alcance.'
+        limitsSizeP:'O solver online trabalha na grade que você vê (até 12 linhas por 6 colunas), que basta para a maioria dos problemas do dia a dia. O complemento lê o modelo que houver na sua planilha. De qualquer forma, modelos muito grandes ou numericamente complicados podem ficar lentos ou atingir um teto de segurança interno; para esses, ou para os não lineares, uma ferramenta dedicada de investigação operacional é a escolha certa, e o Plumline avisa quando um problema foge do seu alcance.'
       },
       legal: {
         pvTitle:'Política de privacidade',
@@ -699,7 +699,7 @@
         pvChangesP:'Se esta política mudar, a data no topo muda com ela, e as versões anteriores permanecem no histórico público deste site. Questões sobre privacidade podem ser enviadas para',
         tmTitle:'Termos de serviço',
         tmAgreeH:'Acordo',
-        tmAgreeP:'Ao instalar ou usar o Plumline (“o complemento”) você concorda com estes termos. Se não concordar com eles, não o instale. O complemento é gratuito.',
+        tmAgreeP:'Ao usar o Plumline, o solver online gratuito em plumline.online ou o complemento do Google Sheets, você concorda com estes termos. Se não concordar com eles, não o use. O Plumline é gratuito.',
         tmMayH:'O que você pode fazer',
         tmMayP:'Usar o complemento para fins pessoais ou comerciais, em qualquer número de planilhas, sem pagamento nem registo.',
         tmNotH:'O que você não pode fazer',
@@ -707,7 +707,7 @@
         tmNot2:'Perturbar, sobrecarregar ou interferir no seu funcionamento para outros.',
         tmNot3:'Usá-lo em violação dos termos da Google ou da lei aplicável.',
         tmResultH:'Resultados e responsabilidade',
-        tmResultP:'O complemento calcula uma solução ótima para o modelo que lê da sua planilha. Não consegue julgar se esse modelo representa corretamente a sua situação. Um modelo baseado em números errados, com restrições em falta ou com intenção mal traduzida produzirá uma resposta matematicamente correta e praticamente errada.',
+        tmResultP:'O Plumline tenta encontrar a melhor solução que o modelo permite, lido da sua planilha. Dependendo do tamanho do modelo, das condições numéricas e dos limites de cálculo, pode devolver uma solução ótima, uma solução viável sem otimalidade provada, ou nenhum resultado. Ele não pode julgar se o modelo representa corretamente a sua situação: um modelo com números errados, restrições em falta ou intenção mal traduzida produzirá uma resposta que se ajusta ao modelo, mas não à realidade.',
         tmResultP2:'As decisões tomadas com base no resultado continuam a ser suas. Reveja o modelo que o painel lhe mostra antes de resolver, e a verificação de restrições que ele lhe mostra depois.',
         tmResultP3:'O complemento escreve valores nas células que você designar. O Google Sheets mantém o seu próprio histórico de versões e o painel oferece desfazer a escrita mais recente, mas você é responsável por guardar cópias do trabalho que não pode dar-se ao luxo de perder.',
         tmWarrantyH:'Sem garantia',
@@ -731,7 +731,7 @@
         aboutWhyH:'Por que funciona assim',
         aboutWhyP:'Um solver pede que você confie num número que não conseguiria calcular sozinho. O Plumline responde a isso mostrando o seu trabalho: escreve a solução nas suas próprias fórmulas, deixa recalcular e mostra a conferência. Você não precisa acreditar. Você pode ver.',
         aboutPrivacyH:'Sobre os seus dados',
-        aboutPrivacyP:'O solver online roda inteiramente no seu navegador e não envia nada. O complemento do Google Sheets lê apenas a planilha em que está instalado e não envia nada a nenhum servidor. Não há conta nem rastreamento. O detalhe completo está na política de privacidade.',
+        aboutPrivacyP:'O solver online roda inteiramente no seu navegador e não envia nada. O complemento do Google Sheets não envia dados da sua planilha ao Plumline nem a terceiros; o processamento ocorre dentro da infraestrutura da Google, sob a sua própria conta. Não há conta nem rastreamento. O detalhe completo está na política de privacidade.',
         aboutContactH:'Entre em contacto',
         aboutContactP:'Relatórios de erros, perguntas e pedidos de funcionalidades são bem-vindos. A forma mais rápida de chegar ao desenvolvedor é por e-mail:',
         aboutCta:'Experimente o solver online'
@@ -811,7 +811,7 @@
         faq3Q:'Welche Arten von Problemen löst es?',
         faq3A:'Lineare und ganzzahlige Probleme: Produktionsmix, Einkauf, Mischungen, Schichtpläne, Transport, Budgetaufteilung. Echte nichtlineare löst es nicht, etwa eine Menge mal eine andere, und es sagt dir, wenn es auf so eine trifft.',
         faq4Q:'Sind meine Zahlen sicher?',
-        faq4A:'Ja. Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Add-on liest nur die Tabelle, in der es installiert ist, sendet nichts an einen Server und verlangt kein Konto.',
+        faq4A:'Ja. Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Add-on sendet keine Tabellendaten an Plumline oder Dritte; seine Verarbeitung findet innerhalb der Google-Infrastruktur unter deinem eigenen Konto statt. Es gibt kein Konto zu erstellen und kein Tracking.',
         faq5Q:'Was kostet es?',
         faq5A:'Nichts. Sowohl der Online-Solver als auch das Add-on sind kostenlos.'
       ,
@@ -906,7 +906,7 @@
         limitsCant:'Löst nicht',
         limitsCantP:'Echte nichtlineare Beziehungen, etwa eine Entscheidung mal eine andere, oder Kurven und abnehmende Erträge. Plumline erkennt diese und zeigt auf die Zelle, statt eine falsche Antwort zu liefern.',
         limitsSize:'Zur Größe',
-        limitsSizeP:'Es gibt keine feste Obergrenze für Variablen oder Grenzen, aber sehr große Modelle können langsam sein oder eine interne Sicherheitsgrenze erreichen. Wenn du etwas Großes oder Nichtlineares lösen musst, ist ein spezialisiertes Operations-Research-Werkzeug die richtige Wahl, und Plumline sagt dir, wenn etwas seinen Rahmen sprengt.'
+        limitsSizeP:'Der Online-Solver arbeitet mit dem sichtbaren Raster (bis zu 12 Zeilen mal 6 Spalten), das für die meisten Alltagsprobleme reicht. Das Add-on liest das Modell, das in deiner Tabelle steht. So oder so können sehr große oder numerisch schwierige Modelle langsam sein oder eine interne Sicherheitsgrenze erreichen; dafür oder für nichtlineare Modelle ist ein spezialisiertes Operations-Research-Werkzeug die richtige Wahl, und Plumline sagt dir, wenn ein Problem seinen Rahmen sprengt.'
       },
       legal: {
         pvTitle:'Datenschutzerklärung',
@@ -942,7 +942,7 @@
         pvChangesP:'Wenn sich diese Richtlinie ändert, ändert sich das Datum oben mit ihr, und frühere Versionen bleiben im öffentlichen Verlauf dieser Website. Fragen zum Datenschutz können gesendet werden an',
         tmTitle:'Nutzungsbedingungen',
         tmAgreeH:'Zustimmung',
-        tmAgreeP:'Durch Installieren oder Verwenden von Plumline (“das Add-on”) stimmst du diesen Bedingungen zu. Wenn du ihnen nicht zustimmst, installiere es nicht. Das Add-on ist kostenlos.',
+        tmAgreeP:'Durch die Nutzung von Plumline, dem kostenlosen Online-Solver auf plumline.online oder dem Google-Sheets-Add-on, stimmst du diesen Bedingungen zu. Wenn du ihnen nicht zustimmst, nutze es nicht. Plumline ist kostenlos.',
         tmMayH:'Was du tun darfst',
         tmMayP:'Das Add-on für private oder kommerzielle Zwecke nutzen, in beliebig vielen Tabellen, ohne Bezahlung oder Registrierung.',
         tmNotH:'Was du nicht tun darfst',
@@ -950,7 +950,7 @@
         tmNot2:'Seinen Betrieb für andere stören, überlasten oder beeinträchtigen.',
         tmNot3:'Es unter Verstoß gegen Googles Bedingungen oder geltendes Recht nutzen.',
         tmResultH:'Ergebnisse und Verantwortung',
-        tmResultP:'Das Add-on berechnet eine optimale Lösung für das Modell, das es aus deiner Tabelle liest. Es kann nicht beurteilen, ob dieses Modell deine Situation korrekt abbildet. Ein Modell mit falschen Zahlen, fehlenden Einschränkungen oder falsch übersetzter Absicht liefert eine Antwort, die mathematisch korrekt und praktisch falsch ist.',
+        tmResultP:'Plumline versucht, die beste vom Modell gestützte Lösung zu finden, die es aus deiner Tabelle liest. Je nach Modellgröße, numerischen Bedingungen und Rechengrenzen kann es eine optimale Lösung, eine zulässige Lösung ohne bewiesene Optimalität oder kein Ergebnis liefern. Es kann nicht beurteilen, ob das Modell deine Situation korrekt abbildet: Ein Modell mit falschen Zahlen, fehlenden Einschränkungen oder falsch übersetzter Absicht liefert eine Antwort, die zum Modell passt, aber nicht zur Realität.',
         tmResultP2:'Entscheidungen, die du auf Basis der Ausgabe triffst, bleiben deine. Überprüfe das Modell, das dir das Panel vor dem Lösen zeigt, und die Einschränkungsprüfung, die es dir danach zeigt.',
         tmResultP3:'Das Add-on schreibt Werte in von dir bestimmte Zellen. Google Sheets führt einen eigenen Versionsverlauf, und das Panel bietet ein Rückgängig für seine jüngste Schreibaktion, doch du bist dafür verantwortlich, Kopien von Arbeit aufzubewahren, deren Verlust du dir nicht leisten kannst.',
         tmWarrantyH:'Keine Gewährleistung',
@@ -974,7 +974,7 @@
         aboutWhyH:'Warum es so funktioniert',
         aboutWhyP:'Ein Solver bittet dich, einer Zahl zu vertrauen, die du selbst nicht ausrechnen könntest. Plumline beantwortet das, indem es seine Arbeit zeigt: Es schreibt die Lösung in deine eigenen Formeln, lässt sie neu rechnen und zeigt dir die Prüfung. Du musst es nicht glauben. Du kannst es sehen.',
         aboutPrivacyH:'Zu deinen Daten',
-        aboutPrivacyP:'Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Google-Sheets-Add-on liest nur die Tabelle, in der es installiert ist, und sendet nichts an einen Server. Es gibt kein Konto und kein Tracking. Alle Details stehen in der Datenschutzerklärung.',
+        aboutPrivacyP:'Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Google-Sheets-Add-on sendet keine Tabellendaten an Plumline oder Dritte; seine Verarbeitung findet innerhalb der Google-Infrastruktur unter deinem eigenen Konto statt. Es gibt kein Konto und kein Tracking. Alle Details stehen in der Datenschutzerklärung.',
         aboutContactH:'Kontakt aufnehmen',
         aboutContactP:'Fehlerberichte, Fragen und Funktionswünsche sind willkommen. Am schnellsten erreichst du den Entwickler per E-Mail:',
         aboutCta:'Online-Solver ausprobieren'
@@ -1054,7 +1054,7 @@
         faq3Q:'Quels types de problèmes résout-il ?',
         faq3A:'Des problèmes linéaires et entiers : mix de production, achats, mélanges, plannings, transport, répartition de budget. Il ne résout pas les problèmes vraiment non linéaires, comme une quantité multipliée par une autre, et il vous le signale s’il en rencontre un.',
         faq4Q:'Mes chiffres sont-ils en sécurité ?',
-        faq4A:'Oui. Le solveur en ligne fonctionne entièrement dans votre navigateur et n’envoie rien. Le module ne lit que la feuille où il est installé, n’envoie rien à aucun serveur et ne demande aucun compte.',
+        faq4A:'Oui. Le solveur en ligne fonctionne entièrement dans votre navigateur et n\'envoie rien. Le module n\'envoie aucune donnée de feuille à Plumline ni à des tiers ; son traitement a lieu au sein de l\'infrastructure de Google, sous votre propre compte. Il n\'y a pas de compte à créer ni de suivi.',
         faq5Q:'Combien ça coûte ?',
         faq5A:'Rien. Le solveur en ligne et le module sont tous deux gratuits.'
       ,
@@ -1149,7 +1149,7 @@
         limitsCant:'Ne résout pas',
         limitsCantP:'Les relations vraiment non linéaires, comme une décision multipliée par une autre, ou les courbes et rendements décroissants. Plumline les détecte et désigne la cellule au lieu de renvoyer une mauvaise réponse.',
         limitsSize:'Sur la taille',
-        limitsSizeP:'Il n’y a pas de plafond fixe de variables ou de limites, mais les très gros modèles peuvent être lents ou atteindre un plafond de sécurité interne. Si vous devez résoudre quelque chose de grand ou de non linéaire, un outil dédié de recherche opérationnelle est le bon choix, et Plumline vous prévient quand quelque chose le dépasse.'
+        limitsSizeP:'Le solveur en ligne travaille sur la grille que vous voyez (jusqu\'à 12 lignes sur 6 colonnes), ce qui suffit pour la plupart des problèmes courants. Le module lit le modèle présent dans votre feuille. Dans les deux cas, les modèles très grands ou numériquement délicats peuvent être lents ou atteindre un plafond de sécurité interne ; pour ceux-là, ou pour les non linéaires, un outil dédié de recherche opérationnelle est le bon choix, et Plumline vous prévient quand un problème le dépasse.'
       },
       legal: {
         pvTitle:'Politique de confidentialité',
@@ -1185,7 +1185,7 @@
         pvChangesP:'Si cette politique change, la date en haut change avec elle, et les versions antérieures restent dans l’historique public de ce site. Les questions sur la confidentialité peuvent être envoyées à',
         tmTitle:'Conditions d’utilisation',
         tmAgreeH:'Accord',
-        tmAgreeP:'En installant ou en utilisant Plumline (“le module”), vous acceptez ces conditions. Si vous ne les acceptez pas, ne l’installez pas. Le module est gratuit.',
+        tmAgreeP:'En utilisant Plumline, le solveur en ligne gratuit sur plumline.online ou le module Google Sheets, vous acceptez ces conditions. Si vous ne les acceptez pas, ne l\'utilisez pas. Plumline est gratuit.',
         tmMayH:'Ce que vous pouvez faire',
         tmMayP:'Utiliser le module à des fins personnelles ou commerciales, dans un nombre illimité de feuilles de calcul, sans paiement ni inscription.',
         tmNotH:'Ce que vous ne pouvez pas faire',
@@ -1193,7 +1193,7 @@
         tmNot2:'Perturber, surcharger ou entraver son fonctionnement pour les autres.',
         tmNot3:'L’utiliser en violation des conditions de Google ou de la loi applicable.',
         tmResultH:'Résultats et responsabilité',
-        tmResultP:'Le module calcule une solution optimale au modèle qu’il lit dans votre feuille. Il ne peut pas juger si ce modèle représente correctement votre situation. Un modèle bâti sur de mauvais chiffres, des contraintes manquantes ou une intention mal traduite produira une réponse mathématiquement correcte et pratiquement fausse.',
+        tmResultP:'Plumline tente de trouver la meilleure solution que le modèle permet, lu depuis votre feuille de calcul. Selon la taille du modèle, les conditions numériques et les limites de calcul, il peut renvoyer une solution optimale, une solution réalisable sans optimalité prouvée, ou aucun résultat. Il ne peut pas juger si le modèle représente correctement votre situation : un modèle bâti sur de mauvais chiffres, des contraintes manquantes ou une intention mal traduite produira une réponse conforme au modèle mais pas à la réalité.',
         tmResultP2:'Les décisions prises à partir de sa sortie restent les vôtres. Examinez le modèle que le panneau vous montre avant de résoudre, et la vérification des contraintes qu’il vous montre ensuite.',
         tmResultP3:'Le module écrit des valeurs dans les cellules que vous désignez. Google Sheets conserve son propre historique de versions et le panneau offre une annulation de sa dernière écriture, mais il vous incombe de conserver des copies du travail que vous ne pouvez pas vous permettre de perdre.',
         tmWarrantyH:'Aucune garantie',
@@ -1217,7 +1217,7 @@
         aboutWhyH:'Pourquoi ça marche ainsi',
         aboutWhyP:'Un solveur vous demande de faire confiance à un nombre que vous ne pourriez pas calculer vous-même. Plumline y répond en montrant son travail : il réécrit la solution dans vos propres formules, les laisse recalculer et vous montre la vérification. Vous n’avez pas à le croire. Vous pouvez le voir.',
         aboutPrivacyH:'À propos de vos données',
-        aboutPrivacyP:'Le solveur en ligne fonctionne entièrement dans votre navigateur et n’envoie rien. Le module Google Sheets ne lit que la feuille où il est installé et n’envoie rien à aucun serveur. Il n’y a ni compte ni suivi. Le détail complet est dans la politique de confidentialité.',
+        aboutPrivacyP:'Le solveur en ligne fonctionne entièrement dans votre navigateur et n\'envoie rien. Le module Google Sheets n\'envoie aucune donnée de feuille à Plumline ni à des tiers ; son traitement a lieu au sein de l\'infrastructure de Google, sous votre propre compte. Il n\'y a ni compte ni suivi. Le détail complet est dans la politique de confidentialité.',
         aboutContactH:'Nous contacter',
         aboutContactP:'Les rapports de bugs, les questions et les demandes de fonctionnalités sont les bienvenus. Le moyen le plus rapide de joindre le développeur est l’e-mail :',
         aboutCta:'Essayer le solveur en ligne'

@@ -6,11 +6,11 @@
 <title>Linear Programming Solver Online: Free LP &amp; Integer Optimization | Plumline</title>
 <meta name="keywords" content="linear programming solver, LP solver online, integer programming, optimization calculator, simplex method, feasible region, shadow price, operations research">
 <meta property="og:title" content="Linear Programming Solver Online, Free">
-<meta property="og:description" content="Solve linear and integer optimization in your browser. Optimal solution, shadow prices, and a feasible-region graph. Nothing uploaded.">
+<meta property="og:description" content="Solve linear and integer models in your browser. Verify the result, inspect binding constraints, and see the estimated impact of extra capacity. Nothing uploaded.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/solver.html">
 <link rel="canonical" href="https://plumline.online/solver.html">
-<meta name="description" content="Free online linear programming solver. Solve LP and integer optimization problems in your browser: enter your model like a spreadsheet, get the optimal solution, shadow prices, and a feasible-region graph. No sign-up, nothing uploaded.">
+<meta name="description" content="Free online linear programming solver. Solve LP and integer models in your browser: enter your model like a spreadsheet, verify the result against your own formulas, inspect binding constraints, and see the estimated impact of one more unit. No sign-up, nothing uploaded.">
 <link rel="stylesheet" href="assets/plumline.css?v=3">
 <style>
 :root{
@@ -222,7 +222,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <p data-i18n="howP2">It solves linear and integer problems: production, purchasing, blending, staffing, transport, budgets. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it will point at the cell if it meets one.</p>
     </div>
     <div style="text-align:center;margin-top:32px">
-      <a class="cta" href="index.html" data-i18n="getAddon">Prefer it inside Google Sheets? Get notified when the add-on launches →</a>
+      <a class="cta" href="index.html#addon" data-i18n="getAddon">Prefer it inside Google Sheets? Get notified when the add-on launches →</a>
     </div>
   </div>
 </div></div>
@@ -2101,7 +2101,7 @@ function matchesAnyHint_(label, hints) {
     line(p.status==='optimal'&&Math.round(p.objective)===1760,'Production example solves','got '+fmt(p.objective)+', expected 1,760');
     // 2: shadow price present
     var hasShadow=(p.constraints||[]).some(function(c){return c.binding&&c.shadowPrice>0;});
-    line(hasShadow,'Sensitivity (shadow price) is computed', hasShadow?'a binding limit shows its value':'none found');
+    line(hasShadow,'Estimated one-unit impact (shadow price) is computed', hasShadow?'a binding limit shows its value':'none found');
     // 3: blend exact
     var b=trySolve(EXAMPLES.blend,false);
     line(b.status==='optimal'&&Math.abs(b.objective-27.35)<0.1,'Blend example solves','got £'+fmt(b.objective)+', expected ~£27.35');
