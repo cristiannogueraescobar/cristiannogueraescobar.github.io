@@ -65,31 +65,26 @@
       padding: 0 40px
     }
 
-    /* two-column workspace: input left, result right, visible together.
-   The input column holds the grid at its natural width; the output column
-   takes the rest, so wide screens are used instead of leaving the right empty. */
+    /* stacked full-width workspace: a big grid on top like a real spreadsheet,
+   controls under it, then the answer full-width below. The grid is the star. */
     .workspace {
-      display: grid;
-      grid-template-columns: minmax(560px, 1fr) 1fr;
-      gap: 40px;
-      align-items: start;
       margin-top: 22px
     }
 
-    .col-output {
-      position: sticky;
-      top: 20px
+    .gridwrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .04)
     }
 
-    @media(max-width:960px) {
-      .workspace {
-        grid-template-columns: 1fr;
-        gap: 24px
-      }
+    .result:not(:empty) {
+      margin-top: 28px
+    }
 
-      .col-output {
-        position: static
-      }
+    .result .placeholder {
+      margin-top: 28px
     }
 
     /* header */
@@ -264,7 +259,7 @@
     table.grid {
       border-collapse: collapse;
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 14.5px;
       width: 100%
     }
 
@@ -272,25 +267,25 @@
       background: var(--paper);
       color: var(--faint);
       font-weight: 500;
-      font-size: 10px;
+      font-size: 11px;
       text-align: center;
-      padding: 5px;
+      padding: 8px 6px;
       border: 1px solid var(--line-fine);
-      min-width: 78px
+      min-width: 120px
     }
 
     table.grid th.corner {
-      min-width: 30px;
-      width: 30px
+      min-width: 38px;
+      width: 38px
     }
 
     table.grid td.rownum {
       background: var(--paper);
       color: var(--faint);
       text-align: center;
-      font-size: 10px;
+      font-size: 11px;
       border: 1px solid var(--line-fine);
-      width: 30px
+      width: 38px
     }
 
     table.grid td {
@@ -303,8 +298,8 @@
       border: none;
       background: transparent;
       font-family: var(--mono);
-      font-size: 13px;
-      padding: 6px 8px;
+      font-size: 14.5px;
+      padding: 11px 12px;
       color: var(--ink);
       outline: none
     }
@@ -572,10 +567,9 @@
       border: 1px dashed var(--line);
       border-radius: 8px;
       background: rgba(255, 255, 255, .4);
-      padding: 48px 30px;
-      text-align: center;
+      padding: 22px 26px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       gap: 16px
     }
@@ -583,7 +577,6 @@
     .placeholder p {
       color: var(--faint);
       font-size: 14px;
-      max-width: 26ch;
       margin: 0
     }
 
@@ -720,31 +713,27 @@
       </div>
 
       <div class="workspace">
-        <div class="col-input">
-          <div class="gridwrap">
-            <table class="grid" id="grid"></table>
-          </div>
-          <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Put an operator (&le;,
-            &ge;, =) and a number to the right of a limit. Edit anything and solve again.</p>
+        <div class="gridwrap">
+          <table class="grid" id="grid"></table>
+        </div>
+        <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Put an operator (&le;, &ge;,
+          =) and a number to the right of a limit. Edit anything and solve again.</p>
 
-          <div class="controls-row">
-            <button class="solve" id="solve" data-i18n="solve">Solve</button>
-            <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers
-                only</span></label>
-            <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
-          </div>
+        <div class="controls-row">
+          <button class="solve" id="solve" data-i18n="solve">Solve</button>
+          <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers
+              only</span></label>
+          <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
         </div>
 
-        <div class="col-output">
-          <div class="result" id="result">
-            <div class="placeholder" id="placeholder">
-              <svg width="34" height="52" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <line x1="12" y1="0" x2="12" y2="10" stroke="var(--brass)" stroke-width="1.5" />
-                <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="var(--brass)" opacity="0.32" />
-                <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="var(--true)" stroke-width="2" />
-              </svg>
-              <p data-i18n="placeholder">Your answer will appear here, checked against your own numbers.</p>
-            </div>
+        <div class="result" id="result">
+          <div class="placeholder" id="placeholder">
+            <svg width="30" height="46" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <line x1="12" y1="0" x2="12" y2="10" stroke="var(--brass)" stroke-width="1.5" />
+              <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="var(--brass)" opacity="0.32" />
+              <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="var(--true)" stroke-width="2" />
+            </svg>
+            <p data-i18n="placeholder">Your answer will appear here, checked against your own numbers.</p>
           </div>
         </div>
       </div>
