@@ -90,6 +90,19 @@ table.grid input:focus{background:var(--brass-tint)}
 
 .controls-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px}
 .grid-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.var-settings{margin-top:16px;border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--panel)}
+.var-settings summary{cursor:pointer;font-family:var(--mono);font-size:13px;color:var(--ink);user-select:none}
+.var-intro{font-size:12px;color:var(--faint);margin:10px 0 14px}
+.vs-row{display:grid;grid-template-columns:1.4fr 1fr .8fr .8fr;gap:10px;align-items:center;padding:5px 0}
+.vs-head{font-size:11px;color:var(--faint);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line-fine);padding-bottom:8px}
+.vs-name{font-size:14px;color:var(--ink)}
+.vs-row select,.vs-row input{font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
+.vs-row input:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:560px){
+  .vs-row{grid-template-columns:1fr 1fr;gap:8px}
+  .vs-head{display:none}
+  .vs-row select,.vs-row input{min-height:44px}
+}
 .grid-tools .gt{padding:4px 12px;font-size:13px}
 .grid-tools .gt:disabled{opacity:.4;cursor:not-allowed}
 label.toggle{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink-2)}
@@ -227,6 +240,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <button class="ghost gt" id="addCol" data-i18n="addCol">+ Column</button>
       <button class="ghost gt" id="delCol" data-i18n="delCol">− Column</button>
       <button class="ghost gt" id="importCsv" data-i18n="importCsv">Import CSV</button>
+      <button class="ghost gt" id="detectVars" data-i18n="detectVars">Variable settings</button>
       <button class="ghost gt" id="undoGrid" data-i18n="undoGrid" style="display:none">Undo</button>
       <input type="file" id="csvFile" accept=".csv,text/csv" style="display:none">
     </div>
@@ -237,6 +251,12 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <p class="paste-tip" data-i18n="wholeHelp" style="width:100%;margin:0">Use this for quantities that cannot be fractional, such as people, vehicles or projects.</p>
       <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
     </div>
+
+    <details class="var-settings" id="varSettings" style="display:none">
+      <summary data-i18n="varSettingsTitle">Variable settings</summary>
+      <p class="var-intro" data-i18n="varSettingsIntro">Plumline detected these decision variables. Set each one's type and limits. Defaults keep every model unchanged.</p>
+      <div id="varSettingsBody"></div>
+    </details>
 
     <div class="result" id="result" role="status" aria-live="polite">
       <div class="placeholder" id="placeholder">
@@ -277,7 +297,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=23"></script>
+<script src="assets/i18n.js?v=24"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -326,9 +346,52 @@ const ENGINE = {
  * be fractional, and branches when some of them must come out whole.
  */
 function optimise_(model) {
+  // Per-variable bounds are translated into ordinary constraints here, so the
+  // simplex core never has to know about them. A finite upper bound becomes
+  // x_i <= upper; a positive lower bound becomes x_i >= lower (the simplex
+  // already assumes x_i >= 0, so lower <= 0 needs nothing). Incompatible
+  // bounds (lower > upper) are a proven dead end before we solve.
+  model = applyBounds_(model);
+  if (model.__infeasible) {
+    return { status: 'infeasible', stopReason: null, optimalityProven: false,
+             nodesExplored: 0, objective: null, values: null };
+  }
   const wanted = integerIndices_(model);
   if (!wanted.length) return solveLinearProgram_(model);
   return solveIntegerProgram_(model, wanted);
+}
+
+// Translate model.bounds into extra constraints. Returns a shallow copy with
+// the bounds folded in; leaves the input untouched. Sets __infeasible when a
+// variable's lower bound exceeds its upper bound.
+function applyBounds_(model) {
+  const bounds = model.bounds;
+  if (!bounds || !bounds.length) return model;
+  const n = model.objective.length;
+  const extra = [];
+  for (let i = 0; i < n; i++) {
+    const b = bounds[i];
+    if (!b) continue;
+    const lower = (typeof b.lower === 'number') ? b.lower : 0;
+    const upper = (typeof b.upper === 'number') ? b.upper : null;
+    if (upper !== null && lower > upper + 1e-9) {
+      return Object.assign({}, model, { __infeasible: true });
+    }
+    if (upper !== null) {
+      const unit = [];
+      for (let j = 0; j < n; j++) unit.push(j === i ? 1 : 0);
+      extra.push({ coefficients: unit, relation: '<=', rhs: upper });
+    }
+    if (lower > 1e-9) {
+      const unit = [];
+      for (let j = 0; j < n; j++) unit.push(j === i ? 1 : 0);
+      extra.push({ coefficients: unit, relation: '>=', rhs: lower });
+    }
+  }
+  if (!extra.length) return model;
+  return Object.assign({}, model, {
+    constraints: (model.constraints || []).concat(extra),
+  });
 }
 
 function integerIndices_(model) {
@@ -1278,12 +1341,16 @@ function solveModel_(sheet, model) {
     });
   });
 
+  // Per-variable domains (from the Variable settings panel) override the simple
+  // whole-numbers flag when present. Otherwise fall back to the global toggle.
+  const domains = model.domains || null;
   const solution = optimise_({
     maximize: model.objective.sense !== 'min',
     objective: coefficientVector_(objectiveForm, variables),
     constant: objectiveForm.constant,
     constraints: constraints,
-    integer: model.wholeNumbers === true,
+    integer: domains ? domains.integer : (model.wholeNumbers === true),
+    bounds: domains ? domains.bounds : null,
   });
 
   const result = {
@@ -2155,6 +2222,7 @@ function matchesAnyHint_(label, hints) {
         '    try{ model=detectModel_(sheet); }',
         '    catch(rerr){ rerr.__phase="read"; throw rerr; }',
         '    model.wholeNumbers=d.wholeNumbers===true;',
+        '    if(d.domains) model.domains=d.domains;',
         '    var out=solveModel_(sheet,model);',
         '    self.postMessage({token:d.token,ok:true,out:out,wholeNumbers:model.wholeNumbers});',
         '  }catch(err){',
@@ -2172,11 +2240,110 @@ function matchesAnyHint_(label, hints) {
     return engineWorker;
   }
 
+  // --- Variable settings panel ----------------------------------------------
+  // Type and per-variable limits are properties of a variable, not model
+  // constraints, so they live in a separate panel rather than in the grid.
+  // varSettings maps a variable's cell (e.g. "B2") to {type, min, max}, so the
+  // configuration survives re-detection as long as the cells line up.
+  var varSettings={};          // { cellA1: {type:'continuous'|'integer'|'binary', min:num|null, max:num|null} }
+  var detectedVars=[];         // [{cell, label}] from the last detection
+
+  // Detect the model on the main thread (fast: no solving) to populate the
+  // panel with one row per decision variable.
+  function detectForPanel(){
+    var sheet=sheetFromGrid();
+    var model;
+    try{ model=detectModel_(sheet); }
+    catch(err){ showTrouble(t('tRead'), String(err.message||err)); return; }
+    var grid=loadGrid_(sheet);
+    var cells=expandRange_(grid, model.variables);
+    detectedVars=cells.map(function(cell){ return { cell:cell, label:labelFor_(grid, cell)||cell }; });
+    renderVarPanel();
+    var panel=document.getElementById('varSettings');
+    if(panel){ panel.style.display=''; panel.open=true; }
+  }
+
+  function settingsFor(cell){
+    if(!varSettings[cell]) varSettings[cell]={ type:'continuous', min:0, max:null };
+    return varSettings[cell];
+  }
+
+  function renderVarPanel(){
+    var body=document.getElementById('varSettingsBody');
+    if(!body) return;
+    var typeOpts=[['continuous',t('typeContinuous')],['integer',t('typeInteger')],['binary',t('typeBinary')]];
+    var rows=detectedVars.map(function(v,i){
+      var s=settingsFor(v.cell);
+      var opts=typeOpts.map(function(o){return '<option value="'+o[0]+'"'+(s.type===o[0]?' selected':'')+'>'+esc(o[1])+'</option>';}).join('');
+      var binLocked=(s.type==='binary');
+      var minVal=(s.min==null?'':s.min), maxVal=(s.max==null?'':s.max);
+      return '<div class="vs-row" data-cell="'+esc(v.cell)+'">'+
+        '<span class="vs-name">'+esc(v.label)+'</span>'+
+        '<select class="vs-type" aria-label="'+esc(t('varType'))+' '+esc(v.label)+'">'+opts+'</select>'+
+        '<input class="vs-min" type="number" step="any" placeholder="0" value="'+esc(String(binLocked?0:minVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMin'))+' '+esc(v.label)+'">'+
+        '<input class="vs-max" type="number" step="any" placeholder="&#8734;" value="'+esc(String(binLocked?1:maxVal))+'"'+(binLocked?' disabled':'')+' aria-label="'+esc(t('varMax'))+' '+esc(v.label)+'">'+
+        '</div>';
+    }).join('');
+    var head='<div class="vs-row vs-head"><span class="vs-name">'+esc(t('varName'))+'</span>'+
+      '<span>'+esc(t('varType'))+'</span><span>'+esc(t('varMin'))+'</span><span>'+esc(t('varMax'))+'</span></div>';
+    body.innerHTML=head+rows;
+    // Wire each row's inputs to update varSettings.
+    var rowEls=body.querySelectorAll('.vs-row[data-cell]');
+    for(var k=0;k<rowEls.length;k++){
+      (function(row){
+        var cell=row.getAttribute('data-cell');
+        var typeSel=row.querySelector('.vs-type');
+        var minIn=row.querySelector('.vs-min');
+        var maxIn=row.querySelector('.vs-max');
+        typeSel.addEventListener('change',function(){
+          var s=settingsFor(cell); s.type=typeSel.value;
+          if(s.type==='binary'){ s.min=0; s.max=1; }
+          renderVarPanel();   // re-render to lock/unlock min/max
+        });
+        if(minIn) minIn.addEventListener('input',function(){ var s=settingsFor(cell); s.min=(minIn.value===''?null:Number(minIn.value)); });
+        if(maxIn) maxIn.addEventListener('input',function(){ var s=settingsFor(cell); s.max=(maxIn.value===''?null:Number(maxIn.value)); });
+      })(rowEls[k]);
+    }
+  }
+
+  // Build {integer, bounds} for optimise_ from the panel + the global toggle.
+  // Returns null when the panel hasn't been used and the global toggle is off,
+  // so untouched models pass nothing extra and behave exactly as before.
+  function variableDomains(variableCells, wholeToggle){
+    var anyPanel=false;
+    for(var i=0;i<variableCells.length;i++){ if(varSettings[variableCells[i]]) { anyPanel=true; break; } }
+    if(!anyPanel && !wholeToggle) return null;
+    var integerIdx=[], bounds=[], anyInteger=false, anyBound=false;
+    for(var j=0;j<variableCells.length;j++){
+      var s=varSettings[variableCells[j]]||{ type:'continuous', min:0, max:null };
+      var isInt=(s.type==='integer'||s.type==='binary');
+      // Global "whole numbers" makes everything integer EXCEPT explicit binaries
+      // (which are already integer anyway) and leaves nothing continuous.
+      if(wholeToggle && s.type!=='binary') isInt=true;
+      if(isInt){ integerIdx.push(j); anyInteger=true; }
+      var lo=(s.type==='binary')?0:(typeof s.min==='number'?s.min:0);
+      var hi=(s.type==='binary')?1:(typeof s.max==='number'?s.max:null);
+      bounds.push({ lower:lo, upper:hi });
+      if(lo>0 || hi!=null) anyBound=true;
+    }
+    return { integer: anyInteger?integerIdx:false, bounds: anyBound?bounds:null };
+  }
+
   function solve(){
     var res=document.getElementById('result');
     var btn=document.getElementById('solve');
     var sheet=sheetFromGrid();
     var wholeNumbers=document.getElementById('whole').checked;
+
+    // Build per-variable domains from the panel (+ global toggle). Detecting
+    // here (fast, no solving) gives the variable cell order to map settings to
+    // indices; the worker detects again for the actual solve.
+    var domains=null;
+    try{
+      var m=detectModel_(sheet);
+      var cells=expandRange_(loadGrid_(sheet), m.variables);
+      domains=variableDomains(cells, wholeNumbers);
+    }catch(e){ domains=null; }   // detection issues surface in the worker
 
     var w=buildWorker();
     if(!w){ offerCompatMode(); return; }   // no worker support: ask before a sync solve
@@ -2222,6 +2389,7 @@ function matchesAnyHint_(label, hints) {
 
     var payload=sheetToArrays(sheet);
     payload.wholeNumbers=wholeNumbers;
+    payload.domains=domains;
     payload.token=myToken;
     w.postMessage(payload);
   }
@@ -2287,6 +2455,10 @@ function matchesAnyHint_(label, hints) {
     try{ model=detectModel_(sheet); }
     catch(err){ return showTrouble(t('tRead'), String(err.message||err)); }
     model.wholeNumbers=document.getElementById('whole').checked;
+    try{
+      var cells=expandRange_(loadGrid_(sheet), model.variables);
+      model.domains=variableDomains(cells, model.wholeNumbers);
+    }catch(e){ model.domains=null; }
 
     var out;
     try{ out=solveModel_(sheet,model); }
@@ -2601,6 +2773,7 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('addCol').addEventListener('click',addCol);
   document.getElementById('delCol').addEventListener('click',delCol);
   document.getElementById('undoGrid').addEventListener('click',doUndo);
+  document.getElementById('detectVars').addEventListener('click',detectForPanel);
   // Toggling integer mode changes the model; cancel any in-flight solve.
   document.getElementById('whole').addEventListener('change',modelChanged);
   // Import CSV: the button opens the hidden file picker; picking a file imports.
