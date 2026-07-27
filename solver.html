@@ -434,13 +434,38 @@ function solveLinearProgram_(model) {
   if (artificials > 0) {
     const phaseOneCost = [];
     for (let j = 0; j < total; j++) phaseOneCost.push(isArtificial[j] ? 1 : 0);
-    iterate_(tableau, basis, phaseOneCost, total, null);
+    const phaseOneStatus = iterate_(tableau, basis, phaseOneCost, total, null);
+    // If phase 1 could not finish, we do not know feasibility. Report it rather
+    // than silently treating an unfinished search as feasible/infeasible.
+    if (phaseOneStatus === 'iteration limit reached') {
+      return { status: 'iteration limit reached' };
+    }
 
     let residual = 0;
     for (let i = 0; i < basis.length; i++) {
       if (isArtificial[basis[i]]) residual += tableau[i][total];
     }
     if (residual > 1e-6) return { status: 'infeasible' };
+
+    // Phase 1 can leave an artificial variable in the basis at value ~0
+    // (a degenerate basis). If left there, phase 2 can pivot it back to a
+    // positive value and violate the '>=' or '=' constraint it came from.
+    // Drive each such artificial out of the basis now: pivot on any
+    // non-artificial column with a non-zero entry in that row. If the whole
+    // row is zero across non-artificial columns, the constraint is redundant
+    // and the artificial can stay pinned at zero (phase 2 forbids it entering).
+    for (let i = 0; i < basis.length; i++) {
+      if (!isArtificial[basis[i]]) continue;
+      let pivotCol = -1;
+      for (let j = 0; j < total; j++) {
+        if (isArtificial[j]) continue;
+        if (Math.abs(tableau[i][j]) > ENGINE.EPSILON) { pivotCol = j; break; }
+      }
+      if (pivotCol !== -1) {
+        pivot_(tableau, i, pivotCol);
+        basis[i] = pivotCol;
+      }
+    }
   }
 
   const sign = model.maximize ? -1 : 1;
