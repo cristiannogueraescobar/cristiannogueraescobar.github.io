@@ -46,52 +46,44 @@
 
 <div class="plumb">
 
-  <section class="bob section">
-    <div class="band">
-      <div><h2 data-i18n="gWhatH">What a linear programming problem is</h2></div>
-      <div><p class="muted" data-i18n="gWhatP">You have a goal you want as high or as low as possible, some quantities you get to choose, and limits you cannot break. A factory choosing how many of each product to make, to earn the most profit, without running past its available hours, is a linear programming problem. So is a diet that meets its nutrition targets at the lowest cost, or a budget split across channels for the best return.</p></div>
+  <section class="section">
+    <div class="sec-head center">
+      <h2 data-i18n="gWhatH">What a linear programming problem is</h2>
+      <p class="muted" data-i18n="gWhatP">You have a goal you want as high or as low as possible, some quantities you get to choose, and limits you cannot break. A factory choosing how many of each product to make, to earn the most profit, without running past its available hours, is a linear programming problem. So is a diet that meets its nutrition targets at the lowest cost, or a budget split across channels for the best return.</p>
     </div>
   </section>
 
-  <section class="section">
-    <div class="band">
-      <div><h2 data-i18n="gPartsH">Every problem has three parts</h2></div>
-      <div class="versus" style="grid-template-columns:1fr 1fr 1fr;margin:0">
-        <div class="card brass"><h3 data-i18n="gPart1H">The goal</h3><p class="muted" style="font-size:14px" data-i18n="gPart1P">The single number you want to make as large or as small as possible: total profit, total cost, total return. In a spreadsheet it is the cell that sums up the others.</p></div>
-        <div class="card"><h3 data-i18n="gPart2H">The decisions</h3><p class="muted" style="font-size:14px" data-i18n="gPart2P">The quantities you are free to choose: how many of each product, how much of each ingredient, how much to each channel. These are what the solver changes to reach the goal.</p></div>
-        <div class="card true"><h3 data-i18n="gPart3H">The limits</h3><p class="muted" style="font-size:14px" data-i18n="gPart3P">The rules you cannot break: only so many hours, a minimum amount of protein, a fixed budget. Each one caps or floors what the decisions are allowed to add up to.</p></div>
-      </div>
+  <section class="section" style="padding-top:0">
+    <div class="sec-head center"><h2 data-i18n="gPartsH">Every problem has three parts</h2></div>
+    <div class="bento three">
+      <div class="card brass"><div class="cardnum">01</div><h3 data-i18n="gPart1H">The goal</h3><p class="muted" style="font-size:14px" data-i18n="gPart1P">The single number you want to make as large or as small as possible: total profit, total cost, total return. In a spreadsheet it is the cell that sums up the others.</p></div>
+      <div class="card"><div class="cardnum">02</div><h3 data-i18n="gPart2H">The decisions</h3><p class="muted" style="font-size:14px" data-i18n="gPart2P">The quantities you are free to choose: how many of each product, how much of each ingredient, how much to each channel. These are what the solver changes to reach the goal.</p></div>
+      <div class="card true"><div class="cardnum">03</div><h3 data-i18n="gPart3H">The limits</h3><p class="muted" style="font-size:14px" data-i18n="gPart3P">The rules you cannot break: only so many hours, a minimum amount of protein, a fixed budget. Each one caps or floors what the decisions are allowed to add up to.</p></div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="band">
-      <div><h2 data-i18n="gStepsH">How to solve it, step by step</h2></div>
-      <div>
-        <ol style="max-width:60ch;padding-left:22px;color:var(--ink-2)">
-          <li style="margin-bottom:12px" data-i18n="gStep1">Write your decisions as a column, one row each, starting at zero.</li>
-          <li style="margin-bottom:12px" data-i18n="gStep2">Write the goal as a cell that totals the value of those decisions.</li>
-          <li style="margin-bottom:12px" data-i18n="gStep3">Write each limit as a row: what it uses, an operator, and the cap.</li>
-          <li style="margin-bottom:12px" data-i18n="gStep4">Hand it to a solver. It searches every allowed combination and returns the one that makes the goal best, along with which limits are binding.</li>
-        </ol>
-      </div>
+  <section class="section" style="padding-top:0">
+    <div class="sec-head center"><h2 data-i18n="gStepsH">How to solve it, step by step</h2></div>
+    <div class="bento" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+      <div class="card"><div class="cardnum">1</div><p style="margin:0;font-size:15px" data-i18n="gStep1">Write your decisions as a column, one row each, starting at zero.</p></div>
+      <div class="card"><div class="cardnum">2</div><p style="margin:0;font-size:15px" data-i18n="gStep2">Write the goal as a cell that totals the value of those decisions.</p></div>
+      <div class="card"><div class="cardnum">3</div><p style="margin:0;font-size:15px" data-i18n="gStep3">Write each limit as a row: what it uses, an operator, and the cap.</p></div>
+      <div class="card"><div class="cardnum">4</div><p style="margin:0;font-size:15px" data-i18n="gStep4">Hand it to a solver. It searches every allowed combination and returns the one that makes the goal best, along with which limits are binding.</p></div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="band">
-      <div>
-        <h2 data-i18n="gExampleH">A worked example</h2>
-        <a class="btn" href="solver.html?lang=en" style="margin-top:14px" data-i18n="gExampleCta">Open this example in the solver</a>
-      </div>
-      <div><p data-i18n="gExampleP">A workshop makes chairs and tables. A chair earns 30, a table 40. Chairs take 2 hours of wood work and 3 of assembly; tables take 4 and 2. There are 80 hours of wood work and 60 of assembly. How many of each to earn the most? The best answer is 10 chairs and 15 tables, for 900, using every hour of both. You can open this in the solver and change the numbers.</p></div>
+  <section class="section" style="padding-top:0">
+    <div class="card brass" style="max-width:820px;margin:0 auto;padding:34px 38px">
+      <h2 style="margin-bottom:12px" data-i18n="gExampleH">A worked example</h2>
+      <p data-i18n="gExampleP">A workshop makes chairs and tables. A chair earns 30, a table 40. Chairs take 2 hours of wood work and 3 of assembly; tables take 4 and 2. There are 80 hours of wood work and 60 of assembly. How many of each to earn the most? The best answer is 10 chairs and 15 tables, for 900, using every hour of both. You can open this in the solver and change the numbers.</p>
+      <a class="btn" href="solver.html?ex=workshop" style="margin-top:6px" data-i18n="gExampleCta">Open this example in the solver</a>
     </div>
   </section>
 
-  <section class="section">
-    <div class="band">
-      <div><h2 data-i18n="gWhyH">Why prove the answer</h2></div>
-      <div><p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the shadow price of each binding limit: how much more you would gain from one more unit of it.</p></div>
+  <section class="section" style="padding-top:0">
+    <div class="sec-head center">
+      <h2 data-i18n="gWhyH">Why prove the answer</h2>
+      <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the shadow price of each binding limit: how much more you would gain from one more unit of it.</p>
     </div>
   </section>
 
@@ -99,14 +91,10 @@
 
 <div class="field-deep" style="margin-top:40px">
   <div class="plumb">
-    <section class="section" style="padding:56px 0 60px">
-      <div class="band" style="align-items:center">
-        <div>
-          <h2 style="max-width:16ch;margin-bottom:8px" data-i18n="gTryH">Try it with your own numbers</h2>
-          <p style="color:rgba(245,242,235,.8)" data-i18n="gTryP">The solver reads a grid like a spreadsheet. Type your goal, your decisions and your limits in plain words, and solve. Nothing is uploaded, and it is free.</p>
-        </div>
-        <div class="row" style="margin-top:0"><a class="btn" href="solver.html" data-i18n="gTryCta">Open the solver</a></div>
-      </div>
+    <section class="section center" style="text-align:center">
+      <h2 style="max-width:20ch;margin:0 auto 10px" data-i18n="gTryH">Try it with your own numbers</h2>
+      <p style="color:rgba(245,242,235,.8);margin:0 auto 26px" data-i18n="gTryP">The solver reads a grid like a spreadsheet. Type your goal, your decisions and your limits in plain words, and solve. Nothing is uploaded, and it is free.</p>
+      <div class="row" style="justify-content:center;margin-top:0"><a class="btn" href="solver.html" data-i18n="gTryCta">Open the solver</a></div>
     </section>
   </div>
 </div>

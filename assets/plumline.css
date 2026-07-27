@@ -48,8 +48,7 @@
   --mono:ui-monospace,'SF Mono','Cascadia Mono','Segoe UI Mono','Roboto Mono',Menlo,Consolas,monospace;
 
   /* scale */
-  --edge:1360px;
-  --edge-wide:1440px;
+  --edge:1200px;
   --rail:56px;            /* plumb-line offset from content edge */
   --radius:8px;
   --radius-sm:4px;
@@ -73,31 +72,39 @@ a:hover{text-decoration-color:var(--brass)}
 :focus-visible{outline:2px solid var(--true);outline-offset:3px;border-radius:2px}
 
 /* ---- (3) LAYOUT ---------------------------------------------------------- */
-/* the plumb-line spine: a quiet hairline down the left as a brand mark, with a
-   brass bob at the first section. The rail is deliberately narrow so it marks
-   the edge without pushing content off-centre on wide screens. */
-.plumb{max-width:var(--edge);margin:0 auto;position:relative;
-  padding:0 40px 0 calc(var(--rail) + 40px)}
-.plumb::before{content:'';position:absolute;left:var(--rail);top:0;bottom:0;width:1px;background:var(--line)}
-.bob{position:relative;padding-top:70px}
-.bob::before{content:'';position:absolute;
-  left:calc(-1*(var(--rail)+40px)+var(--rail)-5px);top:76px;
-  width:11px;height:11px;background:var(--brass);transform:rotate(45deg);
-  box-shadow:0 0 0 4px var(--paper),0 0 0 5px var(--line-fine)}
+/* Centred container, content in the middle of the shell, generous but balanced
+   whitespace on both sides. This is the max-w-7xl / mx-auto pattern that Linear,
+   Stripe and Vercel use. The plumb line is kept only as a small brand mark in
+   the masthead lockup, not as a spine that pushes the whole page left. */
+.plumb{max-width:var(--edge);margin:0 auto;padding:0 40px}
+.bob{padding-top:8px}
 
-.section{padding:56px 0}
+.section{padding:72px 0}
 .wrap{max-width:var(--edge);margin:0 auto;padding:0 40px}
 
-/* a two-column band: heading/intro on the left, content on the right, so wide
-   sections use the whole shell instead of stacking narrow on the left. */
-.band{display:grid;grid-template-columns:minmax(280px,380px) 1fr;gap:56px;align-items:start}
-@media(max-width:900px){.band{grid-template-columns:1fr;gap:24px}}
+/* Section heading that sits centred above its content, or left with an intro
+   beside it on wide screens. Used to introduce a grid of cards. */
+.sec-head{max-width:60ch;margin-bottom:36px}
+.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+
+/* BENTO: the workhorse. A responsive grid of cards that fills the full width,
+   auto-fitting as many columns as fit. This is what stops the empty-right-half
+   problem: content spreads across the whole container instead of a left band. */
+.bento{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.bento.two{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
+.bento.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:900px){.bento.three{grid-template-columns:1fr}}
+
+/* A split row: heading block and content block side by side, each taking real
+   width (no narrow left band). Falls back to stacked on small screens. */
+.band{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.band.wide-right{grid-template-columns:0.8fr 1.2fr}
+@media(max-width:860px){.band,.band.wide-right{grid-template-columns:1fr;gap:28px}}
 
 /* fields on the deep ink ground */
 .field-deep{background:var(--deep);color:var(--cream);position:relative;overflow:hidden}
 .field-deep::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(120% 80% at 78% -10%,rgba(216,169,74,.13),transparent 60%)}
-.field-deep .plumb::before{background:rgba(245,242,235,.16)}
 
 /* ---- (4) COMPONENTS ------------------------------------------------------ */
 
@@ -203,7 +210,6 @@ a:hover{text-decoration-color:var(--brass)}
   text-decoration:none;margin-bottom:8px}
 .foot .col a:hover{color:#fff;text-decoration:underline;text-decoration-color:var(--brass-hi)}
 .foot .fine{max-width:62ch;line-height:1.55;color:rgba(245,242,235,.5);border-top:1px solid rgba(245,242,235,.12);padding-top:22px}
-.foot .plumb::before{background:rgba(245,242,235,.12)}
 
 /* hero split: text left, a live-looking proof on the right, so the width is used */
 .hero-split{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding:44px 0 76px}
@@ -247,7 +253,7 @@ a:hover{text-decoration-color:var(--brass)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
 
 /* ---- PROSE (legal & content pages) --------------------------------------- */
-.prose{padding:20px 0 10px;max-width:68ch}
+.prose{padding:20px 0 10px;max-width:72ch;margin:0 auto}
 .prose h1{font-size:clamp(32px,4.2vw,48px);margin-bottom:10px}
 .prose .updated{font-family:var(--mono);font-size:12px;color:var(--faint);margin-bottom:38px}
 .prose h2{font-size:22px;margin:38px 0 12px}
@@ -258,12 +264,8 @@ a:hover{text-decoration-color:var(--brass)}
 
 /* very wide screens: let the shell breathe a little more, but cap it so text
    lines never grow past a comfortable measure. Space at the edges is intentional. */
-@media(min-width:1600px){
-  :root{--edge:1500px}
-  body{font-size:18px}
-}
-@media(min-width:2000px){
-  :root{--edge:1680px}
+@media(min-width:1500px){
+  :root{--edge:1320px}
 }
 
 /* wide sections: card grids and the hero split use the full shell; running text
@@ -272,3 +274,13 @@ a:hover{text-decoration-color:var(--brass)}
 .hero-split .lead{max-width:42ch}
 .section > .eyebrow + h2, .section > h2{max-width:24ch}
 .section p:not(.lead):not(.fine){max-width:60ch}
+
+/* ---- home extras: card links, numbered feature cards, hero polish --------- */
+.cardlink{display:inline-block;margin-top:14px;font-weight:600;color:var(--true);
+  text-decoration:none;font-size:14px}
+.cardlink:hover{text-decoration:underline;text-decoration-color:var(--true)}
+.cardnum{font-family:var(--mono);font-size:12px;color:var(--brass);letter-spacing:.1em;margin-bottom:14px}
+.card{transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 14px 34px -18px rgba(0,0,0,.25)}
+.sec-head .lead,.sec-head p.muted{max-width:52ch}
+.sec-head.center p{margin-left:auto;margin-right:auto}
