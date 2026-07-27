@@ -259,7 +259,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=16"></script>
+<script src="assets/i18n.js?v=17"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2134,15 +2134,23 @@ function matchesAnyHint_(label, hints) {
   // status, time, nodes, model type, and (when relevant) why it stopped and
   // whether optimality was proven. Turns internal engine fields into visible value.
   function solveDetailsHTML(out,model){
+    // A continuous LP can hand back a bare limit status (iteration_limit,
+    // time_limit, node_limit) as its status, with no stopReason. Normalise
+    // that here, in the presentation layer, so the status reads "Search
+    // incomplete" and a "Stopped because" row still appears. The engine keeps
+    // returning its raw fields untouched (it's shared with the add-on).
+    var limitStatuses=['iteration_limit','time_limit','node_limit'];
+    var displayStatus=(limitStatuses.indexOf(out.status)>=0)?'unknown':out.status;
+    var displayStopReason=out.stopReason||((limitStatuses.indexOf(out.status)>=0)?out.status:null);
     var statusName={optimal:t('statOptimal'),feasible:t('statFeasible'),unknown:t('statUnknown'),
-      infeasible:t('statInfeasible'),unbounded:t('tUnbounded'),numerical_failure:t('tNumerical')}[out.status]||out.status;
+      infeasible:t('statInfeasible'),unbounded:t('tUnbounded'),numerical_failure:t('tNumerical')}[displayStatus]||displayStatus;
     var rows=[];
     rows.push([t('sdStatus'), statusName]);
     if(typeof out.elapsedMs==='number') rows.push([t('sdTime'), out.elapsedMs+' ms']);
     if(typeof out.nodesExplored==='number'&&out.nodesExplored!=null) rows.push([t('sdNodes'), String(out.nodesExplored)]);
     rows.push([t('sdModelType'), (model.wholeNumbers===true)?t('sdInteger'):t('sdContinuous')]);
-    if(out.stopReason){
-      var sr={node_limit:t('srNode'),time_limit:t('srTime'),iteration_limit:t('srIteration'),numerical_failure:t('srNumerical')}[out.stopReason]||out.stopReason;
+    if(displayStopReason){
+      var sr={node_limit:t('srNode'),time_limit:t('srTime'),iteration_limit:t('srIteration'),numerical_failure:t('srNumerical')}[displayStopReason]||displayStopReason;
       rows.push([t('sdStopped'), sr]);
     }
     if(out.status==='feasible'||out.status==='optimal'){
