@@ -2151,9 +2151,9 @@
                     var ci = trySolve(EXAMPLES.production, true);
                     line(ci.status === 'optimal', 'Whole-numbers mode runs', 'objective ' + fmt(ci.objective));
                     // 6: impossible model is caught, not crashed or faked
-                    var imp = trySolve([['Item', 'Qty', 'Value', 'Total', '', ''], ['X', '0', '10', '=B2*C2', '', ''], ['', '', '', '', '', ''], ['Total', '', '', '=SUM(D2)', '', ''], ['Cap', '', '', '=B2', '<=', '5'], ['Floor', '', '', '=B2', '>=', '20']], false);
-                    var caught = (imp.status !== 'optimal' && imp.status !== 'feasible');
-                    line(caught, 'Impossible model is refused, not faked', 'reported: ' + (imp.status || imp.error));
+                    var imp = trySolve([['Item', 'Make', 'Profit', 'Total', '', ''], ['X', '0', '10', '=B2*C2', '', ''], ['Y', '0', '8', '=B3*C3', '', ''], ['', '', '', '', '', ''], ['Total profit', '', '', '=SUM(D2:D3)', '', ''], ['Min make', '', '', '=B2', '>=', '100'], ['Max make', '', '', '=B2', '<=', '20']], false);
+                    var caught = (imp.status === 'infeasible');
+                    line(caught, 'Contradictory limits are caught cleanly', 'reported: ' + (imp.status || imp.error || '?'));
                     var allPass = out.querySelectorAll('span[style*="wrong"]').length === 0;
                     var summary = document.createElement('div');
                     summary.style.marginTop = '10px'; summary.style.fontWeight = '600';
