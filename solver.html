@@ -59,9 +59,34 @@
         }
 
         .wrap {
-            max-width: 960px;
+            max-width: 1140px;
             margin: 0 auto;
-            padding: 0 24px
+            padding: 0 28px
+        }
+
+        /* two-column workspace: input left, result right, visible together */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 26px;
+            align-items: start;
+            margin-top: 18px
+        }
+
+        .col-output {
+            position: sticky;
+            top: 20px
+        }
+
+        @media(max-width:860px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                gap: 20px
+            }
+
+            .col-output {
+                position: static
+            }
         }
 
         /* header */
@@ -94,7 +119,8 @@
 
         .top nav {
             display: flex;
-            gap: 20px
+            gap: 20px;
+            align-items: center
         }
 
         .top nav a {
@@ -105,6 +131,22 @@
         }
 
         .top nav a:hover {
+            color: var(--cream)
+        }
+
+        #lang {
+            font-family: var(--mono);
+            font-size: 12px;
+            background: rgba(245, 242, 235, .1);
+            color: var(--cream);
+            border: 1px solid rgba(245, 242, 235, .25);
+            border-radius: 4px;
+            padding: 4px 6px;
+            cursor: pointer
+        }
+
+        #lang option {
+            background: var(--deep);
             color: var(--cream)
         }
 
@@ -302,12 +344,11 @@
 
         .receipt {
             border: 1px solid var(--line);
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--panel);
-            padding: 22px 24px;
+            padding: 24px 26px;
             font-family: var(--mono);
-            font-size: 14px;
-            max-width: 460px
+            font-size: 14px
         }
 
         .receipt .tot {
@@ -388,7 +429,7 @@
             align-items: center;
             gap: 8px;
             margin-top: 14px;
-            max-width: 460px
+            flex-wrap: wrap
         }
 
         .exports .ex {
@@ -401,8 +442,7 @@
         }
 
         .plotwrap {
-            margin-top: 22px;
-            max-width: 460px
+            margin-top: 18px
         }
 
         .plotcap {
@@ -462,11 +502,10 @@
 
         .steps {
             margin-top: 16px;
-            max-width: 460px;
             border: 1px solid var(--line);
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--panel);
-            padding: 0 16px
+            padding: 0 18px
         }
 
         .steps summary {
@@ -525,12 +564,45 @@
             background: var(--true-lo)
         }
 
+        /* empty-state placeholder in the output column, before a solve */
+        .placeholder {
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .4);
+            padding: 48px 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px
+        }
+
+        .placeholder p {
+            color: var(--faint);
+            font-size: 14px;
+            max-width: 26ch;
+            margin: 0
+        }
+
+        /* self-check sits quietly below the workspace */
+        .selfcheck-row {
+            margin-top: 34px;
+            padding-top: 22px;
+            border-top: 1px solid var(--line-fine)
+        }
+
+        #selftest-out {
+            margin-top: 12px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.9
+        }
+
         .trouble {
             border: 1px solid #E7CFC9;
             background: #F7EEEB;
-            border-radius: 6px;
-            padding: 16px 18px;
-            max-width: 460px;
+            border-radius: 8px;
+            padding: 18px 20px;
             color: var(--wrong);
             font-size: 14px
         }
@@ -610,64 +682,89 @@
                 <span class="wm">Plumline</span>
             </a>
             <nav>
-                <a href="index.html">The add-on</a>
-                <a href="#how">How to use</a>
+                <a href="index.html" data-i18n="navAddon">The add-on</a>
+                <a href="#how" data-i18n="navHow">How to use</a>
+                <select id="lang" aria-label="Language">
+                    <option value="en">EN</option>
+                    <option value="es">ES</option>
+                    <option value="pt">PT</option>
+                    <option value="de">DE</option>
+                    <option value="fr">FR</option>
+                </select>
             </nav>
         </div>
     </div>
 
     <div class="hero">
         <div class="wrap">
-            <p class="eyebrow">Free online solver</p>
-            <h1>Optimise a spreadsheet without leaving your browser.</h1>
-            <p>Type your problem into the grid the way you would in any spreadsheet. Plumline reads it, finds the best
-                allocation, and proves the answer. Nothing is uploaded, nothing is stored, and there is nothing to
-                install.</p>
+            <p class="eyebrow" data-i18n="heroEyebrow">Free online solver</p>
+            <h1 data-i18n="heroTitle">Optimise a spreadsheet without leaving your browser.</h1>
+            <p data-i18n="heroLead">Type your problem into the grid the way you would in any spreadsheet. Plumline reads
+                it, finds the best allocation, and proves the answer. Nothing is uploaded, nothing is stored, and there
+                is nothing to install.</p>
         </div>
     </div>
 
     <div class="app">
         <div class="wrap">
             <div class="bar">
-                <span class="ex">Start from an example</span>
-                <button class="chip" data-ex="production">Production plan</button>
-                <button class="chip" data-ex="blend">Cheapest blend</button>
-                <button class="chip" data-ex="budget">Budget split</button>
-                <button class="chip" data-ex="workshop">Workshop (2-var, shows a chart)</button>
-                <button class="chip" data-ex="blank">Blank grid</button>
+                <span class="ex" data-i18n="startFrom">Start from an example</span>
+                <button class="chip" data-ex="production" data-i18n="exProduction">Production plan</button>
+                <button class="chip" data-ex="blend" data-i18n="exBlend">Cheapest blend</button>
+                <button class="chip" data-ex="budget" data-i18n="exBudget">Budget split</button>
+                <button class="chip" data-ex="workshop" data-i18n="exWorkshop">Workshop (shows a chart)</button>
+                <button class="chip" data-ex="blank" data-i18n="exBlank">Blank grid</button>
             </div>
 
-            <div class="gridwrap">
-                <table class="grid" id="grid"></table>
-            </div>
-            <p class="gridnote">Yellow cells are the quantities to decide. Put an operator (&le;, &ge;, =) and a number
-                to the right of a limit. Edit anything and solve again.</p>
+            <div class="workspace">
+                <div class="col-input">
+                    <div class="gridwrap">
+                        <table class="grid" id="grid"></table>
+                    </div>
+                    <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Put an operator
+                        (&le;, &ge;, =) and a number to the right of a limit. Edit anything and solve again.</p>
 
-            <div class="controls-row">
-                <button class="solve" id="solve">Solve</button>
-                <label class="toggle"><input type="checkbox" id="whole"> Whole numbers only</label>
-                <button class="ghost" id="clear">Clear grid</button>
-            </div>
+                    <div class="controls-row">
+                        <button class="solve" id="solve" data-i18n="solve">Solve</button>
+                        <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole
+                                numbers only</span></label>
+                        <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
+                    </div>
+                </div>
 
-            <div class="result" id="result"></div>
-
-            <div style="margin-top:26px">
-                <button class="ghost" id="selftest">Run a quick self-check</button>
-                <div id="selftest-out" style="margin-top:12px;font-family:var(--mono);font-size:13px;line-height:1.9">
+                <div class="col-output">
+                    <div class="result" id="result">
+                        <div class="placeholder" id="placeholder">
+                            <svg width="34" height="52" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg"
+                                aria-hidden="true">
+                                <line x1="12" y1="0" x2="12" y2="10" stroke="var(--brass)" stroke-width="1.5" />
+                                <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="var(--brass)"
+                                    opacity="0.32" />
+                                <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="var(--true)" stroke-width="2" />
+                            </svg>
+                            <p data-i18n="placeholder">Your answer will appear here, checked against your own numbers.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <div class="selfcheck-row">
+                <button class="ghost" id="selftest" data-i18n="selfCheck">Run a quick self-check</button>
+                <div id="selftest-out"></div>
+            </div>
 
             <div class="explain" id="how">
-                <h2>How it reads your grid</h2>
-                <p>Plumline looks for one cell that totals the others: that becomes the goal. The cells that total feeds
-                    into, and that are currently empty or zero, become the quantities it can change. Any row with a
-                    comparison operator and a number becomes a limit. It uses the labels in your first column to name
-                    everything, so the answer reads in plain words.</p>
-                <p>It solves linear and integer problems: production, purchasing, blending, staffing, transport,
-                    budgets. It does not solve genuinely non-linear ones, such as a quantity multiplied by another
-                    quantity, and it will point at the cell if it meets one.</p>
-                <a class="cta" href="index.html">Prefer it inside Google Sheets? Get the add-on &rarr;</a>
+                <h2 data-i18n="howTitle">How it reads your grid</h2>
+                <p data-i18n="howP1">Plumline looks for one cell that totals the others: that becomes the goal. The
+                    cells that total feeds into, and that are currently empty or zero, become the quantities it can
+                    change. Any row with a comparison operator and a number becomes a limit. It uses the labels in your
+                    first column to name everything, so the answer reads in plain words.</p>
+                <p data-i18n="howP2">It solves linear and integer problems: production, purchasing, blending, staffing,
+                    transport, budgets. It does not solve genuinely non-linear ones, such as a quantity multiplied by
+                    another quantity, and it will point at the cell if it meets one.</p>
+                <a class="cta" href="index.html" data-i18n="getAddon">Prefer it inside Google Sheets? Get the add-on
+                    &rarr;</a>
             </div>
         </div>
     </div>
@@ -684,6 +781,155 @@
     </footer>
 
     <script>
+        /* === Languages. Static text carries data-i18n; the solver's dynamic result
+           strings read from I18N[lang] at render time. Five languages chosen from the
+           search demand for this kind of tool: English, Spanish, Portuguese, German,
+           French. The engine and the maths never change — only the words around them. === */
+        var I18N = {
+            en: {
+                navAddon: 'The add-on', navHow: 'How to use',
+                heroEyebrow: 'Free online solver',
+                heroTitle: 'Optimise a spreadsheet without leaving your browser.',
+                heroLead: 'Type your problem into the grid the way you would in any spreadsheet. Plumline reads it, finds the best allocation, and proves the answer. Nothing is uploaded, nothing is stored, and there is nothing to install.',
+                startFrom: 'Start from an example',
+                exProduction: 'Production plan', exBlend: 'Cheapest blend', exBudget: 'Budget split',
+                exWorkshop: 'Workshop (shows a chart)', exBlank: 'Blank grid',
+                gridNote: 'Yellow cells are the quantities to decide. Put an operator (\u2264, \u2265, =) and a number to the right of a limit. Edit anything and solve again.',
+                solve: 'Solve', wholeNumbers: 'Whole numbers only', clearGrid: 'Clear grid',
+                placeholder: 'Your answer will appear here, checked against your own numbers.',
+                selfCheck: 'Run a quick self-check',
+                howTitle: 'How it reads your grid',
+                howP1: 'Plumline looks for one cell that totals the others: that becomes the goal. The cells that total feeds into, and that are currently empty or zero, become the quantities it can change. Any row with a comparison operator and a number becomes a limit. It uses the labels in your first column to name everything, so the answer reads in plain words.',
+                howP2: 'It solves linear and integer problems: production, purchasing, blending, staffing, transport, budgets. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it will point at the cell if it meets one.',
+                getAddon: 'Prefer it inside Google Sheets? Get the add-on \u2192',
+                // dynamic
+                atLimit: 'at limit', oneMore: 'One more raises the result by ', solvedOk: 'Solved, and every limit is respected.',
+                exportLabel: 'Export', copied: 'Copied',
+                regionCap: 'The feasible region \u2014 every allocation your limits allow. The star is the best one.',
+                showWorking: 'Show the working (corner-point method)',
+                workingIntro: 'A linear problem is always won at a corner of the feasible region. So we find every corner, work out the objective at each, and keep the best.',
+                corner: 'Corner', value: 'Value', best: 'best',
+                workingNote: 'The same answer the solver reached, shown the long way. For problems with more than two decisions the corners can\u2019t be drawn, but the method is identical \u2014 Plumline just does it with the simplex algorithm instead.',
+                tRead: 'Could not read the grid', tSolve: 'Could not solve', tNo: 'No solution',
+                result: 'Result'
+            },
+            es: {
+                navAddon: 'El complemento', navHow: 'C\u00f3mo se usa',
+                heroEyebrow: 'Solver online gratuito',
+                heroTitle: 'Optimiza una hoja de c\u00e1lculo sin salir del navegador.',
+                heroLead: 'Escribe tu problema en la cuadr\u00edcula como lo har\u00edas en cualquier hoja de c\u00e1lculo. Plumline lo lee, encuentra la mejor soluci\u00f3n y la demuestra. No se sube nada, no se guarda nada y no hay nada que instalar.',
+                startFrom: 'Empieza con un ejemplo',
+                exProduction: 'Plan de producci\u00f3n', exBlend: 'Mezcla m\u00e1s barata', exBudget: 'Reparto de presupuesto',
+                exWorkshop: 'Taller (muestra un gr\u00e1fico)', exBlank: 'Cuadr\u00edcula en blanco',
+                gridNote: 'Las celdas amarillas son las cantidades a decidir. Pon un operador (\u2264, \u2265, =) y un n\u00famero a la derecha de un l\u00edmite. Edita lo que quieras y vuelve a resolver.',
+                solve: 'Resolver', wholeNumbers: 'Solo n\u00fameros enteros', clearGrid: 'Vaciar cuadr\u00edcula',
+                placeholder: 'Tu respuesta aparecer\u00e1 aqu\u00ed, comprobada con tus propios n\u00fameros.',
+                selfCheck: 'Ejecutar una comprobaci\u00f3n r\u00e1pida',
+                howTitle: 'C\u00f3mo lee tu cuadr\u00edcula',
+                howP1: 'Plumline busca una celda que sume las dem\u00e1s: esa pasa a ser el objetivo. Las celdas que alimentan ese total, y que ahora est\u00e1n vac\u00edas o a cero, se convierten en las cantidades que puede cambiar. Cualquier fila con un operador de comparaci\u00f3n y un n\u00famero se convierte en un l\u00edmite. Usa las etiquetas de tu primera columna para nombrarlo todo, as\u00ed que la respuesta se lee en palabras claras.',
+                howP2: 'Resuelve problemas lineales y enteros: producci\u00f3n, compras, mezclas, turnos, transporte, presupuestos. No resuelve los realmente no lineales, como una cantidad multiplicada por otra cantidad, y te se\u00f1ala la celda si encuentra uno.',
+                getAddon: '\u00bfLo prefieres dentro de Google Sheets? Consigue el complemento \u2192',
+                atLimit: 'en el l\u00edmite', oneMore: 'Una unidad m\u00e1s sube el resultado en ', solvedOk: 'Resuelto, y se respetan todos los l\u00edmites.',
+                exportLabel: 'Exportar', copied: 'Copiado',
+                regionCap: 'La regi\u00f3n factible: todo lo que tus l\u00edmites permiten. La estrella es la mejor opci\u00f3n.',
+                showWorking: 'Ver el desarrollo (m\u00e9todo de los v\u00e9rtices)',
+                workingIntro: 'Un problema lineal siempre se gana en un v\u00e9rtice de la regi\u00f3n factible. As\u00ed que encontramos cada v\u00e9rtice, calculamos el objetivo en cada uno y nos quedamos con el mejor.',
+                corner: 'V\u00e9rtice', value: 'Valor', best: 'mejor',
+                workingNote: 'La misma respuesta del solver, mostrada por el camino largo. En problemas con m\u00e1s de dos decisiones los v\u00e9rtices no se pueden dibujar, pero el m\u00e9todo es id\u00e9ntico: Plumline lo hace con el algoritmo s\u00edmplex.',
+                tRead: 'No se pudo leer la cuadr\u00edcula', tSolve: 'No se pudo resolver', tNo: 'Sin soluci\u00f3n',
+                result: 'Resultado'
+            },
+            pt: {
+                navAddon: 'O complemento', navHow: 'Como usar',
+                heroEyebrow: 'Solver online gratuito',
+                heroTitle: 'Otimize uma planilha sem sair do navegador.',
+                heroLead: 'Escreva o seu problema na grade como faria em qualquer planilha. O Plumline l\u00ea, encontra a melhor solu\u00e7\u00e3o e prova a resposta. Nada \u00e9 enviado, nada \u00e9 guardado e n\u00e3o h\u00e1 nada para instalar.',
+                startFrom: 'Comece com um exemplo',
+                exProduction: 'Plano de produ\u00e7\u00e3o', exBlend: 'Mistura mais barata', exBudget: 'Divis\u00e3o de or\u00e7amento',
+                exWorkshop: 'Oficina (mostra um gr\u00e1fico)', exBlank: 'Grade em branco',
+                gridNote: 'As c\u00e9lulas amarelas s\u00e3o as quantidades a decidir. Coloque um operador (\u2264, \u2265, =) e um n\u00famero \u00e0 direita de um limite. Edite o que quiser e resolva de novo.',
+                solve: 'Resolver', wholeNumbers: 'Apenas n\u00fameros inteiros', clearGrid: 'Limpar grade',
+                placeholder: 'A sua resposta aparecer\u00e1 aqui, verificada com os seus pr\u00f3prios n\u00fameros.',
+                selfCheck: 'Executar uma verifica\u00e7\u00e3o r\u00e1pida',
+                howTitle: 'Como ele l\u00ea a sua grade',
+                howP1: 'O Plumline procura uma c\u00e9lula que soma as outras: essa passa a ser o objetivo. As c\u00e9lulas que alimentam esse total, e que agora est\u00e3o vazias ou a zero, tornam-se as quantidades que ele pode alterar. Qualquer linha com um operador de compara\u00e7\u00e3o e um n\u00famero vira um limite. Ele usa os r\u00f3tulos da sua primeira coluna para nomear tudo, ent\u00e3o a resposta se l\u00ea em palavras claras.',
+                howP2: 'Resolve problemas lineares e inteiros: produ\u00e7\u00e3o, compras, misturas, escalas, transporte, or\u00e7amentos. N\u00e3o resolve os realmente n\u00e3o lineares, como uma quantidade multiplicada por outra quantidade, e aponta a c\u00e9lula se encontrar um.',
+                getAddon: 'Prefere dentro do Google Sheets? Obtenha o complemento \u2192',
+                atLimit: 'no limite', oneMore: 'Mais uma unidade aumenta o resultado em ', solvedOk: 'Resolvido, e todos os limites s\u00e3o respeitados.',
+                exportLabel: 'Exportar', copied: 'Copiado',
+                regionCap: 'A regi\u00e3o fact\u00edvel: tudo o que os seus limites permitem. A estrela \u00e9 a melhor op\u00e7\u00e3o.',
+                showWorking: 'Ver o desenvolvimento (m\u00e9todo dos v\u00e9rtices)',
+                workingIntro: 'Um problema linear \u00e9 sempre vencido num v\u00e9rtice da regi\u00e3o fact\u00edvel. Ent\u00e3o encontramos cada v\u00e9rtice, calculamos o objetivo em cada um e ficamos com o melhor.',
+                corner: 'V\u00e9rtice', value: 'Valor', best: 'melhor',
+                workingNote: 'A mesma resposta do solver, mostrada pelo caminho longo. Em problemas com mais de duas decis\u00f5es os v\u00e9rtices n\u00e3o podem ser desenhados, mas o m\u00e9todo \u00e9 id\u00eantico: o Plumline faz isso com o algoritmo simplex.',
+                tRead: 'N\u00e3o foi poss\u00edvel ler a grade', tSolve: 'N\u00e3o foi poss\u00edvel resolver', tNo: 'Sem solu\u00e7\u00e3o',
+                result: 'Resultado'
+            },
+            de: {
+                navAddon: 'Das Add-on', navHow: 'So geht\u2019s',
+                heroEyebrow: 'Kostenloser Online-Solver',
+                heroTitle: 'Optimiere eine Tabelle, ohne den Browser zu verlassen.',
+                heroLead: 'Trage dein Problem in das Raster ein, wie in jeder Tabelle. Plumline liest es, findet die beste L\u00f6sung und beweist die Antwort. Nichts wird hochgeladen, nichts gespeichert, und es gibt nichts zu installieren.',
+                startFrom: 'Mit einem Beispiel starten',
+                exProduction: 'Produktionsplan', exBlend: 'G\u00fcnstigste Mischung', exBudget: 'Budgetverteilung',
+                exWorkshop: 'Werkstatt (zeigt ein Diagramm)', exBlank: 'Leeres Raster',
+                gridNote: 'Gelbe Zellen sind die zu bestimmenden Mengen. Setze einen Operator (\u2264, \u2265, =) und eine Zahl rechts neben eine Grenze. \u00c4ndere alles und l\u00f6se erneut.',
+                solve: 'L\u00f6sen', wholeNumbers: 'Nur ganze Zahlen', clearGrid: 'Raster leeren',
+                placeholder: 'Deine Antwort erscheint hier, gepr\u00fcft gegen deine eigenen Zahlen.',
+                selfCheck: 'Schnelle Selbstpr\u00fcfung ausf\u00fchren',
+                howTitle: 'Wie es dein Raster liest',
+                howP1: 'Plumline sucht eine Zelle, die die anderen summiert: das wird das Ziel. Die Zellen, die in diese Summe einflie\u00dfen und derzeit leer oder null sind, werden zu den Mengen, die es \u00e4ndern kann. Jede Zeile mit einem Vergleichsoperator und einer Zahl wird zu einer Grenze. Es nutzt die Bezeichnungen aus deiner ersten Spalte, sodass sich die Antwort in klaren Worten liest.',
+                howP2: 'Es l\u00f6st lineare und ganzzahlige Probleme: Produktion, Einkauf, Mischungen, Schichtpl\u00e4ne, Transport, Budgets. Echte nichtlineare Probleme l\u00f6st es nicht, etwa eine Menge mal eine andere Menge, und es zeigt die Zelle, wenn es auf so eine trifft.',
+                getAddon: 'Lieber in Google Sheets? Hol dir das Add-on \u2192',
+                atLimit: 'an der Grenze', oneMore: 'Eine Einheit mehr erh\u00f6ht das Ergebnis um ', solvedOk: 'Gel\u00f6st, und jede Grenze wird eingehalten.',
+                exportLabel: 'Exportieren', copied: 'Kopiert',
+                regionCap: 'Der zul\u00e4ssige Bereich \u2014 alles, was deine Grenzen erlauben. Der Stern ist die beste Wahl.',
+                showWorking: 'Rechenweg zeigen (Eckpunktmethode)',
+                workingIntro: 'Ein lineares Problem wird immer an einer Ecke des zul\u00e4ssigen Bereichs gewonnen. Also finden wir jede Ecke, berechnen das Ziel an jeder und behalten die beste.',
+                corner: 'Ecke', value: 'Wert', best: 'beste',
+                workingNote: 'Dieselbe Antwort wie der Solver, nur auf dem langen Weg gezeigt. Bei mehr als zwei Entscheidungen lassen sich die Ecken nicht zeichnen, aber die Methode ist identisch \u2014 Plumline nutzt daf\u00fcr den Simplex-Algorithmus.',
+                tRead: 'Raster konnte nicht gelesen werden', tSolve: 'Konnte nicht gel\u00f6st werden', tNo: 'Keine L\u00f6sung',
+                result: 'Ergebnis'
+            },
+            fr: {
+                navAddon: 'Le module', navHow: 'Comment \u00e7a marche',
+                heroEyebrow: 'Solveur en ligne gratuit',
+                heroTitle: 'Optimisez une feuille de calcul sans quitter le navigateur.',
+                heroLead: 'Saisissez votre probl\u00e8me dans la grille comme dans n\u2019importe quel tableur. Plumline le lit, trouve la meilleure solution et prouve la r\u00e9ponse. Rien n\u2019est envoy\u00e9, rien n\u2019est enregistr\u00e9, et il n\u2019y a rien \u00e0 installer.',
+                startFrom: 'Partir d\u2019un exemple',
+                exProduction: 'Plan de production', exBlend: 'M\u00e9lange le moins cher', exBudget: 'R\u00e9partition du budget',
+                exWorkshop: 'Atelier (affiche un graphique)', exBlank: 'Grille vide',
+                gridNote: 'Les cellules jaunes sont les quantit\u00e9s \u00e0 d\u00e9cider. Mettez un op\u00e9rateur (\u2264, \u2265, =) et un nombre \u00e0 droite d\u2019une limite. Modifiez ce que vous voulez et r\u00e9solvez \u00e0 nouveau.',
+                solve: 'R\u00e9soudre', wholeNumbers: 'Nombres entiers uniquement', clearGrid: 'Vider la grille',
+                placeholder: 'Votre r\u00e9ponse appara\u00eetra ici, v\u00e9rifi\u00e9e avec vos propres chiffres.',
+                selfCheck: 'Lancer une v\u00e9rification rapide',
+                howTitle: 'Comment il lit votre grille',
+                howP1: 'Plumline cherche une cellule qui totalise les autres : elle devient l\u2019objectif. Les cellules qui alimentent ce total, et qui sont vides ou \u00e0 z\u00e9ro, deviennent les quantit\u00e9s qu\u2019il peut modifier. Toute ligne avec un op\u00e9rateur de comparaison et un nombre devient une limite. Il utilise les libell\u00e9s de votre premi\u00e8re colonne pour tout nommer, si bien que la r\u00e9ponse se lit en mots clairs.',
+                howP2: 'Il r\u00e9sout les probl\u00e8mes lin\u00e9aires et entiers : production, achats, m\u00e9langes, plannings, transport, budgets. Il ne r\u00e9sout pas les probl\u00e8mes vraiment non lin\u00e9aires, comme une quantit\u00e9 multipli\u00e9e par une autre, et il d\u00e9signe la cellule s\u2019il en rencontre un.',
+                getAddon: 'Vous le pr\u00e9f\u00e9rez dans Google Sheets\u00a0? Obtenez le module \u2192',
+                atLimit: '\u00e0 la limite', oneMore: 'Une unit\u00e9 de plus augmente le r\u00e9sultat de ', solvedOk: 'R\u00e9solu, et toutes les limites sont respect\u00e9es.',
+                exportLabel: 'Exporter', copied: 'Copi\u00e9',
+                regionCap: 'La r\u00e9gion admissible \u2014 tout ce que vos limites permettent. L\u2019\u00e9toile est la meilleure option.',
+                showWorking: 'Voir le d\u00e9tail (m\u00e9thode des sommets)',
+                workingIntro: 'Un probl\u00e8me lin\u00e9aire se gagne toujours \u00e0 un sommet de la r\u00e9gion admissible. On trouve donc chaque sommet, on calcule l\u2019objectif \u00e0 chacun, et on garde le meilleur.',
+                corner: 'Sommet', value: 'Valeur', best: 'meilleur',
+                workingNote: 'La m\u00eame r\u00e9ponse que le solveur, montr\u00e9e par le chemin long. Pour plus de deux d\u00e9cisions, les sommets ne peuvent pas \u00eatre dessin\u00e9s, mais la m\u00e9thode est identique \u2014 Plumline le fait avec l\u2019algorithme du simplexe.',
+                tRead: 'Impossible de lire la grille', tSolve: 'Impossible de r\u00e9soudre', tNo: 'Aucune solution',
+                result: 'R\u00e9sultat'
+            }
+        };
+        var LANG = 'en';
+        function t(key) {return (I18N[LANG] && I18N[LANG][key]) || I18N.en[key] || key;}
+        function applyLang(lang) {
+            LANG = I18N[lang] ? lang : 'en';
+            document.documentElement.lang = LANG;
+            var nodes = document.querySelectorAll('[data-i18n]');
+            for (var i = 0; i < nodes.length; i++) {
+                var k = nodes[i].getAttribute('data-i18n');
+                if (I18N[LANG][k]) nodes[i].innerHTML = I18N[LANG][k];
+            }
+        }
+
         /* === Plumline engine: the exact same code as the Google Sheets add-on === */
         /**
          * Engine.gs — model extraction and optimisation
@@ -2239,15 +2485,15 @@
                 var sheet = sheetFromGrid();
                 var model;
                 try {model = detectModel_(sheet);}
-                catch (err) {return showTrouble('Could not read the grid', String(err.message || err));}
+                catch (err) {return showTrouble(t('tRead'), String(err.message || err));}
                 model.wholeNumbers = document.getElementById('whole').checked;
 
                 var out;
                 try {out = solveModel_(sheet, model);}
-                catch (err) {return showTrouble('Could not solve', String(err.message || err));}
+                catch (err) {return showTrouble(t('tSolve'), String(err.message || err));}
 
                 if (out.status !== 'optimal' && out.status !== 'feasible') {
-                    return showTrouble('No solution', out.explanation || ('The model came back ' + out.status + '.'));
+                    return showTrouble(t('tNo'), out.explanation || ('The model came back ' + out.status + '.'));
                 }
                 renderReceipt(out, model);
             }
@@ -2268,15 +2514,15 @@
                 });
                 (out.constraints || []).forEach(function (c) {
                     var pct = c.limit ? Math.min(100, Math.abs(c.used / c.limit) * 100) : 0;
-                    h += '<div class="lim' + (c.satisfied ? '' : ' over') + '"><div class="r"><span class="k">' + esc(c.label) + '</span><span class="v">' + fmt(c.used) + ' / ' + fmt(c.limit) + (c.binding ? ' at limit' : '') + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
+                    h += '<div class="lim' + (c.satisfied ? '' : ' over') + '"><div class="r"><span class="k">' + esc(c.label) + '</span><span class="v">' + fmt(c.used) + ' / ' + fmt(c.limit) + (c.binding ? ' ' + t('atLimit') : '') + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>';
                     if (c.binding && typeof c.shadowPrice === 'number' && c.shadowPrice > 0)
-                        h += '<div class="shadow">One more raises the result by ' + fmt(c.shadowPrice) + '</div>';
+                        h += '<div class="shadow">' + t('oneMore') + fmt(c.shadowPrice) + '</div>';
                     h += '</div>';
                 });
                 if (out.caveat) h += '<div class="check bad">' + esc(out.caveat) + '</div>';
-                else h += '<div class="check">&#10003; Solved, and every limit is respected.</div>';
+                else h += '<div class="check">&#10003; ' + t('solvedOk') + '</div>';
                 h += '</div>';
-                h += '<div class="exports"><span class="ex">Export</span>' +
+                h += '<div class="exports"><span class="ex">' + t('exportLabel') + '</span>' +
                     '<button class="chip" id="exp-csv">CSV</button>' +
                     '<button class="chip" id="exp-xls">Excel</button>' +
                     '<button class="chip" id="exp-txt">Copy summary</button></div>';
@@ -2336,7 +2582,7 @@
 
                 var box = document.createElement('div');
                 box.className = 'plotwrap';
-                box.innerHTML = '<p class="plotcap">The feasible region — every allocation your limits allow. The star is the best one.</p>' + svg;
+                box.innerHTML = '<p class="plotcap">' + t('regionCap') + '</p>' + svg;
                 document.getElementById('result').appendChild(box);
 
                 // Optional worked steps: the corner-point method, the way it's taught.
@@ -2353,20 +2599,17 @@
                     var isOpt = Math.abs(v.x - out.values[0]) < 1e-6 && Math.abs(v.y - out.values[1]) < 1e-6;
                     return '<tr' + (isOpt ? ' class="win"' : '') + '><td>(' + fmt(v.x) + ', ' + fmt(v.y) + ')</td><td>' +
                         fmt(obj.x) + '·' + fmt(v.x) + ' + ' + fmt(obj.y) + '·' + fmt(v.y) + '</td><td>' + fmt(z) +
-                        (isOpt ? ' &larr; best' : '') + '</td></tr>';
+                        (isOpt ? ' &larr; ' + t('best') : '') + '</td></tr>';
                 }).join('');
                 var det = document.createElement('details');
                 det.className = 'steps';
                 det.innerHTML =
-                    '<summary>Show the working (corner-point method)</summary>' +
-                    '<p>A linear problem is always won at a corner of the feasible region. ' +
-                    'So we find every corner, work out the objective at each, and keep the best.</p>' +
-                    '<table class="steptable"><thead><tr><th>Corner (' + esc(lab[0]) + ', ' + esc(lab[1]) + ')</th>' +
-                    '<th>' + esc(out.objectiveLabel || 'Objective') + '</th><th>Value</th></tr></thead>' +
+                    '<summary>' + t('showWorking') + '</summary>' +
+                    '<p>' + t('workingIntro') + '</p>' +
+                    '<table class="steptable"><thead><tr><th>' + t('corner') + ' (' + esc(lab[0]) + ', ' + esc(lab[1]) + ')</th>' +
+                    '<th>' + esc(out.objectiveLabel || t('result')) + '</th><th>' + t('value') + '</th></tr></thead>' +
                     '<tbody>' + rows + '</tbody></table>' +
-                    '<p class="stepnote">The same answer the solver reached, shown the long way. ' +
-                    'For problems with more than two decisions the corners can\\u2019t be drawn, ' +
-                    'but the method is identical — Plumline just does it with the simplex algorithm instead.</p>';
+                    '<p class="stepnote">' + t('workingNote') + '</p>';
                 document.getElementById('result').appendChild(det);
             }
 
@@ -2485,7 +2728,7 @@
                 });
                 var text = lines.join('\\n');
                 if (navigator.clipboard) {
-                    navigator.clipboard.writeText(text).then(function () {flash('exp-txt', 'Copied');});
+                    navigator.clipboard.writeText(text).then(function () {flash('exp-txt', t('copied'));});
                 } else {
                     download('plumline-solution.txt', 'text/plain', text);
                 }
@@ -2553,6 +2796,14 @@
                 out.appendChild(summary);
             }
             document.getElementById('selftest').addEventListener('click', runSelfTest);
+
+            // Language: honour ?lang= or the browser, then let the switcher change it live.
+            var sel = document.getElementById('lang');
+            var initial = (location.search.match(/[?&]lang=(\w\w)/) || [])[1] ||
+                (navigator.language || 'en').slice(0, 2);
+            if (!I18N[initial]) initial = 'en';
+            sel.value = initial; applyLang(initial);
+            sel.addEventListener('change', function () {applyLang(sel.value);});
 
             loadExample('production');
         })();
