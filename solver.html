@@ -76,6 +76,9 @@ table.grid input:focus{background:var(--brass-tint)}
 .gridnote{font-size:12px;color:var(--faint);margin-top:8px}
 
 .controls-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px}
+.grid-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.grid-tools .gt{padding:4px 12px;font-size:13px}
+.grid-tools .gt:disabled{opacity:.4;cursor:not-allowed}
 label.toggle{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink-2)}
 
 /* result */
@@ -192,6 +195,13 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     </div>
     <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Put an operator (≤, ≥, =) and a number to the right of a limit. Edit anything and solve again.</p>
 
+    <div class="grid-tools">
+      <button class="ghost gt" id="addRow" data-i18n="addRow">+ Row</button>
+      <button class="ghost gt" id="delRow" data-i18n="delRow">− Row</button>
+      <button class="ghost gt" id="addCol" data-i18n="addCol">+ Column</button>
+      <button class="ghost gt" id="delCol" data-i18n="delCol">− Column</button>
+    </div>
+
     <div class="controls-row">
       <button class="solve" id="solve" data-i18n="solve">Solve</button>
       <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers only</span></label>
@@ -237,7 +247,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=9"></script>
+<script src="assets/i18n.js?v=10"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1754,6 +1764,7 @@ function matchesAnyHint_(label, hints) {
   /* === Web app: a spreadsheet-like grid that feeds the engine === */
 (function(){
   var ROWS=12, COLS=6;
+  var MIN_ROWS=3, MIN_COLS=3, MAX_ROWS=40, MAX_COLS=20;
   var data=[];            // data[r][c] = string (formula or value)
   function blank(){ data=[]; for(var r=0;r<ROWS;r++){var row=[];for(var c=0;c<COLS;c++)row.push('');data.push(row);} }
 
@@ -1801,10 +1812,17 @@ function matchesAnyHint_(label, hints) {
   };
 
   function loadExample(name){
-    blank();
     if(name!=='blank'){
       var ex=EXAMPLES[name];
+      // Grow the grid to fit the example (never shrink below the defaults).
+      var needRows=Math.max(12, ex.length);
+      var needCols=Math.max(6, ex.reduce(function(m,row){return Math.max(m,row.length);},0));
+      ROWS=Math.min(MAX_ROWS, needRows);
+      COLS=Math.min(MAX_COLS, needCols);
+      blank();
       for(var r=0;r<ex.length;r++)for(var c=0;c<ex[r].length;c++)data[r][c]=String(ex[r][c]);
+    } else {
+      ROWS=12; COLS=6; blank();
     }
     render();
     document.getElementById('result').classList.remove('show');
@@ -1832,6 +1850,30 @@ function matchesAnyHint_(label, hints) {
         data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')]=e.target.value;
       });
     }
+    syncGridTools();
+  }
+
+  // Dynamic grid: grow or shrink the sheet, keeping existing data in place and
+  // staying within bounds that keep the in-browser solver responsive.
+  function ensureShape(){
+    // Guarantee data has exactly ROWS x COLS cells, preserving what's there.
+    for(var r=0;r<ROWS;r++){
+      if(!data[r]) data[r]=[];
+      for(var c=0;c<COLS;c++) if(data[r][c]==null) data[r][c]='';
+      data[r].length=COLS;
+    }
+    data.length=ROWS;
+  }
+  function addRow(){ if(ROWS>=MAX_ROWS) return; ROWS++; ensureShape(); render(); }
+  function delRow(){ if(ROWS<=MIN_ROWS) return; ROWS--; ensureShape(); render(); }
+  function addCol(){ if(COLS>=MAX_COLS) return; COLS++; ensureShape(); render(); }
+  function delCol(){ if(COLS<=MIN_COLS) return; COLS--; ensureShape(); render(); }
+
+  // Disable a button when its limit is reached, so the bounds are visible.
+  function syncGridTools(){
+    var set=function(id,disabled){var b=document.getElementById(id); if(b) b.disabled=disabled;};
+    set('addRow', ROWS>=MAX_ROWS); set('delRow', ROWS<=MIN_ROWS);
+    set('addCol', COLS>=MAX_COLS); set('delCol', COLS<=MIN_COLS);
   }
 
   // Build the sheet object the engine expects from the current grid.
@@ -2150,6 +2192,10 @@ function matchesAnyHint_(label, hints) {
   for(var i=0;i<chips.length;i++)chips[i].addEventListener('click',function(e){loadExample(e.target.getAttribute('data-ex'));});
   document.getElementById('solve').addEventListener('click',solve);
   document.getElementById('clear').addEventListener('click',function(){loadExample('blank');});
+  document.getElementById('addRow').addEventListener('click',addRow);
+  document.getElementById('delRow').addEventListener('click',delRow);
+  document.getElementById('addCol').addEventListener('click',addCol);
+  document.getElementById('delCol').addEventListener('click',delCol);
 
 
   // --- Self-check: proves the engine works end to end, in plain language ---
