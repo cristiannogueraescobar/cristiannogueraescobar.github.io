@@ -10,7 +10,20 @@
 <meta property="og:description" content="Find the best allocation and verify it against your own numbers. Free online linear and integer solver that runs in your browser.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/">
+<meta property="og:image" content="https://plumline.online/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Plumline: Optimization Solver for Spreadsheets">
+<meta name="twitter:description" content="Find the best allocation and verify it against your own numbers. Free online linear and integer solver that runs in your browser.">
+<meta name="twitter:image" content="https://plumline.online/assets/og-image.png">
 <link rel="canonical" href="https://plumline.online/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Plumline","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://plumline.online/","description":"A free online linear and integer programming solver that finds the best way to split limited resources and verifies the result against your own numbers. Build a model in a spreadsheet-style grid or paste one from Excel or Google Sheets.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","es","pt","de","fr"],"featureList":["Linear programming","Integer programming","Paste from Excel or Google Sheets","CSV import and export","Result verification against your formulas","Shadow prices"]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need to install anything?","acceptedAnswer":{"@type":"Answer","text":"For the online solver, no. It runs in your browser at plumline.online. A Google Sheets add-on is on the way and will be a free, one-time install from the Workspace Marketplace once it's approved."}},{"@type":"Question","name":"How do I write the model?","acceptedAnswer":{"@type":"Answer","text":"With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax."}},{"@type":"Question","name":"What kinds of problems does it solve?","acceptedAnswer":{"@type":"Answer","text":"Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one."}},{"@type":"Question","name":"Are my numbers safe?","acceptedAnswer":{"@type":"Answer","text":"Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google's infrastructure under your own account. There is no Plumline account to create and no tracking."}},{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"The online solver is free. The Google Sheets add-on is planned to be free once it becomes available."}}]}
+</script>
 <link rel="stylesheet" href="assets/plumline.css?v=4">
 </head>
 <body data-page="home">
@@ -29,8 +42,8 @@
       <nav class="nav">
         <a href="solver.html" data-i18n="navSolver">Solver</a>
         <a href="#addon" data-i18n="navAddon">Add-on</a>
-        <a href="guide.html" data-i18n="navGuide">Guide</a>
-        <a href="about.html" data-i18n="navAbout">About</a>
+        <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
+        <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
         <select class="lang" id="lang" aria-label="Language">
           <option value="en">EN</option><option value="es">ES</option>
           <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
@@ -48,9 +61,10 @@
           <a class="btn ghost addon-waitlist" href="mailto:cristiannogueraescobar@gmail.com" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
         </div>
         <div class="hero-chips">
-          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipBrowser">Runs in your browser</span></span>
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipPaste">Paste from Excel or Google Sheets</span></span>
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipGrid">Dynamic grid up to 40×20</span></span>
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipBrowser">Runs locally in your browser</span></span>
           <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipNoAccount">No Plumline account needed</span></span>
-          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipPrivate">Your data stays private</span></span>
         </div>
       </div>
       <div class="proof" aria-hidden="true">
@@ -81,6 +95,7 @@
         <h3 data-i18n="pillarSolverH">Online solver</h3>
         <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Paste an existing model from Excel or Google Sheets, or build one directly in Plumline's spreadsheet-style grid. Add rows and columns, undo destructive changes, solve and export the result without uploading your data. Free, in five languages.</p>
         <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now →</a>
+        <p class="muted" style="font-size:13px;margin-top:12px" data-i18n="pillarSolverExport">Import a CSV, and export the result to CSV, Excel or a copyable summary.</p>
       </div>
       <div class="card true" id="addon">
         <span class="chip" data-i18n="addonSoon">Coming soon to Google Sheets</span>
@@ -230,7 +245,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=17"></script>
+<script src="assets/i18n.js?v=18"></script>
 <script>
   var LANG = Plumline.i18n.init('home');
   // The add-on is not published yet, so its CTAs open a pre-filled email asking

@@ -253,6 +253,20 @@ a:hover{text-decoration-color:var(--brass)}
   .versus{grid-template-columns:1fr}
   .bob::before{left:calc(-1*(var(--rail)+18px)+var(--rail)-5px)}
 }
+@media(max-width:560px){
+  :root{--rail:0px}
+  .plumb,.wrap{padding:0 16px}
+  .nav{gap:12px}
+  .nav a{font-size:11px}
+  /* Comfortable touch targets on small screens (min 44px) */
+  button.solve{width:100%;padding:14px 26px;min-height:44px}
+  .controls-row{gap:10px}
+  .controls-row .toggle{width:100%}
+  .grid-tools{gap:6px}
+  .grid-tools .gt{padding:9px 12px;min-height:44px;flex:1 1 auto;text-align:center}
+  .exports{flex-wrap:wrap}
+  .exports .chip{min-height:40px}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
 
 /* ---- PROSE (legal & content pages) --------------------------------------- */

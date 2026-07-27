@@ -92,8 +92,11 @@
         addonEmailBody:'Hi, please let me know when the Plumline Google Sheets add-on is available.'
       ,
         heroLead2:'Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves linear and integer models, then verifies the result against your own numbers. Free, in your browser.',
-        chipBrowser:'Runs in your browser',
+        chipBrowser:'Runs locally in your browser',
         chipNoAccount:'No Plumline account needed',
+        chipPaste:'Paste from Excel or Google Sheets',
+        chipGrid:'Dynamic grid up to 40×20',
+        pillarSolverExport:'Import a CSV, and export the result to CSV, Excel or a copyable summary.',
         chipPrivate:'Your data stays private'
       ,
         exGridHint:'The highlighted cells (chairs, tables) start at zero. Plumline fills them in.',
@@ -396,8 +399,11 @@
         addonEmailBody:'Hola, avísame cuando el complemento de Plumline para Google Sheets esté disponible.'
       ,
         heroLead2:'Plumline encuentra la mejor forma de repartir recursos limitados: cuánto fabricar, comprar, enviar o asignar de personal. Resuelve modelos lineales y enteros, y luego verifica el resultado con tus propios números. Gratis, en tu navegador.',
-        chipBrowser:'Funciona en tu navegador',
+        chipBrowser:'Se ejecuta localmente en tu navegador',
         chipNoAccount:'Sin cuenta de Plumline',
+        chipPaste:'Pega desde Excel o Google Sheets',
+        chipGrid:'Cuadrícula dinámica hasta 40×20',
+        pillarSolverExport:'Importa un CSV, y exporta el resultado a CSV, Excel o un resumen que puedes copiar.',
         chipPrivate:'Tus datos son privados'
       ,
         exGridHint:'Las celdas resaltadas (sillas, mesas) empiezan en cero. Plumline las rellena.',
@@ -700,8 +706,11 @@
         addonEmailBody:'Olá, avise-me quando o complemento do Plumline para Google Sheets estiver disponível.'
       ,
         heroLead2:'O Plumline encontra a melhor forma de dividir recursos limitados: quanto fabricar, comprar, enviar ou alocar de pessoal. Resolve modelos lineares e inteiros e depois verifica o resultado com os seus próprios números. Grátis, no seu navegador.',
-        chipBrowser:'Roda no seu navegador',
+        chipBrowser:'Roda localmente no seu navegador',
         chipNoAccount:'Sem conta do Plumline',
+        chipPaste:'Cole do Excel ou Google Sheets',
+        chipGrid:'Grade dinâmica até 40×20',
+        pillarSolverExport:'Importe um CSV e exporte o resultado para CSV, Excel ou um resumo copiável.',
         chipPrivate:'Os seus dados são privados'
       ,
         exGridHint:'As células destacadas (cadeiras, mesas) começam em zero. O Plumline as preenche.',
@@ -1004,8 +1013,11 @@
         addonEmailBody:'Hallo, bitte sag mir Bescheid, sobald das Plumline-Add-on für Google Sheets verfügbar ist.'
       ,
         heroLead2:'Plumline findet den besten Weg, begrenzte Ressourcen aufzuteilen: wie viel herstellen, kaufen, liefern oder besetzen. Es löst lineare und ganzzahlige Modelle und prüft das Ergebnis dann mit deinen eigenen Zahlen. Kostenlos, im Browser.',
-        chipBrowser:'Läuft im Browser',
+        chipBrowser:'Läuft lokal in deinem Browser',
         chipNoAccount:'Kein Plumline-Konto nötig',
+        chipPaste:'Aus Excel oder Google Sheets einfügen',
+        chipGrid:'Dynamisches Raster bis 40×20',
+        pillarSolverExport:'Importiere eine CSV und exportiere das Ergebnis als CSV, Excel oder kopierbare Zusammenfassung.',
         chipPrivate:'Deine Daten bleiben privat'
       ,
         exGridHint:'Die markierten Zellen (Stühle, Tische) beginnen bei null. Plumline füllt sie aus.',
@@ -1308,8 +1320,11 @@
         addonEmailBody:'Bonjour, merci de me prévenir quand le module Plumline pour Google Sheets sera disponible.'
       ,
         heroLead2:'Plumline trouve la meilleure façon de répartir des ressources limitées : combien produire, acheter, expédier ou affecter en personnel. Il résout des modèles linéaires et entiers, puis vérifie le résultat avec vos propres chiffres. Gratuit, dans votre navigateur.',
-        chipBrowser:'Fonctionne dans le navigateur',
+        chipBrowser:'S\'exécute localement dans votre navigateur',
         chipNoAccount:'Aucun compte Plumline requis',
+        chipPaste:'Collez depuis Excel ou Google Sheets',
+        chipGrid:'Grille dynamique jusqu\'à 40×20',
+        pillarSolverExport:'Importez un CSV, et exportez le résultat en CSV, Excel ou un résumé copiable.',
         chipPrivate:'Vos données restent privées'
       ,
         exGridHint:'Les cellules surlignées (chaises, tables) partent de zéro. Plumline les remplit.',
