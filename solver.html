@@ -237,7 +237,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=8"></script>
+<script src="assets/i18n.js?v=9"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -504,7 +504,9 @@ function solveLinearProgram_(model) {
   let objective = model.constant || 0;
   for (let j = 0; j < n; j++) objective += (model.objective[j] || 0) * values[j];
 
-  return { status: 'optimal', values: values, objective: objective };
+  // A simplex optimum is a proven optimum for the continuous LP.
+  return { status: 'optimal', values: values, objective: objective,
+           optimalityProven: true, stopReason: null };
 }
 
 function normalizeConstraint_(c) {
@@ -1884,12 +1886,12 @@ function matchesAnyHint_(label, hints) {
     if(out.status!=='optimal'&&out.status!=='feasible'){
       // Pick a title that matches the actual outcome, so the headline never
       // says "no solution" when the search was simply incomplete.
-      var title;
-      if(out.status==='infeasible') title=t('tInfeasible');
-      else if(out.status==='unbounded') title=t('tUnbounded');
-      else if(out.status==='numerical_failure') title=t('tNumerical');
-      else title=t('tIncomplete');   // unknown, iteration_limit, time_limit, node_limit...
-      return showTrouble(title, out.explanation||('The model came back '+out.status+'.'));
+      var title, body;
+      if(out.status==='infeasible'){ title=t('tInfeasible'); body=t('statusInfeasibleBody'); }
+      else if(out.status==='unbounded'){ title=t('tUnbounded'); body=t('statusUnboundedBody'); }
+      else if(out.status==='numerical_failure'){ title=t('tNumerical'); body=t('statusNumericalBody'); }
+      else { title=t('tIncomplete'); body=t('statusUnknownBody'); }   // unknown, iteration_limit, time_limit, node_limit...
+      return showTrouble(title, body);
     }
     renderReceipt(out,model);
   }
@@ -1915,7 +1917,15 @@ function matchesAnyHint_(label, hints) {
         h+='<div class="shadow">'+t('oneMore')+fmt(c.shadowPrice)+'</div>';
       h+='</div>';
     });
-    if(out.caveat) h+='<div class="check bad">'+esc(out.caveat)+'</div>';
+    // Build the "feasible but not proven optimal" caveat in the user's language,
+    // from the real stop reason, rather than trusting an English string.
+    var caveat = '';
+    if(out.status==='feasible'){
+      var rk={time_limit:'feasibleTimeLimit',node_limit:'feasibleNodeLimit',
+              iteration_limit:'feasibleIterationLimit',numerical_failure:'feasibleNumericalFailure'}[out.stopReason]||'feasibleGeneric';
+      caveat=t('feasibleBody').replace('{reason}', t(rk));
+    }
+    if(caveat) h+='<div class="check bad">'+esc(caveat)+'</div>';
     else h+='<div class="check">&#10003; '+t('solvedOk')+'</div>';
     if(/shadow/.test(h)) h+='<div class="shadow-note">'+t('shadowNote')+'</div>';
     h+='</div>';
