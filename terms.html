@@ -3,310 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Terms of service, Plumline</title>
-<meta name="description" content="Terms of service for Plumline, a free Google Sheets add-on.">
-<style>
-/*
-  Plumline, site system (zero third-party: no web fonts, no external anything)
-  ============================================================================
-  A plumb line finds true vertical by gravity alone, the oldest honesty
-  instrument there is. The whole site hangs from it.
-
-  Typography is deliberately system-native. Every request this page makes is
-  to its own origin; on a site whose entire pitch is "your data never leaves
-  and nothing phones home", loading a font from someone else's server would
-  contradict the argument in the source. The display voice is a high-quality
-  serif already on the reader's machine; figures use the platform monospace.
-  The one drawn element is the plumb-bob mark: inline SVG, ours.
-*/
-
-:root {
-  --paper:    #F7F5F0;
-  --panel:    #FFFFFF;
-  --ink:      #1B1D1A;
-  --ink-soft: #55584F;
-  --faint:    #8C8E84;
-
-  --line:      #C9C6BB;
-  --line-fine: #E4E1D8;
-  --brass:     #A97B34;
-  --brass-tint:#F0E7D6;
-
-  --true:     #1F6B4F;
-  --true-lo:  #E0EDE6;
-  --wrong:    #A6392E;
-
-  --serif: ui-serif, 'New York', 'Iowan Old Style', 'Palatino Linotype',
-           Palatino, 'Cambria', Georgia, serif;
-  --mono:  ui-monospace, 'SF Mono', 'Cascadia Mono', 'Segoe UI Mono',
-           'Roboto Mono', Menlo, Consolas, monospace;
-  --sans:  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-           'Helvetica Neue', Arial, sans-serif;
-
-  --edge: 760px;
-  --rail: 56px;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
-
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 17px;
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-.plumb {
-  max-width: var(--edge);
-  margin: 0 auto;
-  padding: 0 32px 0 calc(var(--rail) + 32px);
-  position: relative;
-}
-.plumb::before {
-  content: '';
-  position: absolute;
-  left: var(--rail); top: 0; bottom: 0;
-  width: 1px; background: var(--line);
-}
-.bob { position: relative; padding-top: 74px; }
-.bob::before {
-  content: '';
-  position: absolute;
-  left: calc(-1 * (var(--rail) + 32px) + var(--rail) - 4px);
-  top: 80px; width: 9px; height: 9px;
-  background: var(--brass); transform: rotate(45deg);
-  box-shadow: 0 0 0 4px var(--paper);
-}
-
-.mast {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 24px 0 20px;
-}
-.lockup { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-.lockup svg { display: block; }
-.lockup .wm {
-  font-family: var(--mono); font-size: 13px; letter-spacing: 0.4em;
-  text-transform: uppercase; color: var(--ink);
-}
-.nav { display: flex; gap: 26px; }
-.nav a {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
-  color: var(--ink-soft); text-decoration: none; padding-bottom: 3px;
-  border-bottom: 1px solid transparent; transition: border-color .15s, color .15s;
-}
-.nav a:hover, .nav a[aria-current] { color: var(--ink); border-color: var(--brass); }
-
-.eyebrow {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--brass); margin-bottom: 18px;
-}
-h1 {
-  font-family: var(--serif); font-weight: 600;
-  font-size: clamp(40px, 6.2vw, 66px); line-height: 1.0;
-  letter-spacing: -0.025em; font-optical-sizing: auto;
-}
-h2 {
-  font-family: var(--serif); font-weight: 600;
-  font-size: clamp(27px, 3.5vw, 36px); line-height: 1.1;
-  letter-spacing: -0.02em; margin-bottom: 18px;
-}
-h3 { font-family: var(--serif); font-weight: 600; font-size: 20px; margin-bottom: 7px; }
-p { margin-bottom: 18px; max-width: 56ch; }
-.lead { font-size: clamp(19px, 2.3vw, 24px); line-height: 1.48; color: var(--ink-soft); max-width: 44ch; }
-em { font-style: italic; }
-strong { font-weight: 600; }
-a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
-a:hover { text-decoration-color: var(--brass); }
-a:focus-visible, button:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--true); outline-offset: 3px; border-radius: 2px;
-}
-
-.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 30px; }
-.btn {
-  font-family: var(--sans); font-size: 15px; font-weight: 500;
-  padding: 12px 20px; border-radius: 3px; border: 1px solid var(--ink);
-  background: var(--ink); color: var(--paper); cursor: pointer;
-  text-decoration: none; display: inline-flex; align-items: center; gap: 9px;
-  transition: transform .12s, box-shadow .12s;
-}
-.btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(27,29,26,.16); }
-.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn.ghost:hover { border-color: var(--ink); box-shadow: none; }
-
-.hero { padding: 36px 0 28px; }
-.hero h1 { max-width: 15ch; }
-.hero .lead { margin-top: 22px; }
-
-.solver {
-  margin: 46px 0 8px;
-  display: grid; grid-template-columns: 1.05fr 1fr; gap: 0;
-  border: 1px solid var(--line); border-radius: 5px; overflow: hidden;
-  background: var(--panel); box-shadow: 0 20px 50px -28px rgba(27,29,26,.4);
-}
-.solver .controls { padding: 24px 24px 26px; border-right: 1px solid var(--line-fine); }
-.solver .caption {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--faint); margin-bottom: 18px;
-}
-.dial { margin-bottom: 20px; }
-.dial:last-of-type { margin-bottom: 0; }
-.dial label {
-  display: flex; justify-content: space-between; align-items: baseline;
-  font-size: 14px; margin-bottom: 8px;
-}
-.dial label b { font-family: var(--mono); font-weight: 500; }
-.dial input[type=range] {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 2px; background: var(--line); outline: none; cursor: pointer;
-}
-.dial input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
-  border-radius: 50%; background: var(--brass); border: 2px solid var(--panel);
-  box-shadow: 0 0 0 1px var(--brass);
-}
-.dial input[type=range]::-moz-range-thumb {
-  width: 16px; height: 16px; border-radius: 50%; background: var(--brass);
-  border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--brass);
-}
-
-.receipt { padding: 24px 24px 24px 28px; font-family: var(--mono); font-size: 13.5px; position: relative; }
-.receipt::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 7px;
-  background: radial-gradient(circle at 0 5px, transparent 3px, var(--line-fine) 3.4px, var(--line-fine) 4px, var(--panel) 4.4px) repeat-y;
-  background-size: 7px 9px;
-}
-.receipt .totrow {
-  display: flex; justify-content: space-between; align-items: baseline;
-  padding-bottom: 12px; margin-bottom: 10px; border-bottom: 1px solid var(--line);
-}
-.receipt .totrow span { font-family: var(--sans); font-size: 13px; color: var(--ink-soft); }
-.receipt .totrow b { font-size: 30px; font-weight: 500; letter-spacing: -0.02em; }
-.receipt .r { display: flex; justify-content: space-between; padding: 4px 0; gap: 12px; }
-.receipt .r .k { color: var(--ink-soft); }
-.receipt .r .v { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.receipt .lim { margin-top: 8px; }
-.receipt .lim .bar { height: 3px; background: var(--line-fine); margin-top: 4px; border-radius: 2px; overflow: hidden; }
-.receipt .lim .bar i { display: block; height: 100%; width: 0; background: var(--true); transition: width .35s cubic-bezier(.4,0,.2,1); }
-.receipt .lim.over .bar i { background: var(--wrong); }
-.receipt .check {
-  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line);
-  color: var(--true); display: flex; gap: 8px; align-items: flex-start;
-  font-family: var(--sans); font-size: 13px; line-height: 1.45;
-}
-.receipt .check.warn { color: var(--brass); }
-.solvebtn {
-  width: 100%; margin-top: 18px; font-family: var(--sans); font-size: 14px;
-  font-weight: 500; padding: 11px; border: none; border-radius: 3px;
-  background: var(--true); color: #fff; cursor: pointer; transition: filter .12s;
-}
-.solvebtn:hover { filter: brightness(1.08); }
-.playhint {
-  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--faint); text-align: center; margin-top: 20px;
-}
-
-.feat { max-width: 60ch; }
-.feat h2 + p { color: var(--ink-soft); }
-.detail {
-  font-family: var(--mono); font-size: 13px; color: var(--ink-soft);
-  background: var(--panel); border: 1px solid var(--line-fine);
-  border-left: 2px solid var(--brass); padding: 14px 16px;
-  border-radius: 0 4px 4px 0; margin: 22px 0; max-width: 60ch; line-height: 1.7;
-}
-.detail.true { border-left-color: var(--true); }
-.detail.true b { color: var(--true); }
-.detail.bad { border-left-color: var(--wrong); }
-.detail.bad b { color: var(--wrong); }
-
-.versus { margin: 26px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: none; }
-.vcard { border: 1px solid var(--line-fine); border-radius: 5px; padding: 20px; background: var(--panel); }
-.vcard.them { background: #FBF4F2; border-color: #EAD3CE; }
-.vcard .vh {
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
-  text-transform: uppercase; margin-bottom: 12px;
-}
-.vcard.us .vh { color: var(--true); }
-.vcard.them .vh { color: var(--wrong); }
-.vcard .q { font-family: var(--serif); font-size: 16px; font-style: italic; color: var(--ink-soft); line-height: 1.45; margin-bottom: 10px; }
-.vcard p { font-size: 13.5px; margin-bottom: 0; color: var(--ink-soft); }
-
-.cmp { width: 100%; border-collapse: collapse; margin: 26px 0; font-size: 14.5px; max-width: none; }
-.cmp th, .cmp td { text-align: left; padding: 13px 14px 13px 0; border-bottom: 1px solid var(--line-fine); vertical-align: top; }
-.cmp thead th { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); font-weight: 400; }
-.cmp tbody th { font-weight: 500; font-family: var(--sans); }
-.cmp .ok { color: var(--true); }
-.cmp .no { color: var(--wrong); }
-.cmp .us { background: var(--brass-tint); padding-left: 12px; padding-right: 12px; }
-
-.faq { border-top: 1px solid var(--line-fine); max-width: 62ch; }
-.faq details { border-bottom: 1px solid var(--line-fine); }
-.faq summary {
-  font-family: var(--serif); font-size: 18px; font-weight: 500;
-  padding: 18px 0; cursor: pointer; list-style: none;
-  display: flex; justify-content: space-between; align-items: center; gap: 20px;
-}
-.faq summary::-webkit-details-marker { display: none; }
-.faq summary::after { content: '+'; font-family: var(--mono); color: var(--brass); font-size: 20px; flex: none; }
-.faq details[open] summary::after { content: '\2013'; }
-.faq details p { padding-bottom: 18px; color: var(--ink-soft); }
-
-.band { margin: 80px 0 0; padding: 44px 0 46px; border-top: 1px solid var(--line); }
-.band h2 { max-width: 18ch; }
-
-footer { margin-top: 60px; padding: 30px 0 70px; border-top: 1px solid var(--line); font-size: 13px; color: var(--faint); }
-footer .flinks { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
-footer .flinks a { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); text-decoration: none; }
-footer .flinks a:hover { color: var(--ink); }
-footer .fine { max-width: 60ch; line-height: 1.5; }
-
-.prose { padding-top: 18px; }
-.prose h1 { font-size: clamp(32px, 4vw, 46px); margin-bottom: 10px; letter-spacing: -0.02em; }
-.prose .updated { font-family: var(--mono); font-size: 12px; color: var(--faint); margin-bottom: 40px; }
-.prose h2 { font-size: 22px; margin: 40px 0 12px; }
-.prose p, .prose li { color: var(--ink-soft); }
-.prose ul { margin: 0 0 18px; padding-left: 20px; }
-.prose li { margin-bottom: 9px; max-width: 58ch; }
-.prose .mono { font-family: var(--mono); font-size: 0.9em; color: var(--ink); }
-
-@media (max-width: 720px) {
-  :root { --rail: 30px; }
-  body { font-size: 16px; }
-  .plumb { padding: 0 20px 0 calc(var(--rail) + 20px); }
-  .nav { gap: 15px; }
-  .nav a.hide-sm { display: none; }
-  .solver { grid-template-columns: 1fr; }
-  .solver .controls { border-right: none; border-bottom: 1px solid var(--line-fine); }
-  .versus { grid-template-columns: 1fr; }
-  .bob::before { left: calc(-1 * (var(--rail) + 20px) + var(--rail) - 4px); }
-}
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto; } }
-
-</style>
+<title>Terms of service — Plumline</title>
+<meta name="description" content="The terms for using Plumline, the free optimisation solver and Google Sheets add-on.">
+<link rel="stylesheet" href="assets/plumline.css?v=1">
 </head>
-<body>
+<body data-page="legal">
+
+<div class="field-deep">
+  <div class="plumb">
+    <header class="mast">
+      <a href="index.html" class="lockup" aria-label="Plumline home">
+        <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
+          <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A"/>
+          <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2"/>
+        </svg>
+        <span class="wm">Plumline</span>
+      </a>
+      <nav class="nav">
+        <a href="solver.html" data-i18n="navSolver">Solver</a>
+        <a href="index.html" data-i18n="navAddon">Add-on</a>
+      </nav>
+    </header>
+  </div>
+</div>
+
 <div class="plumb">
-
-  <header class="mast">
-    <a href="index.html" class="lockup" aria-label="Plumline home">
-      <svg width="22" height="34" viewBox="0 0 22 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <line x1="11" y1="0" x2="11" y2="9" stroke="#1B1D1A" stroke-width="1.5"/>
-        <path d="M11 9 L18 15 L18 19 L11 30 L4 19 L4 15 Z" fill="#1B1D1A"/>
-        <line x1="2" y1="33" x2="20" y2="33" stroke="#1F6B4F" stroke-width="2"/>
-      </svg>
-      <span class="wm">Plumline</span>
-    </a>
-    <nav class="nav">
-      <a href="index.html#how" class="hide-sm">How it works</a>
-      <a href="index.html#faq">FAQ</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html" aria-current="page">Terms</a>
-    </nav>
-  </header>
-
   <main class="prose">
     <h1>Terms of service</h1>
     <p class="updated">Last updated 25 July 2026</p>
@@ -389,20 +111,20 @@ footer .fine { max-width: 60ch; line-height: 1.5; }
       <a href="mailto:cristiannogueraescobar@gmail.com">cristiannogueraescobar@gmail.com</a>.
     </p>
   </main>
-
-  <footer>
-    <div class="flinks">
-      <a href="index.html">Home</a>
-      <a href="privacy.html">Privacy policy</a>
-      <a href="terms.html">Terms of service</a>
-    </div>
-    <p class="fine">
-      Plumline is an independent add-on and is not affiliated with or endorsed
-      by Google. Google Sheets™ and Google Workspace™ are trademarks of Google
-      LLC.
-    </p>
-  </footer>
-
 </div>
+
+<footer class="foot">
+  <div class="plumb"><div class="in">
+    <div class="cols">
+      <div class="col"><h4 data-i18n="footTool">Tool</h4><a href="solver.html" data-i18n="footSolver">Online solver</a></div>
+      <div class="col"><h4 data-i18n="footProduct">Product</h4><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
+    </div>
+    <p class="fine" data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</p>
+  </div></div>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script>Plumline.i18n.init('legal');</script>
 </body>
 </html>
