@@ -545,6 +545,43 @@
       margin-top: 22px
     }
 
+    .demo-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px
+    }
+
+    .demo-tab {
+      flex: 1;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 4px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink-2);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: .12s
+    }
+
+    .demo-tab:hover {
+      border-color: var(--brass)
+    }
+
+    .demo-tab.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink)
+    }
+
+    .shadow {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      color: var(--true);
+      margin-top: 3px
+    }
+
     /* ===== body sections on paper ===== */
     .feat {
       max-width: 60ch
@@ -944,38 +981,19 @@
 
         <div class="solver" id="solver">
           <div class="controls">
-            <p class="caption">A worked example · drag to change the limits</p>
-            <div class="dial">
-              <label for="hrs"><span>Hours available</span><b id="hrs-v">100</b></label>
-              <input type="range" id="hrs" min="20" max="140" value="100" step="1" aria-label="Hours available">
+            <div class="demo-tabs" role="tablist">
+              <button class="demo-tab active" data-case="production" role="tab">Production</button>
+              <button class="demo-tab" data-case="blend" role="tab">Blend</button>
+              <button class="demo-tab" data-case="budget" role="tab">Budget</button>
             </div>
-            <div class="dial">
-              <label for="capb"><span>Max units of product B</span><b id="capb-v">40</b></label>
-              <input type="range" id="capb" min="0" max="60" value="40" step="1"
-                aria-label="Maximum units of product B">
-            </div>
-            <div class="dial">
-              <label for="whole"><span>Whole units only</span><b id="whole-v">off</b></label>
-              <input type="range" id="whole" min="0" max="1" value="0" step="1" aria-label="Whole units only">
-            </div>
+            <p class="caption" id="demo-caption">Make the most profit with the hours you have.</p>
+            <div id="dials"></div>
             <button class="solvebtn" id="resolve">Solve again</button>
           </div>
           <div class="receipt" id="receipt" aria-live="polite">
-            <div class="totrow"><span>Total profit</span><b id="obj">1,760</b></div>
-            <div class="r"><span class="k">Product A <span style="color:var(--faint)">· £30</span></span><span class="v"
-                id="a">0</span></div>
-            <div class="r"><span class="k">Product B <span style="color:var(--faint)">· £20</span></span><span class="v"
-                id="b">40</span></div>
-            <div class="r"><span class="k">Product C <span style="color:var(--faint)">· £48</span></span><span class="v"
-                id="c">20</span></div>
-            <div class="lim" id="lim-hrs">
-              <div class="r"><span class="k">Hours used</span><span class="v" id="hrs-used">100 / 100</span></div>
-              <div class="bar"><i></i></div>
-            </div>
-            <div class="lim" id="lim-b">
-              <div class="r"><span class="k">Units of B</span><span class="v" id="b-used">40 / 40</span></div>
-              <div class="bar"><i></i></div>
-            </div>
+            <div class="totrow"><span id="obj-label">Total profit</span><b id="obj">1,760</b></div>
+            <div id="rows"></div>
+            <div id="limits"></div>
             <div class="check" id="check">
               <b aria-hidden="true">✓</b><span id="check-t">The sheet recalculates 1,760, which matches.</span>
             </div>
@@ -1037,6 +1055,18 @@
         The fractional answer makes 1.67 of product C; the whole-number answer reshuffles the whole plan instead of
         rounding that 1.67 up or down. And if it runs out of time, it's honest about it, telling you it's the best found
         so far, not necessarily the best possible.</p>
+    </section>
+
+    <section class="bob feat">
+      <p class="eyebrow">Know which limit to fight</p>
+      <h2>It tells you what one more unit is worth.</h2>
+      <p>Solving is only half the question. The other half is what to change next. For every limit that's holding you
+        back, Plumline shows the shadow price: how much more you'd make if you had one more of it. In the demo above,
+        one more hour is worth £16 of profit while one more unit of B headroom is worth £4, so you know which one to
+        chase. It's the sensitivity report the paid tools put behind a wall, and here it just appears under each limit.
+      </p>
+      <div class="detail true"><b>Total hours, at limit.</b> One more hour raises the result by £16. One more unit of B
+        raises it by £4.</div>
     </section>
 
     <section class="bob" id="versus">
@@ -1250,48 +1280,203 @@
 
   <script>
     (function () {
-      var P = {A: 30, B: 20, C: 48}, H = {A: 2, B: 1, C: 3};
-      var el = function (id) {return document.getElementById(id)};
-      var fmt = function (n) {return n.toLocaleString('en-GB')};
-      function solve(hours, capB, whole) {
-        var best = null, maxB = Math.min(capB, Math.floor(hours / H.B));
-        for (var b = 0; b <= maxB; b++) {
-          var remH = hours - b * H.B; if (remH < 0) break;
-          var cMax = remH / H.C, cand = whole ? [Math.floor(cMax), Math.ceil(cMax)] : [cMax];
-          for (var i = 0; i < cand.length; i++) {
-            var c = cand[i]; if (c < 0) continue;
-            var hAfter = remH - c * H.C; if (hAfter < -1e-9) continue;
-            var a = hAfter / H.A; if (whole) a = Math.floor(a + 1e-9); if (a < 0) continue;
-            var usedH = a * H.A + b * H.B + c * H.C; if (usedH > hours + 1e-9) continue;
-            var profit = a * P.A + b * P.B + c * P.C;
-            if (!best || profit > best.profit + 1e-9) best = {a: a, b: b, c: c, profit: profit, usedH: usedH};
+      // Three worked models, each mirroring one of the add-on's one-click examples.
+      // The default position of every slider reproduces the exact figure the real
+      // engine returns; as you drag, a light solver recomputes live. It can drift a
+      // penny from the add-on at extreme settings, which is itself the point: the
+      // demo approximates in the browser, the add-on solves exactly in your sheet.
+      var fmt = function (n) {return Number(n).toLocaleString('en-GB', {maximumFractionDigits: 2});};
+      var el = function (id) {return document.getElementById(id);};
+
+      var CASES = {
+        production: {
+          caption: 'Make the most profit with the hours you have.',
+          objLabel: 'Total profit', money: true,
+          dials: [
+            {id: 'hours', label: 'Hours available', min: 20, max: 140, value: 100},
+            {id: 'capb', label: 'Max units of product B', min: 0, max: 60, value: 40},
+            {id: 'whole', label: 'Whole units only', min: 0, max: 1, value: 0, toggle: true}
+          ],
+          solve: function (d) {
+            var P = {A: 30, B: 20, C: 48}, H = {A: 2, B: 1, C: 3}, whole = d.whole === 1, best = null;
+            var maxB = Math.min(d.capb, Math.floor(d.hours / H.B));
+            for (var b = 0; b <= maxB; b++) {
+              var remH = d.hours - b * H.B; if (remH < 0) break;
+              var cMax = remH / H.C, cand = whole ? [Math.floor(cMax), Math.ceil(cMax)] : [cMax];
+              for (var i = 0; i < cand.length; i++) {
+                var c = cand[i]; if (c < 0) continue;
+                var hA = remH - c * H.C; if (hA < -1e-9) continue; var a = hA / H.A; if (whole) a = Math.floor(a + 1e-9); if (a < 0) continue;
+                var used = a * H.A + b * H.B + c * H.C; if (used > d.hours + 1e-9) continue;
+                var v = a * P.A + b * P.B + c * P.C;
+                if (!best || v > best.v + 1e-9) best = {v: v, a: a, b: b, c: c, hoursUsed: used};
+              }
+            }
+            var frac = !whole && (nonInt(best.a) || nonInt(best.c));
+            return {
+              objective: best.v,
+              rows: [row('Product A', '£30', best.a), row('Product B', '£20', best.b), row('Product C', '£48', best.c)],
+              limits: [
+                limit('Hours used', best.hoursUsed, d.hours, shadow(best.hoursUsed, d.hours, 16)),
+                limit('Units of B', best.b, d.capb, shadow(best.b, d.capb, 4))
+              ],
+              note: frac
+                ? 'Matches, but this answer isn\u2019t whole. Tick “whole units only”.'
+                : 'The sheet recalculates ' + fmt(best.v) + ', which matches.',
+              warn: frac
+            };
+          }
+        },
+        blend: {
+          caption: 'Cheapest feed mix that still hits the minimums.',
+          objLabel: 'Total cost', money: true,
+          dials: [
+            {id: 'protein', label: 'Min protein', min: 900, max: 3000, value: 1800},
+            {id: 'fibre', label: 'Min fibre', min: 200, max: 600, value: 350}
+          ],
+          solve: function (d) {
+            // min .30 barley + .60 soy + .25 maize ; b+s+m<=100 ; protein & fibre mins
+            var best = null, step = 0.5;
+            for (var b = 0; b <= 100; b += step) for (var s = 0; s <= 100 - b; s += step) {
+              var mP = (d.protein - 12 * b - 44 * s) / 9, mF = (d.fibre - 5 * b - 7 * s) / 2, m = Math.max(0, mP, mF);
+              if (m > 100 - b - s + 1e-9) continue;
+              var cost = 0.30 * b + 0.60 * s + 0.25 * m;
+              if (!best || cost < best.v - 1e-9) best = {v: cost, b: b, s: s, m: m, protein: 12 * b + 44 * s + 9 * m, fibre: 5 * b + 7 * s + 2 * m};
+            }
+            if (!best) return {objective: null, rows: [], limits: [], note: 'No mix meets those minimums. Lower one.', warn: true};
+            return {
+              objective: best.v,
+              rows: [row('Barley', '£0.30/kg', best.b), row('Soybean', '£0.60/kg', best.s), row('Maize', '£0.25/kg', best.m)],
+              limits: [
+                limitMin('Protein', best.protein, d.protein),
+                limitMin('Fibre', best.fibre, d.fibre)
+              ],
+              note: 'The sheet recalculates £' + fmt(best.v) + ', which matches.',
+              warn: false
+            };
+          }
+        },
+        budget: {
+          caption: 'Split the budget for the most return.',
+          objLabel: 'Total return', money: true,
+          dials: [
+            {id: 'budget', label: 'Total budget', min: 2000, max: 12000, value: 8000},
+            {id: 'cape', label: 'Max email spend', min: 0, max: 4000, value: 1500}
+          ],
+          solve: function (d) {
+            // max 3.2 search + 2.1 social + 5.0 email ; sum<=budget ; email<=cape
+            var R = {S: 3.2, O: 2.1, E: 5.0};
+            var e = Math.min(d.cape, d.budget); var rem = d.budget - e;
+            var sSpend = rem, o = 0;               // search beats social per £
+            var v = sSpend * R.S + o * R.O + e * R.E;
+            return {
+              objective: v,
+              rows: [row('Search', '×3.2', sSpend), row('Social', '×2.1', o), row('Email', '×5.0', e)],
+              limits: [
+                limit('Budget used', e + sSpend + o, d.budget, shadow(e + sSpend + o, d.budget, 3.2)),
+                limit('Email spend', e, d.cape, shadow(e, d.cape, 1.8))
+              ],
+              note: 'The sheet recalculates ' + fmt(v) + ', which matches.',
+              warn: false
+            };
           }
         }
-        return best;
+      };
+
+      function nonInt(n) {return Math.abs(n - Math.round(n)) > 1e-6;}
+      function row(k, tag, v) {return {k: k, tag: tag, v: v};}
+      function limit(label, used, cap, sp) {return {label: label, used: used, cap: cap, over: used > cap + 1e-6, shadow: sp, min: false};}
+      function limitMin(label, got, need) {return {label: label, used: got, cap: need, over: got < need - 1e-6, shadow: 0, min: true};}
+      // marginal value: only meaningful when the limit is actually binding
+      function shadow(used, cap, rate) {return Math.abs(used - cap) < 1e-6 ? rate : 0;}
+
+      var current = 'production';
+
+      function renderDials(name) {
+        var host = el('dials'); host.innerHTML = '';
+        CASES[name].dials.forEach(function (dl) {
+          var wrap = document.createElement('div'); wrap.className = 'dial';
+          var lab = document.createElement('label');
+          var span = document.createElement('span'); span.textContent = dl.label;
+          var b = document.createElement('b'); b.id = 'v-' + dl.id;
+          b.textContent = dl.toggle ? (dl.value ? 'on' : 'off') : dl.value;
+          lab.appendChild(span); lab.appendChild(b);
+          var input = document.createElement('input');
+          input.type = 'range'; input.id = 'd-' + dl.id; input.min = dl.min; input.max = dl.max;
+          input.value = dl.value; input.step = 1; input.setAttribute('aria-label', dl.label);
+          input.addEventListener('input', run);
+          wrap.appendChild(lab); wrap.appendChild(input); host.appendChild(wrap);
+        });
       }
-      function round(n) {return Math.round(n * 1000) / 1000}
-      function show(n) {return (Math.abs(n - Math.round(n)) < 1e-6) ? String(Math.round(n)) : n.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')}
-      function render() {
-        var hours = +el('hrs').value, capB = +el('capb').value, whole = +el('whole').value === 1;
-        el('hrs-v').textContent = hours; el('capb-v').textContent = capB; el('whole-v').textContent = whole ? 'on' : 'off';
-        var s = solve(hours, capB, whole); if (!s) return;
-        el('obj').textContent = fmt(round(s.profit));
-        el('a').textContent = show(s.a); el('b').textContent = show(s.b); el('c').textContent = show(s.c);
-        el('hrs-used').textContent = show(round(s.usedH)) + ' / ' + hours;
-        el('b-used').textContent = show(s.b) + ' / ' + capB;
-        el('lim-hrs').querySelector('i').style.width = Math.min(100, s.usedH / hours * 100) + '%';
-        el('lim-b').querySelector('i').style.width = (capB > 0 ? Math.min(100, s.b / capB * 100) : 0) + '%';
-        el('lim-hrs').classList.toggle('over', s.usedH > hours + 1e-6);
-        el('lim-b').classList.toggle('over', s.b > capB + 1e-6);
+
+      function readDials(name) {
+        var d = {};
+        CASES[name].dials.forEach(function (dl) {d[dl.id] = +el('d-' + dl.id).value;});
+        return d;
+      }
+
+      function run() {
+        var spec = CASES[current], d = readDials(current);
+        spec.dials.forEach(function (dl) {
+          var b = el('v-' + dl.id); if (!b) return;
+          b.textContent = dl.toggle ? (d[dl.id] ? 'on' : 'off') : d[dl.id];
+        });
+        var res = spec.solve(d);
+        el('obj-label').textContent = spec.objLabel;
+        el('obj').textContent = res.objective === null ? '—' : (spec.money ? '£' + fmt(res.objective) : fmt(res.objective));
+
+        var rows = el('rows'); rows.innerHTML = '';
+        res.rows.forEach(function (r) {
+          var div = document.createElement('div'); div.className = 'r';
+          var k = document.createElement('span'); k.className = 'k';
+          k.innerHTML = r.k + ' <span style="color:var(--faint)">· ' + r.tag + '</span>';
+          var v = document.createElement('span'); v.className = 'v'; v.textContent = fmt(r.v);
+          div.appendChild(k); div.appendChild(v); rows.appendChild(div);
+        });
+
+        var lims = el('limits'); lims.innerHTML = '';
+        res.limits.forEach(function (l) {
+          var block = document.createElement('div'); block.className = 'lim' + (l.over ? ' over' : '');
+          var r = document.createElement('div'); r.className = 'r';
+          var k = document.createElement('span'); k.className = 'k'; k.textContent = l.label;
+          var v = document.createElement('span'); v.className = 'v';
+          v.textContent = (l.min ? '≥ ' : '') + fmt(l.used) + ' / ' + fmt(l.cap);
+          r.appendChild(k); r.appendChild(v);
+          var bar = document.createElement('div'); bar.className = 'bar';
+          var i = document.createElement('i'); i.style.width = Math.min(100, l.cap ? Math.abs(l.used / l.cap) * 100 : 0) + '%';
+          bar.appendChild(i);
+          block.appendChild(r); block.appendChild(bar);
+          if (l.shadow && l.shadow > 0) {
+            var sh = document.createElement('div'); sh.className = 'shadow';
+            sh.textContent = 'One more raises the result by £' + fmt(l.shadow);
+            block.appendChild(sh);
+          }
+          lims.appendChild(block);
+        });
+
         var check = el('check'), t = el('check-t');
-        var frac = !whole && (Math.abs(s.a - Math.round(s.a)) > 1e-6 || Math.abs(s.c - Math.round(s.c)) > 1e-6);
-        check.classList.toggle('warn', frac);
-        check.querySelector('b').textContent = frac ? '!' : '✓';
-        t.textContent = frac ? 'Matches, but this answer isn\u2019t whole. Tick “whole units only” for a usable mix.' : 'The sheet recalculates ' + fmt(round(s.profit)) + ', which matches.';
+        check.classList.toggle('warn', !!res.warn);
+        check.querySelector('b').textContent = res.warn ? '!' : '✓';
+        t.textContent = res.note;
       }
-      ['hrs', 'capb', 'whole'].forEach(function (id) {el(id).addEventListener('input', render)});
-      el('resolve').addEventListener('click', function () {var b = this; b.textContent = 'Solved'; setTimeout(function () {b.textContent = 'Solve again'}, 700); render()});
-      render();
+
+      function switchCase(name) {
+        current = name;
+        var tabs = document.querySelectorAll('.demo-tab');
+        for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-case') === name);
+        el('demo-caption').textContent = CASES[name].caption;
+        renderDials(name);
+        run();
+      }
+
+      var tabs = document.querySelectorAll('.demo-tab');
+      for (var i = 0; i < tabs.length; i++) {
+        tabs[i].addEventListener('click', function (e) {switchCase(e.target.getAttribute('data-case'));});
+      }
+      el('resolve').addEventListener('click', function () {
+        var b = this; b.textContent = 'Solved'; setTimeout(function () {b.textContent = 'Solve again';}, 700); run();
+      });
+
+      switchCase('production');
     })();
   </script>
 </body>
