@@ -200,6 +200,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <button class="ghost gt" id="delRow" data-i18n="delRow">− Row</button>
       <button class="ghost gt" id="addCol" data-i18n="addCol">+ Column</button>
       <button class="ghost gt" id="delCol" data-i18n="delCol">− Column</button>
+      <button class="ghost gt" id="undoPaste" data-i18n="undoPaste" style="display:none">Undo paste</button>
     </div>
 
     <div class="controls-row">
@@ -247,7 +248,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=10"></script>
+<script src="assets/i18n.js?v=11"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1849,6 +1850,25 @@ function matchesAnyHint_(label, hints) {
       inputs[i].addEventListener('input',function(e){
         data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')]=e.target.value;
       });
+      inputs[i].addEventListener('paste',function(e){
+        var cd=e.clipboardData||window.clipboardData;
+        if(!cd) return;   // very old browser: let the default paste happen
+        var text=cd.getData('text/plain')||cd.getData('text')||'';
+        var block=parseClipboard(text);
+        // Only intercept a genuine multi-cell block; a single value pastes
+        // normally so the user can still edit one cell by hand.
+        var multi=block.length>1||(block.length===1&&block[0].length>1);
+        if(!multi) return;
+        e.preventDefault();
+        var startR=+e.target.getAttribute('data-r');
+        var startC=+e.target.getAttribute('data-c');
+        lastPaste=snapshot();   // enable undo of this whole paste
+        var res=pasteBlock(block,startR,startC);
+        render();
+        var u=document.getElementById('undoPaste');
+        if(u) u.style.display='';
+        if(res.clipped) showTrouble(t('tPasteClipped'), t('tPasteClippedBody'));
+      });
     }
     syncGridTools();
   }
@@ -1874,6 +1894,64 @@ function matchesAnyHint_(label, hints) {
     var set=function(id,disabled){var b=document.getElementById(id); if(b) b.disabled=disabled;};
     set('addRow', ROWS>=MAX_ROWS); set('delRow', ROWS<=MIN_ROWS);
     set('addCol', COLS>=MAX_COLS); set('delCol', COLS<=MIN_COLS);
+  }
+
+  // --- Smart tabular paste (from Excel / Google Sheets) ---------------------
+  // Parse clipboard text into a 2D block: tabs split columns, newlines split
+  // rows. Everything else (formulas starting with '=', decimals, text with
+  // spaces, zeros, empty cells) is kept verbatim as a string.
+  function parseClipboard(text){
+    if(text==null) return [];
+    // Normalise newlines; drop a single trailing newline (common when copying).
+    var t=String(text).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+    if(t.charAt(t.length-1)==='\n') t=t.slice(0,-1);
+    if(t==='') return [];
+    var rows=t.split('\n');
+    return rows.map(function(line){ return line.split('\t'); });
+  }
+
+  // Remember the last paste so it can be undone in one step.
+  var lastPaste=null;   // { before: deep-copy of data, ROWS, COLS }
+
+  function snapshot(){
+    return { data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS };
+  }
+  function restore(snap){
+    ROWS=snap.ROWS; COLS=snap.COLS;
+    data=snap.data.map(function(row){return row.slice();});
+    render();
+  }
+
+  // Paste a parsed block with its top-left at (startR, startC). Grows the grid
+  // to fit (never past MAX), keeps everything outside the pasted area, and
+  // returns { clipped:bool } so the caller can warn if the block didn't fit.
+  function pasteBlock(block, startR, startC){
+    if(!block.length) return { clipped:false };
+    var needRows=startR+block.length;
+    var needCols=startC+block.reduce(function(m,r){return Math.max(m,r.length);},0);
+    var clipped=false;
+    if(needRows>MAX_ROWS){ needRows=MAX_ROWS; clipped=true; }
+    if(needCols>MAX_COLS){ needCols=MAX_COLS; clipped=true; }
+    // Grow (never shrink) to fit the block.
+    if(needRows>ROWS) ROWS=needRows;
+    if(needCols>COLS) COLS=needCols;
+    ensureShape();
+    // Write the block, skipping cells that fall outside the (capped) grid.
+    for(var i=0;i<block.length;i++){
+      var rr=startR+i; if(rr>=ROWS) break;
+      for(var j=0;j<block[i].length;j++){
+        var cc=startC+j; if(cc>=COLS) continue;
+        data[rr][cc]=block[i][j];
+      }
+    }
+    return { clipped:clipped };
+  }
+
+  function undoPaste(){
+    if(!lastPaste) return;
+    restore(lastPaste);
+    lastPaste=null;
+    var u=document.getElementById('undoPaste'); if(u) u.style.display='none';
   }
 
   // Build the sheet object the engine expects from the current grid.
@@ -2196,6 +2274,13 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('delRow').addEventListener('click',delRow);
   document.getElementById('addCol').addEventListener('click',addCol);
   document.getElementById('delCol').addEventListener('click',delCol);
+  document.getElementById('undoPaste').addEventListener('click',undoPaste);
+  // Ctrl/Cmd+Z right after a paste undoes the whole block.
+  document.addEventListener('keydown',function(e){
+    if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')&&lastPaste){
+      e.preventDefault(); undoPaste();
+    }
+  });
 
 
   // --- Self-check: proves the engine works end to end, in plain language ---
