@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to Solve a Linear Programming Problem (Step by Step, with Example) | Plumline</title>
+<meta name="description" content="A plain-language guide to solving linear programming problems: the goal, the decisions, the limits, and a worked example you can open in a free online solver and change.">
+<meta name="keywords" content="how to solve linear programming, linear programming example, LP problem step by step, optimization tutorial, feasible region, shadow price">
+<meta property="og:title" content="How to Solve a Linear Programming Problem, Step by Step">
+<meta property="og:description" content="The goal, the decisions, the limits, and a worked example you can open in a free solver.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://plumline.online/guide.html">
+<link rel="canonical" href="https://plumline.online/guide.html">
+<link rel="stylesheet" href="assets/plumline.css?v=2">
+</head>
+<body data-page="guide">
+
+<div class="field-deep">
+  <div class="plumb">
+    <header class="mast">
+      <a href="index.html" class="lockup" aria-label="Plumline home">
+        <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
+          <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A"/>
+          <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2"/>
+        </svg>
+        <span class="wm">Plumline</span>
+      </a>
+      <nav class="nav">
+        <a href="solver.html" data-i18n="navSolver">Solver</a>
+        <a href="index.html" data-i18n="navAddon">Add-on</a>
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="en">EN</option><option value="es">ES</option>
+          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
+        </select>
+      </nav>
+    </header>
+
+    <section class="section" style="padding:40px 0 64px">
+      <p class="eyebrow" data-i18n="gEyebrow">Guide</p>
+      <h1 style="max-width:20ch" data-i18n="gTitle">How to solve a linear programming problem</h1>
+      <p class="lead" style="margin-top:22px" data-i18n="gLead">Linear programming finds the best way to use limited resources: the most profit, the lowest cost, the best split. This is a plain-language walkthrough, with a worked example you can open in the solver and change.</p>
+    </section>
+  </div>
+</div>
+
+<div class="plumb">
+
+  <section class="bob section">
+    <div class="band">
+      <div><h2 data-i18n="gWhatH">What a linear programming problem is</h2></div>
+      <div><p class="muted" data-i18n="gWhatP">You have a goal you want as high or as low as possible, some quantities you get to choose, and limits you cannot break. A factory choosing how many of each product to make, to earn the most profit, without running past its available hours, is a linear programming problem. So is a diet that meets its nutrition targets at the lowest cost, or a budget split across channels for the best return.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="band">
+      <div><h2 data-i18n="gPartsH">Every problem has three parts</h2></div>
+      <div class="versus" style="grid-template-columns:1fr 1fr 1fr;margin:0">
+        <div class="card brass"><h3 data-i18n="gPart1H">The goal</h3><p class="muted" style="font-size:14px" data-i18n="gPart1P">The single number you want to make as large or as small as possible: total profit, total cost, total return. In a spreadsheet it is the cell that sums up the others.</p></div>
+        <div class="card"><h3 data-i18n="gPart2H">The decisions</h3><p class="muted" style="font-size:14px" data-i18n="gPart2P">The quantities you are free to choose: how many of each product, how much of each ingredient, how much to each channel. These are what the solver changes to reach the goal.</p></div>
+        <div class="card true"><h3 data-i18n="gPart3H">The limits</h3><p class="muted" style="font-size:14px" data-i18n="gPart3P">The rules you cannot break: only so many hours, a minimum amount of protein, a fixed budget. Each one caps or floors what the decisions are allowed to add up to.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="band">
+      <div><h2 data-i18n="gStepsH">How to solve it, step by step</h2></div>
+      <div>
+        <ol style="max-width:60ch;padding-left:22px;color:var(--ink-2)">
+          <li style="margin-bottom:12px" data-i18n="gStep1">Write your decisions as a column, one row each, starting at zero.</li>
+          <li style="margin-bottom:12px" data-i18n="gStep2">Write the goal as a cell that totals the value of those decisions.</li>
+          <li style="margin-bottom:12px" data-i18n="gStep3">Write each limit as a row: what it uses, an operator, and the cap.</li>
+          <li style="margin-bottom:12px" data-i18n="gStep4">Hand it to a solver. It searches every allowed combination and returns the one that makes the goal best, along with which limits are binding.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="band">
+      <div>
+        <h2 data-i18n="gExampleH">A worked example</h2>
+        <a class="btn" href="solver.html?lang=en" style="margin-top:14px" data-i18n="gExampleCta">Open this example in the solver</a>
+      </div>
+      <div><p data-i18n="gExampleP">A workshop makes chairs and tables. A chair earns 30, a table 40. Chairs take 2 hours of wood work and 3 of assembly; tables take 4 and 2. There are 80 hours of wood work and 60 of assembly. How many of each to earn the most? The best answer is 10 chairs and 15 tables, for 900, using every hour of both. You can open this in the solver and change the numbers.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="band">
+      <div><h2 data-i18n="gWhyH">Why prove the answer</h2></div>
+      <div><p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the shadow price of each binding limit: how much more you would gain from one more unit of it.</p></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="field-deep" style="margin-top:40px">
+  <div class="plumb">
+    <section class="section" style="padding:56px 0 60px">
+      <div class="band" style="align-items:center">
+        <div>
+          <h2 style="max-width:16ch;margin-bottom:8px" data-i18n="gTryH">Try it with your own numbers</h2>
+          <p style="color:rgba(245,242,235,.8)" data-i18n="gTryP">The solver reads a grid like a spreadsheet. Type your goal, your decisions and your limits in plain words, and solve. Nothing is uploaded, and it is free.</p>
+        </div>
+        <div class="row" style="margin-top:0"><a class="btn" href="solver.html" data-i18n="gTryCta">Open the solver</a></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="plumb"><div class="in">
+    <div class="cols">
+      <div class="col"><h4 data-i18n="footTool">Tool</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="guide.html" data-i18n="footGuide">Guide</a></div>
+      <div class="col"><h4 data-i18n="footProduct">Product</h4><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
+    </div>
+    <p class="fine" data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets&trade; and Google Workspace&trade; are trademarks of Google LLC.</p>
+  </div></div>
+</footer>
+
+<script src="assets/i18n.js"></script>
+<script>Plumline.i18n.init('guide');</script>
+</body>
+</html>
