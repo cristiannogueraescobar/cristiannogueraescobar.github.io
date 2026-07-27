@@ -320,13 +320,12 @@ function solveIntegerProgram_(model, wanted) {
   let best = null;
   let nodes = 0;
   let exhausted = true;
+  let stopReason = null;   // why the search became incomplete, if it did
 
   function explore(extra, depth) {
-    if (nodes++ > ENGINE.BRANCH_NODES || depth > ENGINE.BRANCH_DEPTH ||
-        Date.now() > deadline) {
-      exhausted = false;
-      return;
-    }
+    if (nodes++ > ENGINE.BRANCH_NODES) { exhausted = false; if (!stopReason) stopReason = 'node_limit'; return; }
+    if (depth > ENGINE.BRANCH_DEPTH)      { exhausted = false; if (!stopReason) stopReason = 'node_limit'; return; }
+    if (Date.now() > deadline)            { exhausted = false; if (!stopReason) stopReason = 'time_limit'; return; }
 
     const relaxed = solveLinearProgram_({
       maximize: model.maximize,
@@ -334,7 +333,17 @@ function solveIntegerProgram_(model, wanted) {
       constant: model.constant,
       constraints: model.constraints.concat(extra),
     });
-    if (relaxed.status !== 'optimal') return;
+    if (relaxed.status !== 'optimal') {
+      // 'infeasible' is a proven dead end: abandoning it keeps the search
+      // complete. Anything else (iteration_limit, unbounded, numerical_failure)
+      // means this branch could not be resolved, so the overall search is no
+      // longer exhaustive and we must not later claim proven infeasibility.
+      if (relaxed.status !== 'infeasible') {
+        exhausted = false;
+        if (!stopReason) stopReason = relaxed.status;
+      }
+      return;
+    }
 
     if (best) {
       const better = model.maximize
@@ -371,10 +380,20 @@ function solveIntegerProgram_(model, wanted) {
   explore([], 0);
 
   if (!best) {
-    return { status: exhausted ? 'infeasible' : 'no whole-number solution found in time' };
+    // No integer solution found. Only call it infeasible if we truly explored
+    // the whole tree; otherwise we simply do not know.
+    if (exhausted) {
+      return { status: 'infeasible', stopReason: null, optimalityProven: false,
+               nodesExplored: nodes, objective: null, values: null };
+    }
+    return { status: 'unknown', stopReason: stopReason || 'iteration_limit',
+             optimalityProven: false, nodesExplored: nodes, objective: null, values: null };
   }
   return {
     status: exhausted ? 'optimal' : 'feasible',
+    stopReason: exhausted ? null : (stopReason || 'iteration_limit'),
+    optimalityProven: !!exhausted,
+    nodesExplored: nodes,
     values: best.values,
     objective: best.objective,
     nodes: nodes,
@@ -1348,10 +1367,16 @@ function explainStatus_(status, model) {
       'fractional answer.';
   }
   if (status === 'unbounded') {
-    return 'The objective can grow forever because nothing limits it. ' +
+    return 'The model appears unbounded: the objective can grow without limit. ' +
       'Add a constraint on ' + model.variables + ' or on a total that uses it.';
   }
-  return 'The solver stopped before reaching an optimum.';
+  if (status === 'numerical_failure') {
+    return 'A numerical problem prevented a reliable result. The model may have ' +
+      'very large or very small coefficients; try rescaling them.';
+  }
+  // 'unknown' and any limit-based stop: honest incomplete-search message.
+  return 'The search stopped before a conclusion could be reached. ' +
+    'The model may be too large for the in-browser solver; try a smaller model.';
 }
 
 function isSatisfied_(used, relation, limit) {
