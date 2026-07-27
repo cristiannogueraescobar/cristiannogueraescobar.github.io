@@ -11,7 +11,7 @@
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://plumline.online/guide.html">
 <link rel="canonical" href="https://plumline.online/guide.html">
-<link rel="stylesheet" href="assets/plumline.css?v=3">
+<link rel="stylesheet" href="assets/plumline.css?v=4">
 </head>
 <body data-page="guide">
 
@@ -87,12 +87,22 @@
     </div>
   </section>
 
+  <section class="section" style="padding-top:0" id="status">
+    <div class="sec-head"><h2 data-i18n="statusH">Understanding the result status</h2></div>
+    <ul class="status-list">
+      <li><strong data-i18n="statusOptimalLabel">Optimal solution proven</strong> — <span data-i18n="statusOptimalDesc">the search completed and no better answer exists.</span></li>
+      <li><strong data-i18n="statusFeasibleLabel">Feasible solution</strong> — <span data-i18n="statusFeasibleDesc">it satisfies every constraint, but a better one might exist and could not be proven within the limits.</span></li>
+      <li><strong data-i18n="statusIncompleteLabel">Search incomplete</strong> — <span data-i18n="statusIncompleteDesc">Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.</span></li>
+      <li><strong data-i18n="statusInfeasibleLabel">No feasible solution</strong> — <span data-i18n="statusInfeasibleDesc">the constraints have been proven to contradict each other.</span></li>
+    </ul>
+  </section>
+
   <section class="section" style="padding-top:0" id="limits">
     <div class="sec-head"><h2 data-i18n="limitsH">What it can and can't do</h2></div>
     <div class="grid-3">
       <div class="card true"><h3 data-i18n="limitsHandles">Handles</h3><p class="muted" style="font-size:14px" data-i18n="limitsHandlesP">Linear problems (maximise or minimise a weighted total) and integer problems (whole-number quantities). Production mix, purchasing, blending, staffing rotas, transport, budget allocation. Many small models solve quickly in the browser.</p></div>
       <div class="card wrong"><h3 data-i18n="limitsCant">Does not handle</h3><p class="muted" style="font-size:14px" data-i18n="limitsCantP">Genuinely non-linear relationships, such as one decision multiplied by another, or curves and diminishing returns. Plumline detects these and points at the cell rather than returning a wrong answer.</p></div>
-      <div class="card"><h3 data-i18n="limitsSize">On size</h3><p class="muted" style="font-size:14px" data-i18n="limitsSizeP">The online solver works on the grid you see (up to 12 rows by 6 columns), which fits most everyday problems. The add-on reads whatever model is in your sheet. Either way, very large or numerically awkward models can be slow or hit an internal safety ceiling; for those, or for non-linear ones, a dedicated operations-research tool is the right choice, and Plumline tells you when a problem is out of its depth.</p></div>
+      <div class="card"><h3 data-i18n="limitsSize">On size</h3><p class="muted" style="font-size:14px" data-i18n="limitsSizeP">The online solver uses a dynamic grid of up to 40 rows by 20 columns. Add or remove rows and columns as needed, or paste a table from Excel or Google Sheets and Plumline expands the grid automatically. Very large or numerically awkward models can still be slow or hit an internal safety ceiling; for those, or for non-linear ones, a dedicated operations-research tool is the right choice, and Plumline tells you when a problem is out of its depth.</p></div>
     </div>
   </section>
 
@@ -111,7 +121,7 @@
 <footer class="foot">
   <div class="plumb"><div class="in">
     <div class="cols">
-      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html#addon" data-i18n="footAddon">Sheets add-on</a></div>
       <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
       <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
       <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
@@ -120,7 +130,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=14"></script>
+<script src="assets/i18n.js?v=15"></script>
 <script>Plumline.i18n.init('guide');</script>
 </body>
 </html>

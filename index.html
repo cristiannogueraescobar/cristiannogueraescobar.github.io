@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/">
 <link rel="canonical" href="https://plumline.online/">
-<link rel="stylesheet" href="assets/plumline.css?v=3">
+<link rel="stylesheet" href="assets/plumline.css?v=4">
 </head>
 <body data-page="home">
 
@@ -63,7 +63,7 @@
           <div class="pbar"><i style="width:100%"></i></div>
           <div class="pshadow" data-i18n="proofShadow">Estimated value of one more hour: £16</div>
         </div>
-        <div class="pcheck"><b aria-hidden="true">✓</b><span data-i18n="proofCheck">The sheet recalculates 1,760, which matches.</span></div>
+        <div class="pcheck"><b aria-hidden="true">✓</b><span data-i18n="proofCheck">Plumline recalculates the model from your formulas. The result matches.</span></div>
       </div>
     </section>
   </div>
@@ -79,7 +79,7 @@
     <div class="grid-2">
       <div class="card brass">
         <h3 data-i18n="pillarSolverH">Online solver</h3>
-        <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Type your problem into a grid like a spreadsheet and solve it in the browser. Nothing to install, nothing uploaded. Free, in five languages.</p>
+        <p class="muted" style="font-size:15px" data-i18n="pillarSolverP">Paste an existing model from Excel or Google Sheets, or build one directly in Plumline's spreadsheet-style grid. Add rows and columns, undo destructive changes, solve and export the result without uploading your data. Free, in five languages.</p>
         <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now →</a>
       </div>
       <div class="card true" id="addon">
@@ -106,12 +106,17 @@
       <div class="card">
         <div class="cardnum">02</div>
         <h3 data-i18n="f2H">It verifies the answer</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f2P">It writes the solution back and lets the sheet recalculate, so you see both numbers agree before you rely on it.</p>
+        <p class="muted" style="font-size:14.5px" data-i18n="f2P">The online solver recalculates your objective and constraints from your own formulas and shows whether every limit holds. The Sheets add-on writes the solution back and lets Sheets recalculate. Either way, you see the numbers agree before you rely on them.</p>
       </div>
       <div class="card">
         <div class="cardnum">03</div>
         <h3 data-i18n="f3H">It shows what one more is worth</h3>
         <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, its estimated one-unit impact, often called a shadow price: how much more you'd gain from one more unit, while the model stays the same. A sensitivity-style insight, explained in plain language.</p>
+      </div>
+      <div class="card">
+        <div class="cardnum">04</div>
+        <h3 data-i18n="provenH">It tells you what is proven</h3>
+        <p class="muted" style="font-size:14.5px" data-i18n="provenP">Plumline distinguishes an optimal solution from a valid one whose optimality could not be proven within the solving limits. If the search is incomplete, it says so instead of calling the model impossible.</p>
       </div>
     </div>
   </section>
@@ -194,7 +199,7 @@
       <details><summary data-i18n="faq2Q">How do I write the model?</summary><p data-i18n="faq2A">With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax.</p></details>
       <details><summary data-i18n="faq3Q">What kinds of problems does it solve?</summary><p data-i18n="faq3A">Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one.</p></details>
       <details><summary data-i18n="faq4Q">Are my numbers safe?</summary><p data-i18n="faq4A">Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google's infrastructure under your own account. There is no Plumline account to create and no tracking.</p></details>
-      <details><summary data-i18n="faq5Q">How much does it cost?</summary><p data-i18n="faq5A">Nothing. Both the online solver and the add-on are free.</p></details>
+      <details><summary data-i18n="faq5Q">How much does it cost?</summary><p data-i18n="faq5A">The online solver is free. The Google Sheets add-on is planned to be free once it becomes available.</p></details>
     </div>
   </section>
 
@@ -216,7 +221,7 @@
 <footer class="foot">
   <div class="plumb"><div class="in">
     <div class="cols">
-      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html#addon" data-i18n="footAddon">Sheets add-on</a></div>
       <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
       <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
       <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
@@ -225,7 +230,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=14"></script>
+<script src="assets/i18n.js?v=15"></script>
 <script>
   var LANG = Plumline.i18n.init('home');
   // The add-on is not published yet, so its CTAs open a pre-filled email asking

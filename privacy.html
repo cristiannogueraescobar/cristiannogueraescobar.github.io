@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy policy — Plumline</title>
 <meta name="description" content="How Plumline handles data: the online solver runs in your browser and uploads nothing; the Sheets add-on keeps data within Google. No Plumline account, no tracking.">
-<link rel="stylesheet" href="assets/plumline.css?v=3">
+<link rel="stylesheet" href="assets/plumline.css?v=4">
 </head>
 <body data-page="legal">
 
@@ -42,7 +42,7 @@
     <p data-i18n="pvIntro">Plumline comes in two forms: a free online solver that runs in your browser, and a Google Sheets add-on. Neither sends your data to a Plumline server, because there is no Plumline server, no account, no analytics and no tracking. The rest of this page explains each one in full.</p>
 
     <h2 data-i18n="pvSolverH">The online solver</h2>
-    <p data-i18n="pvSolverP">The online solver at plumline.online runs entirely in your browser. The model you type is read and solved locally on your own device. No model data is uploaded to Plumline or anyone else. It sets no cookies, runs no analytics, and needs no account. Closing or refreshing the page clears the model; nothing is stored between visits.</p>
+    <p data-i18n="pvSolverP">The online solver at plumline.online runs entirely in your browser. The model you type is read and solved locally on your own device. When you paste a table from Excel or Google Sheets, that clipboard data is read only at the moment you paste it into the grid; it stays in browser memory and is not uploaded. The Undo snapshot of your grid is kept only in memory and is discarded when you make a new edit, undo, or reload the page. No model data is uploaded to Plumline or anyone else. It sets no cookies, runs no analytics, and needs no account. Closing or refreshing the page clears the model; nothing is stored between visits.</p>
 
     <h2 data-i18n="pvAddonH">The Google Sheets add-on</h2>
     <h3 data-i18n="pvAccessH">What Plumline accesses</h3>
@@ -84,7 +84,7 @@
 <footer class="foot">
   <div class="plumb"><div class="in">
     <div class="cols">
-      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html#addon" data-i18n="footAddon">Sheets add-on</a></div>
       <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
       <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
       <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
@@ -93,7 +93,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=14"></script>
+<script src="assets/i18n.js?v=15"></script>
 <script>Plumline.i18n.init('legal');</script>
 </body>
 </html>

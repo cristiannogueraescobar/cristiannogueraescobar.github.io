@@ -11,7 +11,7 @@
 <meta property="og:url" content="https://plumline.online/solver.html">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online linear programming solver. Solve LP and integer models in your browser: enter your model like a spreadsheet, verify the result against your own formulas, inspect binding constraints, and see the estimated impact of one more unit. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=3">
+<link rel="stylesheet" href="assets/plumline.css?v=4">
 <style>
 :root{
   --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#93958A;
@@ -30,8 +30,7 @@ a{color:var(--ink)}
 /* stacked full-width workspace: a big grid on top like a real spreadsheet,
    controls under it, then the answer full-width below. The grid is the star. */
 .workspace{margin-top:22px}
-.gridwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel);
-  box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.gridwrap{border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .result:not(:empty){margin-top:28px}
 .result .placeholder{margin-top:28px}
 
@@ -65,15 +64,22 @@ button.solve{background:var(--true);border-color:var(--true);font-size:15px;padd
 button.solve:hover{background:var(--true-hi);opacity:1}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 
-.gridwrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
-table.grid{border-collapse:collapse;font-family:var(--mono);font-size:14.5px;width:100%}
-table.grid th{background:var(--paper);color:var(--faint);font-weight:500;font-size:11px;text-align:center;padding:8px 6px;border:1px solid var(--line-fine);min-width:120px}
-table.grid th.corner{min-width:38px;width:38px}
-table.grid td.rownum{background:var(--paper);color:var(--faint);text-align:center;font-size:11px;border:1px solid var(--line-fine);width:38px}
+.gridwrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+table.grid{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:14.5px;width:100%}
+table.grid th{position:sticky;top:0;z-index:2;background:var(--paper);color:var(--faint);font-weight:500;font-size:11px;text-align:center;padding:8px 6px;border:1px solid var(--line-fine);min-width:120px}
+table.grid th.corner{position:sticky;top:0;left:0;z-index:3;min-width:38px;width:38px}
+table.grid td.rownum{position:sticky;left:0;z-index:1;background:var(--paper);color:var(--faint);text-align:center;font-size:11px;border:1px solid var(--line-fine);width:38px}
 table.grid td{border:1px solid var(--line-fine);padding:0}
 table.grid input{width:100%;border:none;background:transparent;font-family:var(--mono);font-size:14.5px;padding:11px 12px;color:var(--ink);outline:none}
 table.grid input:focus{background:var(--brass-tint)}
 .gridnote{font-size:12px;color:var(--faint);margin-top:8px}
+.gridsize{font-size:12px;color:var(--faint);margin-top:4px;font-family:var(--mono)}
+.paste-tip{font-size:13px;color:var(--faint);margin:0 0 10px}
+.solve-details{margin-top:16px;font-size:13px}
+.solve-details summary{cursor:pointer;color:var(--faint);font-size:12px;user-select:none}
+.solve-details .sd-row{display:flex;justify-content:space-between;gap:16px;padding:5px 0;border-bottom:1px solid var(--line-fine);font-family:var(--mono)}
+.solve-details .sd-k{color:var(--faint)}
+.solve-details .sd-v{color:var(--ink)}
 
 .controls-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px}
 .grid-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
@@ -176,7 +182,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 <div class="hero"><div class="wrap">
   <p class="eyebrow" data-i18n="heroEyebrow">Free online solver</p>
   <h1 data-i18n="heroTitle">Optimise a spreadsheet without leaving your browser.</h1>
-  <p data-i18n="heroLead">Type your problem into the grid the way you would in any spreadsheet. Plumline reads it, finds the best allocation it can prove within its solving limits, and verifies it against your formulas. Nothing is uploaded, nothing is stored, and there is nothing to install.</p>
+  <p data-i18n="heroLead">Paste a model from Excel or Google Sheets, or build one directly in the grid. Plumline interprets your formulas, recalculates the objective and constraints, and shows whether every limit is satisfied — within its solving limits. Nothing is uploaded, nothing is stored, and there is nothing to install.</p>
 </div></div>
 
 <div class="app"><div class="wrap">
@@ -190,10 +196,12 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   </div>
 
   <div class="workspace">
+    <p class="paste-tip" data-i18n="pasteTip">Paste from Excel or Sheets, or start typing below.</p>
     <div class="gridwrap">
       <table class="grid" id="grid"></table>
     </div>
-    <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Put an operator (≤, ≥, =) and a number to the right of a limit. Edit anything and solve again.</p>
+    <p class="gridnote" data-i18n="gridNote">Yellow cells are the quantities to decide. Copy a table from Excel or Google Sheets and paste it into any cell — Plumline expands the grid automatically. Put an operator (≤, ≥, =) and a number to the right of a limit. Edit anything and solve again.</p>
+    <p class="gridsize" id="gridsize" aria-live="polite"></p>
 
     <div class="grid-tools">
       <button class="ghost gt" id="addRow" data-i18n="addRow">+ Row</button>
@@ -208,10 +216,11 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     <div class="controls-row">
       <button class="solve" id="solve" data-i18n="solve">Solve</button>
       <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers only</span></label>
+      <p class="paste-tip" data-i18n="wholeHelp" style="width:100%;margin:0">Use this for quantities that cannot be fractional, such as people, vehicles or projects.</p>
       <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
     </div>
 
-    <div class="result" id="result">
+    <div class="result" id="result" role="status" aria-live="polite">
       <div class="placeholder" id="placeholder">
         <svg width="30" height="46" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <line x1="12" y1="0" x2="12" y2="10" stroke="var(--brass)" stroke-width="1.5"/>
@@ -223,7 +232,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     </div>
   </div>
 
-  <div class="selfcheck-row">
+  <div class="selfcheck-row" id="selfcheck-row" style="display:none">
     <button class="ghost" id="selftest" data-i18n="selfCheck">Run a quick self-check</button>
     <div id="selftest-out"></div>
   </div>
@@ -242,7 +251,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 
 <footer class="foot"><div class="plumb"><div class="in">
   <div class="cols">
-    <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html" data-i18n="footAddon">Sheets add-on</a></div>
+    <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html#addon" data-i18n="footAddon">Sheets add-on</a></div>
     <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="index.html#example" data-i18n="exampleEyebrow">See it work</a></div>
     <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
     <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
@@ -250,7 +259,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=14"></script>
+<script src="assets/i18n.js?v=15"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1843,7 +1852,8 @@ function matchesAnyHint_(label, hints) {
       html+='<tr><td class="rownum">'+(r+1)+'</td>';
       for(var c=0;c<COLS;c++){
         var v=(data[r]&&data[r][c])||'';
-        html+='<td><input data-r="'+r+'" data-c="'+c+'" value="'+v.replace(/"/g,'&quot;')+'"></td>';
+        var cellRef=colLetter(c+1)+(r+1);
+        html+='<td><input aria-label="Cell '+cellRef+'" data-r="'+r+'" data-c="'+c+'" value="'+v.replace(/"/g,'&quot;')+'"></td>';
       }
       html+='</tr>';
     }
@@ -1922,6 +1932,8 @@ function matchesAnyHint_(label, hints) {
     var set=function(id,disabled){var b=document.getElementById(id); if(b) b.disabled=disabled;};
     set('addRow', ROWS>=MAX_ROWS); set('delRow', ROWS<=MIN_ROWS);
     set('addCol', COLS>=MAX_COLS); set('delCol', COLS<=MIN_COLS);
+    var gs=document.getElementById('gridsize');
+    if(gs) gs.textContent=t('gridSize').replace('{rows}',ROWS).replace('{cols}',COLS);
   }
 
   // --- Smart tabular paste (from Excel / Google Sheets) ---------------------
@@ -2117,6 +2129,27 @@ function matchesAnyHint_(label, hints) {
     res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 
+  // A collapsible "Solve details" block that surfaces what the engine reports:
+  // status, time, nodes, model type, and (when relevant) why it stopped and
+  // whether optimality was proven. Turns internal engine fields into visible value.
+  function solveDetailsHTML(out,model){
+    var statusName={optimal:t('statOptimal'),feasible:t('statFeasible'),unknown:t('statUnknown')}[out.status]||out.status;
+    var rows=[];
+    rows.push([t('sdStatus'), statusName]);
+    if(typeof out.elapsedMs==='number') rows.push([t('sdTime'), out.elapsedMs+' ms']);
+    if(typeof out.nodesExplored==='number'&&out.nodesExplored!=null) rows.push([t('sdNodes'), String(out.nodesExplored)]);
+    rows.push([t('sdModelType'), (model.wholeNumbers===true)?t('sdInteger'):t('sdContinuous')]);
+    if(out.stopReason){
+      var sr={node_limit:t('srNode'),time_limit:t('srTime'),iteration_limit:t('srIteration'),numerical_failure:t('srNumerical')}[out.stopReason]||out.stopReason;
+      rows.push([t('sdStopped'), sr]);
+    }
+    if(out.status==='feasible'||out.status==='optimal'){
+      rows.push([t('sdProven'), out.optimalityProven?t('sdYes'):t('sdNo')]);
+    }
+    var body=rows.map(function(r){return '<div class="sd-row"><span class="sd-k">'+esc(r[0])+'</span><span class="sd-v">'+esc(r[1])+'</span></div>';}).join('');
+    return '<details class="solve-details"><summary>'+esc(t('solveDetails'))+'</summary>'+body+'</details>';
+  }
+
   function renderReceipt(out,model){
     var res=document.getElementById('result');
     var money=''; // we don't assume currency
@@ -2144,6 +2177,7 @@ function matchesAnyHint_(label, hints) {
     else h+='<div class="check">&#10003; '+t('solvedOk')+'</div>';
     if(/shadow/.test(h)) h+='<div class="shadow-note">'+t('shadowNote')+'</div>';
     h+='</div>';
+    h+=solveDetailsHTML(out,model);
     h+='<div class="exports"><span class="ex">'+t('exportLabel')+'</span>'+
        '<button class="chip" id="exp-csv">CSV</button>'+
        '<button class="chip" id="exp-xls">Excel</button>'+
@@ -2436,6 +2470,11 @@ function matchesAnyHint_(label, hints) {
     out.appendChild(summary);
   }
   document.getElementById('selftest').addEventListener('click',runSelfTest);
+  // The self-check is a development diagnostic, not a user task. Show it only
+  // when the URL carries ?debug=1, so it stays out of the normal flow.
+  if(/[?&]debug=1/.test(location.search)){
+    var scr=document.getElementById('selfcheck-row'); if(scr) scr.style.display='';
+  }
 
   // Language: the shared engine wires the <select>, applies text, returns the lang.
   LANG = Plumline.i18n.init('solver');
