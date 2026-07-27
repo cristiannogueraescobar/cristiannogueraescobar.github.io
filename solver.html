@@ -248,7 +248,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=12"></script>
+<script src="assets/i18n.js?v=13"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1813,6 +1813,7 @@ function matchesAnyHint_(label, hints) {
   };
 
   function loadExample(name){
+    clearUndo();   // loading/clearing replaces the whole grid; old undo is void
     if(name!=='blank'){
       var ex=EXAMPLES[name];
       // Grow the grid to fit the example (never shrink below the defaults).
@@ -1849,6 +1850,7 @@ function matchesAnyHint_(label, hints) {
     for(var i=0;i<inputs.length;i++){
       inputs[i].addEventListener('input',function(e){
         data[+e.target.getAttribute('data-r')][+e.target.getAttribute('data-c')]=e.target.value;
+        clearUndo();   // a manual edit invalidates the previous paste/delete undo
       });
       inputs[i].addEventListener('paste',function(e){
         var cd=e.clipboardData||window.clipboardData;
@@ -1858,7 +1860,7 @@ function matchesAnyHint_(label, hints) {
         // Only intercept a genuine multi-cell block; a single value pastes
         // normally so the user can still edit one cell by hand.
         var multi=block.length>1||(block.length===1&&block[0].length>1);
-        if(!multi) return;
+        if(!multi){ clearUndo(); return; }   // single-cell paste is a new edit
         e.preventDefault();
         var startR=+e.target.getAttribute('data-r');
         var startC=+e.target.getAttribute('data-c');
@@ -1882,8 +1884,8 @@ function matchesAnyHint_(label, hints) {
     }
     data.length=ROWS;
   }
-  function addRow(){ if(ROWS>=MAX_ROWS) return; ROWS++; ensureShape(); render(); }
-  function addCol(){ if(COLS>=MAX_COLS) return; COLS++; ensureShape(); render(); }
+  function addRow(){ if(ROWS>=MAX_ROWS) return; clearUndo(); ROWS++; ensureShape(); render(); }
+  function addCol(){ if(COLS>=MAX_COLS) return; clearUndo(); COLS++; ensureShape(); render(); }
 
   // Does the last row / last column hold any non-empty cell? Used to warn
   // before a delete would discard real data.
@@ -1980,6 +1982,14 @@ function matchesAnyHint_(label, hints) {
   function doUndo(){
     if(!lastUndo) return;
     restore(lastUndo);
+    lastUndo=null;
+    var u=document.getElementById('undoGrid'); if(u) u.style.display='none';
+  }
+  // Invalidate a stale undo point. Called after any NEW action that changes the
+  // grid (editing a cell, adding/removing rows or columns, loading an example,
+  // clearing), so Ctrl+Z can never jump back past those later changes. NOT
+  // called on Solve, which doesn't modify the grid.
+  function clearUndo(){
     lastUndo=null;
     var u=document.getElementById('undoGrid'); if(u) u.style.display='none';
   }
