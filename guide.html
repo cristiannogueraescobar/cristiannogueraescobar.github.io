@@ -47,15 +47,15 @@
 <div class="plumb">
 
   <section class="section">
-    <div class="sec-head center">
+    <div class="sec-head">
       <h2 data-i18n="gWhatH">What a linear programming problem is</h2>
       <p class="muted" data-i18n="gWhatP">You have a goal you want as high or as low as possible, some quantities you get to choose, and limits you cannot break. A factory choosing how many of each product to make, to earn the most profit, without running past its available hours, is a linear programming problem. So is a diet that meets its nutrition targets at the lowest cost, or a budget split across channels for the best return.</p>
     </div>
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="sec-head center"><h2 data-i18n="gPartsH">Every problem has three parts</h2></div>
-    <div class="bento three">
+    <div class="sec-head"><h2 data-i18n="gPartsH">Every problem has three parts</h2></div>
+    <div class="grid-3">
       <div class="card brass"><div class="cardnum">01</div><h3 data-i18n="gPart1H">The goal</h3><p class="muted" style="font-size:14px" data-i18n="gPart1P">The single number you want to make as large or as small as possible: total profit, total cost, total return. In a spreadsheet it is the cell that sums up the others.</p></div>
       <div class="card"><div class="cardnum">02</div><h3 data-i18n="gPart2H">The decisions</h3><p class="muted" style="font-size:14px" data-i18n="gPart2P">The quantities you are free to choose: how many of each product, how much of each ingredient, how much to each channel. These are what the solver changes to reach the goal.</p></div>
       <div class="card true"><div class="cardnum">03</div><h3 data-i18n="gPart3H">The limits</h3><p class="muted" style="font-size:14px" data-i18n="gPart3P">The rules you cannot break: only so many hours, a minimum amount of protein, a fixed budget. Each one caps or floors what the decisions are allowed to add up to.</p></div>
@@ -63,8 +63,8 @@
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="sec-head center"><h2 data-i18n="gStepsH">How to solve it, step by step</h2></div>
-    <div class="bento" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+    <div class="sec-head"><h2 data-i18n="gStepsH">How to solve it, step by step</h2></div>
+    <div class="grid-4">
       <div class="card"><div class="cardnum">1</div><p style="margin:0;font-size:15px" data-i18n="gStep1">Write your decisions as a column, one row each, starting at zero.</p></div>
       <div class="card"><div class="cardnum">2</div><p style="margin:0;font-size:15px" data-i18n="gStep2">Write the goal as a cell that totals the value of those decisions.</p></div>
       <div class="card"><div class="cardnum">3</div><p style="margin:0;font-size:15px" data-i18n="gStep3">Write each limit as a row: what it uses, an operator, and the cap.</p></div>
@@ -81,7 +81,7 @@
   </section>
 
   <section class="section" style="padding-top:0">
-    <div class="sec-head center">
+    <div class="sec-head">
       <h2 data-i18n="gWhyH">Why prove the answer</h2>
       <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. Plumline writes the answer back into your own formulas and lets them recalculate, so you see the goal and the check agree before you rely on it. It also shows the shadow price of each binding limit: how much more you would gain from one more unit of it.</p>
     </div>

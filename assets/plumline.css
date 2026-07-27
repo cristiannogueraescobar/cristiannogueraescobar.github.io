@@ -48,7 +48,7 @@
   --mono:ui-monospace,'SF Mono','Cascadia Mono','Segoe UI Mono','Roboto Mono',Menlo,Consolas,monospace;
 
   /* scale */
-  --edge:1200px;
+  --edge:1240px;
   --rail:56px;            /* plumb-line offset from content edge */
   --radius:8px;
   --radius-sm:4px;
@@ -72,34 +72,37 @@ a:hover{text-decoration-color:var(--brass)}
 :focus-visible{outline:2px solid var(--true);outline-offset:3px;border-radius:2px}
 
 /* ---- (3) LAYOUT ---------------------------------------------------------- */
-/* Centred container, content in the middle of the shell, generous but balanced
-   whitespace on both sides. This is the max-w-7xl / mx-auto pattern that Linear,
-   Stripe and Vercel use. The plumb line is kept only as a small brand mark in
-   the masthead lockup, not as a spine that pushes the whole page left. */
+/* Container: centred, generous balanced margins. max-w pattern (Linear/Stripe). */
 .plumb{max-width:var(--edge);margin:0 auto;padding:0 40px}
 .bob{padding-top:8px}
-
-.section{padding:72px 0}
 .wrap{max-width:var(--edge);margin:0 auto;padding:0 40px}
 
-/* Section heading that sits centred above its content, or left with an intro
-   beside it on wide screens. Used to introduce a grid of cards. */
-.sec-head{max-width:60ch;margin-bottom:36px}
-.sec-head.center{margin-left:auto;margin-right:auto;text-align:center}
+/* Section rhythm: generous vertical space between stripes. */
+.section{padding:80px 0}
+@media(max-width:760px){.section{padding:52px 0}}
 
-/* BENTO: the workhorse. A responsive grid of cards that fills the full width,
-   auto-fitting as many columns as fit. This is what stops the empty-right-half
-   problem: content spreads across the whole container instead of a left band. */
-.bento{display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
-.bento.two{grid-template-columns:repeat(auto-fit,minmax(360px,1fr))}
-.bento.three{grid-template-columns:repeat(3,1fr)}
-@media(max-width:900px){.bento.three{grid-template-columns:1fr}}
+/* SECTION HEADING — centred, full container width, with a readable measure.
+   This is the professional pattern: heading + subtitle centred ABOVE the grid,
+   never a narrow block hanging on the left. */
+.sec-head{max-width:100%;margin:0 auto 48px;text-align:center}
+.sec-head .eyebrow{margin-bottom:14px}
+.sec-head h2{margin:0 auto 14px;max-width:22ch}
+.sec-head p{margin:0 auto;max-width:56ch;color:var(--soft)}
+.sec-head.left{text-align:left;margin-left:0}
+.sec-head.left h2,.sec-head.left p{margin-left:0}
 
-/* A split row: heading block and content block side by side, each taking real
-   width (no narrow left band). Falls back to stacked on small screens. */
-.band{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
-.band.wide-right{grid-template-columns:0.8fr 1.2fr}
-@media(max-width:860px){.band,.band.wide-right{grid-template-columns:1fr;gap:28px}}
+/* GRID — equal columns that fill the whole container width, the workhorse for
+   features, steps, products. gap-driven spacing, responsive collapse. */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:1000px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+/* SPLIT — a genuine two-up where BOTH sides carry real content of similar
+   weight (text one side, a visual the other). Not heading-left/content-right. */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media(max-width:900px){.split{grid-template-columns:1fr;gap:36px}}
 
 /* fields on the deep ink ground */
 .field-deep{background:var(--deep);color:var(--cream);position:relative;overflow:hidden}
@@ -130,7 +133,7 @@ a:hover{text-decoration-color:var(--brass)}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
   color:var(--brass);margin-bottom:16px}
 .field-deep .eyebrow{color:var(--brass-hi)}
-.lead{font-size:clamp(18px,2.2vw,23px);line-height:1.46;max-width:46ch}
+.lead{font-size:clamp(18px,2.2vw,23px);line-height:1.5;max-width:52ch}
 
 /* buttons */
 .btn{font-family:var(--sans);font-size:15px;font-weight:600;padding:13px 22px;border-radius:var(--radius-sm);
@@ -265,7 +268,10 @@ a:hover{text-decoration-color:var(--brass)}
 /* very wide screens: let the shell breathe a little more, but cap it so text
    lines never grow past a comfortable measure. Space at the edges is intentional. */
 @media(min-width:1500px){
-  :root{--edge:1320px}
+  :root{--edge:1360px}
+}
+@media(min-width:1900px){
+  :root{--edge:1440px}
 }
 
 /* wide sections: card grids and the hero split use the full shell; running text
