@@ -141,6 +141,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 .solving .spin{width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--true);
   border-radius:50%;animation:spin .7s linear infinite;flex:none}
 @keyframes spin{to{transform:rotate(360deg)}}
+.shadow-note{font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5;font-style:italic}
 </style>
 </head>
 <body data-page="solver">
@@ -1848,6 +1849,7 @@ function matchesAnyHint_(label, hints) {
     });
     if(out.caveat) h+='<div class="check bad">'+esc(out.caveat)+'</div>';
     else h+='<div class="check">&#10003; '+t('solvedOk')+'</div>';
+    if(/shadow/.test(h)) h+='<div class="shadow-note">'+t('shadowNote')+'</div>';
     h+='</div>';
     h+='<div class="exports"><span class="ex">'+t('exportLabel')+'</span>'+
        '<button class="chip" id="exp-csv">CSV</button>'+
