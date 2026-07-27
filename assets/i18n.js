@@ -85,6 +85,20 @@
         faq4A:'Yes. The online solver runs entirely in your browser and uploads nothing. The add-on reads only the spreadsheet it is installed in, sends nothing to any server, and asks for no account.',
         faq5Q:'How much does it cost?',
         faq5A:'Nothing. Both the online solver and the add-on are free.'
+      ,
+        addonWaitlist:'Get notified when the add-on launches',
+        addonSoon:'Coming soon to Google Sheets',
+        addonSoonP:'The Google Sheets add-on is in review. It reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free. Leave your email and you\'ll hear the moment it\'s live.',
+        addonEmailSubject:'Notify me when the Plumline add-on launches',
+        addonEmailBody:'Hi, please let me know when the Plumline Google Sheets add-on is available.'
+      ,
+        heroLead2:'Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves linear and integer models, then proves the result against your own numbers. Free, in your browser.',
+        chipBrowser:'Runs in your browser',
+        chipNoAccount:'No account needed',
+        chipPrivate:'Your data stays private'
+      ,
+        exGridHint:'The highlighted cells (chairs, tables) start at zero. Plumline fills them in.',
+        exArrow:'solves to'
       },
       solver: {
         navAddon:'The add-on',
@@ -310,6 +324,20 @@
         faq4A:'Sí. El solver online funciona entero en tu navegador y no sube nada. El complemento lee solo la hoja en la que está instalado, no envía nada a ningún servidor y no pide ninguna cuenta.',
         faq5Q:'¿Cuánto cuesta?',
         faq5A:'Nada. Tanto el solver online como el complemento son gratuitos.'
+      ,
+        addonWaitlist:'Avísame cuando salga el complemento',
+        addonSoon:'Pronto en Google Sheets',
+        addonSoonP:'El complemento de Google Sheets está en revisión. Lee el modelo directamente de la hoja que ya construiste, lo resuelve y escribe la respuesta para que Sheets pueda comprobarla. Gratis. Deja tu correo y te aviso en cuanto esté disponible.',
+        addonEmailSubject:'Avísame cuando salga el complemento de Plumline',
+        addonEmailBody:'Hola, avísame cuando el complemento de Plumline para Google Sheets esté disponible.'
+      ,
+        heroLead2:'Plumline encuentra la mejor forma de repartir recursos limitados: cuánto fabricar, comprar, enviar o asignar de personal. Resuelve modelos lineales y enteros, y luego demuestra el resultado con tus propios números. Gratis, en tu navegador.',
+        chipBrowser:'Funciona en tu navegador',
+        chipNoAccount:'Sin cuenta',
+        chipPrivate:'Tus datos son privados'
+      ,
+        exGridHint:'Las celdas resaltadas (sillas, mesas) empiezan en cero. Plumline las rellena.',
+        exArrow:'se resuelve a'
       },
       solver: {
         navAddon:'El complemento',
@@ -535,6 +563,20 @@
         faq4A:'Sim. O solver online roda inteiramente no seu navegador e não envia nada. O complemento lê apenas a planilha em que está instalado, não envia nada a nenhum servidor e não pede conta.',
         faq5Q:'Quanto custa?',
         faq5A:'Nada. Tanto o solver online quanto o complemento são gratuitos.'
+      ,
+        addonWaitlist:'Avise-me quando o complemento sair',
+        addonSoon:'Em breve no Google Sheets',
+        addonSoonP:'O complemento do Google Sheets está em revisão. Ele lê o modelo direto da planilha que você já construiu, resolve e escreve a resposta para o Sheets conferir. Grátis. Deixe o seu e-mail e aviso assim que estiver disponível.',
+        addonEmailSubject:'Avise-me quando o complemento do Plumline sair',
+        addonEmailBody:'Olá, avise-me quando o complemento do Plumline para Google Sheets estiver disponível.'
+      ,
+        heroLead2:'O Plumline encontra a melhor forma de dividir recursos limitados: quanto fabricar, comprar, enviar ou alocar de pessoal. Resolve modelos lineares e inteiros e depois prova o resultado com os seus próprios números. Grátis, no seu navegador.',
+        chipBrowser:'Roda no seu navegador',
+        chipNoAccount:'Sem conta',
+        chipPrivate:'Os seus dados são privados'
+      ,
+        exGridHint:'As células destacadas (cadeiras, mesas) começam em zero. O Plumline as preenche.',
+        exArrow:'resolve para'
       },
       solver: {
         navAddon:'O complemento',
@@ -760,6 +802,20 @@
         faq4A:'Ja. Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Add-on liest nur die Tabelle, in der es installiert ist, sendet nichts an einen Server und verlangt kein Konto.',
         faq5Q:'Was kostet es?',
         faq5A:'Nichts. Sowohl der Online-Solver als auch das Add-on sind kostenlos.'
+      ,
+        addonWaitlist:'Benachrichtige mich zum Start des Add-ons',
+        addonSoon:'Bald für Google Sheets',
+        addonSoonP:'Das Google-Sheets-Add-on ist in Prüfung. Es liest das Modell direkt aus der Tabelle, die du schon gebaut hast, löst es und schreibt die Antwort zurück, damit Sheets sie prüfen kann. Kostenlos. Hinterlass deine E-Mail und du hörst es, sobald es live ist.',
+        addonEmailSubject:'Benachrichtige mich zum Start des Plumline-Add-ons',
+        addonEmailBody:'Hallo, bitte sag mir Bescheid, sobald das Plumline-Add-on für Google Sheets verfügbar ist.'
+      ,
+        heroLead2:'Plumline findet den besten Weg, begrenzte Ressourcen aufzuteilen: wie viel herstellen, kaufen, liefern oder besetzen. Es löst lineare und ganzzahlige Modelle und beweist das Ergebnis dann mit deinen eigenen Zahlen. Kostenlos, im Browser.',
+        chipBrowser:'Läuft im Browser',
+        chipNoAccount:'Kein Konto nötig',
+        chipPrivate:'Deine Daten bleiben privat'
+      ,
+        exGridHint:'Die markierten Zellen (Stühle, Tische) beginnen bei null. Plumline füllt sie aus.',
+        exArrow:'löst zu'
       },
       solver: {
         navAddon:'Das Add-on',
@@ -985,6 +1041,20 @@
         faq4A:'Oui. Le solveur en ligne fonctionne entièrement dans votre navigateur et n’envoie rien. Le module ne lit que la feuille où il est installé, n’envoie rien à aucun serveur et ne demande aucun compte.',
         faq5Q:'Combien ça coûte ?',
         faq5A:'Rien. Le solveur en ligne et le module sont tous deux gratuits.'
+      ,
+        addonWaitlist:'Prévenez-moi au lancement du module',
+        addonSoon:'Bientôt sur Google Sheets',
+        addonSoonP:'Le module Google Sheets est en cours de validation. Il lit le modèle directement dans la feuille que vous avez déjà construite, le résout et réécrit la réponse pour que Sheets la vérifie. Gratuit. Laissez votre e-mail et vous serez prévenu dès sa mise en ligne.',
+        addonEmailSubject:'Prévenez-moi au lancement du module Plumline',
+        addonEmailBody:'Bonjour, merci de me prévenir quand le module Plumline pour Google Sheets sera disponible.'
+      ,
+        heroLead2:'Plumline trouve la meilleure façon de répartir des ressources limitées : combien produire, acheter, expédier ou affecter en personnel. Il résout des modèles linéaires et entiers, puis prouve le résultat avec vos propres chiffres. Gratuit, dans votre navigateur.',
+        chipBrowser:'Fonctionne dans le navigateur',
+        chipNoAccount:'Aucun compte requis',
+        chipPrivate:'Vos données restent privées'
+      ,
+        exGridHint:'Les cellules surlignées (chaises, tables) partent de zéro. Plumline les remplit.',
+        exArrow:'se résout en'
       },
       solver: {
         navAddon:'Le module',

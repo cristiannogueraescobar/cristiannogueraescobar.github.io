@@ -42,10 +42,15 @@
       <div>
         <p class="eyebrow" data-i18n="heroEyebrow">Optimisation, made legible</p>
         <h1 style="max-width:14ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
-        <p class="lead" style="margin-top:22px" data-i18n="heroLead">Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. Then it proves the result against your own numbers. Use it free in your browser, or inside Google Sheets.</p>
+        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves linear and integer models, then proves the result against your own numbers. Free, in your browser.</p>
         <div class="row">
           <a class="btn big" href="solver.html" data-i18n="heroSolver">Open the online solver</a>
-          <a class="btn ghost" href="#addon" data-i18n="heroAddon">Get the Sheets add-on</a>
+          <a class="btn ghost addon-waitlist" href="mailto:cristiannogueraescobar@gmail.com" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
+        </div>
+        <div class="hero-chips">
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipBrowser">Runs in your browser</span></span>
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipNoAccount">No account needed</span></span>
+          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipPrivate">Your data stays private</span></span>
         </div>
       </div>
       <div class="proof" aria-hidden="true">
@@ -78,9 +83,10 @@
         <a href="solver.html" class="btn" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarSolverCta">Solve something now &rarr;</a>
       </div>
       <div class="card true" id="addon">
-        <h3 data-i18n="pillarAddonH">Google Sheets add-on</h3>
-        <p class="muted" style="font-size:15px" data-i18n="pillarAddonP">Reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free.</p>
-        <a href="#example" class="btn ghost" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="pillarAddonCta">See the add-on &rarr;</a>
+        <span class="chip" data-i18n="addonSoon">Coming soon to Google Sheets</span>
+        <h3 data-i18n="pillarAddonH" style="margin-top:10px">Google Sheets add-on</h3>
+        <p class="muted" style="font-size:15px" data-i18n="addonSoonP">The Google Sheets add-on is in review. It reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free. Leave your email and you'll hear the moment it's live.</p>
+        <a href="mailto:cristiannogueraescobar@gmail.com" class="btn ghost addon-waitlist" style="margin-top:16px;font-size:14px;padding:10px 18px" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
       </div>
     </div>
   </section>
@@ -123,13 +129,14 @@
           <thead><tr><th>&nbsp;</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
           <tbody>
             <tr><td>1</td><td>Item</td><td>Make</td><td>Profit</td><td>Total</td></tr>
-            <tr class="decide"><td>2</td><td data-i18n="exRowChairs">Chairs</td><td class="num">10</td><td class="num">30</td><td class="f">=B2*C2</td></tr>
-            <tr class="decide"><td>3</td><td data-i18n="exRowTables">Tables</td><td class="num">15</td><td class="num">40</td><td class="f">=B3*C3</td></tr>
+            <tr class="decide"><td>2</td><td data-i18n="exRowChairs">Chairs</td><td class="num">0</td><td class="num">30</td><td class="f">=B2*C2</td></tr>
+            <tr class="decide"><td>3</td><td data-i18n="exRowTables">Tables</td><td class="num">0</td><td class="num">40</td><td class="f">=B3*C3</td></tr>
             <tr><td>4</td><td>Profit</td><td></td><td></td><td class="f">=SUM(D2:D3)</td></tr>
             <tr><td>5</td><td data-i18n="exLimitWood">Wood hours</td><td class="f">=2*B2+4*B3</td><td>&le;</td><td class="num">80</td></tr>
             <tr><td>6</td><td data-i18n="exLimitAssembly">Assembly hours</td><td class="f">=3*B2+2*B3</td><td>&le;</td><td class="num">60</td></tr>
           </tbody>
         </table>
+        <p class="ex-hint" data-i18n="exGridHint">The highlighted cells (chairs, tables) start at zero. Plumline fills them in.</p>
       </div>
       <div>
         <p class="ex-cap" data-i18n="exResultCap">What Plumline gives back</p>
@@ -199,7 +206,7 @@
       <p style="color:rgba(245,242,235,.8);margin:0 auto 26px" data-i18n="ctaP">Free. Nothing sent to any server.</p>
       <div class="row" style="justify-content:center;margin-top:0">
         <a class="btn" href="solver.html" data-i18n="ctaBtn">Open the solver</a>
-        <a class="btn ghost" href="#addon" data-i18n="heroAddon">Get the Sheets add-on</a>
+        <a class="btn ghost addon-waitlist" href="mailto:cristiannogueraescobar@gmail.com" data-i18n="addonWaitlist">Get notified when the add-on launches</a>
       </div>
     </section>
   </div>
@@ -218,6 +225,24 @@
 </footer>
 
 <script src="assets/i18n.js"></script>
-<script>Plumline.i18n.init('home');</script>
+<script>
+  var LANG = Plumline.i18n.init('home');
+  // The add-on is not published yet, so its CTAs open a pre-filled email asking
+  // to be notified. Subject and body follow the active language.
+  (function(){
+    var subj = Plumline.i18n.t(LANG,'home','addonEmailSubject');
+    var body = Plumline.i18n.t(LANG,'home','addonEmailBody');
+    var href = 'mailto:cristiannogueraescobar@gmail.com?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+    var links = document.querySelectorAll('a.addon-waitlist');
+    for (var i=0;i<links.length;i++){ links[i].setAttribute('href', href); }
+    var sel = document.getElementById('lang');
+    if (sel) sel.addEventListener('change', function(){
+      var l = sel.value;
+      var h = 'mailto:cristiannogueraescobar@gmail.com?subject='+encodeURIComponent(Plumline.i18n.t(l,'home','addonEmailSubject'))+'&body='+encodeURIComponent(Plumline.i18n.t(l,'home','addonEmailBody'));
+      var ls = document.querySelectorAll('a.addon-waitlist');
+      for (var k=0;k<ls.length;k++){ ls[k].setAttribute('href', h); }
+    });
+  })();
+</script>
 </body>
 </html>
