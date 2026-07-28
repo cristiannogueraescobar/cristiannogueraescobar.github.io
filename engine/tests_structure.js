@@ -80,9 +80,15 @@ const PRIMARY = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html
 const CURRENT_OF = { 'solver.html': 'solver.html', 'guide.html': 'guide.html', 'examples.html': 'examples.html', 'about.html': 'about.html' };
 PAGES.forEach(function (p) {
   const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
-  const navs = [...stripScripts(raw).matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
+  const body = stripScripts(raw);
+  const navs = [...body.matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
   ok(p + ' has exactly one primary nav', navs.length === 1, 'found ' + navs.length);
   const nav = navs[0] || '';
+  // The lazy [\s\S]*? above stops at the FIRST </nav>. If another <nav> were
+  // nested inside Primary, the captured slice would be truncated at the inner
+  // close — so an inner nav both corrupts extraction and misrepresents the
+  // landmark tree. Forbid any <nav> inside the Primary slice outright.
+  ok(p + ' primary nav contains no nested nav', !/<nav\b/.test(nav.replace(/^<nav\b[^>]*>/, '')), nav.match(/<nav\b/g) ? nav.match(/<nav\b/g).length + ' nav tags' : '');
   // The five core links appear in order (extra page-specific links like
   // "How to use" are allowed but must not break the core order).
   const hrefs = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]).filter(h => PRIMARY.indexOf(h) >= 0);
@@ -97,12 +103,28 @@ PAGES.forEach(function (p) {
   }
   // Mobile consistency: all five core links carry hide-sm, so the mobile
   // primary nav (below the shared 820px breakpoint) is identical everywhere —
-  // logo + language only, no core links. Page-specific on-page links (marked
-  // nav-context) are exempt.
-  const coreLinks = [...nav.matchAll(/<a\b[^>]*data-i18n="nav[A-Za-z]+"[^>]*>/g)]
-    .filter(a => !/class="[^"]*\bnav-context\b/.test(a[0]));
-  const allHideSm = coreLinks.every(a => /class="[^"]*\bhide-sm\b/.test(a[0]));
+  // logo + language only, no core links. Locate anchors by their expected href
+  // (not by data-i18n): a regression that dropped both data-i18n and hide-sm
+  // from a link would otherwise remove it from the checked set and slip past
+  // every(). Requiring all five hrefs present AND carrying hide-sm closes that.
+  const anchors = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
+  const coreLinks = PRIMARY.map(href => anchors.find(m => m[1] === href));
+  const allHideSm = coreLinks.length === PRIMARY.length &&
+    coreLinks.every(m => m && /class="[^"]*\bhide-sm\b/.test(m[0]));
   ok(p + ' all core nav links carry hide-sm (consistent mobile nav)', allHideSm);
+
+  // Solver has a second navigation landmark, "On this page", for its in-page
+  // "How to use" link. It must be exactly one region, hold only #how, and be a
+  // SIBLING of Primary — not nested inside it (nested would make it a
+  // descendant landmark, not the two independent regions intended).
+  if (p === 'solver.html') {
+    const onPage = [...body.matchAll(/<nav\b[^>]*aria-label="On this page"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
+    ok('solver has exactly one On this page nav', onPage.length === 1, 'found ' + onPage.length);
+    ok('On this page nav links to #how', /href="#how"/.test(onPage[0] || ''));
+    ok('On this page nav holds only #how', (onPage[0] || '').match(/<a\b/g)?.length === 1,
+       ((onPage[0] || '').match(/<a\b/g) || []).length + ' links');
+    ok('On this page nav is outside Primary', !/aria-label="On this page"/.test(nav));
+  }
 });
 
 // Exactly one canonical per page, pointing to the right URL.
