@@ -24,6 +24,14 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
   ok('assets/i18n.js is valid JavaScript', good, err.split('\n')[0]);
 })();
 
+// 1b. nav-menu.js parses as JS (the accessible mobile drawer behavior).
+(function () {
+  let good = true, err = '';
+  try { execSync('node --check ' + JSON.stringify(path.join(siteDir, 'assets', 'nav-menu.js')), { stdio: 'pipe' }); }
+  catch (e) { good = false; err = String(e.stderr || e.message); }
+  ok('assets/nav-menu.js is valid JavaScript', good, err.split('\n')[0]);
+})();
+
 // 2. i18n.js actually defines the Plumline.i18n API when evaluated.
 (function () {
   let hasApi = false, err = '';

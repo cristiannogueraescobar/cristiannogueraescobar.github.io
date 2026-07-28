@@ -18,7 +18,7 @@
 <meta name="twitter:title" content="How to Solve an Optimisation Problem, Step by Step">
 <meta name="twitter:description" content="A plain-language guide to continuous, integer, binary and mixed-integer optimisation: define the goal, decisions and limits, then solve a worked example.">
 <link rel="canonical" href="https://plumline.online/guide.html">
-<link rel="stylesheet" href="assets/plumline.css?v=5">
+<link rel="stylesheet" href="assets/plumline.css?v=6">
 </head>
 <body data-page="guide">
 
@@ -33,17 +33,20 @@
         </svg>
         <span class="wm">Plumline</span>
       </a>
-            <nav class="nav" aria-label="Primary">
+            <div class="header-actions">
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu" data-i18n="menuLabel">Menu</button>
+        <nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">
         <a href="solver.html" class="hide-sm" data-i18n="navSolver">Solver</a>
         <a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>
         <a href="guide.html" class="hide-sm" aria-current="page" data-i18n="navGuide">Guide</a>
         <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
         <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
-        <select class="lang" id="lang" aria-label="Language">
+      </nav>
+       <select class="lang" id="lang" aria-label="Language" data-i18n-aria="ariaLanguage">
           <option value="en">EN</option><option value="es">ES</option>
           <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
         </select>
-      </nav>
+      </div>
     </header>
   </div>
 </div>
@@ -163,7 +166,8 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=44"></script>
+<script src="assets/i18n.js?v=45"></script>
+  <script src="assets/nav-menu.js?v=1" defer></script>
 <script>Plumline.i18n.init('guide');</script>
 <script src="assets/build-badge.js?v=1"></script>
 </body>

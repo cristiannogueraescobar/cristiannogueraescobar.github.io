@@ -38,6 +38,9 @@ jobs:
           node-version: '20'
 
       # 1. Full test battery — the job fails here if anything is red.
+      - name: Install test deps
+        run: npm install jsdom --no-save
+
       - name: Run tests
         id: tests
         run: |

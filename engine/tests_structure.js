@@ -74,58 +74,133 @@ PAGES.forEach(function (p) {
   ok(p + ' header is outside <main>', hd >= 0 && hd < m0);
 });
 
-// Consistent primary nav: exactly one nav[aria-label="Primary"] per page, the
-// five core links in order, and aria-current on the page's own link.
+// Consistent primary nav, validated by a single reusable function so the SAME
+// logic guards the real pages AND a set of deliberately-broken fixtures below
+// (so the guard code itself is protected, not just the live HTML).
 const PRIMARY = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
 const CURRENT_OF = { 'solver.html': 'solver.html', 'guide.html': 'guide.html', 'examples.html': 'examples.html', 'about.html': 'about.html' };
+
+// Returns an array of { name, cond, detail } checks for the given page body.
+// `opts.onPage` = true means the page is expected to carry the "On this page"
+// second landmark (solver only).
+function validateNavigation(body, label, opts) {
+  const R = [];
+  const add = (name, cond, detail) => R.push({ name: label + ' ' + name, cond: !!cond, detail: detail });
+  opts = opts || {};
+
+  const navs = [...body.matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
+  add('has exactly one primary nav', navs.length === 1, 'found ' + navs.length);
+  const nav = navs[0] || '';
+
+  // The lazy match stops at the first </nav>; a nested <nav> both corrupts this
+  // extraction and misrepresents the landmark tree. Forbid it outright.
+  const innerNavs = (nav.replace(/^<nav\b[^>]*>/, '').match(/<nav\b/g) || []).length;
+  add('primary nav contains no nested nav', innerNavs === 0, innerNavs + ' nested');
+
+  // The five core links appear in this exact order.
+  const hrefs = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]).filter(h => PRIMARY.indexOf(h) >= 0);
+  add('primary nav has the 5 core links in order', hrefs.join('|') === PRIMARY.join('|'), hrefs.join('|'));
+
+  // The nav landmark name is translatable (data-i18n-aria), not hard-wired to
+  // English, so a screen reader announces it in the active language.
+  add('primary nav has data-i18n-aria', /<nav\b[^>]*data-i18n-aria="ariaPrimary"/.test(nav));
+
+  // aria-current on the page's own link (and only there).
+  const currentHrefs = [...nav.matchAll(/<a\b[^>]*aria-current="page"[^>]*href="([^"]+)"|<a\b[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].map(m => m[1] || m[2]);
+  if (opts.current) add('aria-current is on ' + opts.current, currentHrefs.length === 1 && currentHrefs[0] === opts.current, currentHrefs.join(','));
+  else add('has no aria-current (no own slot)', currentHrefs.length === 0, currentHrefs.join(','));
+
+  // Mobile consistency: locate anchors by their expected href (not data-i18n),
+  // so dropping both data-i18n and hide-sm can't slip a link past the check.
+  const anchors = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
+  const coreLinks = PRIMARY.map(href => anchors.find(m => m[1] === href));
+  const allHideSm = coreLinks.length === PRIMARY.length && coreLinks.every(m => m && /class="[^"]*\bhide-sm\b/.test(m[0]));
+  add('all core nav links carry hide-sm (consistent mobile nav)', allHideSm);
+
+  // A mobile menu toggle exists (with proper button semantics) so the hidden
+  // links remain reachable below the breakpoint without scrolling to the footer.
+  add('has a menu-toggle button', /<button\b[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
+  add('menu-toggle controls mobile-menu', /<button\b[^>]*class="[^"]*\bmenu-toggle\b[^>]*aria-controls="mobile-menu"|<button\b[^>]*aria-controls="mobile-menu"[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
+
+  // Language switch carries a translatable accessible name.
+  add('language select has data-i18n-aria', /<select\b[^>]*data-i18n-aria="ariaLanguage"/.test(body));
+
+  // Second landmark: "On this page" (solver only). It must be exactly one
+  // region, hold ONLY #how (exact href), and be a SIBLING of Primary.
+  const onPage = [...body.matchAll(/<nav\b[^>]*aria-label="On this page"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
+  if (opts.onPage) {
+    add('has exactly one On this page nav', onPage.length === 1, 'found ' + onPage.length);
+    const opHrefs = [...(onPage[0] || '').matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]);
+    add('On this page nav holds only #how', opHrefs.length === 1 && opHrefs[0] === '#how', opHrefs.join(','));
+    add('On this page nav has data-i18n-aria', /data-i18n-aria="ariaOnPage"/.test(onPage[0] || ''));
+    add('On this page nav is outside Primary', !/aria-label="On this page"/.test(nav));
+  } else {
+    add('has no On this page nav', onPage.length === 0, 'found ' + onPage.length);
+  }
+  return R;
+}
+
 PAGES.forEach(function (p) {
   const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
   const body = stripScripts(raw);
-  const navs = [...body.matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
-  ok(p + ' has exactly one primary nav', navs.length === 1, 'found ' + navs.length);
-  const nav = navs[0] || '';
-  // The lazy [\s\S]*? above stops at the FIRST </nav>. If another <nav> were
-  // nested inside Primary, the captured slice would be truncated at the inner
-  // close — so an inner nav both corrupts extraction and misrepresents the
-  // landmark tree. Forbid any <nav> inside the Primary slice outright.
-  ok(p + ' primary nav contains no nested nav', !/<nav\b/.test(nav.replace(/^<nav\b[^>]*>/, '')), nav.match(/<nav\b/g) ? nav.match(/<nav\b/g).length + ' nav tags' : '');
-  // The five core links appear in order (extra page-specific links like
-  // "How to use" are allowed but must not break the core order).
-  const hrefs = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]).filter(h => PRIMARY.indexOf(h) >= 0);
-  ok(p + ' primary nav has the 5 core links in order', hrefs.join('|') === PRIMARY.join('|'), hrefs.join('|'));
-  // aria-current sits on the page's own link (and only there).
-  const currentHrefs = [...nav.matchAll(/<a\b[^>]*aria-current="page"[^>]*href="([^"]+)"|<a\b[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].map(m => m[1] || m[2]);
-  const expectCurrent = CURRENT_OF[p];
-  if (expectCurrent) {
-    ok(p + ' aria-current is on ' + expectCurrent, currentHrefs.length === 1 && currentHrefs[0] === expectCurrent, currentHrefs.join(','));
-  } else {
-    ok(p + ' has no aria-current (no own slot)', currentHrefs.length === 0, currentHrefs.join(','));
-  }
-  // Mobile consistency: all five core links carry hide-sm, so the mobile
-  // primary nav (below the shared 820px breakpoint) is identical everywhere —
-  // logo + language only, no core links. Locate anchors by their expected href
-  // (not by data-i18n): a regression that dropped both data-i18n and hide-sm
-  // from a link would otherwise remove it from the checked set and slip past
-  // every(). Requiring all five hrefs present AND carrying hide-sm closes that.
-  const anchors = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>/g)];
-  const coreLinks = PRIMARY.map(href => anchors.find(m => m[1] === href));
-  const allHideSm = coreLinks.length === PRIMARY.length &&
-    coreLinks.every(m => m && /class="[^"]*\bhide-sm\b/.test(m[0]));
-  ok(p + ' all core nav links carry hide-sm (consistent mobile nav)', allHideSm);
-
-  // Solver has a second navigation landmark, "On this page", for its in-page
-  // "How to use" link. It must be exactly one region, hold only #how, and be a
-  // SIBLING of Primary — not nested inside it (nested would make it a
-  // descendant landmark, not the two independent regions intended).
-  if (p === 'solver.html') {
-    const onPage = [...body.matchAll(/<nav\b[^>]*aria-label="On this page"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
-    ok('solver has exactly one On this page nav', onPage.length === 1, 'found ' + onPage.length);
-    ok('On this page nav links to #how', /href="#how"/.test(onPage[0] || ''));
-    ok('On this page nav holds only #how', (onPage[0] || '').match(/<a\b/g)?.length === 1,
-       ((onPage[0] || '').match(/<a\b/g) || []).length + ' links');
-    ok('On this page nav is outside Primary', !/aria-label="On this page"/.test(nav));
-  }
+  validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html' })
+    .forEach(r => ok(r.name, r.cond, r.detail));
 });
+
+// --- Permanent self-tests: run validateNavigation against deliberately broken
+// fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
+// the auditor could reintroduce must make at least one named check fail here.
+const GOOD_NAV = [
+  '<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu">Menu</button>',
+  '<nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">',
+  '<a href="solver.html" class="hide-sm" aria-current="page" data-i18n="navSolver">Solver</a>',
+  '<a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>',
+  '<a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>',
+  '<a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>',
+  '<a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>',
+  '</nav>',
+  '<nav class="nav-onpage" aria-label="On this page" data-i18n-aria="ariaOnPage"><a href="#how" class="nav-context" data-i18n="navHow">How to use</a></nav>',
+  '<select id="lang" aria-label="Language" data-i18n-aria="ariaLanguage"></select>'
+].join('\n');
+const GOOD_OPTS = { current: 'solver.html', onPage: true };
+
+function failsOn(mutated, checkSubstring) {
+  // True if validateNavigation reports a FAILING check whose name contains the
+  // substring — i.e. the guard caught the regression.
+  return validateNavigation(mutated, 'fixture', GOOD_OPTS)
+    .some(r => !r.cond && r.name.indexOf(checkSubstring) >= 0);
+}
+function passesClean(fixture) {
+  return validateNavigation(fixture, 'fixture', GOOD_OPTS).every(r => r.cond);
+}
+
+// The clean fixture must pass every check (guards aren't vacuously failing).
+ok('self-test: clean fixture passes all nav checks', passesClean(GOOD_NAV));
+
+// 1. On this page nested INSIDE Primary → nesting + outside-Primary must fail.
+const nested = GOOD_NAV
+  .replace('</nav>\n<nav class="nav-onpage"', '<nav class="nav-onpage"')
+  .replace('data-i18n="navHow">How to use</a></nav>', 'data-i18n="navHow">How to use</a></nav></nav>');
+ok('self-test: nested On this page is caught (nesting)', failsOn(nested, 'contains no nested nav'));
+ok('self-test: nested On this page is caught (outside Primary)', failsOn(nested, 'is outside Primary'));
+
+// 2. A core link with neither data-i18n nor hide-sm → mobile check must fail.
+const bareLink = GOOD_NAV.replace('<a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>',
+                                  '<a href="guide.html">Guide</a>');
+ok('self-test: core link without hide-sm/data-i18n is caught', failsOn(bareLink, 'carry hide-sm'));
+
+// 3. On this page with two links → only-#how check must fail.
+const twoLinks = GOOD_NAV.replace('data-i18n="navHow">How to use</a></nav>',
+                                  'data-i18n="navHow">How to use</a><a href="#other">Other</a></nav>');
+ok('self-test: On this page with a second link is caught', failsOn(twoLinks, 'holds only #how'));
+
+// 4. Missing menu-toggle → mobile reachability check must fail.
+const noToggle = GOOD_NAV.replace(/<button class="menu-toggle"[\s\S]*?<\/button>\n/, '');
+ok('self-test: missing menu-toggle is caught', failsOn(noToggle, 'has a menu-toggle button'));
+
+// 5. Hard-wired (non-translatable) landmark name → i18n-aria check must fail.
+const noAria = GOOD_NAV.replace(' data-i18n-aria="ariaPrimary"', '');
+ok('self-test: non-translatable Primary label is caught', failsOn(noAria, 'has data-i18n-aria'));
 
 // Exactly one canonical per page, pointing to the right URL.
 const CANONICALS = {

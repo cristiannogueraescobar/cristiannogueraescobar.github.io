@@ -49,6 +49,7 @@
       },
       common: {
         navSolver:'Solver',
+        ariaPrimary:'Primary', ariaOnPage:'On this page', ariaLanguage:'Language', ariaMobileMenu:'Site menu', menuLabel:'Menu',
         navExamples:'Examples', navAddon:'Add-on', navGuide:'Guide', navHow:'How to use',
         footTool:'Tool', footProduct:'Product', footLegal:'Legal',
         footSolver:'Online solver', footAddon:'Sheets add-on', footGuide:'Guide',
@@ -504,6 +505,7 @@
       },
       common: {
         navSolver:'Solver',
+        ariaPrimary:'Principal', ariaOnPage:'En esta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Men\u00fa del sitio', menuLabel:'Men\u00fa',
         navExamples:'Ejemplos', navAddon:'Complemento', navGuide:'Gu\u00eda', navHow:'C\u00f3mo se usa',
         footTool:'Herramienta', footProduct:'Producto', footLegal:'Legal',
         footSolver:'Solver online', footAddon:'Complemento de Sheets', footGuide:'Gu\u00eda',
@@ -959,6 +961,7 @@
       },
       common: {
         navSolver:'Solver',
+        ariaPrimary:'Principal', ariaOnPage:'Nesta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Menu do site', menuLabel:'Menu',
         navExamples:'Exemplos', navAddon:'Complemento', navGuide:'Guia', navHow:'Como usar',
         footTool:'Ferramenta', footProduct:'Produto', footLegal:'Legal',
         footSolver:'Solver online', footAddon:'Complemento do Sheets', footGuide:'Guia',
@@ -1414,6 +1417,7 @@
       },
       common: {
         navSolver:'Solver',
+        ariaPrimary:'Haupt', ariaOnPage:'Auf dieser Seite', ariaLanguage:'Sprache', ariaMobileMenu:'Seitenmen\u00fc', menuLabel:'Men\u00fc',
         navExamples:'Beispiele', navAddon:'Add-on', navGuide:'Anleitung', navHow:'So geht\u2019s',
         footTool:'Werkzeug', footProduct:'Produkt', footLegal:'Rechtliches',
         footSolver:'Online-Solver', footAddon:'Sheets-Add-on', footGuide:'Anleitung',
@@ -1869,6 +1873,7 @@
       },
       common: {
         navSolver:'Solveur',
+        ariaPrimary:'Principale', ariaOnPage:'Sur cette page', ariaLanguage:'Langue', ariaMobileMenu:'Menu du site', menuLabel:'Menu',
         navExamples:'Exemples', navAddon:'Module', navGuide:'Guide', navHow:'Comment \u00e7a marche',
         footTool:'Outil', footProduct:'Produit', footLegal:'L\u00e9gal',
         footSolver:'Solveur en ligne', footAddon:'Module Sheets', footGuide:'Guide',

@@ -138,6 +138,28 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 .field-deep .lang{background:rgba(245,242,235,.1);color:var(--cream);border-color:rgba(245,242,235,.28)}
 .field-deep .lang option{background:var(--deep);color:var(--cream)}
 
+/* header actions: nav + language grouped, so the language switch sits beside
+   Primary rather than inside it (changing language is not site navigation) */
+.header-actions{display:flex;align-items:center;gap:22px}
+
+/* mobile menu toggle — hidden on desktop, shown below the nav breakpoint */
+.menu-toggle{display:none;font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+  color:inherit;background:transparent;border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:8px 12px;cursor:pointer;min-height:44px}
+.field-deep .menu-toggle{border-color:rgba(245,242,235,.28);color:var(--cream)}
+
+/* mobile drawer */
+.mobile-menu[hidden]{display:none}
+.mobile-menu{position:fixed;inset:0;z-index:50}
+.mobile-menu-backdrop{position:absolute;inset:0;background:rgba(20,22,20,.55)}
+.mobile-menu-panel{position:absolute;top:0;right:0;height:100%;width:min(78vw,320px);
+  background:var(--deep);color:var(--cream);display:flex;flex-direction:column;gap:4px;
+  padding:72px 20px 24px;box-shadow:-8px 0 30px rgba(0,0,0,.25)}
+.mobile-menu-panel a{font-family:var(--mono);font-size:15px;letter-spacing:.04em;color:var(--cream);
+  text-decoration:none;padding:12px 8px;min-height:44px;display:flex;align-items:center;
+  border-bottom:1px solid rgba(245,242,235,.12)}
+.mobile-menu-panel a:hover,.mobile-menu-panel a[aria-current="page"]{color:var(--brass-hi)}
+
 /* type helpers */
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
   color:var(--brass);margin-bottom:16px}
@@ -259,6 +281,7 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   .plumb{padding:0 18px 0 calc(var(--rail)+18px)}
   .nav{gap:14px}
   .nav a.hide-sm{display:none}
+  .menu-toggle{display:inline-flex;align-items:center}
   .versus{grid-template-columns:1fr}
   .bob::before{left:calc(-1*(var(--rail)+18px)+var(--rail)-5px)}
 }
