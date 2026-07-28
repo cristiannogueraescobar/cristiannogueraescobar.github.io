@@ -18,7 +18,7 @@
 <meta name="twitter:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online optimisation solver. Solve continuous, integer, binary and mixed-integer models in your browser: enter your model like a spreadsheet, set variable types and per-variable limits, and verify the result against your own formulas. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=4">
+<link rel="stylesheet" href="assets/plumline.css?v=5">
 <style>
 :root{
   --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#93958A;
@@ -224,7 +224,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </head>
 <body data-page="solver">
 
-<div class="top"><div class="wrap">
+<header class="top"><div class="wrap">
   <a class="lockup" href="index.html" aria-label="Plumline home">
     <svg width="20" height="30" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
       <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
@@ -233,7 +233,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     </svg>
     <span class="wm">Plumline</span>
   </a>
-  <nav>
+  <nav aria-label="Primary">
     <a href="index.html#addon" data-i18n="navAddon">The add-on</a>
     <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
     <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
@@ -247,8 +247,9 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <option value="fr">FR</option>
     </select>
   </nav>
-</div></div>
+</div></header>
 
+<main id="content">
 <div class="hero"><div class="wrap">
   <p class="eyebrow" data-i18n="heroEyebrow">Free online solver</p>
   <h1 data-i18n="heroTitle">Optimise a spreadsheet without leaving your browser.</h1>
@@ -332,6 +333,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     </div>
   </div>
 </div></div>
+</main>
 
 <footer class="foot"><div class="plumb"><div class="in">
   <div class="cols">
