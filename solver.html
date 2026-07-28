@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Linear Programming Solver Online: Free LP &amp; Integer Optimization | Plumline</title>
+<title>Online Optimisation Solver: Continuous, Integer, Binary &amp; Mixed-Integer | Plumline</title>
 <meta name="keywords" content="linear programming solver, LP solver online, integer programming, optimization calculator, simplex method, feasible region, shadow price, operations research">
 <meta property="og:title" content="Linear Programming Solver Online, Free">
-<meta property="og:description" content="Solve linear and integer models in your browser. Verify the result, inspect binding constraints, and see the estimated impact of extra capacity. Nothing uploaded.">
+<meta property="og:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/solver.html">
 <meta property="og:image" content="https://plumline.online/assets/og-image.png">
@@ -15,9 +15,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://plumline.online/assets/og-image.png">
 <meta name="twitter:title" content="Linear Programming Solver Online, Free">
-<meta name="twitter:description" content="Solve linear and integer models in your browser. Verify the result, inspect binding constraints, and see the estimated impact of extra capacity. Nothing uploaded.">
+<meta name="twitter:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <link rel="canonical" href="https://plumline.online/solver.html">
-<meta name="description" content="Free online linear programming solver. Solve LP and integer models in your browser: enter your model like a spreadsheet, verify the result against your own formulas, inspect binding constraints, and see the estimated impact of one more unit. No sign-up, nothing uploaded.">
+<meta name="description" content="Free online optimisation solver. Solve continuous, integer, binary and mixed-integer models in your browser: enter your model like a spreadsheet, set variable types and per-variable limits, and verify the result against your own formulas. No sign-up, nothing uploaded.">
 <link rel="stylesheet" href="assets/plumline.css?v=4">
 <style>
 :root{
@@ -325,7 +325,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     <div class="sec-head"><h2 data-i18n="howTitle">How it reads your grid</h2></div>
     <div class="grid-2">
       <p data-i18n="howP1">Plumline looks for one cell that totals the others: that becomes the goal. The cells that total feeds into, and that are currently empty or zero, become the quantities it can change. Any row with a comparison operator and a number becomes a limit. It uses the labels in your first column to name everything, so the answer reads in plain words.</p>
-      <p data-i18n="howP2">It solves linear and integer problems: production, purchasing, blending, staffing, transport, budgets. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it will point at the cell if it meets one.</p>
+      <p data-i18n="howP2">It solves continuous, integer, binary and mixed-integer linear problems: production, purchasing, blending, staffing, transport, budgets, project selection and loading. Use Variable settings to make a decision whole or 0/1 and to set its minimum and maximum. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it will point at the cell if it meets one.</p>
     </div>
     <div style="text-align:center;margin-top:32px">
       <a class="cta" href="index.html#addon" data-i18n="getAddon">Prefer it inside Google Sheets? Get notified when the add-on launches →</a>
@@ -355,7 +355,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=37"></script>
+<script src="assets/i18n.js?v=38"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2347,6 +2347,12 @@ function matchesAnyHint_(label, hints) {
   // (assets/examples-data.js), so the solver and examples.html can't drift.
   var CATEGORY_ORDER=window.PL_CATEGORY_ORDER||['start','business','binary'];
   var EXAMPLE_META=window.PL_EXAMPLE_META||[];
+  // The shared metadata file (assets/examples-data.js) drives every example's
+  // slug, category, type and direction. If it failed to load, the examples
+  // can't be trusted, so disable them with a clear console message rather than
+  // silently loading a wrong model. The manual solver is unaffected.
+  var EXAMPLES_OK=Array.isArray(window.PL_EXAMPLE_META) && window.PL_EXAMPLE_META.length===Object.keys(EXAMPLES).length;
+  if(!EXAMPLES_OK){ try{ console.error('Plumline: example metadata failed to load; examples disabled.'); }catch(e){} }
   function metaFor(key){ for(var i=0;i<EXAMPLE_META.length;i++){ if(EXAMPLE_META[i].key===key) return EXAMPLE_META[i]; } return null; }
   function categoryOf(key){ var m=metaFor(key); return m?m.category:(EXAMPLES[key]&&EXAMPLES[key].category); }
   function slugOf(key){ var m=metaFor(key); return m?m.slug:(EXAMPLES[key]&&EXAMPLES[key].slug); }
@@ -3626,10 +3632,15 @@ function matchesAnyHint_(label, hints) {
     }
     return out;
   }
+  var __prevOverflow='';
   function openDrawer(){
+    if(!EXAMPLES_OK) return;                 // examples disabled (metadata missing)
+    var drawer=document.getElementById('exDrawer');
+    if(!drawer || !drawer.hidden) return;   // already open: don't re-run (would clobber saved state)
     renderExamplesDrawer();
-    document.getElementById('exDrawer').hidden=false;
+    drawer.hidden=false;
     document.getElementById('exDrawerBackdrop').hidden=false;
+    __prevOverflow=document.body.style.overflow;              // save prior scroll state
     document.body.style.overflow='hidden';                    // lock background scroll
     // Save each background element's prior inert state, then set inert. On
     // close we restore exactly what was there, so this is safe even if an
@@ -3644,7 +3655,7 @@ function matchesAnyHint_(label, hints) {
     if(!drawer || drawer.hidden) return;
     drawer.hidden=true;
     document.getElementById('exDrawerBackdrop').hidden=true;
-    document.body.style.overflow='';
+    document.body.style.overflow=__prevOverflow;              // restore prior scroll state
     backgroundEls().forEach(function(el){ el.inert=(el.__prevInert===true); delete el.__prevInert; });  // restore prior inert state
     var openBtn=document.getElementById('openExamples');
     if(openBtn){ openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }  // return focus
