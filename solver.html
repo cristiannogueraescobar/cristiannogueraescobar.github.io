@@ -202,6 +202,10 @@ svg.plot .axlab{font-family:var(--mono);font-size:11px;fill:var(--faint)}
 footer{background:var(--deep);color:rgba(245,242,235,.6);margin-top:50px}
 footer .wrap{padding:26px 24px 50px;font-size:13px}
 footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text-decoration:none;margin-right:18px}
+/* Match the shared .nav breakpoint (820px) so the mobile primary nav is
+   identical across all pages: the five core links hide, leaving logo + lang
+   (plus this page's own "How to use" on-page link). */
+@media(max-width:820px){.top nav a.hide-sm{display:none}}
 @media(max-width:640px){table.grid th{min-width:64px}}
 @media(max-width:560px){
   /* This page has its own .top nav (not the shared .nav), so hide-sm needs
@@ -234,12 +238,12 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     <span class="wm">Plumline</span>
   </a>
   <nav class="nav" aria-label="Primary">
-    <a href="solver.html" aria-current="page" data-i18n="navSolver">Solver</a>
-    <a href="index.html#addon" data-i18n="navAddon">Add-on</a>
+    <a href="solver.html" class="hide-sm" aria-current="page" data-i18n="navSolver">Solver</a>
+    <a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>
     <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
     <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
     <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
-    <a href="#how" class="nav-context" data-i18n="navHow">How to use</a>
+    <nav class="nav-onpage" aria-label="On this page"><a href="#how" class="nav-context" data-i18n="navHow">How to use</a></nav>
     <select id="lang" aria-label="Language">
       <option value="en">EN</option>
       <option value="es">ES</option>

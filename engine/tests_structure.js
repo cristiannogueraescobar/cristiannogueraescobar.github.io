@@ -95,6 +95,14 @@ PAGES.forEach(function (p) {
   } else {
     ok(p + ' has no aria-current (no own slot)', currentHrefs.length === 0, currentHrefs.join(','));
   }
+  // Mobile consistency: all five core links carry hide-sm, so the mobile
+  // primary nav (below the shared 820px breakpoint) is identical everywhere —
+  // logo + language only, no core links. Page-specific on-page links (marked
+  // nav-context) are exempt.
+  const coreLinks = [...nav.matchAll(/<a\b[^>]*data-i18n="nav[A-Za-z]+"[^>]*>/g)]
+    .filter(a => !/class="[^"]*\bnav-context\b/.test(a[0]));
+  const allHideSm = coreLinks.every(a => /class="[^"]*\bhide-sm\b/.test(a[0]));
+  ok(p + ' all core nav links carry hide-sm (consistent mobile nav)', allHideSm);
 });
 
 // Exactly one canonical per page, pointing to the right URL.
