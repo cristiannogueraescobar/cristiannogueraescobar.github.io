@@ -53,5 +53,22 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
   }
 })();
 
+// 4. The build badge appears exactly once per page, inside the footer's
+//    <p class="fine"> line — never stranded in body content.
+(function () {
+  const pages = ['index.html', 'solver.html', 'guide.html', 'about.html',
+                 'privacy.html', 'terms.html', 'examples.html'];
+  pages.forEach(function (page) {
+    const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+    const count = (html.match(/id="buildBadge"/g) || []).length;
+    ok(page + ' has exactly one build badge', count === 1, 'found ' + count);
+    // The badge must sit on the same <p class="fine"> line as the footer text.
+    const fineLine = (html.split('\n').find(l => l.indexOf('class="fine"') >= 0)) || '';
+    ok(page + ' badge is in the footer .fine line', fineLine.indexOf('id="buildBadge"') >= 0);
+    // And the badge script is included.
+    ok(page + ' includes build-badge.js', /build-badge\.js/.test(html));
+  });
+})();
+
 console.log('ASSET TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);
