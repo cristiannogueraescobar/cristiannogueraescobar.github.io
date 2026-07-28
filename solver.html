@@ -309,7 +309,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=26"></script>
+<script src="assets/i18n.js?v=27"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -467,7 +467,7 @@ function buildVariableDomains_(domains, wholeToggle, variables, labels, values, 
       max: upper,
       value: value,
       satisfied: lowerOk && upperOk,
-      lowerBinding: Math.abs(value - lower) < 1e-6 && lower > 0,
+      lowerBinding: Math.abs(value - lower) < 1e-6,
       upperBinding: (upper !== null) && Math.abs(value - upper) < 1e-6,
     });
   }
@@ -1525,6 +1525,7 @@ function solveModel_(sheet, model) {
       maximize: model.objective.sense !== 'min',
       objective: coefficientVector_(objectiveForm, variables),
       constant: objectiveForm.constant,
+      bounds: domains ? domains.bounds : null,
     }, result.objective);
   }
 
@@ -1554,6 +1555,7 @@ function addShadowPrices_(reported, constraints, base, baseObjective) {
       objective: base.objective,
       constant: base.constant,
       constraints: perturbed,
+      bounds: base.bounds || null,
     });
     if (probe.status !== 'optimal') continue;
 
@@ -2140,15 +2142,29 @@ function matchesAnyHint_(label, hints) {
 
   // Remember the last destructive operation (paste or delete) so it can be
   // undone in one step.
-  var lastUndo=null;   // { data: deep-copy, ROWS, COLS }
+  var lastUndo=null;   // { data, ROWS, COLS, varSettings, detectedVars, panelStale }
 
   function snapshot(){
-    return { data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS };
+    return {
+      data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS,
+      // Deep-copy the panel state so undo restores variable types/bounds too.
+      varSettings:JSON.parse(JSON.stringify(varSettings)),
+      detectedVars:detectedVars.slice(),
+      panelStale:panelStale
+    };
   }
   function restore(snap){
     ROWS=snap.ROWS; COLS=snap.COLS;
     data=snap.data.map(function(row){return row.slice();});
+    // Restore the panel state if the snapshot carried it (older snapshots may not).
+    if(snap.varSettings){ varSettings=JSON.parse(JSON.stringify(snap.varSettings)); }
+    if(snap.detectedVars){ detectedVars=snap.detectedVars.slice(); }
+    if(typeof snap.panelStale==='boolean'){ panelStale=snap.panelStale; }
     render();
+    // Reflect the restored panel state in the UI.
+    var panel=document.getElementById('varSettings');
+    if(detectedVars.length){ if(panel){ panel.style.display=''; } renderVarPanel(); setDetectLabel(panelStale); }
+    else if(panel){ panel.style.display='none'; setDetectLabel(false); }
   }
   // Capture the current state as the undo point and reveal the Undo button.
   function saveUndo(){
@@ -2222,8 +2238,8 @@ function matchesAnyHint_(label, hints) {
     if(!block.length){ showTrouble(t('tCsvEmpty'), t('tCsvEmptyBody')); return; }
     // Replace the grid with the CSV, sized to fit (capped at MAX), from A1.
     modelChanged();
+    saveUndo();        // capture the OLD grid + panel first, so undo restores them
     resetVarPanel();   // full model replacement: old variable settings are void
-    saveUndo();
     var needRows=Math.min(MAX_ROWS, Math.max(MIN_ROWS, block.length));
     var needCols=Math.min(MAX_COLS, Math.max(MIN_COLS, block.reduce(function(m,r){return Math.max(m,r.length);},0)));
     var clipped=(block.length>MAX_ROWS)||block.some(function(r){return r.length>MAX_COLS;});
@@ -2372,6 +2388,11 @@ function matchesAnyHint_(label, hints) {
     var grid=loadGrid_(sheet);
     var cells=expandRange_(grid, model.variables);
     detectedVars=cells.map(function(cell){ return { cell:cell, label:labelFor_(grid, cell)||cell }; });
+    // Drop settings for cells that are no longer decision variables, so an old
+    // invalid bound on a now-removed variable can't block solving invisibly.
+    var active={};
+    detectedVars.forEach(function(v){ active[v.cell]=true; });
+    Object.keys(varSettings).forEach(function(cell){ if(!active[cell]) delete varSettings[cell]; });
     panelStale=false;
     setDetectLabel(false);
     renderVarPanel();
@@ -2476,21 +2497,18 @@ function matchesAnyHint_(label, hints) {
           var s=settingsFor(cell); s.type=typeSel.value;
           if(s.type==='binary'){ s.min=0; s.max=1; }
           modelChanged(true);      // changing a domain invalidates any solve/result
-          clearUndo();             // grid undo can't restore domains; keep them consistent
           renderVarPanel();    // re-render to lock/unlock min/max
         });
         if(minIn) minIn.addEventListener('input',function(){
           var s=settingsFor(cell);
           s.min=cleanBound(minIn.value);
           modelChanged(true);
-          clearUndo();
           showVarError(cell);
         });
         if(maxIn) maxIn.addEventListener('input',function(){
           var s=settingsFor(cell);
           s.max=cleanBound(maxIn.value);
           modelChanged(true);
-          clearUndo();
           showVarError(cell);
         });
       })(rowEls[k]);
@@ -2522,6 +2540,9 @@ function matchesAnyHint_(label, hints) {
       var sMax=(typeof s.max==='number' && !isNaN(s.max))?s.max:null;
       var lo=(s.type==='binary')?0:(sMin!=null?sMin:0);
       var hi=(s.type==='binary')?1:sMax;
+      // A positive min below the engine's activation tolerance is effectively
+      // zero; normalise it so it doesn't look "set" while being ignored.
+      if(lo>0 && lo<=1e-9) lo=0;
       // Variables are non-negative; a negative lower is clamped to 0 here as a
       // safety net (the UI already rejects it, so this shouldn't trigger).
       if(lo<0) lo=0;
@@ -2791,7 +2812,15 @@ function matchesAnyHint_(label, hints) {
               iteration_limit:'feasibleIterationLimit',numerical_failure:'feasibleNumericalFailure'}[out.stopReason]||'feasibleGeneric';
       caveat=t('feasibleBody').replace('{reason}', t(rk));
     }
+    // Defensive final verification: every constraint AND every variable domain
+    // must be satisfied. A correct engine guarantees this, but the product's
+    // promise is verifiability, so we check it explicitly rather than trust the
+    // status alone.
+    var verificationPassed =
+      (out.constraints||[]).every(function(c){ return c.satisfied; }) &&
+      (out.variableDomains||[]).every(function(d){ return d.satisfied; });
     if(caveat) h+='<div class="check bad">'+esc(caveat)+'</div>';
+    else if(!verificationPassed) h+='<div class="check bad">&#10007; '+t('verifyFailed')+'</div>';
     else h+='<div class="check">&#10003; '+t('solvedOk')+'</div>';
     if(/shadow/.test(h)) h+='<div class="shadow-note">'+t('shadowNote')+'</div>';
     h+='</div>';
@@ -2807,13 +2836,17 @@ function matchesAnyHint_(label, hints) {
     document.getElementById('exp-xls').addEventListener('click', exportExcel);
     document.getElementById('exp-txt').addEventListener('click', copySummary);
 
-    // If this is a two-variable CONTINUOUS model, draw the feasible region.
-    // The corner-point method draws a continuous region and evaluates its
-    // vertices, which does NOT explain an integer/binary/mixed optimum (the
-    // best point may not be a continuous vertex, and per-variable bounds aren't
-    // in out.constraints). So we skip the plot for discrete models rather than
-    // show a picture that doesn't match what was solved.
-    if (out.modelType === 'continuous' && out.plot && out.values && out.values.length === 2) {
+    // If this is a two-variable CONTINUOUS model WITHOUT custom bounds, draw
+    // the feasible region. The corner-point method builds the region only from
+    // out.constraints, which don't include per-variable bounds, so a bounded
+    // continuous model would draw a region larger than what was solved. And
+    // discrete models (integer/binary/mixed) have no continuous-vertex optimum
+    // to show. In both cases we skip the plot rather than mislead.
+    var hasCustomBounds = out.variableDomains && out.variableDomains.some(function(d){
+      return d.min > 0 || d.max != null;
+    });
+    if (out.modelType === 'continuous' && !hasCustomBounds &&
+        out.plot && out.values && out.values.length === 2) {
       drawFeasibleRegion(out);
     }
   }
@@ -2942,23 +2975,23 @@ function matchesAnyHint_(label, hints) {
 
   function solutionRows(out){
     // a clean, labelled table anyone can open: the answer, then the limits
-    var rows = [['Result', out.objectiveLabel || 'Objective', num(out.objective)]];
+    var rows = [[t('exResult'), out.objectiveLabel || t('exObjective'), num(out.objective)]];
     rows.push([]);
-    rows.push(['Decision', 'From', 'To']);
+    rows.push([t('exDecision'), t('exFrom'), t('exTo')]);
     (out.labels||[]).forEach(function(lb,i){ rows.push([lb, num(out.previous[i]), num(out.values[i])]); });
     rows.push([]);
-    rows.push(['Limit', 'Used', 'Cap', 'At limit', 'Value of one more']);
+    rows.push([t('exLimit'), t('exUsed'), t('exCap'), t('exAtLimit'), t('exOneMore')]);
     (out.constraints||[]).forEach(function(c){
-      rows.push([c.label, num(c.used), num(c.limit), c.binding?'yes':'no',
+      rows.push([c.label, num(c.used), num(c.limit), c.binding?t('exYes'):t('exNo'),
                  (c.binding && c.shadowPrice>0) ? num(c.shadowPrice) : '']);
     });
     // Variable limits: type and bounds per configured variable, so an exported
     // report documents that a variable was e.g. binary or capped at 10.
     if(out.variableDomains && out.variableDomains.length){
       rows.push([]);
-      rows.push(['Variable', 'Type', 'Min', 'Max', 'Result']);
+      rows.push([t('exVariable'), t('varType'), t('varMin'), t('varMax'), t('exResult')]);
       out.variableDomains.forEach(function(d){
-        var typeName={continuous:'Continuous',integer:'Integer',binary:'Binary'}[d.type]||d.type;
+        var typeName={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary')}[d.type]||d.type;
         rows.push([d.label, typeName, num(d.min), (d.max==null?'':num(d.max)), num(d.value)]);
       });
     }
@@ -3014,9 +3047,9 @@ function matchesAnyHint_(label, hints) {
       lines.push(s + ')');
     });
     if(out.variableDomains && out.variableDomains.length){
-      lines.push('Variable limits:');
+      lines.push(t('varLimitsTitle')+':');
       out.variableDomains.forEach(function(d){
-        var typeName={continuous:'Continuous',integer:'Integer',binary:'Binary'}[d.type]||d.type;
+        var typeName={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary')}[d.type]||d.type;
         var rng=(d.type==='binary')?'0-1':(fmt(d.min)+'-'+(d.max==null?'inf':fmt(d.max)));
         lines.push('  ' + d.label + ' (' + typeName + ', ' + rng + '): ' + fmt(d.value));
       });
@@ -3044,8 +3077,9 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('delCol').addEventListener('click',delCol);
   document.getElementById('undoGrid').addEventListener('click',doUndo);
   document.getElementById('detectVars').addEventListener('click',detectForPanel);
-  // Toggling integer mode changes the model; cancel any in-flight solve.
-  document.getElementById('whole').addEventListener('change',modelChanged);
+  // Toggling integer mode changes the model but not the detected variables,
+  // so pass fromPanel=true: invalidate the result, don't mark the panel stale.
+  document.getElementById('whole').addEventListener('change',function(){ modelChanged(true); });
   // Import CSV: the button opens the hidden file picker; picking a file imports.
   document.getElementById('importCsv').addEventListener('click',function(){
     document.getElementById('csvFile').click();
