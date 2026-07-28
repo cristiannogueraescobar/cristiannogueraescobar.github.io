@@ -1,0 +1,6 @@
+{
+  "commit": "DEV-LOCAL",
+  "builtAt": "unbuilt",
+  "testsPassed": 0,
+  "note": "This file is overwritten by the deploy workflow with the real commit SHA, build timestamp, and the number of tests that passed for that commit. A value of DEV-LOCAL means the site was not built through CI."
+}
