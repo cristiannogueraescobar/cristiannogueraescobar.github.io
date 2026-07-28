@@ -68,21 +68,32 @@ jobs:
         env:
           TEST_COUNT: ${{ steps.tests.outputs.count }}
 
-      # 3. Record a SHA-256 of every file that will be served.
+      # Build the served site into _site, excluding tests and dev-only files.
+      # engine/ stays in the repo (CI needs it) but is never served.
+      - name: Prepare served site
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude '.git' --exclude '.github' --exclude '_site' \
+            --exclude 'engine' --exclude 'DEPLOY.md' --exclude 'hashes.txt' \
+            ./ _site/
+
+      # 3. Record a SHA-256 of every file that will actually be served.
+      #    Exclude hashes.txt itself so it never hashes its own (empty) contents.
       - name: Write file hashes
         run: |
-          find . -type f \
-            -not -path './.git/*' -not -path './.github/*' -not -path './engine/*' \
-            -not -name 'hashes.txt' \
-            | sort | xargs sha256sum > assets/hashes.txt
-          echo "Hashed $(wc -l < assets/hashes.txt) files"
+          (
+            cd _site &&
+            find . -type f ! -path './assets/hashes.txt' -print0 |
+            sort -z |
+            xargs -0 sha256sum
+          ) > _site/assets/hashes.txt
+          echo "Hashed $(wc -l < _site/assets/hashes.txt) served files"
 
-      # The engine/ folder holds the tests; it is not part of the served site
-      # (the user's .gitignore already excludes it from the deploy artifact).
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
   deploy:
     needs: build
@@ -99,21 +110,71 @@ jobs:
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      # 5. Post-deploy smoke test against the live site.
+      - uses: actions/checkout@v4
+      # 5. Post-deploy smoke test against the live site, with retries for the
+      #    GitHub Pages CDN cache (a fresh deploy can take a couple of minutes
+      #    to propagate).
       - name: Smoke test production
         run: |
           set -e
           BASE="https://plumline.online"
-          echo "Checking $BASE/build-info.json reports $GITHUB_SHA"
-          DEPLOYED=$(curl -fsS "$BASE/build-info.json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).commit||""))')
+          # One cache-buster for the whole run, so every resource is fetched
+          # fresh from THIS deploy — never a mix of new build-info.json and
+          # stale HTML/hashes that happen to agree with each other.
+          CB="${GITHUB_SHA}-${RANDOM}"
+          FETCH="curl -LfsS -H Cache-Control:no-cache"
+
+          # Wait until production reports THIS commit (up to ~3 min).
+          echo "Waiting for production to report $GITHUB_SHA ..."
+          DEPLOYED=""
+          for i in $(seq 1 18); do
+            DEPLOYED=$($FETCH "$BASE/build-info.json?cb=$CB-$i" \
+              | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).commit||"")}catch(e){}})' || true)
+            if [ "$DEPLOYED" = "$GITHUB_SHA" ]; then echo "Production is on the expected commit."; break; fi
+            echo "  attempt $i: production reports '$DEPLOYED', retrying in 10s"
+            sleep 10
+          done
           if [ "$DEPLOYED" != "$GITHUB_SHA" ]; then
-            echo "MISMATCH: production serves commit $DEPLOYED but this run is $GITHUB_SHA"
-            echo "GitHub Pages caches for a few minutes; re-run this job if it only just deployed."
-            exit 1
+            echo "MISMATCH: production serves '$DEPLOYED', expected '$GITHUB_SHA'"; exit 1
           fi
-          echo "Production is on the expected commit."
+
+          # Download everything ONCE to /tmp with the same cache-buster, then
+          # analyse the files on disk (so each check sees the same bytes).
+          mkdir -p /tmp/prod
+          for rel in index.html assets/i18n.js examples.html guide.html assets/hashes.txt; do
+            mkdir -p "/tmp/prod/$(dirname "$rel")"
+            $FETCH "$BASE/$rel?cb=$CB" -o "/tmp/prod/$rel"
+          done
+
           # Content markers that must exist in the current build.
-          curl -fsS "$BASE/index.html" | grep -q 'id="capabilities"' || { echo "index.html missing #capabilities"; exit 1; }
-          curl -fsS "$BASE/assets/i18n.js" | grep -q 'gDirH' || { echo "i18n.js missing gDirH"; exit 1; }
-          curl -fsS "$BASE/examples.html" | grep -q 'application/ld+json' || { echo "examples.html missing JSON-LD"; exit 1; }
-          echo "Smoke test passed."
+          grep -q 'id="capabilities"' /tmp/prod/index.html || { echo "index.html missing #capabilities"; exit 1; }
+          grep -q 'gDirH' /tmp/prod/assets/i18n.js || { echo "i18n.js missing gDirH"; exit 1; }
+
+          # JSON-LD on production must actually PARSE (not merely be present).
+          echo "Parsing production JSON-LD ..."
+          node -e '
+            const fs=require("fs"); const s=fs.readFileSync("/tmp/prod/examples.html","utf8");
+            const blocks=[...s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+            if(!blocks.length){ console.error("no JSON-LD found"); process.exit(1); }
+            blocks.forEach((m,i)=>{ try{ JSON.parse(m[1]); }catch(e){ console.error("block "+(i+1)+" invalid: "+e.message); process.exit(1); } });
+            console.log("  "+blocks.length+" JSON-LD block(s) parsed OK");'
+
+          # The tests folder must return exactly 404 (repo-only, never served).
+          echo "Checking /engine/ is not served ..."
+          CODE=$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/engine/run_all.js?cb=$CB")
+          if [ "$CODE" != "404" ]; then echo "Expected /engine/run_all.js to return 404, got $CODE"; exit 1; fi
+          echo "  /engine/run_all.js -> 404 (not served, good)"
+
+          # 6. Verify served files against the published hashes — all from the
+          #    same cache-busted fetch above.
+          echo "Verifying served files against hashes.txt ..."
+          FAILED=0
+          for path in ./index.html ./assets/i18n.js ./examples.html ./guide.html; do
+            EXPECT=$(grep -E "  $path\$" /tmp/prod/assets/hashes.txt | awk '{print $1}')
+            if [ -z "$EXPECT" ]; then echo "  no hash listed for $path"; FAILED=1; continue; fi
+            ACTUAL=$(sha256sum "/tmp/prod/${path#./}" | awk '{print $1}')
+            if [ "$EXPECT" != "$ACTUAL" ]; then echo "  HASH MISMATCH $path (expected $EXPECT got $ACTUAL)"; FAILED=1; else echo "  ok $path"; fi
+          done
+          [ "$FAILED" = "0" ] || { echo "served files do not match hashes.txt"; exit 1; }
+
+          echo "Smoke test passed: production = $GITHUB_SHA, JSON-LD valid, engine/ 404, hashes match."
