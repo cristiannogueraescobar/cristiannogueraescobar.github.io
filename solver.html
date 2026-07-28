@@ -309,7 +309,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=27"></script>
+<script src="assets/i18n.js?v=28"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -1537,6 +1537,10 @@ function addShadowPrices_(reported, constraints, base, baseObjective) {
   let probes = 0;
   for (let i = 0; i < reported.length; i++) {
     if (!reported[i].binding) continue;
+    // Equality limits have no single "relax by one unit" direction (raising vs
+    // lowering the RHS are different questions), so we don't report a marginal
+    // value for them in the beta rather than describe it wrongly.
+    if (reported[i].relation === '=') continue;
     if (probes++ >= MAX_PROBES) break;
 
     const perturbed = constraints.map(function (c) {
@@ -1546,9 +1550,10 @@ function addShadowPrices_(reported, constraints, base, baseObjective) {
         rhs: c.rhs,
       };
     });
-    // Relax this limit by one unit in the direction that loosens it.
-    const loosen = reported[i].relation === '>=' ? -1 : 1;
-    perturbed[i].rhs += loosen;
+    // Relax this limit by one unit in the direction that loosens it: a '<=' cap
+    // goes up by one, a '>=' floor goes down by one.
+    const rhsChange = reported[i].relation === '>=' ? -1 : 1;
+    perturbed[i].rhs += rhsChange;
 
     const probe = optimise_({
       maximize: base.maximize,
@@ -1559,9 +1564,14 @@ function addShadowPrices_(reported, constraints, base, baseObjective) {
     });
     if (probe.status !== 'optimal') continue;
 
-    const gain = round_((probe.objective - baseObjective) * loosen);
-    // Report the marginal value of one more unit of headroom.
-    reported[i].shadowPrice = Math.abs(gain) < 1e-6 ? 0 : Math.abs(gain);
+    // Signed change in the objective from that one-unit relaxation. Positive
+    // means the objective went up, negative means down — the UI describes it
+    // neutrally ("improvement from relaxing by one unit") using the sign and
+    // the optimisation direction, so it reads correctly for min and max, and
+    // for '<=' and '>=' alike.
+    const delta = round_(probe.objective - baseObjective);
+    reported[i].objectiveDelta = Math.abs(delta) < 1e-6 ? 0 : delta;
+    reported[i].rhsChange = rhsChange;
   }
 }
 
@@ -2494,6 +2504,7 @@ function matchesAnyHint_(label, hints) {
         var minIn=row.querySelector('.vs-min');
         var maxIn=row.querySelector('.vs-max');
         typeSel.addEventListener('change',function(){
+          saveUndo();              // snapshot BEFORE the change, so undo reverts just this
           var s=settingsFor(cell); s.type=typeSel.value;
           if(s.type==='binary'){ s.min=0; s.max=1; }
           modelChanged(true);      // changing a domain invalidates any solve/result
@@ -2503,12 +2514,14 @@ function matchesAnyHint_(label, hints) {
           var s=settingsFor(cell);
           s.min=cleanBound(minIn.value);
           modelChanged(true);
+          clearUndo();   // don't let Ctrl+Z jump past this edit to an earlier change
           showVarError(cell);
         });
         if(maxIn) maxIn.addEventListener('input',function(){
           var s=settingsFor(cell);
           s.max=cleanBound(maxIn.value);
           modelChanged(true);
+          clearUndo();
           showVarError(cell);
         });
       })(rowEls[k]);
@@ -2782,8 +2795,8 @@ function matchesAnyHint_(label, hints) {
     (out.constraints||[]).forEach(function(c){
       var pct=c.limit?Math.min(100,Math.abs(c.used/c.limit)*100):0;
       h+='<div class="lim'+(c.satisfied?'':' over')+'"><div class="r"><span class="k">'+esc(c.label)+'</span><span class="v">'+fmt(c.used)+' / '+fmt(c.limit)+(c.binding?' '+t('atLimit'):'')+'</span></div><div class="bar"><i style="width:'+pct+'%"></i></div>';
-      if(c.binding&&typeof c.shadowPrice==='number'&&c.shadowPrice>0)
-        h+='<div class="shadow">'+t('oneMore')+fmt(c.shadowPrice)+'</div>';
+      if(c.binding&&typeof c.objectiveDelta==='number'&&c.objectiveDelta!==0)
+        h+='<div class="shadow">'+t('relaxImprove')+fmt(Math.abs(c.objectiveDelta))+'</div>';
       h+='</div>';
     });
     // Variable limits: show each configured variable's type and bounds, and
@@ -2797,7 +2810,8 @@ function matchesAnyHint_(label, hints) {
           (fmt(d.min)+' / '+(d.max==null?'&#8734;':fmt(d.max)));
         var mark=d.satisfied?'&#10003;':'&#10007;';
         var bind='';
-        if(d.upperBinding) bind=' '+t('atMax');
+        if(d.upperBinding && d.lowerBinding) bind=' '+t('atFixed');   // min = max
+        else if(d.upperBinding) bind=' '+t('atMax');
         else if(d.lowerBinding) bind=' '+t('atMin');
         h+='<div class="vlim'+(d.satisfied?'':' over')+'"><div class="r"><span class="k">'+esc(d.label)+
            ' <span class="vlim-type">'+esc(typeShort[d.type]||d.type)+'</span></span>'+
@@ -2815,26 +2829,34 @@ function matchesAnyHint_(label, hints) {
     // Defensive final verification: every constraint AND every variable domain
     // must be satisfied. A correct engine guarantees this, but the product's
     // promise is verifiability, so we check it explicitly rather than trust the
-    // status alone.
+    // status alone. A verification FAILURE takes precedence over every other
+    // message, so a numerical breach can never hide behind "feasible".
     var verificationPassed =
       (out.constraints||[]).every(function(c){ return c.satisfied; }) &&
       (out.variableDomains||[]).every(function(d){ return d.satisfied; });
-    if(caveat) h+='<div class="check bad">'+esc(caveat)+'</div>';
-    else if(!verificationPassed) h+='<div class="check bad">&#10007; '+t('verifyFailed')+'</div>';
+    if(!verificationPassed) h+='<div class="check bad">&#10007; '+t('verifyFailed')+'</div>';
+    else if(caveat) h+='<div class="check bad">'+esc(caveat)+'</div>';
     else h+='<div class="check">&#10003; '+t('solvedOk')+'</div>';
     if(/shadow/.test(h)) h+='<div class="shadow-note">'+t('shadowNote')+'</div>';
     h+='</div>';
     h+=solveDetailsHTML(out,model);
-    h+='<div class="exports"><span class="ex">'+t('exportLabel')+'</span>'+
-       '<button class="chip" id="exp-csv">CSV</button>'+
-       '<button class="chip" id="exp-xls">Excel</button>'+
-       '<button class="chip" id="exp-txt">Copy summary</button></div>';
+    // Exports are hidden when verification failed: we won't hand out a report
+    // that claims to be a solution when we couldn't verify it.
+    if(verificationPassed){
+      h+='<div class="exports"><span class="ex">'+t('exportLabel')+'</span>'+
+         '<button class="chip" id="exp-csv">CSV</button>'+
+         '<button class="chip" id="exp-xls">Excel</button>'+
+         '<button class="chip" id="exp-txt">'+t('exportCopySummary')+'</button></div>';
+    }
     res.innerHTML=h; res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
 
-    lastResult = out;  // remember for the export buttons
-    document.getElementById('exp-csv').addEventListener('click', exportCSV);
-    document.getElementById('exp-xls').addEventListener('click', exportExcel);
-    document.getElementById('exp-txt').addEventListener('click', copySummary);
+    // Only keep an exportable result when it passed verification.
+    lastResult = verificationPassed ? out : null;
+    if(verificationPassed){
+      document.getElementById('exp-csv').addEventListener('click', exportCSV);
+      document.getElementById('exp-xls').addEventListener('click', exportExcel);
+      document.getElementById('exp-txt').addEventListener('click', copySummary);
+    }
 
     // If this is a two-variable CONTINUOUS model WITHOUT custom bounds, draw
     // the feasible region. The corner-point method builds the region only from
@@ -2977,13 +2999,27 @@ function matchesAnyHint_(label, hints) {
     // a clean, labelled table anyone can open: the answer, then the limits
     var rows = [[t('exResult'), out.objectiveLabel || t('exObjective'), num(out.objective)]];
     rows.push([]);
+    // Solve metadata, so an exported report is auditable on its own: status,
+    // model type, whether optimality was proven, why it stopped, work done, and
+    // the final verification result.
+    var typeNames={continuous:t('sdContinuous'),integer:t('sdInteger'),binary:t('sdBinary'),mixed:t('sdMixed')};
+    var verifOk=(out.constraints||[]).every(function(c){return c.satisfied;}) &&
+                (out.variableDomains||[]).every(function(d){return d.satisfied;});
+    rows.push([t('sdStatus'), out.status||'']);
+    rows.push([t('sdModelType'), typeNames[out.modelType]||out.modelType||'']);
+    if(out.status==='optimal'||out.status==='feasible') rows.push([t('sdProven'), out.optimalityProven?t('sdYes'):t('sdNo')]);
+    if(out.stopReason) rows.push([t('sdStopped'), out.stopReason]);
+    if(typeof out.nodesExplored==='number'&&out.nodesExplored!=null) rows.push([t('sdNodes'), num(out.nodesExplored)]);
+    if(typeof out.elapsedMs==='number') rows.push([t('sdTime'), out.elapsedMs+' ms']);
+    rows.push([t('exVerification'), verifOk?t('exVerifyPass'):t('exVerifyFail')]);
+    rows.push([]);
     rows.push([t('exDecision'), t('exFrom'), t('exTo')]);
     (out.labels||[]).forEach(function(lb,i){ rows.push([lb, num(out.previous[i]), num(out.values[i])]); });
     rows.push([]);
     rows.push([t('exLimit'), t('exUsed'), t('exCap'), t('exAtLimit'), t('exOneMore')]);
     (out.constraints||[]).forEach(function(c){
       rows.push([c.label, num(c.used), num(c.limit), c.binding?t('exYes'):t('exNo'),
-                 (c.binding && c.shadowPrice>0) ? num(c.shadowPrice) : '']);
+                 (c.binding && typeof c.objectiveDelta==='number' && c.objectiveDelta!==0) ? num(Math.abs(c.objectiveDelta)) : '']);
     });
     // Variable limits: type and bounds per configured variable, so an exported
     // report documents that a variable was e.g. binary or capped at 10.
@@ -2991,8 +3027,8 @@ function matchesAnyHint_(label, hints) {
       rows.push([]);
       rows.push([t('exVariable'), t('varType'), t('varMin'), t('varMax'), t('exResult')]);
       out.variableDomains.forEach(function(d){
-        var typeName={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary')}[d.type]||d.type;
-        rows.push([d.label, typeName, num(d.min), (d.max==null?'':num(d.max)), num(d.value)]);
+        var tn={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary')}[d.type]||d.type;
+        rows.push([d.label, tn, num(d.min), (d.max==null?'':num(d.max)), num(d.value)]);
       });
     }
     return rows;
@@ -3032,25 +3068,25 @@ function matchesAnyHint_(label, hints) {
     var xml = '<?xml version="1.0"?>'+
       '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" '+
       'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">'+
-      '<Worksheet ss:Name="Plumline solution"><Table>'+rows+'</Table></Worksheet></Workbook>';
+      '<Worksheet ss:Name="'+t('excelSheetName')+'"><Table>'+rows+'</Table></Worksheet></Workbook>';
     download('plumline-solution.xls', 'application/vnd.ms-excel', xml);
   }
 
   function copySummary(){
     if(!lastResult) return;
     var out = lastResult, lines = [];
-    lines.push((out.objectiveLabel||'Result') + ': ' + fmt(out.objective));
+    lines.push((out.objectiveLabel||t('exResult')) + ': ' + fmt(out.objective));
     (out.labels||[]).forEach(function(lb,i){ lines.push('  ' + lb + ': ' + fmt(out.values[i])); });
     (out.constraints||[]).forEach(function(c){
-      var s = '  ' + c.label + ' ' + fmt(c.used) + '/' + fmt(c.limit) + (c.binding?' (at limit':' (');
-      if(c.binding && c.shadowPrice>0) s += ', one more worth ' + fmt(c.shadowPrice);
+      var s = '  ' + c.label + ' ' + fmt(c.used) + '/' + fmt(c.limit) + (c.binding?(' ('+t('summaryAtLimit')):' (');
+      if(c.binding && typeof c.objectiveDelta==='number' && c.objectiveDelta!==0) s += ', '+t('summaryImpact')+' ' + fmt(Math.abs(c.objectiveDelta));
       lines.push(s + ')');
     });
     if(out.variableDomains && out.variableDomains.length){
       lines.push(t('varLimitsTitle')+':');
       out.variableDomains.forEach(function(d){
         var typeName={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary')}[d.type]||d.type;
-        var rng=(d.type==='binary')?'0-1':(fmt(d.min)+'-'+(d.max==null?'inf':fmt(d.max)));
+        var rng=(d.type==='binary')?'0-1':(fmt(d.min)+'-'+(d.max==null?t('summaryNoLimit'):fmt(d.max)));
         lines.push('  ' + d.label + ' (' + typeName + ', ' + rng + '): ' + fmt(d.value));
       });
     }
@@ -3123,7 +3159,7 @@ function matchesAnyHint_(label, hints) {
     var p=trySolve(EXAMPLES.production,false);
     line(p.status==='optimal'&&Math.round(p.objective)===1760,'Production example solves','got '+fmt(p.objective)+', expected 1,760');
     // 2: shadow price present
-    var hasShadow=(p.constraints||[]).some(function(c){return c.binding&&c.shadowPrice>0;});
+    var hasShadow=(p.constraints||[]).some(function(c){return c.binding&&typeof c.objectiveDelta==='number'&&c.objectiveDelta!==0;});
     line(hasShadow,'Estimated one-unit impact (shadow price) is computed', hasShadow?'a binding limit shows its value':'none found');
     // 3: blend exact
     var b=trySolve(EXAMPLES.blend,false);

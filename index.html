@@ -19,7 +19,7 @@
 <meta name="twitter:image" content="https://plumline.online/assets/og-image.png">
 <link rel="canonical" href="https://plumline.online/">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Plumline","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://plumline.online/","description":"A free online linear and integer programming solver that finds the best way to split limited resources and verifies the result against your own numbers. Build a model in a spreadsheet-style grid or paste one from Excel or Google Sheets.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","es","pt","de","fr"],"featureList":["Linear programming","Integer programming","Paste from Excel or Google Sheets","CSV import and export","Result verification against your formulas","Estimated one-unit impact for binding constraints"]}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Plumline","applicationCategory":"BusinessApplication","operatingSystem":"Web","url":"https://plumline.online/","description":"A free online linear and integer programming solver that finds the best way to split limited resources and verifies the result against your own numbers. Build a model in a spreadsheet-style grid or paste one from Excel or Google Sheets.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","es","pt","de","fr"],"featureList":["Linear programming","Integer programming","Paste from Excel or Google Sheets","CSV import and export","Result verification against your formulas","Estimated one-unit impact for eligible binding constraints in continuous models"]}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need to install anything?","acceptedAnswer":{"@type":"Answer","text":"For the online solver, no. It runs in your browser at plumline.online. A Google Sheets add-on is on the way and will be a free, one-time install from the Workspace Marketplace once it's approved."}},{"@type":"Question","name":"How do I write the model?","acceptedAnswer":{"@type":"Answer","text":"With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax."}},{"@type":"Question","name":"What kinds of problems does it solve?","acceptedAnswer":{"@type":"Answer","text":"Linear and integer problems: production mix, purchasing, blending, staffing, transport, budget splits. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one."}},{"@type":"Question","name":"Are my numbers safe?","acceptedAnswer":{"@type":"Answer","text":"Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google's infrastructure under your own account. There is no Plumline account to create and no tracking."}},{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"The online solver is free. The Google Sheets add-on is planned to be free once it becomes available."}}]}
@@ -126,7 +126,7 @@
       <div class="card">
         <div class="cardnum">03</div>
         <h3 data-i18n="f3H">It shows what one more is worth</h3>
-        <p class="muted" style="font-size:14.5px" data-i18n="f3P">For every limit that holds you back, its estimated one-unit impact, often called a shadow price: how much more you'd gain from one more unit, while the model stays the same. A sensitivity-style insight, explained in plain language.</p>
+        <p class="muted" style="font-size:14.5px" data-i18n="f3P">For eligible binding limits in continuous models, the estimated improvement from relaxing the limit by one unit, often called a shadow price. A sensitivity-style insight, explained in plain language.</p>
       </div>
       <div class="card">
         <div class="cardnum">04</div>
@@ -245,7 +245,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=27"></script>
+<script src="assets/i18n.js?v=28"></script>
 <script>
   var LANG = Plumline.i18n.init('home');
   // The add-on is not published yet, so its CTAs open a pre-filled email asking
