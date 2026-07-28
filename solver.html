@@ -90,6 +90,27 @@ table.grid input:focus{background:var(--brass-tint)}
 
 .sense-hint{font-size:12px;color:var(--faint);font-family:var(--mono)}
 .sense-hint.pending{color:var(--brass)}
+.chip-more{border-style:dashed}
+.drawer-backdrop{position:fixed;inset:0;background:rgba(20,30,25,.45);z-index:40}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--paper);
+  border-left:1px solid var(--line);box-shadow:-8px 0 30px rgba(0,0,0,.15);z-index:41;
+  display:flex;flex-direction:column;overflow:hidden}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
+.drawer-close{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink)}
+.drawer-body{padding:12px 18px 24px;overflow-y:auto}
+.drawer-section{margin-top:14px}
+.drawer-section h4{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.ex-card{width:100%;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--card,#fff);
+  padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,transform .05s}
+.ex-card:hover{border-color:var(--brass)}
+.ex-card:active{transform:translateY(1px)}
+.ex-card .ex-name{font-weight:600;font-size:14.5px}
+.ex-card .ex-desc{font-size:13px;color:var(--faint);margin:2px 0 6px}
+.ex-card .ex-tags{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.03em}
+@media (max-width:560px){
+  .drawer{width:100%;top:auto;bottom:0;height:78vh;border-left:none;border-top:1px solid var(--line);
+    border-radius:14px 14px 0 0}
+}
 .controls-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px}
 .grid-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .var-settings{margin-top:16px;border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--panel)}
@@ -234,11 +255,21 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <div class="bar">
     <span class="ex" data-i18n="startFrom">Start from an example</span>
     <button class="chip" data-ex="production" data-i18n="exProduction">Production plan</button>
-    <button class="chip" data-ex="blend" data-i18n="exBlend">Cheapest blend</button>
-    <button class="chip" data-ex="budget" data-i18n="exBudget">Budget split</button>
-    <button class="chip" data-ex="workshop" data-i18n="exWorkshop">Workshop (shows a chart)</button>
+    <button class="chip" data-ex="workforce" data-i18n="exWorkforce">Workforce scheduling</button>
+    <button class="chip" data-ex="project" data-i18n="exProject">Project selection</button>
+    <button class="chip chip-more" id="openExamples" data-i18n="moreExamples">More examples</button>
     <button class="chip" data-ex="blank" data-i18n="exBlank">Blank grid</button>
   </div>
+
+  <!-- Examples drawer: grouped catalog, opened by the "More examples" button. -->
+  <div class="drawer-backdrop" id="exDrawerBackdrop" hidden></div>
+  <aside class="drawer" id="exDrawer" hidden aria-label="Examples">
+    <div class="drawer-head">
+      <strong data-i18n="examplesTitle">Examples</strong>
+      <button class="drawer-close" id="closeExamples" aria-label="Close">&times;</button>
+    </div>
+    <div class="drawer-body" id="exDrawerBody"></div>
+  </aside>
 
   <div class="workspace">
     <p class="paste-tip" data-i18n="pasteTip">Paste from Excel or Sheets, or start typing below.</p>
@@ -318,7 +349,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=32"></script>
+<script src="assets/i18n.js?v=33"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2170,74 +2201,192 @@ function matchesAnyHint_(label, hints) {
   var data=[];            // data[r][c] = string (formula or value)
   function blank(){ data=[]; for(var r=0;r<ROWS;r++){var row=[];for(var c=0;c<COLS;c++)row.push('');data.push(row);} }
 
+  // Each example carries its grid, objective direction, optional per-variable
+  // domains, and an expected result. The expected values were obtained by
+  // solving each model with this engine and checking them by hand, so an
+  // example that ever stops matching its expected result is a real regression.
   var EXAMPLES={
-    production:[
-      ['Product','Units','Profit','Contribution','Hours',''],
-      ['A','0','30','=B2*C2','2',''],
-      ['B','0','20','=B3*C3','1',''],
-      ['C','0','48','=B4*C4','3',''],
-      ['','','','','',''],
-      ['Total profit','','','=SUM(D2:D4)','',''],
-      ['Total hours','','','=SUMPRODUCT(B2:B4,E2:E4)','<=','100'],
-      ['Units of B','','','=B3','<=','40']
-    ],
-    blend:[
-      ['Ingredient','Kg','Cost/kg','Spend','Protein%','Fibre%'],
-      ['Barley','0','0.30','=B2*C2','12','5'],
-      ['Soybean','0','0.60','=B3*C3','44','7'],
-      ['Maize','0','0.25','=B4*C4','9','2'],
-      ['','','','','',''],
-      ['Total cost','','','=SUM(D2:D4)','',''],
-      ['Total kg','','','=SUM(B2:B4)','<=','100'],
-      ['Protein','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','1800'],
-      ['Fibre','','','=SUMPRODUCT(B2:B4,F2:F4)','>=','350']
-    ],
-    workshop:[
-      ['Item','Make','Profit','Total','Wood','Labour'],
-      ['Chairs','0','30','=B2*C2','2','3'],
-      ['Tables','0','40','=B3*C3','4','2'],
-      ['','','','','',''],
-      ['Total profit','','','=SUM(D2:D3)','',''],
-      ['Wood used','','','=SUMPRODUCT(B2:B3,E2:E3)','<=','80'],
-      ['Labour used','','','=SUMPRODUCT(B2:B3,F2:F3)','<=','60']
-    ],
-    budget:[
-      ['Channel','Spend','Return/£','Return','',''],
-      ['Search','0','3.2','=B2*C2','',''],
-      ['Social','0','2.1','=B3*C3','',''],
-      ['Email','0','5.0','=B4*C4','',''],
-      ['','','','','',''],
-      ['Total return','','','=SUM(D2:D4)','',''],
-      ['Total budget','','','=SUM(B2:B4)','<=','8000'],
-      ['Email spend','','','=B4','<=','1500']
-    ]
+    production:{ category:'start', sense:'max',
+      grid:[
+        ['Product','Units','Profit','Contribution','Hours',''],
+        ['A','0','30','=B2*C2','2',''],
+        ['B','0','20','=B3*C3','1',''],
+        ['C','0','48','=B4*C4','3',''],
+        ['','','','','',''],
+        ['Total profit','','','=SUM(D2:D4)','',''],
+        ['Total hours','','','=SUMPRODUCT(B2:B4,E2:E4)','<=','100'],
+        ['Units of B','','','=B3','<=','40']],
+      expected:{ status:'optimal', modelType:'continuous', objective:1760 } },
+    workshop:{ category:'start', sense:'max',
+      grid:[
+        ['Item','Make','Profit','Total','Wood','Labour'],
+        ['Chairs','0','30','=B2*C2','2','3'],
+        ['Tables','0','40','=B3*C3','4','2'],
+        ['','','','','',''],
+        ['Total profit','','','=SUM(D2:D3)','',''],
+        ['Wood used','','','=SUMPRODUCT(B2:B3,E2:E3)','<=','80'],
+        ['Labour used','','','=SUMPRODUCT(B2:B3,F2:F3)','<=','60']],
+      expected:{ status:'optimal', modelType:'continuous', objective:900 } },
+    blend:{ category:'start', sense:'min',
+      grid:[
+        ['Ingredient','Kg','Cost/kg','Spend','Protein%','Fibre%'],
+        ['Barley','0','0.30','=B2*C2','12','5'],
+        ['Soybean','0','0.60','=B3*C3','44','7'],
+        ['Maize','0','0.25','=B4*C4','9','2'],
+        ['','','','','',''],
+        ['Total cost','','','=SUM(D2:D4)','',''],
+        ['Total kg','','','=SUM(B2:B4)','<=','100'],
+        ['Protein','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','1800'],
+        ['Fibre','','','=SUMPRODUCT(B2:B4,F2:F4)','>=','350']],
+      expected:{ status:'optimal', modelType:'continuous' } },
+    marketing:{ category:'business', sense:'max',
+      grid:[
+        ['Channel','Spend','Return/unit','Return','',''],
+        ['Search','0','3.2','=B2*C2','',''],
+        ['Social','0','2.1','=B3*C3','',''],
+        ['Email','0','5.0','=B4*C4','',''],
+        ['','','','','',''],
+        ['Total return','','','=SUM(D2:D4)','',''],
+        ['Total budget','','','=SUM(B2:B4)','<=','6000']],
+      domains:{ B2:{type:'continuous',min:0,max:4000}, B3:{type:'continuous',min:500,max:null}, B4:{type:'continuous',min:0,max:1500} },
+      openVarSettings:true,
+      expected:{ status:'optimal', modelType:'continuous', objective:21350 } },
+    workforce:{ category:'business', sense:'min', whole:true,
+      grid:[
+        ['Start day','Staff','','',''],
+        ['Mon','0','','',''],
+        ['Tue','0','','',''],
+        ['Wed','0','','',''],
+        ['Thu','0','','',''],
+        ['Fri','0','','',''],
+        ['Sat','0','','',''],
+        ['Sun','0','','',''],
+        ['','','','',''],
+        ['Total staff','','=SUM(B2:B8)','',''],
+        ['Mon cover','','=B2+B5+B6+B7+B8','>=','17'],
+        ['Tue cover','','=B2+B3+B6+B7+B8','>=','13'],
+        ['Wed cover','','=B2+B3+B4+B7+B8','>=','15'],
+        ['Thu cover','','=B2+B3+B4+B5+B8','>=','19'],
+        ['Fri cover','','=B2+B3+B4+B5+B6','>=','14'],
+        ['Sat cover','','=B3+B4+B5+B6+B7','>=','16'],
+        ['Sun cover','','=B4+B5+B6+B7+B8','>=','11']],
+      expected:{ status:'optimal', modelType:'integer', objective:23 } },
+    shipping:{ category:'business', sense:'min', whole:true,
+      grid:[
+        ['Route','Units','Cost/unit','Cost','',''],
+        ['F1 to A','0','4','=B2*C2','',''],
+        ['F1 to B','0','6','=B3*C3','',''],
+        ['F1 to C','0','8','=B4*C4','',''],
+        ['F2 to A','0','5','=B5*C5','',''],
+        ['F2 to B','0','3','=B6*C6','',''],
+        ['F2 to C','0','7','=B7*C7','',''],
+        ['','','','','',''],
+        ['Total cost','','','=SUM(D2:D7)','',''],
+        ['F1 supply','','','=B2+B3+B4','<=','50'],
+        ['F2 supply','','','=B5+B6+B7','<=','50'],
+        ['A demand','','','=B2+B5','>=','30'],
+        ['B demand','','','=B3+B6','>=','25'],
+        ['C demand','','','=B4+B7','>=','35']],
+      expected:{ status:'optimal', modelType:'integer', objective:450 } },
+    project:{ category:'binary', sense:'max',
+      grid:[
+        ['Project','Fund','Value','Selected','Cost','Hours'],
+        ['Alpha','0','40','=B2*C2','30','20'],
+        ['Beta','0','55','=B3*C3','45','35'],
+        ['Gamma','0','30','=B4*C4','25','15'],
+        ['Delta','0','50','=B5*C5','40','30'],
+        ['','','','','',''],
+        ['Total value','','','=SUM(D2:D5)','',''],
+        ['Budget used','','','=SUMPRODUCT(B2:B5,E2:E5)','<=','100'],
+        ['Hours used','','','=SUMPRODUCT(B2:B5,F2:F5)','<=','70']],
+      domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'} },
+      openVarSettings:true,
+      expected:{ status:'optimal', modelType:'binary', objective:125 } },
+    delivery:{ category:'binary', sense:'max',
+      grid:[
+        ['Order','Load','Profit','Selected','Weight','Volume'],
+        ['O1','0','60','=B2*C2','10','4'],
+        ['O2','0','100','=B3*C3','20','5'],
+        ['O3','0','120','=B4*C4','30','8'],
+        ['O4','0','80','=B5*C5','15','6'],
+        ['O5','0','40','=B6*C6','8','3'],
+        ['','','','','',''],
+        ['Total profit','','','=SUM(D2:D6)','',''],
+        ['Weight used','','','=SUMPRODUCT(B2:B6,E2:E6)','<=','50'],
+        ['Volume used','','','=SUMPRODUCT(B2:B6,F2:F6)','<=','16']],
+      domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'}, B6:{type:'binary'} },
+      openVarSettings:true,
+      expected:{ status:'optimal', modelType:'binary', objective:240 } },
+    supplier:{ category:'binary', sense:'min',
+      grid:[
+        ['Decision','Value','Coeff','Term','',''],
+        ['Use S1','0','200','=B2*C2','',''],
+        ['Use S2','0','150','=B3*C3','',''],
+        ['Use S3','0','300','=B4*C4','',''],
+        ['Qty S1','0','4','=B5*C5','',''],
+        ['Qty S2','0','6','=B6*C6','',''],
+        ['Qty S3','0','3','=B7*C7','',''],
+        ['','','','','',''],
+        ['Total cost','','','=SUM(D2:D7)','',''],
+        ['Demand','','','=B5+B6+B7','>=','100'],
+        ['S1 link','','','=B5-60*B2','<=','0'],
+        ['S2 link','','','=B6-60*B3','<=','0'],
+        ['S3 link','','','=B7-60*B4','<=','0']],
+      domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'},
+                B5:{type:'integer',min:0,max:60}, B6:{type:'integer',min:0,max:60}, B7:{type:'integer',min:0,max:60} },
+      openVarSettings:true,
+      expected:{ status:'optimal', modelType:'mixed', objective:830 } }
   };
+  // The order and grouping used by the example picker.
+  var EXAMPLE_ORDER=[
+    { key:'start', items:['production','workshop','blend'] },
+    { key:'business', items:['marketing','workforce','shipping'] },
+    { key:'binary', items:['project','delivery','supplier'] }
+  ];
 
   function loadExample(name){
     modelChanged();
     resetVarPanel();   // full model replacement: old variable settings are void
     clearUndo();   // loading/clearing replaces the whole grid; old undo is void
-    if(name!=='blank'){
-      var ex=EXAMPLES[name];
+    var ex=EXAMPLES[name];
+    if(name!=='blank' && ex){
+      var grid=ex.grid;
       // Grow the grid to fit the example (never shrink below the defaults).
-      var needRows=Math.max(12, ex.length);
-      var needCols=Math.max(6, ex.reduce(function(m,row){return Math.max(m,row.length);},0));
+      var needRows=Math.max(12, grid.length);
+      var needCols=Math.max(6, grid.reduce(function(m,row){return Math.max(m,row.length);},0));
       ROWS=Math.min(MAX_ROWS, needRows);
       COLS=Math.min(MAX_COLS, needCols);
       blank();
-      for(var r=0;r<ex.length;r++)for(var c=0;c<ex[r].length;c++)data[r][c]=String(ex[r][c]);
+      for(var r=0;r<grid.length;r++)for(var c=0;c<grid[r].length;c++)data[r][c]=String(grid[r][c]);
     } else {
       ROWS=12; COLS=6; blank();
     }
     render();
     document.getElementById('result').classList.remove('show');
-    // Examples are known-good models: pre-confirm their detected direction so
-    // the user isn't asked to confirm a curated example. Manual models still
-    // require confirmation.
-    if(name!=='blank'){
-      var sig=objectiveSignature();
+    if(name!=='blank' && ex){
+      // Whole-numbers toggle for pure-integer examples with no per-var domains.
+      var wholeBox=document.getElementById('whole'); if(wholeBox) wholeBox.checked=!!ex.whole;
+      // Confirm the objective direction for this curated model, from the
+      // example's own sense (not a re-detection), then remember the signature.
       var sel=document.getElementById('senseSel');
-      if(sig && sel){ sel.value=sig.detected; confirmedObjectiveSig=sig; }
+      if(sel){ sel.value=ex.sense||'auto'; }
+      var sig=objectiveSignature();
+      if(sig){ if(sel && (ex.sense==='max'||ex.sense==='min')) sig.detected=ex.sense; confirmedObjectiveSig=sig; }
+      // Load per-variable domains into the panel, if the example defines them,
+      // and open Variable settings so the feature is visible.
+      if(ex.domains){
+        detectForPanel();                     // populate detectedVars for the panel
+        Object.keys(ex.domains).forEach(function(cell){
+          var d=ex.domains[cell];
+          var s=settingsFor(cell);
+          s.type=d.type; s.min=(d.min==null?null:d.min); s.max=(d.max==null?null:d.max);
+          if(d.type==='binary'){ s.min=0; s.max=1; }
+        });
+        panelStale=false;
+        renderVarPanel();
+        var panel=document.getElementById('varSettings');
+        if(panel && ex.openVarSettings){ panel.style.display=''; panel.open=true; }
+      }
     }
     updateSenseHint();
   }
@@ -3407,6 +3556,46 @@ function matchesAnyHint_(label, hints) {
 
   var chips=document.querySelectorAll('[data-ex]');
   for(var i=0;i<chips.length;i++)chips[i].addEventListener('click',function(e){loadExample(e.target.getAttribute('data-ex'));});
+
+  // Examples drawer: build the grouped catalog, wire open/close.
+  function renderExamplesDrawer(){
+    var body=document.getElementById('exDrawerBody'); if(!body) return;
+    var typeTag={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary'),mixed:t('sdMixed')};
+    var html='';
+    EXAMPLE_ORDER.forEach(function(group){
+      html+='<div class="drawer-section"><h4>'+esc(t('exCat_'+group.key))+'</h4>';
+      group.items.forEach(function(key){
+        var ex=EXAMPLES[key];
+        var mt=(ex.expected&&ex.expected.modelType)||'continuous';
+        var nvars=0; // count decision rows (best-effort from grid: rows with a leading label and a 0)
+        var tags=[ (typeTag[mt]||mt).toUpperCase(),
+                   (ex.sense==='min'?t('senseMin'):t('senseMax')).toUpperCase() ];
+        html+='<button class="ex-card" data-ex="'+key+'">'+
+                '<div class="ex-name">'+esc(t('exName_'+key))+'</div>'+
+                '<div class="ex-desc">'+esc(t('exDesc_'+key))+'</div>'+
+                '<div class="ex-tags">'+tags.join(' &middot; ')+'</div>'+
+              '</button>';
+      });
+      html+='</div>';
+    });
+    body.innerHTML=html;
+    body.querySelectorAll('[data-ex]').forEach(function(btn){
+      btn.addEventListener('click',function(){ loadExample(btn.getAttribute('data-ex')); closeDrawer(); });
+    });
+  }
+  function openDrawer(){
+    renderExamplesDrawer();
+    document.getElementById('exDrawer').hidden=false;
+    document.getElementById('exDrawerBackdrop').hidden=false;
+  }
+  function closeDrawer(){
+    document.getElementById('exDrawer').hidden=true;
+    document.getElementById('exDrawerBackdrop').hidden=true;
+  }
+  var openEx=document.getElementById('openExamples'); if(openEx) openEx.addEventListener('click',openDrawer);
+  var closeEx=document.getElementById('closeExamples'); if(closeEx) closeEx.addEventListener('click',closeDrawer);
+  var backdrop=document.getElementById('exDrawerBackdrop'); if(backdrop) backdrop.addEventListener('click',closeDrawer);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
   document.getElementById('solve').addEventListener('click',solve);
   document.getElementById('clear').addEventListener('click',function(){loadExample('blank');});
   document.getElementById('addRow').addEventListener('click',addRow);
@@ -3509,7 +3698,7 @@ function matchesAnyHint_(label, hints) {
     updateSenseHint();                        // hint text follows the language
   });
 
-  var _ex=(location.search.match(/[?&]ex=(\w+)/)||[])[1];
+  var _ex=(function(){ try{ return new URLSearchParams(location.search).get('ex'); }catch(e){ return null; } })();
   loadExample(EXAMPLES[_ex] ? _ex : 'production');
 })();
 </script>
