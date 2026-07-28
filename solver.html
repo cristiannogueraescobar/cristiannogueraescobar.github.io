@@ -236,6 +236,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <nav>
     <a href="index.html#addon" data-i18n="navAddon">The add-on</a>
     <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
+    <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
     <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
     <a href="#how" data-i18n="navHow">How to use</a>
     <select id="lang" aria-label="Language">
@@ -352,7 +353,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=35"></script>
+<script src="assets/i18n.js?v=36"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -3605,11 +3606,26 @@ function matchesAnyHint_(label, hints) {
       btn.addEventListener('click',function(){ loadExample(btn.getAttribute('data-ex')); closeDrawer(); });
     });
   }
+  // Elements to make inert (removed from the a11y tree and non-interactive)
+  // while the drawer is open: everything at the top level except the drawer
+  // and its backdrop.
+  function backgroundEls(){
+    var out=[];
+    var kids=document.body.children;
+    for(var i=0;i<kids.length;i++){
+      var el=kids[i];
+      if(el.id==='exDrawer'||el.id==='exDrawerBackdrop') continue;
+      if(el.tagName==='SCRIPT') continue;
+      out.push(el);
+    }
+    return out;
+  }
   function openDrawer(){
     renderExamplesDrawer();
     document.getElementById('exDrawer').hidden=false;
     document.getElementById('exDrawerBackdrop').hidden=false;
     document.body.style.overflow='hidden';                    // lock background scroll
+    backgroundEls().forEach(function(el){ el.inert=true; });   // remove background from a11y tree
     var openBtn=document.getElementById('openExamples'); if(openBtn) openBtn.setAttribute('aria-expanded','true');
     var closeBtn=document.getElementById('closeExamples');
     if(closeBtn){ closeBtn.setAttribute('aria-label', t('closeLabel')); closeBtn.focus(); }  // move focus in
@@ -3620,6 +3636,7 @@ function matchesAnyHint_(label, hints) {
     drawer.hidden=true;
     document.getElementById('exDrawerBackdrop').hidden=true;
     document.body.style.overflow='';
+    backgroundEls().forEach(function(el){ el.inert=false; });  // restore background
     var openBtn=document.getElementById('openExamples');
     if(openBtn){ openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }  // return focus
   }
