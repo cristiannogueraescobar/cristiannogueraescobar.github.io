@@ -2035,6 +2035,14 @@
       var val = tables[0][key] || tables[1][key] || en[0][key] || en[1][key];
       if (val) nodes[i].innerHTML = val;
     }
+    // Also translate ARIA labels tagged with data-i18n-aria="key", so things
+    // like a drawer Close button follow the language without extra JS.
+    var aria = document.querySelectorAll('[data-i18n-aria]');
+    for (var k = 0; k < aria.length; k++) {
+      var akey = aria[k].getAttribute('data-i18n-aria');
+      var aval = tables[0][akey] || tables[1][akey] || en[0][akey] || en[1][akey];
+      if (aval) aria[k].setAttribute('aria-label', aval);
+    }
   }
 
   // public: Plumline.i18n.init(page) wires everything, incl. the <select id="lang">
@@ -2061,11 +2069,11 @@
           apply(sel.value, page);
           remember(sel.value);
           // Preserve any other query parameters (e.g. ?ex=project-selection)
-          // instead of overwriting the whole query with just ?lang=.
+          // and the hash (e.g. #how) instead of overwriting the whole URL.
           try {
             var params = new URLSearchParams(location.search);
             params.set('lang', sel.value);
-            history.replaceState(null, '', '?' + params.toString());
+            history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash);
           } catch (e) {}
         });
       }

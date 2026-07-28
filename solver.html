@@ -95,6 +95,9 @@ table.grid input:focus{background:var(--brass-tint)}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--paper);
   border-left:1px solid var(--line);box-shadow:-8px 0 30px rgba(0,0,0,.15);z-index:41;
   display:flex;flex-direction:column;overflow:hidden}
+/* The [hidden] attribute must win over display:flex/block above, or the drawer
+   and backdrop render on page load instead of staying closed. */
+.drawer[hidden],.drawer-backdrop[hidden]{display:none}
 .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
 .drawer-close{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink)}
 .drawer-body{padding:12px 18px 24px;overflow-y:auto}
@@ -349,7 +352,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=34"></script>
+<script src="assets/i18n.js?v=35"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -3573,7 +3576,7 @@ function matchesAnyHint_(label, hints) {
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
   var chips=document.querySelectorAll('[data-ex]');
-  for(var i=0;i<chips.length;i++)chips[i].addEventListener('click',function(e){loadExample(e.target.getAttribute('data-ex'));});
+  for(var i=0;i<chips.length;i++)chips[i].addEventListener('click',function(e){loadExample(e.currentTarget.getAttribute('data-ex'));});
 
   // Examples drawer: build the grouped catalog, wire open/close.
   function renderExamplesDrawer(){
@@ -3758,9 +3761,12 @@ function matchesAnyHint_(label, hints) {
     setDetectLabel(panelStale);              // button label follows the language
     if(detectedVars.length) renderVarPanel(); // re-render dynamic panel in new language
     updateSenseHint();                        // hint text follows the language
-    // If the examples drawer is open, re-render its cards in the new language.
+    // If the examples drawer is open, re-render its cards and Close label.
     var exd=document.getElementById('exDrawer');
-    if(exd && !exd.hidden && typeof renderExamplesDrawer==='function') renderExamplesDrawer();
+    if(exd && !exd.hidden){
+      if(typeof renderExamplesDrawer==='function') renderExamplesDrawer();
+      var cb=document.getElementById('closeExamples'); if(cb) cb.setAttribute('aria-label', t('closeLabel'));
+    }
   });
 
   var _ex=(function(){ try{ return new URLSearchParams(location.search).get('ex'); }catch(e){ return null; } })();
