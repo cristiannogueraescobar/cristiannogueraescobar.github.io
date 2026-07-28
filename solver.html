@@ -395,13 +395,26 @@ function optimise_(model) {
   // Defensive final feasibility check against the FULL applied model (bounds
   // folded in). This covers every variable's non-negativity — including plain
   // continuous ones with no receipt entry — plus all constraints.
-  if ((solution.status === 'optimal' || solution.status === 'feasible') &&
-      !feasibleAt_(model, model.constraints || [], solution.values || [])) {
-    return { status: 'numerical_failure', stopReason: 'numerical_failure',
-             optimalityProven: false, nodesExplored: solution.nodesExplored || 0,
-             objective: null, values: null };
+  if (solution.status === 'optimal' || solution.status === 'feasible') {
+    if (!feasibleAt_(model, model.constraints || [], solution.values || [])) {
+      return numericalFailure_(solution.nodesExplored);
+    }
+    for (let i = 0; i < wanted.length; i++) {
+      const v = solution.values[wanted[i]];
+      if (Math.abs(v - Math.round(v)) > 1e-6) return numericalFailure_(solution.nodesExplored);
+    }
+    const recomputed = dotProduct_(model.objective, solution.values) + (model.constant || 0);
+    if (!isFinite(recomputed) || Math.abs(recomputed - solution.objective) > 1e-6) {
+      return numericalFailure_(solution.nodesExplored);
+    }
   }
   return solution;
+}
+
+function numericalFailure_(nodes) {
+  return { status: 'numerical_failure', stopReason: 'numerical_failure',
+           optimalityProven: false, nodesExplored: nodes || 0,
+           objective: null, values: null };
 }
 
 // Every objective coefficient, constant, constraint coefficient, rhs, and bound
@@ -564,12 +577,16 @@ function dotProduct_(coeffs, values) {
 }
 function feasibleAt_(model, constraints, values) {
   const TOL = 1e-6;
+  if (!Array.isArray(values)) return false;
+  if (model && model.objective && values.length !== model.objective.length) return false;
   for (let i = 0; i < values.length; i++) {
-    if (values[i] < -TOL) return false;   // variables are non-negative
+    if (!isFinite(values[i])) return false;   // NaN / Infinity is never feasible
+    if (values[i] < -TOL) return false;        // variables are non-negative
   }
   for (let k = 0; k < constraints.length; k++) {
     const c = constraints[k];
     const lhs = dotProduct_(c.coefficients, values);
+    if (!isFinite(lhs)) return false;   // Infinity - Infinity = NaN would pass by accident
     if (c.relation === '<=' && lhs > c.rhs + TOL) return false;
     if (c.relation === '>=' && lhs < c.rhs - TOL) return false;
     if (c.relation === '=' && Math.abs(lhs - c.rhs) > TOL) return false;
@@ -630,7 +647,13 @@ function solveIntegerProgram_(model, wanted) {
         return;
       }
       const snappedObjective = round_(dotProduct_(model.objective, snapped) + (model.constant || 0));
-      best = { objective: snappedObjective, values: snapped };
+      // Only accept if the EXACT-integer objective actually improves on the
+      // incumbent. Rounding within tolerance can make the snapped point slightly
+      // worse, so re-compare here or we could replace a better solution.
+      const improves = !best || (model.maximize
+        ? snappedObjective > best.objective + ENGINE.EPSILON
+        : snappedObjective < best.objective - ENGINE.EPSILON);
+      if (improves) best = { objective: snappedObjective, values: snapped };
       return;
     }
 
@@ -753,7 +776,7 @@ function solveLinearProgram_(model) {
         if (Math.abs(tableau[i][j]) > ENGINE.EPSILON) { pivotCol = j; break; }
       }
       if (pivotCol !== -1) {
-        pivot_(tableau, i, pivotCol);
+        if (!pivot_(tableau, i, pivotCol)) return { status: 'numerical_failure' };
         basis[i] = pivotCol;
       }
     }
@@ -802,6 +825,7 @@ function iterate_(tableau, basis, cost, total, forbidden) {
       for (let i = 0; i < tableau.length; i++) {
         reduced -= cost[basis[i]] * tableau[i][j];
       }
+      if (!isFinite(reduced)) return 'numerical_failure';
       if (reduced < -ENGINE.PIVOT_TOLERANCE) { entering = j; break; }
     }
     if (entering === -1) return 'optimal';
@@ -810,8 +834,10 @@ function iterate_(tableau, basis, cost, total, forbidden) {
     let best = Infinity;
     for (let i = 0; i < tableau.length; i++) {
       const coefficient = tableau[i][entering];
+      if (!isFinite(coefficient)) return 'numerical_failure';
       if (coefficient > ENGINE.EPSILON) {
         const ratio = tableau[i][total] / coefficient;
+        if (!isFinite(ratio)) return 'numerical_failure';
         const tie = Math.abs(ratio - best) < ENGINE.EPSILON;
         if (ratio < best - ENGINE.EPSILON ||
             (tie && leaving !== -1 && basis[i] < basis[leaving])) {
@@ -830,16 +856,22 @@ function iterate_(tableau, basis, cost, total, forbidden) {
 
 function pivot_(tableau, row, column) {
   const pivotValue = tableau[row][column];
-  // A non-finite or near-zero pivot means the tableau has degenerated; signal
-  // a numerical failure rather than propagate NaN/Infinity through the matrix.
+  // Guard the pivot value AND the result of every division and subtraction: a
+  // tableau that starts finite can still overflow to +/-Infinity mid-pivot, and
+  // Infinity - Infinity is NaN. Any non-finite result aborts the pivot.
   if (!isFinite(pivotValue) || Math.abs(pivotValue) <= ENGINE.EPSILON) return false;
-  for (let j = 0; j < tableau[row].length; j++) tableau[row][j] /= pivotValue;
+  for (let j = 0; j < tableau[row].length; j++) {
+    tableau[row][j] /= pivotValue;
+    if (!isFinite(tableau[row][j])) return false;
+  }
   for (let i = 0; i < tableau.length; i++) {
     if (i === row) continue;
     const factor = tableau[i][column];
+    if (!isFinite(factor)) return false;
     if (Math.abs(factor) < ENGINE.EPSILON) continue;
     for (let j = 0; j < tableau[i].length; j++) {
       tableau[i][j] -= factor * tableau[row][j];
+      if (!isFinite(tableau[i][j])) return false;
     }
   }
   return true;
@@ -1487,7 +1519,6 @@ const APP = {
   UNDO_KEY: 'undo:',
   REVIEW_KEY: 'reviewPrompt',   // per-user: 'done' once shown, so we never nag
   MAX_SCAN_COLUMNS: 4,      // how far right to look for a relation and a limit
-  MAX_DETECTED_CONSTRAINTS: 12,
   FREE_VARIABLE_LIMIT: 50,  // matches the paid competitor's published ceiling
   FREE_CONSTRAINT_LIMIT: 20,
 };
@@ -2510,12 +2541,16 @@ function matchesAnyHint_(label, hints) {
       return {
         cell: model.objective.cell,
         label: labelFor_(grid, model.objective.cell)||'',
+        // The formula itself is part of the objective's identity: editing it in
+        // the same cell (same label) must lapse confirmation, while changing a
+        // referenced coefficient value must not.
+        formula: (cellAt_(grid, model.objective.cell)||{}).formula||'',
         detected: (model.objective.sense==='min'?'min':'max')
       };
     }catch(e){ return null; }
   }
   function sameObjective(a,b){
-    return a&&b&&a.cell===b.cell&&a.label===b.label;
+    return a&&b&&a.cell===b.cell&&a.label===b.label&&a.formula===b.formula;
   }
   // The direction is confirmed when the selector holds an explicit max/min AND
   // that choice was made for the current objective.
