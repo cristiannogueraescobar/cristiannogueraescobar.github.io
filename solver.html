@@ -318,7 +318,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=31"></script>
+<script src="assets/i18n.js?v=32"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -428,13 +428,27 @@ function validModelShape_(model) {
   if (!model || !Array.isArray(model.objective)) return false;
   const n = model.objective.length;
   if (n < 1) return false;
-  const cons = model.constraints || [];
-  for (let k = 0; k < cons.length; k++) {
-    const c = cons[k];
-    if (!c || !Array.isArray(c.coefficients)) return false;
+  if (typeof model.maximize !== 'boolean') return false;
+  if (!Array.isArray(model.constraints)) return false;
+  for (let i = 0; i < n; i++) {
+    if (!(i in model.objective)) return false;
+    if (typeof model.objective[i] !== 'number') return false;
+  }
+  if (model.constant != null && typeof model.constant !== 'number') return false;
+  for (let k = 0; k < model.constraints.length; k++) {
+    const c = model.constraints[k];
+    if (!c) return false;
+    if (!Array.isArray(c.coefficients)) return false;
     if (c.coefficients.length !== n) return false;
+    for (let i = 0; i < n; i++) {
+      if (!(i in c.coefficients)) return false;
+      if (typeof c.coefficients[i] !== 'number') return false;
+    }
+    if (typeof c.rhs !== 'number') return false;
     if (c.relation !== '<=' && c.relation !== '>=' && c.relation !== '=') return false;
   }
+  if (model.integer != null && model.integer !== false && model.integer !== true &&
+      !Array.isArray(model.integer)) return false;
   if (Array.isArray(model.integer)) {
     const seen = {};
     for (let i = 0; i < model.integer.length; i++) {
@@ -444,25 +458,35 @@ function validModelShape_(model) {
       seen[idx] = true;
     }
   }
-  if (model.bounds && model.bounds.length > n) return false;
+  if (model.bounds != null && !Array.isArray(model.bounds)) return false;
+  const bounds = model.bounds || [];
+  if (bounds.length > n) return false;
+  for (let i = 0; i < bounds.length; i++) {
+    const b = bounds[i];
+    if (b == null) continue;
+    if (typeof b !== 'object' || Array.isArray(b)) return false;
+    if (b.lower != null && typeof b.lower !== 'number') return false;
+    if (b.upper != null && typeof b.upper !== 'number') return false;
+    if (b.lower != null && b.lower < 0) return false;
+  }
   return true;
 }
 // Every objective coefficient, constant, constraint coefficient, rhs, and bound
-// must be a finite number.
+// must be a finite number. Uses Number.isFinite (no coercion).
 function finiteModel_(model) {
   if (!model || !model.objective) return false;
-  if ((model.objective || []).some(function (c) { return !isFinite(c); })) return false;
-  if (model.constant != null && !isFinite(model.constant)) return false;
+  if ((model.objective || []).some(function (c) { return !Number.isFinite(c); })) return false;
+  if (model.constant != null && !Number.isFinite(model.constant)) return false;
   const cons = model.constraints || [];
   for (let i = 0; i < cons.length; i++) {
-    if (!isFinite(cons[i].rhs)) return false;
-    if ((cons[i].coefficients || []).some(function (c) { return !isFinite(c); })) return false;
+    if (!Number.isFinite(cons[i].rhs)) return false;
+    if ((cons[i].coefficients || []).some(function (c) { return !Number.isFinite(c); })) return false;
   }
   const bounds = model.bounds || [];
   for (let i = 0; i < bounds.length; i++) {
     const b = bounds[i]; if (!b) continue;
-    if (b.lower != null && !isFinite(b.lower)) return false;
-    if (b.upper != null && !isFinite(b.upper)) return false;
+    if (b.lower != null && !Number.isFinite(b.lower)) return false;
+    if (b.upper != null && !Number.isFinite(b.upper)) return false;
   }
   return true;
 }
@@ -2566,12 +2590,12 @@ function matchesAnyHint_(label, hints) {
 
   // Objective direction must be confirmed once per model before solving, so we
   // never silently solve in the wrong direction. We remember a signature of the
-  // objective (its cell, label, and detected sense) that was confirmed; if the
+  // objective (its cell, label, and formula) that was confirmed; if the
   // objective itself changes, confirmation lapses. Editing coefficients or
   // constraints does NOT lapse it.
   var confirmedObjectiveSig=null;
 
-  // A light signature of the current objective: cell + label + detected sense.
+  // A light signature of the current objective: cell + label + formula (+ detected).
   // Returns null if the model can't be read yet.
   function objectiveSignature(){
     try{
@@ -3001,7 +3025,7 @@ function matchesAnyHint_(label, hints) {
       if(out.status==='infeasible'){ title=t('tInfeasible'); body=t('statusInfeasibleBody'); }
       else if(out.status==='unbounded'){ title=t('tUnbounded'); body=t('statusUnboundedBody'); }
       else if(out.status==='numerical_failure'){ title=t('tNumerical'); body=t('statusNumericalBody'); }
-      else if(out.status==='invalid_model'){ title=t('tNumerical'); body=t('statusInvalidBody'); }
+      else if(out.status==='invalid_model'){ title=t('tInvalidModel'); body=t('statusInvalidBody'); }
       else { title=t('tIncomplete'); body=t('statusUnknownBody'); }   // unknown, iteration_limit, time_limit, node_limit...
       return showTrouble(title, body, out, model);
     }
