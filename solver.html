@@ -88,6 +88,8 @@ table.grid input:focus{background:var(--brass-tint)}
 .solve-details .sd-k{color:var(--faint)}
 .solve-details .sd-v{color:var(--ink)}
 
+.sense-hint{font-size:12px;color:var(--faint);font-family:var(--mono)}
+.sense-hint.pending{color:var(--brass)}
 .controls-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:18px}
 .grid-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .var-settings{margin-top:16px;border:1px solid var(--line);border-radius:8px;padding:14px 16px;background:var(--panel)}
@@ -265,6 +267,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
           <option value="max" data-i18n="senseMax">Maximize</option>
           <option value="min" data-i18n="senseMin">Minimize</option>
         </select></label>
+      <p class="sense-hint" id="senseHint" style="width:100%;margin:0"></p>
       <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers only</span></label>
       <p class="paste-tip" data-i18n="wholeHelp" style="width:100%;margin:0">Use this for quantities that cannot be fractional, such as people, vehicles or projects.</p>
       <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
@@ -315,7 +318,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=29"></script>
+<script src="assets/i18n.js?v=30"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -385,6 +388,15 @@ function optimise_(model) {
   // Final numeric guard: never return an "optimal" whose numbers aren't finite.
   if ((solution.status === 'optimal' || solution.status === 'feasible') &&
       (!isFinite(solution.objective) || (solution.values || []).some(function (v) { return !isFinite(v); }))) {
+    return { status: 'numerical_failure', stopReason: 'numerical_failure',
+             optimalityProven: false, nodesExplored: solution.nodesExplored || 0,
+             objective: null, values: null };
+  }
+  // Defensive final feasibility check against the FULL applied model (bounds
+  // folded in). This covers every variable's non-negativity — including plain
+  // continuous ones with no receipt entry — plus all constraints.
+  if ((solution.status === 'optimal' || solution.status === 'feasible') &&
+      !feasibleAt_(model, model.constraints || [], solution.values || [])) {
     return { status: 'numerical_failure', stopReason: 'numerical_failure',
              optimalityProven: false, nodesExplored: solution.nodesExplored || 0,
              objective: null, values: null };
@@ -716,6 +728,9 @@ function solveLinearProgram_(model) {
     if (phaseOneStatus === 'iteration_limit') {
       return { status: 'iteration_limit' };
     }
+    if (phaseOneStatus === 'numerical_failure') {
+      return { status: 'numerical_failure' };
+    }
 
     let residual = 0;
     for (let i = 0; i < basis.length; i++) {
@@ -807,7 +822,7 @@ function iterate_(tableau, basis, cost, total, forbidden) {
     }
     if (leaving === -1) return 'unbounded';
 
-    pivot_(tableau, leaving, entering);
+    if (!pivot_(tableau, leaving, entering)) return 'numerical_failure';
     basis[leaving] = entering;
   }
   return 'iteration_limit';
@@ -815,6 +830,9 @@ function iterate_(tableau, basis, cost, total, forbidden) {
 
 function pivot_(tableau, row, column) {
   const pivotValue = tableau[row][column];
+  // A non-finite or near-zero pivot means the tableau has degenerated; signal
+  // a numerical failure rather than propagate NaN/Infinity through the matrix.
+  if (!isFinite(pivotValue) || Math.abs(pivotValue) <= ENGINE.EPSILON) return false;
   for (let j = 0; j < tableau[row].length; j++) tableau[row][j] /= pivotValue;
   for (let i = 0; i < tableau.length; i++) {
     if (i === row) continue;
@@ -824,6 +842,7 @@ function pivot_(tableau, row, column) {
       tableau[i][j] -= factor * tableau[row][j];
     }
   }
+  return true;
 }
 
 /* ================================================================== */
@@ -2127,6 +2146,15 @@ function matchesAnyHint_(label, hints) {
     }
     render();
     document.getElementById('result').classList.remove('show');
+    // Examples are known-good models: pre-confirm their detected direction so
+    // the user isn't asked to confirm a curated example. Manual models still
+    // require confirmation.
+    if(name!=='blank'){
+      var sig=objectiveSignature();
+      var sel=document.getElementById('senseSel');
+      if(sig && sel){ sel.value=sig.detected; confirmedObjectiveSig=sig; }
+    }
+    updateSenseHint();
   }
 
   function colLetter(i){var s='',n=i;while(n>0){var r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
@@ -2465,12 +2493,63 @@ function matchesAnyHint_(label, hints) {
   var detectedVars=[];         // [{cell, label}] from the last detection
   var panelStale=false;        // grid changed since last detection
 
+  // Objective direction must be confirmed once per model before solving, so we
+  // never silently solve in the wrong direction. We remember a signature of the
+  // objective (its cell, label, and detected sense) that was confirmed; if the
+  // objective itself changes, confirmation lapses. Editing coefficients or
+  // constraints does NOT lapse it.
+  var confirmedObjectiveSig=null;
+
+  // A light signature of the current objective: cell + label + detected sense.
+  // Returns null if the model can't be read yet.
+  function objectiveSignature(){
+    try{
+      var sheet=sheetFromGrid();
+      var model=detectModel_(sheet);
+      var grid=loadGrid_(sheet);
+      return {
+        cell: model.objective.cell,
+        label: labelFor_(grid, model.objective.cell)||'',
+        detected: (model.objective.sense==='min'?'min':'max')
+      };
+    }catch(e){ return null; }
+  }
+  function sameObjective(a,b){
+    return a&&b&&a.cell===b.cell&&a.label===b.label;
+  }
+  // The direction is confirmed when the selector holds an explicit max/min AND
+  // that choice was made for the current objective.
+  function senseConfirmed(){
+    var sel=document.getElementById('senseSel');
+    if(!sel||sel.value==='auto') return false;
+    return sameObjective(confirmedObjectiveSig, objectiveSignature());
+  }
+
+  // Show the detected direction as a proposal, and whether confirmation is
+  // still pending. The heuristic proposes; the user confirms.
+  function updateSenseHint(){
+    var hint=document.getElementById('senseHint');
+    if(!hint) return;
+    var sig=objectiveSignature();
+    if(!sig){ hint.textContent=''; return; }
+    var detectedName=(sig.detected==='min')?t('senseMin'):t('senseMax');
+    if(senseConfirmed()){
+      hint.className='sense-hint';
+      hint.textContent='';
+    } else {
+      hint.className='sense-hint pending';
+      var proposal=t('senseDetected').replace('{dir}', detectedName).replace('{label}', sig.label||sig.cell);
+      hint.textContent=proposal+' '+t('senseConfirmShort');
+    }
+  }
+
   // A full model replacement (load example, clear, import CSV) makes old
   // per-variable settings meaningless, since they're keyed by cell. Wipe them
   // so a new model never silently inherits an old variable's type.
   function resetVarPanel(){
     varSettings={}; detectedVars=[]; panelStale=false;
     var sel=document.getElementById('senseSel'); if(sel) sel.value='auto';   // new model: re-detect direction
+    confirmedObjectiveSig=null;   // require re-confirmation for the new objective
     var panel=document.getElementById('varSettings');
     if(panel){ panel.style.display='none'; panel.open=false; }
     var body=document.getElementById('varSettingsBody'); if(body) body.innerHTML='';
@@ -2663,6 +2742,14 @@ function matchesAnyHint_(label, hints) {
   function solve(){
     var res=document.getElementById('result');
     var btn=document.getElementById('solve');
+    // The objective direction must be confirmed once per model, so we never
+    // solve in the wrong direction from a heuristic guess.
+    if(!senseConfirmed()){
+      res.innerHTML='<div class="trouble">'+t('senseConfirmBody')+'</div>';
+      res.classList.add('show');
+      updateSenseHint();
+      return;
+    }
     if(anyVarError()){
       res.innerHTML='<div class="trouble">'+t('varErrBlock')+'</div>';
       res.classList.add('show');
@@ -2771,6 +2858,9 @@ function matchesAnyHint_(label, hints) {
       }
     }
     lastResult=null;
+    // A grid edit may have changed the objective (cell/label), which lapses the
+    // direction confirmation. Keep the hint accurate.
+    if(!fromPanel) updateSenseHint();
     // A GRID change (not a panel change) may invalidate the detected variables.
     // Keep the settings, but flag the panel and offer to refresh.
     if(!fromPanel && detectedVars.length && !panelStale){
@@ -3230,7 +3320,13 @@ function matchesAnyHint_(label, hints) {
   document.getElementById('whole').addEventListener('change',function(){ modelChanged(true); });
   // Changing the objective direction changes the model; invalidate the result.
   var senseEl=document.getElementById('senseSel');
-  if(senseEl) senseEl.addEventListener('change',function(){ modelChanged(true); });
+  if(senseEl) senseEl.addEventListener('change',function(){
+    // An explicit max/min is a confirmation for the current objective.
+    if(senseEl.value==='max'||senseEl.value==='min'){ confirmedObjectiveSig=objectiveSignature(); }
+    else { confirmedObjectiveSig=null; }
+    updateSenseHint();
+    modelChanged(true);
+  });
   // Import CSV: the button opens the hidden file picker; picking a file imports.
   document.getElementById('importCsv').addEventListener('click',function(){
     document.getElementById('csvFile').click();
@@ -3310,6 +3406,7 @@ function matchesAnyHint_(label, hints) {
     LANG = sel.value;
     setDetectLabel(panelStale);              // button label follows the language
     if(detectedVars.length) renderVarPanel(); // re-render dynamic panel in new language
+    updateSenseHint();                        // hint text follows the language
   });
 
   var _ex=(location.search.match(/[?&]ex=(\w+)/)||[])[1];
