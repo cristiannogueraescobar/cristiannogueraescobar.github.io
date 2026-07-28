@@ -74,15 +74,44 @@ PAGES.forEach(function (p) {
   ok(p + ' header is outside <main>', hd >= 0 && hd < m0);
 });
 
-// Consistent primary nav: every page links to the other core pages. A page
-// need not link to itself (it marks aria-current instead).
-const CORE = { 'index.html': null, 'solver.html': 'solver.html', 'guide.html': 'guide.html', 'examples.html': 'examples.html', 'about.html': 'about.html' };
+// Consistent primary nav: exactly one nav[aria-label="Primary"] per page, the
+// five core links in order, and aria-current on the page's own link.
+const PRIMARY = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
+const CURRENT_OF = { 'solver.html': 'solver.html', 'guide.html': 'guide.html', 'examples.html': 'examples.html', 'about.html': 'about.html' };
 PAGES.forEach(function (p) {
-  const nav = (bodies[p].match(/<nav[\s\S]*?<\/nav>/) || [''])[0];
-  ['solver.html', 'guide.html', 'examples.html', 'about.html'].forEach(function (target) {
-    if (target === p) return; // don't require a self-link on its own page
-    ok(p + ' nav links to ' + target, nav.indexOf('href="' + target) >= 0);
-  });
+  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const navs = [...stripScripts(raw).matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
+  ok(p + ' has exactly one primary nav', navs.length === 1, 'found ' + navs.length);
+  const nav = navs[0] || '';
+  // The five core links appear in order (extra page-specific links like
+  // "How to use" are allowed but must not break the core order).
+  const hrefs = [...nav.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m => m[1]).filter(h => PRIMARY.indexOf(h) >= 0);
+  ok(p + ' primary nav has the 5 core links in order', hrefs.join('|') === PRIMARY.join('|'), hrefs.join('|'));
+  // aria-current sits on the page's own link (and only there).
+  const currentHrefs = [...nav.matchAll(/<a\b[^>]*aria-current="page"[^>]*href="([^"]+)"|<a\b[^>]*href="([^"]+)"[^>]*aria-current="page"/g)].map(m => m[1] || m[2]);
+  const expectCurrent = CURRENT_OF[p];
+  if (expectCurrent) {
+    ok(p + ' aria-current is on ' + expectCurrent, currentHrefs.length === 1 && currentHrefs[0] === expectCurrent, currentHrefs.join(','));
+  } else {
+    ok(p + ' has no aria-current (no own slot)', currentHrefs.length === 0, currentHrefs.join(','));
+  }
+});
+
+// Exactly one canonical per page, pointing to the right URL.
+const CANONICALS = {
+  'index.html': 'https://plumline.online/',
+  'solver.html': 'https://plumline.online/solver.html',
+  'guide.html': 'https://plumline.online/guide.html',
+  'examples.html': 'https://plumline.online/examples.html',
+  'about.html': 'https://plumline.online/about.html',
+  'privacy.html': 'https://plumline.online/privacy.html',
+  'terms.html': 'https://plumline.online/terms.html'
+};
+PAGES.forEach(function (p) {
+  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const canons = [...raw.matchAll(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/g)].map(m => m[1]);
+  ok(p + ' has exactly one canonical', canons.length === 1, 'found ' + canons.length);
+  ok(p + ' canonical is ' + CANONICALS[p], canons[0] === CANONICALS[p], canons[0]);
 });
 
 console.log('STRUCTURE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

@@ -142,7 +142,7 @@ jobs:
           # analyse the files on disk (so every check sees the same bytes, from
           # the same CDN response — never a mix of fresh and stale resources).
           mkdir -p /tmp/prod
-          for rel in build-info.json index.html assets/i18n.js examples.html guide.html assets/hashes.txt; do
+          for rel in build-info.json index.html solver.html guide.html about.html privacy.html terms.html examples.html assets/i18n.js assets/hashes.txt; do
             mkdir -p "/tmp/prod/$(dirname "$rel")"
             $FETCH "$BASE/$rel?cb=$CB" -o "/tmp/prod/$rel"
           done
@@ -172,6 +172,36 @@ jobs:
           CODE=$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/engine/run_all.js?cb=$CB")
           if [ "$CODE" != "404" ]; then echo "Expected /engine/run_all.js to return 404, got $CODE"; exit 1; fi
           echo "  /engine/run_all.js -> 404 (not served, good)"
+
+          # Crawl every internal href/src across the served pages and require 200
+          # (this is the real "zero 404" check — HTTP, not disk existence).
+          echo "Crawling internal links for 404s ..."
+          node -e '
+            const fs=require("fs");
+            const pages=["index.html","solver.html","guide.html","about.html","privacy.html","terms.html","examples.html"];
+            const base="'"$BASE"'";
+            const cb="'"$CB"'";
+            const targets=new Set();
+            for(const p of pages){
+              const s=fs.readFileSync("/tmp/prod/"+p,"utf8").replace(/<script[\s\S]*?<\/script>/g,"");
+              for(const m of s.matchAll(/(?:href|src)="([^"]+)"/g)){
+                let u=m[1];
+                if(/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) continue;
+                u=u.split("#")[0]; if(!u) continue;
+                targets.add(u);
+              }
+            }
+            (async()=>{
+              let bad=0;
+              for(const t of targets){
+                const url=base+"/"+t+(t.indexOf("?")>=0?"&":"?")+"cb="+cb;
+                const res=await fetch(url,{redirect:"manual"});
+                if(res.status!==200){ console.error("  "+res.status+"  "+t); bad++; }
+              }
+              if(bad){ console.error(bad+" internal target(s) not 200"); process.exit(1); }
+              console.log("  all "+targets.size+" internal targets return 200");
+            })();
+          ' || { echo "internal link crawl failed"; exit 1; }
 
           # 6. Verify served files against the published hashes — build-info.json
           #    included, so a manifest from a different build fails here. Exact

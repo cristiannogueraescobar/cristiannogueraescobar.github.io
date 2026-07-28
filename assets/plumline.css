@@ -106,11 +106,17 @@ a:hover{text-decoration-color:var(--brass)}
 
 /* fields on the deep ink ground */
 .field-deep{background:var(--deep);color:var(--cream);position:relative;overflow:hidden}
-/* Header and hero are separate .field-deep blocks (header outside <main>, hero inside). Render them as one continuous dark band, no seam. */
+/* Header and hero are separate .field-deep blocks (header outside <main>, hero
+   inside). Keep them one continuous dark band with no seam. */
 .field-deep + main > .field-deep:first-child, main > .field-deep:first-child{margin-top:0}
 body > .field-deep + main{margin-top:0}
 .field-deep::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(120% 80% at 78% -10%,rgba(216,169,74,.13),transparent 60%)}
+/* The header-only block (direct child of body, holds just the nav) shows solid
+   colour at the join; the decorative gradient belongs to the hero block and
+   starts just below the seam so both sides of the join are exactly --deep. */
+body > .field-deep::after{content:none}
+main > .field-deep:first-child::after{inset:18px 0 0}
 
 /* ---- (4) COMPONENTS ------------------------------------------------------ */
 
