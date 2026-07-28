@@ -66,9 +66,11 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
     const footerBadges = (footer.match(/id="buildBadge"/g) || []).length;
     ok(page + ' has exactly one build badge', totalBadges === 1, 'found ' + totalBadges);
     ok(page + ' badge is inside <footer>', footerBadges === 1, 'found ' + footerBadges + ' in footer');
-    // And specifically inside a <p class="fine"> within that footer.
-    ok(page + ' footer badge is in a .fine paragraph',
-       /<p\b[^>]*class="[^"]*\bfine\b[^"]*"[^>]*>[\s\S]*?id="buildBadge"[\s\S]*?<\/p>/i.test(footer));
+    // Extract each <p class="fine">...</p> block individually (the inner regex
+    // refuses to cross a </p>), so a badge in a SEPARATE <p> can't satisfy this.
+    const fineParagraphs = [...footer.matchAll(/<p\b[^>]*class="[^"]*\bfine\b[^"]*"[^>]*>(?:(?!<\/p>)[\s\S])*<\/p>/gi)].map(m => m[0]);
+    const fineBadges = fineParagraphs.reduce((n, p) => n + (p.match(/id="buildBadge"/g) || []).length, 0);
+    ok(page + ' footer has one .fine paragraph containing the badge', fineBadges === 1, 'found ' + fineBadges);
     ok(page + ' includes build-badge.js', /build-badge\.js/.test(html));
   });
 })();

@@ -139,12 +139,20 @@ jobs:
           fi
 
           # Download everything ONCE to /tmp with the same cache-buster, then
-          # analyse the files on disk (so each check sees the same bytes).
+          # analyse the files on disk (so every check sees the same bytes, from
+          # the same CDN response — never a mix of fresh and stale resources).
           mkdir -p /tmp/prod
-          for rel in index.html assets/i18n.js examples.html guide.html assets/hashes.txt; do
+          for rel in build-info.json index.html assets/i18n.js examples.html guide.html assets/hashes.txt; do
             mkdir -p "/tmp/prod/$(dirname "$rel")"
             $FETCH "$BASE/$rel?cb=$CB" -o "/tmp/prod/$rel"
           done
+
+          # Re-confirm the commit from the SAME download used for the hash check,
+          # so build-info, the manifest and the files all come from one fetch.
+          FINAL_DEPLOYED=$(node -e 'process.stdout.write((require("/tmp/prod/build-info.json").commit)||"")')
+          if [ "$FINAL_DEPLOYED" != "$GITHUB_SHA" ]; then
+            echo "Downloaded build-info.json reports '$FINAL_DEPLOYED', expected '$GITHUB_SHA'"; exit 1
+          fi
 
           # Content markers that must exist in the current build.
           grep -q 'id="capabilities"' /tmp/prod/index.html || { echo "index.html missing #capabilities"; exit 1; }
@@ -165,16 +173,17 @@ jobs:
           if [ "$CODE" != "404" ]; then echo "Expected /engine/run_all.js to return 404, got $CODE"; exit 1; fi
           echo "  /engine/run_all.js -> 404 (not served, good)"
 
-          # 6. Verify served files against the published hashes — all from the
-          #    same cache-busted fetch above.
+          # 6. Verify served files against the published hashes — build-info.json
+          #    included, so a manifest from a different build fails here. Exact
+          #    field match (awk $2 == path), no regex interpretation of dots.
           echo "Verifying served files against hashes.txt ..."
           FAILED=0
-          for path in ./index.html ./assets/i18n.js ./examples.html ./guide.html; do
-            EXPECT=$(grep -E "  $path\$" /tmp/prod/assets/hashes.txt | awk '{print $1}')
+          for path in ./build-info.json ./index.html ./assets/i18n.js ./examples.html ./guide.html; do
+            EXPECT=$(awk -v p="$path" '$2 == p { print $1 }' /tmp/prod/assets/hashes.txt)
             if [ -z "$EXPECT" ]; then echo "  no hash listed for $path"; FAILED=1; continue; fi
             ACTUAL=$(sha256sum "/tmp/prod/${path#./}" | awk '{print $1}')
             if [ "$EXPECT" != "$ACTUAL" ]; then echo "  HASH MISMATCH $path (expected $EXPECT got $ACTUAL)"; FAILED=1; else echo "  ok $path"; fi
           done
           [ "$FAILED" = "0" ] || { echo "served files do not match hashes.txt"; exit 1; }
 
-          echo "Smoke test passed: production = $GITHUB_SHA, JSON-LD valid, engine/ 404, hashes match."
+          echo "Smoke test passed: production = $GITHUB_SHA, build-info + JSON-LD + hashes all consistent, engine/ 404."
