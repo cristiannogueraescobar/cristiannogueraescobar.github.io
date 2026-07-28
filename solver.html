@@ -259,6 +259,12 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 
     <div class="controls-row">
       <button class="solve" id="solve" data-i18n="solve">Solve</button>
+      <label class="toggle" for="senseSel"><span data-i18n="objectiveLabel2">Objective</span>
+        <select id="senseSel" style="margin-left:6px">
+          <option value="auto" data-i18n="senseAuto">Auto-detect</option>
+          <option value="max" data-i18n="senseMax">Maximize</option>
+          <option value="min" data-i18n="senseMin">Minimize</option>
+        </select></label>
       <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers only</span></label>
       <p class="paste-tip" data-i18n="wholeHelp" style="width:100%;margin:0">Use this for quantities that cannot be fractional, such as people, vehicles or projects.</p>
       <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
@@ -309,7 +315,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=28"></script>
+<script src="assets/i18n.js?v=29"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -358,6 +364,12 @@ const ENGINE = {
  * be fractional, and branches when some of them must come out whole.
  */
 function optimise_(model) {
+  // Reject non-finite inputs up front: a NaN or Infinity anywhere in the model
+  // would silently corrupt the simplex. Fail cleanly instead.
+  if (!finiteModel_(model)) {
+    return { status: 'numerical_failure', stopReason: 'numerical_failure',
+             optimalityProven: false, nodesExplored: 0, objective: null, values: null };
+  }
   // Per-variable bounds are translated into ordinary constraints here, so the
   // simplex core never has to know about them. A finite upper bound becomes
   // x_i <= upper; a positive lower bound becomes x_i >= lower (the simplex
@@ -369,8 +381,35 @@ function optimise_(model) {
              nodesExplored: 0, objective: null, values: null };
   }
   const wanted = integerIndices_(model);
-  if (!wanted.length) return solveLinearProgram_(model);
-  return solveIntegerProgram_(model, wanted);
+  const solution = !wanted.length ? solveLinearProgram_(model) : solveIntegerProgram_(model, wanted);
+  // Final numeric guard: never return an "optimal" whose numbers aren't finite.
+  if ((solution.status === 'optimal' || solution.status === 'feasible') &&
+      (!isFinite(solution.objective) || (solution.values || []).some(function (v) { return !isFinite(v); }))) {
+    return { status: 'numerical_failure', stopReason: 'numerical_failure',
+             optimalityProven: false, nodesExplored: solution.nodesExplored || 0,
+             objective: null, values: null };
+  }
+  return solution;
+}
+
+// Every objective coefficient, constant, constraint coefficient, rhs, and bound
+// must be a finite number.
+function finiteModel_(model) {
+  if (!model || !model.objective) return false;
+  if ((model.objective || []).some(function (c) { return !isFinite(c); })) return false;
+  if (model.constant != null && !isFinite(model.constant)) return false;
+  const cons = model.constraints || [];
+  for (let i = 0; i < cons.length; i++) {
+    if (!isFinite(cons[i].rhs)) return false;
+    if ((cons[i].coefficients || []).some(function (c) { return !isFinite(c); })) return false;
+  }
+  const bounds = model.bounds || [];
+  for (let i = 0; i < bounds.length; i++) {
+    const b = bounds[i]; if (!b) continue;
+    if (b.lower != null && !isFinite(b.lower)) return false;
+    if (b.upper != null && !isFinite(b.upper)) return false;
+  }
+  return true;
 }
 
 // Translate model.bounds into extra constraints. Returns a shallow copy with
@@ -459,6 +498,11 @@ function buildVariableDomains_(domains, wholeToggle, variables, labels, values, 
     const value = round_(values[i]);
     const lowerOk = value >= lower - 1e-6;
     const upperOk = (upper === null) || (value <= upper + 1e-6);
+    // Verify the type too: an integer variable must be whole, a binary must be
+    // exactly 0 or 1. Without this, a binary reported as 0.5 would sit inside
+    // [0,1] and wrongly pass, and the final aggregate check would trust it.
+    const integerOk = !isInt || (Math.abs(value - Math.round(value)) < 1e-6);
+    const binaryOk = !isBinary || (Math.abs(value) < 1e-6 || Math.abs(value - 1) < 1e-6);
     out.push({
       cell: variables[i],
       label: (labels && labels[i]) || variables[i],
@@ -466,7 +510,9 @@ function buildVariableDomains_(domains, wholeToggle, variables, labels, values, 
       min: lower,
       max: upper,
       value: value,
-      satisfied: lowerOk && upperOk,
+      satisfied: lowerOk && upperOk && integerOk && binaryOk,
+      integralitySatisfied: integerOk,
+      binarySatisfied: binaryOk,
       lowerBinding: Math.abs(value - lower) < 1e-6,
       upperBinding: (upper !== null) && Math.abs(value - upper) < 1e-6,
     });
@@ -499,6 +545,25 @@ function isWhole_(value) {
  * Saying so is the point — a solver that cannot tell the difference is how
  * users end up trusting a number they should not.
  */
+function dotProduct_(coeffs, values) {
+  let s = 0;
+  for (let i = 0; i < coeffs.length; i++) s += (coeffs[i] || 0) * (values[i] || 0);
+  return s;
+}
+function feasibleAt_(model, constraints, values) {
+  const TOL = 1e-6;
+  for (let i = 0; i < values.length; i++) {
+    if (values[i] < -TOL) return false;   // variables are non-negative
+  }
+  for (let k = 0; k < constraints.length; k++) {
+    const c = constraints[k];
+    const lhs = dotProduct_(c.coefficients, values);
+    if (c.relation === '<=' && lhs > c.rhs + TOL) return false;
+    if (c.relation === '>=' && lhs < c.rhs - TOL) return false;
+    if (c.relation === '=' && Math.abs(lhs - c.rhs) > TOL) return false;
+  }
+  return true;
+}
 function solveIntegerProgram_(model, wanted) {
   const deadline = Date.now() + ENGINE.BRANCH_MILLIS;
   let best = null;
@@ -542,10 +607,18 @@ function solveIntegerProgram_(model, wanted) {
     }
 
     if (fractional === -1) {
-      best = {
-        objective: relaxed.objective,
-        values: relaxed.values.map(function (v) { return Math.round(v * 1e9) / 1e9; }),
-      };
+      // Snap the integer variables to exact integers, recompute the objective
+      // from the snapped point, and re-check every constraint. Only accept it
+      // if the exact-integer point is still feasible.
+      const snapped = relaxed.values.map(function (v) { return Math.round(v * 1e9) / 1e9; });
+      wanted.forEach(function (idx) { snapped[idx] = Math.round(snapped[idx]); });
+      if (!feasibleAt_(model, model.constraints.concat(extra), snapped)) {
+        exhausted = false;
+        if (!stopReason) stopReason = 'numerical_failure';
+        return;
+      }
+      const snappedObjective = round_(dotProduct_(model.objective, snapped) + (model.constant || 0));
+      best = { objective: snappedObjective, values: snapped };
       return;
     }
 
@@ -835,6 +908,10 @@ function newContext_(grid, variables) {
     memo: {},
     dependsMemo: {},
     constantFallbacks: [],
+    // On the web every formula's stored value is 0, so folding an unsupported
+    // formula to its "cached" value would inject a false 0. Always forbid it
+    // here; the Google Sheets add-on (where the value is exact) allows it.
+    allowCachedFormulaFallback: false,
   };
 }
 
@@ -1003,8 +1080,9 @@ function linearize_(context, a1, depth) {
       }
     } catch (err) {
       // Anything the parser cannot handle is still usable as long as it does
-      // not lead back to a decision variable: the cached value is then exact.
-      if (!dependsOnVariables_(context, cell, {})) {
+      // not lead back to a decision variable AND the caller allows folding a
+      // cached value. On the web this is off, so an unsupported formula fails.
+      if (context.allowCachedFormulaFallback && !dependsOnVariables_(context, cell, {})) {
         const cached = entry.value;
         if (typeof cached !== 'number') {
           throw new Error(cell + ' has no numeric value to fall back on');
@@ -1012,8 +1090,8 @@ function linearize_(context, a1, depth) {
         context.constantFallbacks.push(cell);
         form = constantForm_(cached);
       } else {
-        throw new Error(cell + ' depends on the decision variables and ' +
-          'cannot be linearised (' + err.message + ')');
+        throw new Error(cell + ' could not be read as a number or a linear ' +
+          'expression of the decision variables (' + err.message + ')');
       }
     }
   }
@@ -1408,6 +1486,13 @@ function solveModel_(sheet, model) {
 
   const constraints = [];
   (model.constraints || []).forEach(function (item, index) {
+    // A "guessed" constraint had no explicit operator and limit. On the web the
+    // stored value is 0, so accepting it would invent "cell <= 0" the user never
+    // wrote. Fail clearly instead of solving a model they didn't build.
+    if (item.guessed) {
+      throw new Error(item.cell + ' looks like a constraint but has no explicit ' +
+        'operator and limit. Add one (for example <= 100), or remove the row.');
+    }
     const form = safeLinearize_(context, item.cell,
       'constraint ' + (index + 1));
     constraints.push({
@@ -1450,6 +1535,7 @@ function solveModel_(sheet, model) {
     elapsedMs: Date.now() - started,
     variables: variables,
     modelType: modelType,
+    sense: model.objective.sense === 'min' ? 'min' : 'max',
     labels: readLabels_(grid, model.variables, variables),
     previous: variables.map(function (cell) {
       const value = cellAt_(grid, cell).value;
@@ -1706,9 +1792,15 @@ function detectModel_(sheet) {
   const constraints = [];
   dependent.forEach(function (cell) {
     if (cell === objectiveCell) return;
-    if (constraints.length >= APP.MAX_DETECTED_CONSTRAINTS) return;
     constraints.push(readConstraint_(grid, cell));
   });
+  // Never silently drop constraints: a model with more limits than we support
+  // must fail loudly, or we'd "verify" a smaller model than the user built and
+  // could return a false optimum.
+  if (constraints.length > APP.FREE_CONSTRAINT_LIMIT) {
+    throw new Error('This model has ' + constraints.length + ' constraints. ' +
+      'Plumline currently supports up to ' + APP.FREE_CONSTRAINT_LIMIT + '.');
+  }
 
   return {
     variables: variables,
@@ -2346,6 +2438,7 @@ function matchesAnyHint_(label, hints) {
         '    catch(rerr){ rerr.__phase="read"; throw rerr; }',
         '    model.wholeNumbers=d.wholeNumbers===true;',
         '    if(d.domains) model.domains=d.domains;',
+        '    if(d.sense==="max"||d.sense==="min") model.objective.sense=d.sense;',
         '    var out=solveModel_(sheet,model);',
         '    self.postMessage({token:d.token,ok:true,out:out,wholeNumbers:model.wholeNumbers});',
         '  }catch(err){',
@@ -2377,6 +2470,7 @@ function matchesAnyHint_(label, hints) {
   // so a new model never silently inherits an old variable's type.
   function resetVarPanel(){
     varSettings={}; detectedVars=[]; panelStale=false;
+    var sel=document.getElementById('senseSel'); if(sel) sel.value='auto';   // new model: re-detect direction
     var panel=document.getElementById('varSettings');
     if(panel){ panel.style.display='none'; panel.open=false; }
     var body=document.getElementById('varSettingsBody'); if(body) body.innerHTML='';
@@ -2640,6 +2734,7 @@ function matchesAnyHint_(label, hints) {
     var payload=sheetToArrays(sheet);
     payload.wholeNumbers=wholeNumbers;
     payload.domains=domains;
+    payload.sense=(document.getElementById('senseSel')||{}).value;
     payload.token=myToken;
     w.postMessage(payload);
   }
@@ -2718,6 +2813,8 @@ function matchesAnyHint_(label, hints) {
     try{ model=detectModel_(sheet); }
     catch(err){ return showTrouble(t('tRead'), String(err.message||err)); }
     model.wholeNumbers=document.getElementById('whole').checked;
+    var senseSel=(document.getElementById('senseSel')||{}).value;
+    if(senseSel==='max'||senseSel==='min') model.objective.sense=senseSel;
     try{
       var cells=expandRange_(loadGrid_(sheet), model.variables);
       model.domains=variableDomains(cells, model.wholeNumbers);
@@ -2748,7 +2845,9 @@ function matchesAnyHint_(label, hints) {
   function showTrouble(title,msg,out,model){
     var res=document.getElementById('result');
     var extra=(out?solveDetailsHTML(out,model||{}):'');
-    res.innerHTML='<div class="trouble"><b>'+title+'.</b> '+msg+'</div>'+extra;
+    // Escape title and msg: engine error messages can include fragments of a
+    // user-written formula or cell label, so they must never be treated as HTML.
+    res.innerHTML='<div class="trouble"><b>'+esc(title)+'.</b> '+esc(msg)+'</div>'+extra;
     res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
   }
 
@@ -2773,6 +2872,7 @@ function matchesAnyHint_(label, hints) {
     var typeNames={continuous:t('sdContinuous'),integer:t('sdInteger'),binary:t('sdBinary'),mixed:t('sdMixed')};
     var mt=out.modelType || ((model && model.wholeNumbers===true)?'integer':'continuous');
     rows.push([t('sdModelType'), typeNames[mt]||typeNames.continuous]);
+    if(out.sense) rows.push([t('sdObjective'), out.sense==='min'?t('senseMin'):t('senseMax')]);
     if(displayStopReason){
       var sr={node_limit:t('srNode'),time_limit:t('srTime'),iteration_limit:t('srIteration'),numerical_failure:t('srNumerical')}[displayStopReason]||displayStopReason;
       rows.push([t('sdStopped'), sr]);
@@ -2788,7 +2888,7 @@ function matchesAnyHint_(label, hints) {
     var res=document.getElementById('result');
     var money=''; // we don't assume currency
     var h='<div class="receipt">';
-    h+='<div class="tot"><span>'+(out.objectiveLabel||'Result')+'</span><b>'+fmt(out.objective)+'</b></div>';
+    h+='<div class="tot"><span>'+esc(out.objectiveLabel||t('exResult'))+'</span><b>'+fmt(out.objective)+'</b></div>';
     (out.labels||[]).forEach(function(lb,i){
       h+='<div class="r"><span class="k">'+esc(lb)+'</span><span class="v">'+fmt(out.previous[i])+' &rarr; '+fmt(out.values[i])+'</span></div>';
     });
@@ -3016,10 +3116,12 @@ function matchesAnyHint_(label, hints) {
     rows.push([t('exDecision'), t('exFrom'), t('exTo')]);
     (out.labels||[]).forEach(function(lb,i){ rows.push([lb, num(out.previous[i]), num(out.values[i])]); });
     rows.push([]);
-    rows.push([t('exLimit'), t('exUsed'), t('exCap'), t('exAtLimit'), t('exOneMore')]);
+    rows.push([t('exLimit'), t('exUsed'), t('exCap'), t('exAtLimit'), t('exRhsChange'), t('exObjChange'), t('exOneMore')]);
     (out.constraints||[]).forEach(function(c){
+      var hasImpact=(c.binding && typeof c.objectiveDelta==='number' && c.objectiveDelta!==0);
       rows.push([c.label, num(c.used), num(c.limit), c.binding?t('exYes'):t('exNo'),
-                 (c.binding && typeof c.objectiveDelta==='number' && c.objectiveDelta!==0) ? num(Math.abs(c.objectiveDelta)) : '']);
+                 hasImpact?num(c.rhsChange):'', hasImpact?num(c.objectiveDelta):'',
+                 hasImpact?num(Math.abs(c.objectiveDelta)):'']);
     });
     // Variable limits: type and bounds per configured variable, so an exported
     // report documents that a variable was e.g. binary or capped at 10.
@@ -3035,6 +3137,15 @@ function matchesAnyHint_(label, hints) {
   }
   function num(n){ return (n==null||isNaN(n)) ? '' : Math.round(n*10000)/10000; }
 
+  // Neutralise spreadsheet formula injection: a user label starting with = + - @
+  // (or a leading tab/CR) can execute as a formula when the file opens in Excel
+  // or Sheets. Prefix a single quote so it's treated as text. Only applied to
+  // string cells (numbers are emitted as-is).
+  function safeCsvText_(value){
+    var s = String(value);
+    return /^[=+@\t\r-]/.test(s) ? "'" + s : s;
+  }
+
   function download(name, mime, text){
     var blob = new Blob([text], { type: mime });
     var url = URL.createObjectURL(blob);
@@ -3047,7 +3158,7 @@ function matchesAnyHint_(label, hints) {
     if(!lastResult) return;
     var csv = solutionRows(lastResult).map(function(r){
       return r.map(function(cell){
-        var s = String(cell);
+        var s = safeCsvText_(cell);
         return /[",\\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
       }).join(',');
     }).join('\\r\\n');
@@ -3061,7 +3172,8 @@ function matchesAnyHint_(label, hints) {
       return '<Row>'+r.map(function(cell){
         var isNum = cell!=='' && !isNaN(Number(cell)) && typeof cell!=='boolean';
         var t = isNum ? 'Number' : 'String';
-        var v = String(cell).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        var raw = isNum ? String(cell) : safeCsvText_(cell);
+        var v = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         return '<Cell><Data ss:Type="'+t+'">'+v+'</Data></Cell>';
       }).join('')+'</Row>';
     }).join('');
@@ -3116,6 +3228,9 @@ function matchesAnyHint_(label, hints) {
   // Toggling integer mode changes the model but not the detected variables,
   // so pass fromPanel=true: invalidate the result, don't mark the panel stale.
   document.getElementById('whole').addEventListener('change',function(){ modelChanged(true); });
+  // Changing the objective direction changes the model; invalidate the result.
+  var senseEl=document.getElementById('senseSel');
+  if(senseEl) senseEl.addEventListener('change',function(){ modelChanged(true); });
   // Import CSV: the button opens the hidden file picker; picking a file imports.
   document.getElementById('importCsv').addEventListener('click',function(){
     document.getElementById('csvFile').click();
