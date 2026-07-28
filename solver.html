@@ -355,7 +355,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=36"></script>
+<script src="assets/i18n.js?v=37"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2212,7 +2212,7 @@ function matchesAnyHint_(label, hints) {
   // solving each model with this engine and checking them by hand, so an
   // example that ever stops matching its expected result is a real regression.
   var EXAMPLES={
-    production:{ slug:'production-plan', category:'start', sense:'max',
+    production:{ 
       grid:[
         ['Product','Units','Profit','Contribution','Hours',''],
         ['A','0','30','=B2*C2','2',''],
@@ -2223,7 +2223,7 @@ function matchesAnyHint_(label, hints) {
         ['Total hours','','','=SUMPRODUCT(B2:B4,E2:E4)','<=','100'],
         ['Units of B','','','=B3','<=','40']],
       expected:{ status:'optimal', modelType:'continuous', objective:1760 } },
-    workshop:{ slug:'workshop-chart', category:'start', sense:'max',
+    workshop:{ 
       grid:[
         ['Item','Make','Profit','Total','Wood','Labour'],
         ['Chairs','0','30','=B2*C2','2','3'],
@@ -2233,7 +2233,7 @@ function matchesAnyHint_(label, hints) {
         ['Wood used','','','=SUMPRODUCT(B2:B3,E2:E3)','<=','80'],
         ['Labour used','','','=SUMPRODUCT(B2:B3,F2:F3)','<=','60']],
       expected:{ status:'optimal', modelType:'continuous', objective:900 } },
-    blend:{ slug:'cheapest-feed-blend', category:'start', sense:'min',
+    blend:{ 
       grid:[
         ['Ingredient','Kg','Cost/kg','Spend','Protein%','Fibre%'],
         ['Barley','0','0.30','=B2*C2','12','5'],
@@ -2245,7 +2245,7 @@ function matchesAnyHint_(label, hints) {
         ['Protein','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','1800'],
         ['Fibre','','','=SUMPRODUCT(B2:B4,F2:F4)','>=','350']],
       expected:{ status:'optimal', modelType:'continuous', objective:27.352941176470587, tolerance:1e-8 } },
-    marketing:{ slug:'marketing-budget', category:'business', sense:'max',
+    marketing:{ 
       grid:[
         ['Channel','Spend','Return/unit','Return','',''],
         ['Search','0','3.2','=B2*C2','',''],
@@ -2257,7 +2257,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'continuous',min:0,max:4000}, B3:{type:'continuous',min:500,max:null}, B4:{type:'continuous',min:0,max:1500} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'continuous', objective:21350 } },
-    workforce:{ slug:'workforce-scheduling', category:'business', sense:'min', whole:true,
+    workforce:{ whole:true,
       grid:[
         ['Start day','Staff','','',''],
         ['Mon','0','','',''],
@@ -2277,7 +2277,7 @@ function matchesAnyHint_(label, hints) {
         ['Sat cover','','=B3+B4+B5+B6+B7','>=','16'],
         ['Sun cover','','=B4+B5+B6+B7+B8','>=','11']],
       expected:{ status:'optimal', modelType:'integer', objective:23 } },
-    shipping:{ slug:'shipping-plan', category:'business', sense:'min', whole:true,
+    shipping:{ whole:true,
       grid:[
         ['Route','Units','Cost/unit','Cost','',''],
         ['F1 to A','0','4','=B2*C2','',''],
@@ -2294,7 +2294,7 @@ function matchesAnyHint_(label, hints) {
         ['B demand','','','=B3+B6','>=','25'],
         ['C demand','','','=B4+B7','>=','35']],
       expected:{ status:'optimal', modelType:'integer', objective:450 } },
-    project:{ slug:'project-selection', category:'binary', sense:'max',
+    project:{ 
       grid:[
         ['Project','Fund','Value','Selected','Cost','Hours'],
         ['Alpha','0','40','=B2*C2','30','20'],
@@ -2308,7 +2308,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'binary', objective:125 } },
-    delivery:{ slug:'delivery-load', category:'binary', sense:'max',
+    delivery:{ 
       grid:[
         ['Order','Load','Profit','Selected','Weight','Volume'],
         ['O1','0','60','=B2*C2','10','4'],
@@ -2323,7 +2323,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'}, B6:{type:'binary'} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'binary', objective:240 } },
-    supplier:{ slug:'supplier-activation', category:'binary', sense:'min',
+    supplier:{ 
       grid:[
         ['Decision','Value','Coeff','Term','',''],
         ['Use S1','0','200','=B2*C2','',''],
@@ -2350,6 +2350,8 @@ function matchesAnyHint_(label, hints) {
   function metaFor(key){ for(var i=0;i<EXAMPLE_META.length;i++){ if(EXAMPLE_META[i].key===key) return EXAMPLE_META[i]; } return null; }
   function categoryOf(key){ var m=metaFor(key); return m?m.category:(EXAMPLES[key]&&EXAMPLES[key].category); }
   function slugOf(key){ var m=metaFor(key); return m?m.slug:(EXAMPLES[key]&&EXAMPLES[key].slug); }
+  function senseOf(key){ var m=metaFor(key); return m?m.sense:(EXAMPLES[key]&&EXAMPLES[key].sense); }
+  function typeOf(key){ var m=metaFor(key); return m?m.type:(EXAMPLES[key]&&EXAMPLES[key].expected&&EXAMPLES[key].expected.modelType); }
   function examplesInCategory(cat){
     return Object.keys(EXAMPLES).filter(function(k){ return categoryOf(k)===cat; });
   }
@@ -2385,9 +2387,10 @@ function matchesAnyHint_(label, hints) {
       // Confirm the objective direction for this curated model, from the
       // example's own sense (not a re-detection), then remember the signature.
       var sel=document.getElementById('senseSel');
-      if(sel){ sel.value=ex.sense||'auto'; }
+      var exSense=senseOf(name);
+      if(sel){ sel.value=exSense||'auto'; }
       var sig=objectiveSignature();
-      if(sig){ if(sel && (ex.sense==='max'||ex.sense==='min')) sig.detected=ex.sense; confirmedObjectiveSig=sig; }
+      if(sig){ if(sel && (exSense==='max'||exSense==='min')) sig.detected=exSense; confirmedObjectiveSig=sig; }
       // Load per-variable domains into the panel, if the example defines them.
       // The panel opens only when the example asks for it (openVarSettings).
       if(ex.domains){
@@ -3593,10 +3596,9 @@ function matchesAnyHint_(label, hints) {
       if(!items.length) return;
       html+='<div class="drawer-section"><h4>'+esc(t('exCat_'+cat))+'</h4>';
       items.forEach(function(key){
-        var ex=EXAMPLES[key];
-        var mt=(ex.expected&&ex.expected.modelType)||'continuous';
+        var mt=typeOf(key)||'continuous';
         var tags=[ (typeTag[mt]||mt).toUpperCase(),
-                   (ex.sense==='min'?t('senseMin'):t('senseMax')).toUpperCase() ];
+                   (senseOf(key)==='min'?t('senseMin'):t('senseMax')).toUpperCase() ];
         html+='<button class="ex-card" data-ex="'+key+'">'+
                 '<div class="ex-name">'+esc(t('exName_'+key))+'</div>'+
                 '<div class="ex-desc">'+esc(t('exDesc_'+key))+'</div>'+
@@ -3629,7 +3631,10 @@ function matchesAnyHint_(label, hints) {
     document.getElementById('exDrawer').hidden=false;
     document.getElementById('exDrawerBackdrop').hidden=false;
     document.body.style.overflow='hidden';                    // lock background scroll
-    backgroundEls().forEach(function(el){ el.inert=true; });   // remove background from focus order, pointer interaction and the a11y tree
+    // Save each background element's prior inert state, then set inert. On
+    // close we restore exactly what was there, so this is safe even if an
+    // element was already inert for another reason.
+    backgroundEls().forEach(function(el){ el.__prevInert=el.inert; el.inert=true; });
     var openBtn=document.getElementById('openExamples'); if(openBtn) openBtn.setAttribute('aria-expanded','true');
     var closeBtn=document.getElementById('closeExamples');
     if(closeBtn){ closeBtn.setAttribute('aria-label', t('closeLabel')); closeBtn.focus(); }  // move focus in
@@ -3640,7 +3645,7 @@ function matchesAnyHint_(label, hints) {
     drawer.hidden=true;
     document.getElementById('exDrawerBackdrop').hidden=true;
     document.body.style.overflow='';
-    backgroundEls().forEach(function(el){ el.inert=false; });  // restore background
+    backgroundEls().forEach(function(el){ el.inert=(el.__prevInert===true); delete el.__prevInert; });  // restore prior inert state
     var openBtn=document.getElementById('openExamples');
     if(openBtn){ openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }  // return focus
   }
@@ -3717,11 +3722,11 @@ function matchesAnyHint_(label, hints) {
     }
     // Solve an example exactly as loadExample would: apply its sense, whole
     // flag, and per-variable domains, then solve.
-    function solveExample(ex){
+    function solveExample(ex, senseOverride){
       try{
         var sh=sheetFrom(ex.grid);
         var m=detectModel_(sh);
-        m.objective.sense=ex.sense;
+        m.objective.sense=senseOverride||ex.sense;
         m.wholeNumbers=!!ex.whole;
         if(ex.domains){
           var cells=expandRange_(loadGrid_(sh), m.variables);
@@ -3740,7 +3745,7 @@ function matchesAnyHint_(label, hints) {
     // Every example must solve to its expected status, model type, objective
     // (within tolerance), prove optimality, and pass verification.
     Object.keys(EXAMPLES).forEach(function(key){
-      var ex=EXAMPLES[key], exp=ex.expected||{}, out=solveExample(ex);
+      var ex=EXAMPLES[key], exp=ex.expected||{}, out=solveExample(ex, senseOf(key));
       var tol=exp.tolerance||1e-6;
       var verified=(out.constraints||[]).every(function(c){return c.satisfied;})&&
                    (out.variableDomains||[]).every(function(d){return d.satisfied;});
@@ -3754,7 +3759,7 @@ function matchesAnyHint_(label, hints) {
         (verified?'':' [verify FAILED]')+(okProven?'':' [not proven]'));
     });
     // Shadow price is computed on a binding continuous limit.
-    var p=solveExample(EXAMPLES.production);
+    var p=solveExample(EXAMPLES.production, senseOf('production'));
     var hasShadow=(p.constraints||[]).some(function(c){return c.binding&&typeof c.objectiveDelta==='number'&&c.objectiveDelta!==0;});
     line(hasShadow,'Estimated one-unit impact (shadow price) is computed', hasShadow?'a binding limit shows its value':'none found');
     // Contradictory limits are caught, not faked.
