@@ -318,7 +318,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=30"></script>
+<script src="assets/i18n.js?v=31"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -367,6 +367,13 @@ const ENGINE = {
  * be fractional, and branches when some of them must come out whole.
  */
 function optimise_(model) {
+  // Reject structurally invalid models before anything else: a shared engine
+  // must defend itself. An unknown relation would otherwise slip through
+  // feasibleAt_ without triggering any comparison.
+  if (!validModelShape_(model)) {
+    return { status: 'invalid_model', stopReason: 'invalid_model',
+             optimalityProven: false, nodesExplored: 0, objective: null, values: null };
+  }
   // Reject non-finite inputs up front: a NaN or Infinity anywhere in the model
   // would silently corrupt the simplex. Fail cleanly instead.
   if (!finiteModel_(model)) {
@@ -417,6 +424,29 @@ function numericalFailure_(nodes) {
            objective: null, values: null };
 }
 
+function validModelShape_(model) {
+  if (!model || !Array.isArray(model.objective)) return false;
+  const n = model.objective.length;
+  if (n < 1) return false;
+  const cons = model.constraints || [];
+  for (let k = 0; k < cons.length; k++) {
+    const c = cons[k];
+    if (!c || !Array.isArray(c.coefficients)) return false;
+    if (c.coefficients.length !== n) return false;
+    if (c.relation !== '<=' && c.relation !== '>=' && c.relation !== '=') return false;
+  }
+  if (Array.isArray(model.integer)) {
+    const seen = {};
+    for (let i = 0; i < model.integer.length; i++) {
+      const idx = model.integer[i];
+      if (!Number.isInteger(idx) || idx < 0 || idx >= n) return false;
+      if (seen[idx]) return false;
+      seen[idx] = true;
+    }
+  }
+  if (model.bounds && model.bounds.length > n) return false;
+  return true;
+}
 // Every objective coefficient, constant, constraint coefficient, rhs, and bound
 // must be a finite number.
 function finiteModel_(model) {
@@ -746,19 +776,19 @@ function solveLinearProgram_(model) {
     const phaseOneCost = [];
     for (let j = 0; j < total; j++) phaseOneCost.push(isArtificial[j] ? 1 : 0);
     const phaseOneStatus = iterate_(tableau, basis, phaseOneCost, total, null);
-    // If phase 1 could not finish, we do not know feasibility. Report it rather
-    // than silently treating an unfinished search as feasible/infeasible.
-    if (phaseOneStatus === 'iteration_limit') {
-      return { status: 'iteration_limit' };
-    }
-    if (phaseOneStatus === 'numerical_failure') {
-      return { status: 'numerical_failure' };
+    // Phase 1 must end 'optimal'. Anything else means we don't know feasibility:
+    // 'unbounded' shouldn't happen for the auxiliary problem, so treat it as a
+    // numerical anomaly; the rest pass through.
+    if (phaseOneStatus !== 'optimal') {
+      return { status: phaseOneStatus === 'unbounded' ? 'numerical_failure' : phaseOneStatus };
     }
 
     let residual = 0;
     for (let i = 0; i < basis.length; i++) {
       if (isArtificial[basis[i]]) residual += tableau[i][total];
     }
+    if (!isFinite(residual)) return { status: 'numerical_failure' };
+    if (residual < -1e-6) return { status: 'numerical_failure' };
     if (residual > 1e-6) return { status: 'infeasible' };
 
     // Phase 1 can leave an artificial variable in the basis at value ~0
@@ -2228,6 +2258,7 @@ function matchesAnyHint_(label, hints) {
         saveUndo();   // enable undo of this whole paste
         var res=pasteBlock(block,startR,startC);
         render();
+        updateSenseHint();   // the pasted block may have changed the objective
         if(res.clipped) showTrouble(t('tPasteClipped'), t('tPasteClippedBody'));
       });
     }
@@ -2306,12 +2337,17 @@ function matchesAnyHint_(label, hints) {
   var lastUndo=null;   // { data, ROWS, COLS, varSettings, detectedVars, panelStale }
 
   function snapshot(){
+    var sel=document.getElementById('senseSel');
     return {
       data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS,
       // Deep-copy the panel state so undo restores variable types/bounds too.
       varSettings:JSON.parse(JSON.stringify(varSettings)),
       detectedVars:detectedVars.slice(),
-      panelStale:panelStale
+      panelStale:panelStale,
+      // Capture the objective-direction confirmation, so undo doesn't force a
+      // re-confirm of a direction the user had already set.
+      senseValue:sel?sel.value:'auto',
+      confirmedObjectiveSig:confirmedObjectiveSig?JSON.parse(JSON.stringify(confirmedObjectiveSig)):null
     };
   }
   function restore(snap){
@@ -2321,11 +2357,15 @@ function matchesAnyHint_(label, hints) {
     if(snap.varSettings){ varSettings=JSON.parse(JSON.stringify(snap.varSettings)); }
     if(snap.detectedVars){ detectedVars=snap.detectedVars.slice(); }
     if(typeof snap.panelStale==='boolean'){ panelStale=snap.panelStale; }
+    // Restore the objective-direction confirmation.
+    if('senseValue' in snap){ var sel=document.getElementById('senseSel'); if(sel) sel.value=snap.senseValue; }
+    if('confirmedObjectiveSig' in snap){ confirmedObjectiveSig=snap.confirmedObjectiveSig; }
     render();
     // Reflect the restored panel state in the UI.
     var panel=document.getElementById('varSettings');
     if(detectedVars.length){ if(panel){ panel.style.display=''; } renderVarPanel(); setDetectLabel(panelStale); }
     else if(panel){ panel.style.display='none'; setDetectLabel(false); }
+    updateSenseHint();
   }
   // Capture the current state as the undo point and reveal the Undo button.
   function saveUndo(){
@@ -2961,6 +3001,7 @@ function matchesAnyHint_(label, hints) {
       if(out.status==='infeasible'){ title=t('tInfeasible'); body=t('statusInfeasibleBody'); }
       else if(out.status==='unbounded'){ title=t('tUnbounded'); body=t('statusUnboundedBody'); }
       else if(out.status==='numerical_failure'){ title=t('tNumerical'); body=t('statusNumericalBody'); }
+      else if(out.status==='invalid_model'){ title=t('tNumerical'); body=t('statusInvalidBody'); }
       else { title=t('tIncomplete'); body=t('statusUnknownBody'); }   // unknown, iteration_limit, time_limit, node_limit...
       return showTrouble(title, body, out, model);
     }
