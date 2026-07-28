@@ -257,16 +257,16 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     <button class="chip" data-ex="production" data-i18n="exProduction">Production plan</button>
     <button class="chip" data-ex="workforce" data-i18n="exWorkforce">Workforce scheduling</button>
     <button class="chip" data-ex="project" data-i18n="exProject">Project selection</button>
-    <button class="chip chip-more" id="openExamples" data-i18n="moreExamples">More examples</button>
+    <button class="chip chip-more" id="openExamples" data-i18n="moreExamples" aria-haspopup="dialog" aria-expanded="false" aria-controls="exDrawer">More examples</button>
     <button class="chip" data-ex="blank" data-i18n="exBlank">Blank grid</button>
   </div>
 
   <!-- Examples drawer: grouped catalog, opened by the "More examples" button. -->
   <div class="drawer-backdrop" id="exDrawerBackdrop" hidden></div>
-  <aside class="drawer" id="exDrawer" hidden aria-label="Examples">
+  <aside class="drawer" id="exDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="exDrawerTitle">
     <div class="drawer-head">
-      <strong data-i18n="examplesTitle">Examples</strong>
-      <button class="drawer-close" id="closeExamples" aria-label="Close">&times;</button>
+      <strong id="exDrawerTitle" data-i18n="examplesTitle">Examples</strong>
+      <button class="drawer-close" id="closeExamples" data-i18n-aria="closeLabel" aria-label="Close">&times;</button>
     </div>
     <div class="drawer-body" id="exDrawerBody"></div>
   </aside>
@@ -349,7 +349,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
 </div></div></footer>
 
-<script src="assets/i18n.js?v=33"></script>
+<script src="assets/i18n.js?v=34"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2206,7 +2206,7 @@ function matchesAnyHint_(label, hints) {
   // solving each model with this engine and checking them by hand, so an
   // example that ever stops matching its expected result is a real regression.
   var EXAMPLES={
-    production:{ category:'start', sense:'max',
+    production:{ slug:'production-plan', category:'start', sense:'max',
       grid:[
         ['Product','Units','Profit','Contribution','Hours',''],
         ['A','0','30','=B2*C2','2',''],
@@ -2217,7 +2217,7 @@ function matchesAnyHint_(label, hints) {
         ['Total hours','','','=SUMPRODUCT(B2:B4,E2:E4)','<=','100'],
         ['Units of B','','','=B3','<=','40']],
       expected:{ status:'optimal', modelType:'continuous', objective:1760 } },
-    workshop:{ category:'start', sense:'max',
+    workshop:{ slug:'workshop-chart', category:'start', sense:'max',
       grid:[
         ['Item','Make','Profit','Total','Wood','Labour'],
         ['Chairs','0','30','=B2*C2','2','3'],
@@ -2227,7 +2227,7 @@ function matchesAnyHint_(label, hints) {
         ['Wood used','','','=SUMPRODUCT(B2:B3,E2:E3)','<=','80'],
         ['Labour used','','','=SUMPRODUCT(B2:B3,F2:F3)','<=','60']],
       expected:{ status:'optimal', modelType:'continuous', objective:900 } },
-    blend:{ category:'start', sense:'min',
+    blend:{ slug:'cheapest-feed-blend', category:'start', sense:'min',
       grid:[
         ['Ingredient','Kg','Cost/kg','Spend','Protein%','Fibre%'],
         ['Barley','0','0.30','=B2*C2','12','5'],
@@ -2238,8 +2238,8 @@ function matchesAnyHint_(label, hints) {
         ['Total kg','','','=SUM(B2:B4)','<=','100'],
         ['Protein','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','1800'],
         ['Fibre','','','=SUMPRODUCT(B2:B4,F2:F4)','>=','350']],
-      expected:{ status:'optimal', modelType:'continuous' } },
-    marketing:{ category:'business', sense:'max',
+      expected:{ status:'optimal', modelType:'continuous', objective:27.352941176470587, tolerance:1e-8 } },
+    marketing:{ slug:'marketing-budget', category:'business', sense:'max',
       grid:[
         ['Channel','Spend','Return/unit','Return','',''],
         ['Search','0','3.2','=B2*C2','',''],
@@ -2251,7 +2251,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'continuous',min:0,max:4000}, B3:{type:'continuous',min:500,max:null}, B4:{type:'continuous',min:0,max:1500} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'continuous', objective:21350 } },
-    workforce:{ category:'business', sense:'min', whole:true,
+    workforce:{ slug:'workforce-scheduling', category:'business', sense:'min', whole:true,
       grid:[
         ['Start day','Staff','','',''],
         ['Mon','0','','',''],
@@ -2271,7 +2271,7 @@ function matchesAnyHint_(label, hints) {
         ['Sat cover','','=B3+B4+B5+B6+B7','>=','16'],
         ['Sun cover','','=B4+B5+B6+B7+B8','>=','11']],
       expected:{ status:'optimal', modelType:'integer', objective:23 } },
-    shipping:{ category:'business', sense:'min', whole:true,
+    shipping:{ slug:'shipping-plan', category:'business', sense:'min', whole:true,
       grid:[
         ['Route','Units','Cost/unit','Cost','',''],
         ['F1 to A','0','4','=B2*C2','',''],
@@ -2288,7 +2288,7 @@ function matchesAnyHint_(label, hints) {
         ['B demand','','','=B3+B6','>=','25'],
         ['C demand','','','=B4+B7','>=','35']],
       expected:{ status:'optimal', modelType:'integer', objective:450 } },
-    project:{ category:'binary', sense:'max',
+    project:{ slug:'project-selection', category:'binary', sense:'max',
       grid:[
         ['Project','Fund','Value','Selected','Cost','Hours'],
         ['Alpha','0','40','=B2*C2','30','20'],
@@ -2302,7 +2302,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'binary', objective:125 } },
-    delivery:{ category:'binary', sense:'max',
+    delivery:{ slug:'delivery-load', category:'binary', sense:'max',
       grid:[
         ['Order','Load','Profit','Selected','Weight','Volume'],
         ['O1','0','60','=B2*C2','10','4'],
@@ -2317,7 +2317,7 @@ function matchesAnyHint_(label, hints) {
       domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'}, B6:{type:'binary'} },
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'binary', objective:240 } },
-    supplier:{ category:'binary', sense:'min',
+    supplier:{ slug:'supplier-activation', category:'binary', sense:'min',
       grid:[
         ['Decision','Value','Coeff','Term','',''],
         ['Use S1','0','200','=B2*C2','',''],
@@ -2337,12 +2337,18 @@ function matchesAnyHint_(label, hints) {
       openVarSettings:true,
       expected:{ status:'optimal', modelType:'mixed', objective:830 } }
   };
-  // The order and grouping used by the example picker.
-  var EXAMPLE_ORDER=[
-    { key:'start', items:['production','workshop','blend'] },
-    { key:'business', items:['marketing','workforce','shipping'] },
-    { key:'binary', items:['project','delivery','supplier'] }
-  ];
+  // Category display order; each example's own `category` is the source of
+  // truth for which group it belongs to (no duplicated membership list).
+  var CATEGORY_ORDER=['start','business','binary'];
+  function examplesInCategory(cat){
+    return Object.keys(EXAMPLES).filter(function(k){ return EXAMPLES[k].category===cat; });
+  }
+  // Resolve a public slug (or a short internal key) to the internal key.
+  var EXAMPLE_BY_SLUG={};
+  Object.keys(EXAMPLES).forEach(function(key){
+    EXAMPLE_BY_SLUG[key]=key;                                   // short key (back-compat)
+    if(EXAMPLES[key].slug) EXAMPLE_BY_SLUG[EXAMPLES[key].slug]=key;
+  });
 
   function loadExample(name){
     modelChanged();
@@ -2363,19 +2369,21 @@ function matchesAnyHint_(label, hints) {
     }
     render();
     document.getElementById('result').classList.remove('show');
+    // Whole-numbers toggle reflects the example (false for Blank), so a new
+    // model started from Blank is never silently integer.
+    var wholeBox=document.getElementById('whole');
+    if(wholeBox) wholeBox.checked=!!(ex && ex.whole);
     if(name!=='blank' && ex){
-      // Whole-numbers toggle for pure-integer examples with no per-var domains.
-      var wholeBox=document.getElementById('whole'); if(wholeBox) wholeBox.checked=!!ex.whole;
       // Confirm the objective direction for this curated model, from the
       // example's own sense (not a re-detection), then remember the signature.
       var sel=document.getElementById('senseSel');
       if(sel){ sel.value=ex.sense||'auto'; }
       var sig=objectiveSignature();
       if(sig){ if(sel && (ex.sense==='max'||ex.sense==='min')) sig.detected=ex.sense; confirmedObjectiveSig=sig; }
-      // Load per-variable domains into the panel, if the example defines them,
-      // and open Variable settings so the feature is visible.
+      // Load per-variable domains into the panel, if the example defines them.
+      // The panel opens only when the example asks for it (openVarSettings).
       if(ex.domains){
-        detectForPanel();                     // populate detectedVars for the panel
+        detectForPanel({ open: ex.openVarSettings===true });
         Object.keys(ex.domains).forEach(function(cell){
           var d=ex.domains[cell];
           var s=settingsFor(cell);
@@ -2384,11 +2392,20 @@ function matchesAnyHint_(label, hints) {
         });
         panelStale=false;
         renderVarPanel();
-        var panel=document.getElementById('varSettings');
-        if(panel && ex.openVarSettings){ panel.style.display=''; panel.open=true; }
       }
     }
     updateSenseHint();
+    updateExampleUrl(ex ? (ex.slug||name) : null);
+  }
+  // Keep ?ex= in the URL in sync with the loaded example, so a reload or a
+  // copied link preserves the choice. Blank clears it.
+  function updateExampleUrl(slug){
+    try{
+      var params=new URLSearchParams(location.search);
+      if(slug && slug!=='blank') params.set('ex', slug); else params.delete('ex');
+      history.replaceState(null, '', location.pathname +
+        (params.toString()?'?'+params.toString():'') + location.hash);
+    }catch(e){}
   }
 
   function colLetter(i){var s='',n=i;while(n>0){var r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
@@ -2811,7 +2828,8 @@ function matchesAnyHint_(label, hints) {
 
   // Detect the model on the main thread (fast: no solving) to populate the
   // panel with one row per decision variable.
-  function detectForPanel(){
+  function detectForPanel(opts){
+    var openPanel=!opts || opts.open!==false;   // default: open (manual button use)
     var sheet=sheetFromGrid();
     var model;
     try{ model=detectModel_(sheet); }
@@ -2828,7 +2846,7 @@ function matchesAnyHint_(label, hints) {
     setDetectLabel(false);
     renderVarPanel();
     var panel=document.getElementById('varSettings');
-    if(panel){ panel.style.display=''; panel.open=true; }
+    if(panel){ panel.style.display=''; if(openPanel) panel.open=true; }
   }
 
   function settingsFor(cell){
@@ -3562,12 +3580,13 @@ function matchesAnyHint_(label, hints) {
     var body=document.getElementById('exDrawerBody'); if(!body) return;
     var typeTag={continuous:t('typeContinuous'),integer:t('typeInteger'),binary:t('typeBinary'),mixed:t('sdMixed')};
     var html='';
-    EXAMPLE_ORDER.forEach(function(group){
-      html+='<div class="drawer-section"><h4>'+esc(t('exCat_'+group.key))+'</h4>';
-      group.items.forEach(function(key){
+    CATEGORY_ORDER.forEach(function(cat){
+      var items=examplesInCategory(cat);
+      if(!items.length) return;
+      html+='<div class="drawer-section"><h4>'+esc(t('exCat_'+cat))+'</h4>';
+      items.forEach(function(key){
         var ex=EXAMPLES[key];
         var mt=(ex.expected&&ex.expected.modelType)||'continuous';
-        var nvars=0; // count decision rows (best-effort from grid: rows with a leading label and a 0)
         var tags=[ (typeTag[mt]||mt).toUpperCase(),
                    (ex.sense==='min'?t('senseMin'):t('senseMax')).toUpperCase() ];
         html+='<button class="ex-card" data-ex="'+key+'">'+
@@ -3587,15 +3606,36 @@ function matchesAnyHint_(label, hints) {
     renderExamplesDrawer();
     document.getElementById('exDrawer').hidden=false;
     document.getElementById('exDrawerBackdrop').hidden=false;
+    document.body.style.overflow='hidden';                    // lock background scroll
+    var openBtn=document.getElementById('openExamples'); if(openBtn) openBtn.setAttribute('aria-expanded','true');
+    var closeBtn=document.getElementById('closeExamples');
+    if(closeBtn){ closeBtn.setAttribute('aria-label', t('closeLabel')); closeBtn.focus(); }  // move focus in
   }
   function closeDrawer(){
-    document.getElementById('exDrawer').hidden=true;
+    var drawer=document.getElementById('exDrawer');
+    if(!drawer || drawer.hidden) return;
+    drawer.hidden=true;
     document.getElementById('exDrawerBackdrop').hidden=true;
+    document.body.style.overflow='';
+    var openBtn=document.getElementById('openExamples');
+    if(openBtn){ openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }  // return focus
   }
   var openEx=document.getElementById('openExamples'); if(openEx) openEx.addEventListener('click',openDrawer);
   var closeEx=document.getElementById('closeExamples'); if(closeEx) closeEx.addEventListener('click',closeDrawer);
   var backdrop=document.getElementById('exDrawerBackdrop'); if(backdrop) backdrop.addEventListener('click',closeDrawer);
-  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
+  document.addEventListener('keydown',function(e){
+    var drawer=document.getElementById('exDrawer');
+    if(!drawer || drawer.hidden) return;
+    if(e.key==='Escape'){ closeDrawer(); return; }
+    if(e.key==='Tab'){
+      // Keep Tab focus inside the open drawer.
+      var f=drawer.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if(!f.length) return;
+      var first=f[0], last=f[f.length-1];
+      if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+    }
+  });
   document.getElementById('solve').addEventListener('click',solve);
   document.getElementById('clear').addEventListener('click',function(){loadExample('blank');});
   document.getElementById('addRow').addEventListener('click',addRow);
@@ -3642,38 +3682,60 @@ function matchesAnyHint_(label, hints) {
         ' &nbsp;'+label+(detail?' <span style="color:var(--faint)">'+detail+'</span>':'');
       out.appendChild(d);
     }
-    function sheetFrom(ex){
-      var isF=function(x){return typeof x==='string'&&x.charAt(0)==='=';};
+    function sheetFrom(grid){
+      var isF=function(x){return typeof x==='string'&&x.charAt(0)==='='&&!({'<=':1,'>=':1,'=':1}[x]);};
       var F=[],V=[];
-      for(var r=0;r<ex.length;r++){var fr=[],vr=[];for(var c=0;c<ex[r].length;c++){
-        var raw=String(ex[r][c]);
+      for(var r=0;r<grid.length;r++){var fr=[],vr=[];for(var c=0;c<grid[r].length;c++){
+        var raw=String(grid[r][c]);
         if(isF(raw)){fr.push(raw);vr.push(0);}else{fr.push('');vr.push(raw!==''&&!isNaN(Number(raw))?Number(raw):raw);}
       }F.push(fr);V.push(vr);}
       return {getDataRange:function(){return{getRow:function(){return 1;},getColumn:function(){return 1;},getFormulas:function(){return F;},getValues:function(){return V;}};}};
     }
-    function trySolve(ex,whole){
-      try{var sh=sheetFrom(ex);var m=detectModel_(sh);if(whole)m.wholeNumbers=true;return solveModel_(sh,m);}
-      catch(e){return {status:'error',error:String(e.message||e)};}
+    // Solve an example exactly as loadExample would: apply its sense, whole
+    // flag, and per-variable domains, then solve.
+    function solveExample(ex){
+      try{
+        var sh=sheetFrom(ex.grid);
+        var m=detectModel_(sh);
+        m.objective.sense=ex.sense;
+        m.wholeNumbers=!!ex.whole;
+        if(ex.domains){
+          var cells=expandRange_(loadGrid_(sh), m.variables);
+          var integer=[],bounds=[];
+          cells.forEach(function(cell,i){
+            var d=ex.domains[cell]; if(!d) return;
+            if(d.type==='binary'){ integer.push(i); bounds[i]={lower:0,upper:1}; }
+            else if(d.type==='integer'){ integer.push(i); bounds[i]={lower:d.min==null?0:d.min,upper:d.max==null?null:d.max}; }
+            else { bounds[i]={lower:d.min==null?0:d.min,upper:d.max==null?null:d.max}; }
+          });
+          m.domains={integer:(ex.whole?true:(integer.length?integer:null)),bounds:bounds.length?bounds:null};
+        }
+        return solveModel_(sh,m);
+      }catch(e){ return {status:'error',error:String(e.message||e)}; }
     }
-    // 1: production optimum
-    var p=trySolve(EXAMPLES.production,false);
-    line(p.status==='optimal'&&Math.round(p.objective)===1760,'Production example solves','got '+fmt(p.objective)+', expected 1,760');
-    // 2: shadow price present
+    // Every example must solve to its expected status, model type, objective
+    // (within tolerance), prove optimality, and pass verification.
+    Object.keys(EXAMPLES).forEach(function(key){
+      var ex=EXAMPLES[key], exp=ex.expected||{}, out=solveExample(ex);
+      var tol=exp.tolerance||1e-6;
+      var verified=(out.constraints||[]).every(function(c){return c.satisfied;})&&
+                   (out.variableDomains||[]).every(function(d){return d.satisfied;});
+      var okStatus=out.status===exp.status;
+      var okType=!exp.modelType||out.modelType===exp.modelType;
+      var okObj=exp.objective==null||(typeof out.objective==='number'&&Math.abs(out.objective-exp.objective)<=tol);
+      var okProven=out.status!=='optimal'||out.optimalityProven===true;
+      var all=okStatus&&okType&&okObj&&okProven&&verified;
+      line(all, t('exName_'+key),
+        (exp.objective!=null?('obj '+fmt(out.objective)+(okObj?'':' (exp '+exp.objective+')')):out.status)+
+        (verified?'':' [verify FAILED]')+(okProven?'':' [not proven]'));
+    });
+    // Shadow price is computed on a binding continuous limit.
+    var p=solveExample(EXAMPLES.production);
     var hasShadow=(p.constraints||[]).some(function(c){return c.binding&&typeof c.objectiveDelta==='number'&&c.objectiveDelta!==0;});
     line(hasShadow,'Estimated one-unit impact (shadow price) is computed', hasShadow?'a binding limit shows its value':'none found');
-    // 3: blend exact
-    var b=trySolve(EXAMPLES.blend,false);
-    line(b.status==='optimal'&&Math.abs(b.objective-27.35)<0.1,'Blend example solves','got £'+fmt(b.objective)+', expected ~£27.35');
-    // 4: budget
-    var g=trySolve(EXAMPLES.budget,false);
-    line(g.status==='optimal'&&Math.round(g.objective)===28300,'Budget example solves','got '+fmt(g.objective)+', expected 28,300');
-    // 5: integer differs from continuous
-    var ci=trySolve(EXAMPLES.production,true);
-    line(ci.status==='optimal','Whole-numbers mode runs', 'objective '+fmt(ci.objective));
-    // 6: impossible model is caught, not crashed or faked
-    var imp=trySolve([['Item','Make','Profit','Total','',''],['X','0','10','=B2*C2','',''],['Y','0','8','=B3*C3','',''],['','','','','',''],['Total profit','','','=SUM(D2:D3)','',''],['Min make','','','=B2','>=','100'],['Max make','','','=B2','<=','20']],false);
-    var caught=(imp.status==='infeasible');
-    line(caught,'Contradictory limits are caught cleanly','reported: '+(imp.status||imp.error||'?'));
+    // Contradictory limits are caught, not faked.
+    var imp=solveExample({grid:[['Item','Make','Profit','Total','',''],['X','0','10','=B2*C2','',''],['Y','0','8','=B3*C3','',''],['','','','','',''],['Total profit','','','=SUM(D2:D3)','',''],['Min make','','','=B2','>=','100'],['Max make','','','=B2','<=','20']],sense:'max'});
+    line(imp.status==='infeasible','Contradictory limits are caught cleanly','reported: '+(imp.status||imp.error||'?'));
     var allPass=out.querySelectorAll('span[style*="wrong"]').length===0;
     var summary=document.createElement('div');
     summary.style.marginTop='10px';summary.style.fontWeight='600';
@@ -3696,10 +3758,13 @@ function matchesAnyHint_(label, hints) {
     setDetectLabel(panelStale);              // button label follows the language
     if(detectedVars.length) renderVarPanel(); // re-render dynamic panel in new language
     updateSenseHint();                        // hint text follows the language
+    // If the examples drawer is open, re-render its cards in the new language.
+    var exd=document.getElementById('exDrawer');
+    if(exd && !exd.hidden && typeof renderExamplesDrawer==='function') renderExamplesDrawer();
   });
 
   var _ex=(function(){ try{ return new URLSearchParams(location.search).get('ex'); }catch(e){ return null; } })();
-  loadExample(EXAMPLES[_ex] ? _ex : 'production');
+  loadExample(EXAMPLE_BY_SLUG[_ex] || 'production');
 })();
 </script>
 </body>
