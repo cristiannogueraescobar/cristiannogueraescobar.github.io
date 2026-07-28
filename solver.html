@@ -340,7 +340,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
     <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
     <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
   </div>
-  <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span></p>
+  <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span> <span id="buildBadge" class="build-badge" style="opacity:.6;font-family:var(--mono,monospace);font-size:11px"></span></p>
 </div></div></footer>
 
 <!-- Examples drawer: a direct child of <body> (NOT inside .app) so the inert
@@ -355,7 +355,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=40"></script>
+<script src="assets/i18n.js?v=44"></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -3810,5 +3810,6 @@ function matchesAnyHint_(label, hints) {
   loadExample(EXAMPLE_BY_SLUG[_ex] || 'production');
 })();
 </script>
+<script src="assets/build-badge.js?v=1"></script>
 </body>
 </html>

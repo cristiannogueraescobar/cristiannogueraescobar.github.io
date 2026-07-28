@@ -1,0 +1,124 @@
+# Deploy workflow for plumline.online (GitHub Pages).
+#
+# It ties production to a known-good commit, per the deployment diagnosis:
+#   1. Runs the full test battery (engine/run_all.js). A red build never deploys.
+#   2. Stamps build-info.json with the commit SHA, timestamp and test count.
+#   3. Writes assets/hashes.txt with a SHA-256 of every served file.
+#   4. Deploys the site to GitHub Pages.
+#   5. Smoke-tests the live site: build-info.json reports THIS commit, and a
+#      couple of content markers that must exist in the current build are present.
+#
+# After a green run you can state: "production corresponds to commit <SHA>,
+# that commit passed N tests, and the served files match assets/hashes.txt."
+
+name: Test and deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 1. Full test battery — the job fails here if anything is red.
+      - name: Run tests
+        id: tests
+        run: |
+          OUT=$(node engine/run_all.js)
+          echo "$OUT"
+          COUNT=$(echo "$OUT" | grep -oE 'TOTAL PASSED: [0-9]+' | grep -oE '[0-9]+')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+
+      # Extra guard: i18n.js must parse, and every JSON-LD block must be valid.
+      - name: Validate assets
+        run: |
+          node --check assets/i18n.js
+          node engine/tests_jsonld.js
+          node engine/tests_i18n_pages.js
+
+      # 2. Stamp build-info.json with the real commit, time and test count.
+      - name: Stamp build info
+        run: |
+          node -e '
+            const fs = require("fs");
+            fs.writeFileSync("build-info.json", JSON.stringify({
+              commit: process.env.GITHUB_SHA,
+              builtAt: new Date().toISOString(),
+              testsPassed: Number(process.env.TEST_COUNT || 0),
+              note: "Stamped by CI at deploy time."
+            }, null, 2) + "\n");
+          '
+        env:
+          TEST_COUNT: ${{ steps.tests.outputs.count }}
+
+      # Build the served site into _site, excluding tests and dev-only files.
+      # engine/ stays in the repo (CI needs it) but is never served.
+      - name: Prepare served site
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude '.git' --exclude '.github' --exclude '_site' \
+            --exclude 'engine' --exclude 'DEPLOY.md' --exclude 'hashes.txt' \
+            ./ _site/
+
+      # 3. Record a SHA-256 of every file that will actually be served.
+      - name: Write file hashes
+        run: |
+          ( cd _site && find . -type f | sort | xargs sha256sum ) > _site/assets/hashes.txt
+          echo "Hashed $(wc -l < _site/assets/hashes.txt) served files"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      # 5. Post-deploy smoke test against the live site.
+      - name: Smoke test production
+        run: |
+          set -e
+          BASE="https://plumline.online"
+          echo "Checking $BASE/build-info.json reports $GITHUB_SHA"
+          DEPLOYED=$(curl -fsS "$BASE/build-info.json" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).commit||""))')
+          if [ "$DEPLOYED" != "$GITHUB_SHA" ]; then
+            echo "MISMATCH: production serves commit $DEPLOYED but this run is $GITHUB_SHA"
+            echo "GitHub Pages caches for a few minutes; re-run this job if it only just deployed."
+            exit 1
+          fi
+          echo "Production is on the expected commit."
+          # Content markers that must exist in the current build.
+          curl -fsS "$BASE/index.html" | grep -q 'id="capabilities"' || { echo "index.html missing #capabilities"; exit 1; }
+          curl -fsS "$BASE/assets/i18n.js" | grep -q 'gDirH' || { echo "i18n.js missing gDirH"; exit 1; }
+          curl -fsS "$BASE/examples.html" | grep -q 'application/ld+json' || { echo "examples.html missing JSON-LD"; exit 1; }
+          echo "Smoke test passed."
