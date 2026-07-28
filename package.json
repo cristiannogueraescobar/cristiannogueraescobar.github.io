@@ -1,0 +1,11 @@
+{
+  "name": "plumline-site",
+  "private": true,
+  "description": "Plumline site tests and tooling. Runtime pages ship no npm deps; this is dev-only (test battery).",
+  "scripts": {
+    "test": "node engine/run_all.js"
+  },
+  "devDependencies": {
+    "jsdom": "30.0.0"
+  }
+}

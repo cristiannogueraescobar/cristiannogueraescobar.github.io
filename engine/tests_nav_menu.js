@@ -1,11 +1,10 @@
 /**
  * tests_nav_menu.js — behavioral test for the accessible mobile drawer
- * (assets/nav-menu.js). Static structure is covered in tests_structure.js;
- * this exercises the actual keyboard/focus behavior in a simulated DOM.
+ * (assets/nav-menu.js), plus a check against every real page's header.
  *
- * Requires jsdom. If jsdom isn't installed it skips (prints SKIPPED and exits 0)
- * so the core suite never depends on an optional package. Run explicitly with
- * jsdom present to verify the drawer.
+ * Requires jsdom (pinned in package.json; CI runs `npm ci`). If jsdom is
+ * missing it prints SKIPPED and exits 0; run_all.js surfaces the skip in its
+ * summary so "all green" is never silently incomplete.
  *
  * Run: node engine/tests_nav_menu.js
  */
@@ -14,62 +13,91 @@ const path = require('path');
 
 let JSDOM;
 try { ({ JSDOM } = require('jsdom')); }
-catch (e) {
-  console.log('NAV MENU TESTS  SKIPPED (jsdom not installed)');
-  process.exit(0);
-}
+catch (e) { console.log('NAV MENU TESTS  SKIPPED (jsdom not installed — run npm ci)'); process.exit(0); }
 
-const navmenu = fs.readFileSync(path.join(__dirname, '..', 'assets', 'nav-menu.js'), 'utf8');
-const html = `<!DOCTYPE html><html><body>
-<header><div class="header-actions">
-  <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">Menu</button>
-  <nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">
-    <a href="solver.html" class="hide-sm" data-i18n="navSolver">Solver</a>
-    <a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>
-    <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
-    <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
-    <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
-  </nav>
-  <select id="lang" aria-label="Language"></select>
-</div></header>
-</body></html>`;
+const siteDir = path.join(__dirname, '..');
+const navmenu = fs.readFileSync(path.join(siteDir, 'assets', 'nav-menu.js'), 'utf8');
+const EXPECTED = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
+const PAGES = ['index.html', 'solver.html', 'guide.html', 'about.html', 'examples.html', 'privacy.html', 'terms.html'];
 
-const dom = new JSDOM(html, { runScripts: 'outside-only' });
-const { window } = dom;
-const document = window.document;
-new Function('window', 'document', navmenu)(window, document);
-document.dispatchEvent(new window.Event('DOMContentLoaded'));
-
-const toggle = document.querySelector('.menu-toggle');
-const drawer = document.getElementById('mobile-menu');
 let pass = 0, fail = 0;
 function ok(name, cond) { if (cond) pass++; else { fail++; console.log('  FAIL:', name); } }
 
-ok('drawer is created', !!drawer);
-ok('drawer starts hidden', drawer.hasAttribute('hidden'));
-ok('drawer clones exactly 5 core links', drawer.querySelectorAll('.mobile-menu-panel a').length === 5);
-ok('drawer links match Primary order',
-   [...drawer.querySelectorAll('a')].map(a => a.getAttribute('href')).join('|') ===
-   'solver.html|index.html#addon|guide.html|examples.html|about.html');
-ok('drawer panel keeps the Primary label', drawer.querySelector('.mobile-menu-panel').getAttribute('aria-label') === 'Primary');
-ok('cloned links drop hide-sm', [...drawer.querySelectorAll('a')].every(a => !a.classList.contains('hide-sm')));
+// Boot a page's real HTML in jsdom, run nav-menu.js, return { window, document }.
+function boot(html) {
+  const dom = new JSDOM(html, { runScripts: 'outside-only' });
+  const { window } = dom;
+  const document = window.document;
+  new Function('window', 'document', navmenu)(window, document);
+  document.dispatchEvent(new window.Event('DOMContentLoaded'));
+  return { window, document };
+}
 
-// Open via click (Enter/Space work natively on a <button>).
+// --- Part 1: every REAL page builds a drawer with exactly the five core hrefs.
+PAGES.forEach(function (p) {
+  const html = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const { document } = boot(html);
+  const drawer = document.getElementById('mobile-menu');
+  ok(p + ': drawer is built', !!drawer);
+  if (!drawer) return;
+  const primaryLinks = [...drawer.querySelectorAll('.mobile-menu-panel:not(.mobile-menu-onpage) > a')]
+    .map(a => a.getAttribute('href'));
+  ok(p + ': drawer holds exactly the 5 core links in order',
+     primaryLinks.join('|') === EXPECTED.join('|'));
+});
+
+// --- Part 2: full keyboard/focus behavior, driven on the real solver page.
+const solverHtml = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+const { window, document } = boot(solverHtml);
+const toggle = document.querySelector('.menu-toggle');
+const drawer = document.getElementById('mobile-menu');
+const panel = drawer.querySelector('.mobile-menu-panel');
+
+ok('starts hidden', drawer.hasAttribute('hidden'));
+ok('cloned links drop hide-sm', [...panel.querySelectorAll('a')].every(a => !a.classList.contains('hide-sm')));
+ok('panel is a modal dialog', panel.getAttribute('role') === 'dialog' && panel.getAttribute('aria-modal') === 'true');
+
+// Open on click; focus moves in; background is inert; scroll locked.
 toggle.dispatchEvent(new window.Event('click'));
-ok('opens on trigger click', !drawer.hasAttribute('hidden'));
-ok('aria-expanded is true when open', toggle.getAttribute('aria-expanded') === 'true');
-ok('focus moves to the first drawer link', document.activeElement === drawer.querySelector('.mobile-menu-panel a'));
+ok('opens on click', !drawer.hasAttribute('hidden'));
+ok('aria-expanded true', toggle.getAttribute('aria-expanded') === 'true');
+const focusList = [...panel.querySelectorAll('a[href]')];
+ok('focus moves to first link', document.activeElement === focusList[0]);
+ok('body scroll locked', document.body.style.overflow === 'hidden');
+const header = document.querySelector('header');
+ok('background header is inert', header.inert === true);
 
-// Escape closes and returns focus to the trigger.
+// Tab from last wraps to first; Shift+Tab from first wraps to last.
+focusList[focusList.length - 1].focus();
+document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab' }));
+ok('Tab from last wraps to first', document.activeElement === focusList[0]);
+focusList[0].focus();
+document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }));
+ok('Shift+Tab from first wraps to last', document.activeElement === focusList[focusList.length - 1]);
+
+// Escape closes, returns focus, restores inert + scroll.
 document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape' }));
-ok('Escape closes the drawer', drawer.hasAttribute('hidden'));
-ok('aria-expanded is false after close', toggle.getAttribute('aria-expanded') === 'false');
-ok('focus returns to the trigger', document.activeElement === toggle);
+ok('Escape closes', drawer.hasAttribute('hidden'));
+ok('focus returns to toggle', document.activeElement === toggle);
+ok('body scroll restored', document.body.style.overflow === '');
+ok('background header no longer inert', header.inert !== true);
 
-// Backdrop click closes too.
+// Second click on Menu reopens then closes (toggle behavior).
+toggle.dispatchEvent(new window.Event('click'));
+ok('reopens on second click', !drawer.hasAttribute('hidden'));
+toggle.dispatchEvent(new window.Event('click'));
+ok('closes on toggle click', drawer.hasAttribute('hidden'));
+
+// Click a cross-document link closes the drawer.
+toggle.dispatchEvent(new window.Event('click'));
+const guideLink = [...panel.querySelectorAll('a')].find(a => a.getAttribute('href') === 'guide.html');
+guideLink.dispatchEvent(new window.Event('click', { bubbles: true }));
+ok('cross-document link click closes drawer', drawer.hasAttribute('hidden'));
+
+// Backdrop click closes.
 toggle.dispatchEvent(new window.Event('click'));
 drawer.querySelector('.mobile-menu-backdrop').dispatchEvent(new window.Event('click'));
-ok('backdrop click closes the drawer', drawer.hasAttribute('hidden'));
+ok('backdrop click closes drawer', drawer.hasAttribute('hidden'));
 
 console.log('NAV MENU TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

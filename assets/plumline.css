@@ -280,8 +280,11 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   :root{--rail:26px}
   .plumb{padding:0 18px 0 calc(var(--rail)+18px)}
   .nav{gap:14px}
-  .nav a.hide-sm{display:none}
-  .menu-toggle{display:inline-flex;align-items:center}
+  /* Only collapse the nav into the drawer when JS is available to run it.
+     Without JS the links stay visible and the (non-functional) toggle stays
+     hidden — the page degrades to a plain, fully navigable header. */
+  .js .nav a.hide-sm{display:none}
+  .js .menu-toggle{display:inline-flex;align-items:center}
   .versus{grid-template-columns:1fr}
   .bob::before{left:calc(-1*(var(--rail)+18px)+var(--rail)-5px)}
 }

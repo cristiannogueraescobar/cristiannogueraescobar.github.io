@@ -87,6 +87,9 @@ function validateNavigation(body, label, opts) {
   const R = [];
   const add = (name, cond, detail) => R.push({ name: label + ' ' + name, cond: !!cond, detail: detail });
   opts = opts || {};
+  // Raw HTML (scripts intact) for checks that inspect inline <script>, e.g. the
+  // js-class classifier in <head>. Falls back to body when not provided.
+  const fullRaw = opts.fullRaw || body;
 
   const navs = [...body.matchAll(/<nav\b[^>]*aria-label="Primary"[^>]*>[\s\S]*?<\/nav>/g)].map(m => m[0]);
   add('has exactly one primary nav', navs.length === 1, 'found ' + navs.length);
@@ -122,6 +125,12 @@ function validateNavigation(body, label, opts) {
   add('has a menu-toggle button', /<button\b[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
   add('menu-toggle controls mobile-menu', /<button\b[^>]*class="[^"]*\bmenu-toggle\b[^>]*aria-controls="mobile-menu"|<button\b[^>]*aria-controls="mobile-menu"[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
 
+  // Progressive enhancement: the page marks itself with a `js` class early, and
+  // the CSS only collapses the nav when that class is present. Without JS the
+  // links stay visible — the header degrades to plain navigation rather than a
+  // dead Menu button. Guard both halves.
+  add("sets the js class early", /document\.documentElement\.classList\.add\(['"]js['"]\)/.test(fullRaw));
+
   // Language switch carries a translatable accessible name.
   add('language select has data-i18n-aria', /<select\b[^>]*data-i18n-aria="ariaLanguage"/.test(body));
 
@@ -143,7 +152,7 @@ function validateNavigation(body, label, opts) {
 PAGES.forEach(function (p) {
   const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
   const body = stripScripts(raw);
-  validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html' })
+  validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html', fullRaw: raw })
     .forEach(r => ok(r.name, r.cond, r.detail));
 });
 
@@ -151,6 +160,7 @@ PAGES.forEach(function (p) {
 // fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
 // the auditor could reintroduce must make at least one named check fail here.
 const GOOD_NAV = [
+  '<script>document.documentElement.classList.add(\'js\')</script>',
   '<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu">Menu</button>',
   '<nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">',
   '<a href="solver.html" class="hide-sm" aria-current="page" data-i18n="navSolver">Solver</a>',
@@ -162,16 +172,17 @@ const GOOD_NAV = [
   '<nav class="nav-onpage" aria-label="On this page" data-i18n-aria="ariaOnPage"><a href="#how" class="nav-context" data-i18n="navHow">How to use</a></nav>',
   '<select id="lang" aria-label="Language" data-i18n-aria="ariaLanguage"></select>'
 ].join('\n');
-const GOOD_OPTS = { current: 'solver.html', onPage: true };
+const GOOD_OPTS = { current: 'solver.html', onPage: true, fullRaw: GOOD_NAV };
 
+function optsFor(fixture) { return { current: 'solver.html', onPage: true, fullRaw: fixture }; }
 function failsOn(mutated, checkSubstring) {
   // True if validateNavigation reports a FAILING check whose name contains the
   // substring — i.e. the guard caught the regression.
-  return validateNavigation(mutated, 'fixture', GOOD_OPTS)
+  return validateNavigation(mutated, 'fixture', optsFor(mutated))
     .some(r => !r.cond && r.name.indexOf(checkSubstring) >= 0);
 }
 function passesClean(fixture) {
-  return validateNavigation(fixture, 'fixture', GOOD_OPTS).every(r => r.cond);
+  return validateNavigation(fixture, 'fixture', optsFor(fixture)).every(r => r.cond);
 }
 
 // The clean fixture must pass every check (guards aren't vacuously failing).
@@ -201,6 +212,11 @@ ok('self-test: missing menu-toggle is caught', failsOn(noToggle, 'has a menu-tog
 // 5. Hard-wired (non-translatable) landmark name → i18n-aria check must fail.
 const noAria = GOOD_NAV.replace(' data-i18n-aria="ariaPrimary"', '');
 ok('self-test: non-translatable Primary label is caught', failsOn(noAria, 'has data-i18n-aria'));
+
+// 6. Missing js-class classifier → progressive-enhancement check must fail
+//    (without it the CSS would hide links with no working menu).
+const noJs = GOOD_NAV.replace(/<script>document\.documentElement[\s\S]*?<\/script>\n/, '');
+ok('self-test: missing js-class classifier is caught', failsOn(noJs, 'sets the js class early'));
 
 // Exactly one canonical per page, pointing to the right URL.
 const CANONICALS = {

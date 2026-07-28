@@ -12,10 +12,16 @@ const suites = [
   'tests_i18n_pages', 'tests_direction', 'tests_structure', 'tests_worker_parity', 'tests_nav_menu'
 ];
 
-let totalPass = 0, anyFail = false;
+let totalPass = 0, anyFail = false, anySkip = false;
 suites.forEach(function (s) {
   try {
     const out = execSync('node ' + path.join(__dirname, s + '.js'), { encoding: 'utf8' });
+    if (/SKIPPED/.test(out)) {
+      anySkip = true;
+      console.log('  ' + s.padEnd(20) + ' SKIPPED');
+      process.stdout.write('    ' + out.trim().split('\n').pop() + '\n');
+      return;
+    }
     const m = out.match(/PASSED: (\d+)\s+FAILED: (\d+)/);
     const p = m ? +m[1] : 0, f = m ? +m[2] : 0;
     totalPass += p;
@@ -28,5 +34,6 @@ suites.forEach(function (s) {
   }
 });
 console.log('  ' + '-'.repeat(40));
-console.log('  TOTAL PASSED: ' + totalPass + (anyFail ? '   (SOME FAILED)' : '   (all green)'));
+console.log('  TOTAL PASSED: ' + totalPass +
+  (anyFail ? '   (SOME FAILED)' : (anySkip ? '   (all green, SOME SKIPPED — install deps with npm ci)' : '   (all green)')));
 process.exit(anyFail ? 1 : 0);

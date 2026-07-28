@@ -39,7 +39,7 @@ jobs:
 
       # 1. Full test battery — the job fails here if anything is red.
       - name: Install test deps
-        run: npm install jsdom --no-save
+        run: npm ci
 
       - name: Run tests
         id: tests
