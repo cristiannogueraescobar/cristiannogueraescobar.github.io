@@ -83,23 +83,16 @@
   </div></div>
 </footer>
 
+<script src="assets/examples-data.js?v=1"></script>
 <script src="assets/i18n.js?v=36"></script>
 <script>
-  // The catalog is data-driven so it stays in sync with the solver's examples.
-  // Each entry mirrors the solver's slug, category, sense and model type; the
-  // display text comes from the shared i18n keys (exName_*, exDesc_*).
-  var CATALOG=[
-    { key:'production', slug:'production-plan',        cat:'start',    type:'continuous', sense:'max' },
-    { key:'workshop',   slug:'workshop-chart',         cat:'start',    type:'continuous', sense:'max' },
-    { key:'blend',      slug:'cheapest-feed-blend',    cat:'start',    type:'continuous', sense:'min' },
-    { key:'marketing',  slug:'marketing-budget',       cat:'business', type:'continuous', sense:'max' },
-    { key:'workforce',  slug:'workforce-scheduling',   cat:'business', type:'integer',    sense:'min' },
-    { key:'shipping',   slug:'shipping-plan',          cat:'business', type:'integer',    sense:'min' },
-    { key:'project',    slug:'project-selection',      cat:'binary',   type:'binary',     sense:'max' },
-    { key:'delivery',   slug:'delivery-load',          cat:'binary',   type:'binary',     sense:'max' },
-    { key:'supplier',   slug:'supplier-activation',    cat:'binary',   type:'mixed',      sense:'min' }
-  ];
-  var CATEGORY_ORDER=['start','business','binary'];
+  // The catalog is driven by the SHARED metadata (assets/examples-data.js), the
+  // same source the solver's drawer uses, so the two can never drift. Display
+  // text comes from the shared i18n keys (exName_*, exDesc_*).
+  var CATALOG=(window.PL_EXAMPLE_META||[]).map(function(m){
+    return { key:m.key, slug:m.slug, cat:m.category, type:m.type, sense:m.sense };
+  });
+  var CATEGORY_ORDER=window.PL_CATEGORY_ORDER||['start','business','binary'];
 
   function tt(key){ return Plumline.i18n.t(document.documentElement.lang||'en','examples',key); }
 
