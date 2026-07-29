@@ -30,24 +30,60 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
 const helperDef = (solverSrc.match(/function showEngineTrouble\([\s\S]*?\n\}/) || [''])[0];
 ok('showEngineTrouble exists and localizes', /localizeEngineError\(/.test(helperDef), helperDef.slice(0, 60));
 
-// This scan catches the DIRECT shapes — showTrouble(..., String(err.message)),
-// err.message, error.message — where the error reference appears in the call
-// itself. It does NOT catch an error hidden behind an intermediate variable
-// (var m = err.message; showTrouble(title, m)); that case is instead caught by
-// the per-route checks below, which require each of the four error routes to
-// call showEngineTrouble. The two guards are complementary: this one flags an
-// obvious raw display anywhere; the route checks pin the specific catches.
-const showTroubleCalls = solverSrc.match(/showTrouble\([^;]*\)/g) || [];
-const rawErrorCalls = showTroubleCalls.filter(function (c) {
-  const surfacesError = /\.message\b/.test(c) || /\b(err|error)\b/.test(c);
-  const localized = /localizeEngineError/.test(c);
-  return surfacesError && !localized;
-});
-ok('no showTrouble call directly surfaces a raw engine error', rawErrorCalls.length === 0, rawErrorCalls.join(' | '));
+// Extract every catch block by BRACE MATCHING (not regex), so nested braces
+// inside the body don't truncate it. Returns { binding, body } for each. The
+// binding name is captured (err, e, error, ex, anything) so a future route with
+// a different name is still scanned.
+function catchBlocks(src) {
+  const blocks = [];
+  const head = /catch\s*\(\s*([A-Za-z_$][\w$]*)\s*\)\s*\{/g;
+  let m;
+  while ((m = head.exec(src))) {
+    const binding = m[1];
+    let i = head.lastIndex, depth = 1;
+    while (i < src.length && depth > 0) {
+      const ch = src[i];
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      i++;
+    }
+    blocks.push({ binding: binding, body: src.slice(head.lastIndex, i - 1) });
+  }
+  return blocks;
+}
+const blocks = catchBlocks(solverSrc);
+ok('found the catch blocks to scan', blocks.length >= 4, blocks.length + ' blocks');
+
+// POLICY: engine errors are shown ONLY through showEngineTrouble. So inside any
+// catch that surfaces its caught error, calling showTrouble or announce with
+// that error (directly OR via a variable assigned from <binding>.message) is
+// forbidden — EVEN IF showEngineTrouble is also present. A decorative helper
+// call must not launder a second raw display. One shared predicate is used for
+// the real scan AND the negative fixtures, so they can't drift apart.
+function catchLeaks(binding, body) {
+  const bind = binding.replace(/[$]/g, '\\$&');
+  // Names of variables assigned from <binding>.message, so a later raw display
+  // of that variable is caught too.
+  const msgVars = []; let vm;
+  const va = new RegExp('(?:var|let|const)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*' + bind + '\\s*(?:&&[^;]*)?\\.\\s*message', 'g');
+  while ((vm = va.exec(body))) msgVars.push(vm[1]);
+  const calls = body.match(/(?:showTrouble|announce)\s*\([^;]*\)/g) || [];
+  return calls.some(function (call) {
+    const usesBindingMessage = new RegExp('\\b' + bind + '\\b[^;]*\\.\\s*message').test(call) ||
+                               new RegExp('String\\(\\s*' + bind + '\\b').test(call) ||
+                               (new RegExp('\\b' + bind + '\\b(?!\\s*\\.)').test(call) && /message/.test(call));
+    const usesMsgVar = msgVars.some(function (v) { return new RegExp('\\b' + v.replace(/[$]/g, '\\$&') + '\\b').test(call); });
+    const wrapped = /localizeEngineError\s*\(/.test(call);
+    return (usesBindingMessage || usesMsgVar) && !wrapped;
+  });
+}
+const leaky = blocks.filter(function (b) { return catchLeaks(b.binding, b.body); });
+ok('no error catch shows a raw engine message (helper presence does not absolve)',
+   leaky.length === 0, leaky.map(b => b.body.slice(0, 60).replace(/\s+/g, ' ')).join(' | '));
 
 // The four known error-display routes must each call showEngineTrouble. Match
-// them by their surrounding context so we count DISTINCT routes, not just N
-// calls (a duplicate can't mask a missing one).
+// them by surrounding context so we count DISTINCT routes (a duplicate can't
+// mask a missing one).
 const routes = {
   'worker onmessage': /w\.onmessage\s*=\s*function[\s\S]{0,600}?showEngineTrouble\(/,
   'compat fallback read (detectForPanel)': /function detectForPanel[\s\S]*?catch\s*\(err\)\s*\{\s*showEngineTrouble\('tRead'/,
@@ -58,20 +94,16 @@ Object.keys(routes).forEach(function (name) {
   ok('route localizes via showEngineTrouble: ' + name, routes[name].test(solverSrc));
 });
 
-// Belt-and-braces: no catch block anywhere in the solver may show a raw engine
-// error alongside (or instead of) the helper. Scan every "catch (err|e) { ... }"
-// body; if it calls showTrouble/announce with a raw *.message and does NOT route
-// that through localizeEngineError/showEngineTrouble, flag it. This catches the
-// intermediate-variable and decorative-call cases the arg-only scan misses.
-const catchBodies = solverSrc.match(/catch\s*\((?:err|e|error)\)\s*\{[\s\S]*?\n\s*\}/g) || [];
-const leakyCatches = catchBodies.filter(function (body) {
-  const showsRaw = /(showTrouble|announce)\([^;]*\b(?:err|e|error)\.message\b/.test(body) ||
-                   /(showTrouble|announce)\([^;]*\bmessage\b[^;]*\)/.test(body) && /=\s*(?:err|e|error)\.message/.test(body);
-  const routesThroughHelper = /showEngineTrouble\(|localizeEngineError\(/.test(body);
-  return showsRaw && !routesThroughHelper;
-});
-ok('no catch block displays a raw engine message (incl. via a variable)',
-   leakyCatches.length === 0, leakyCatches.map(b => b.slice(0, 50)).join(' | '));
+// Negative fixtures — prove the SAME predicate bites the exact regressions the
+// auditor named, and doesn't fire on the correct pattern.
+ok('guard fixture: decorative helper + direct raw display is leaky',
+   catchLeaks('err', "showEngineTrouble('tRead', err); showTrouble(t('tRead'), err.message);"));
+ok('guard fixture: decorative helper + variable raw display is leaky',
+   catchLeaks('err', "showEngineTrouble('tRead', err); const message = err.message; showTrouble(t('tRead'), message);"));
+ok('guard fixture: sole showEngineTrouble is NOT leaky',
+   !catchLeaks('err', "return showEngineTrouble('tRead', err);"));
+ok('guard fixture: alternate binding name (ex) is scanned',
+   catchLeaks('ex', "const message = ex.message; showTrouble(t('tRead'), message);"));
 
 // ---- Layer 2: functional localization -----------------------------------
 let JSDOM;
