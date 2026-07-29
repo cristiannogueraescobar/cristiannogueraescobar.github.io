@@ -159,6 +159,9 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   text-decoration:none;padding:12px 8px;min-height:44px;display:flex;align-items:center;
   border-bottom:1px solid rgba(245,242,235,.12)}
 .mobile-menu-panel a:hover,.mobile-menu-panel a[aria-current="page"]{color:var(--brass-hi)}
+.mobile-menu-close{align-self:flex-end;min-width:44px;min-height:44px;font-family:var(--mono);
+  font-size:12px;letter-spacing:.04em;color:var(--cream);background:transparent;
+  border:1px solid rgba(245,242,235,.28);border-radius:var(--radius-sm);cursor:pointer;margin-bottom:8px}
 
 /* type helpers */
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
@@ -280,11 +283,12 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   :root{--rail:26px}
   .plumb{padding:0 18px 0 calc(var(--rail)+18px)}
   .nav{gap:14px}
-  /* Only collapse the nav into the drawer when JS is available to run it.
-     Without JS the links stay visible and the (non-functional) toggle stays
-     hidden — the page degrades to a plain, fully navigable header. */
-  .js .nav a.hide-sm{display:none}
-  .js .menu-toggle{display:inline-flex;align-items:center}
+  /* Only collapse the nav into the drawer once nav-menu.js has actually built
+     and wired the drawer (it then adds .nav-menu-ready). If the script fails to
+     load or throws, the class is never added and the links stay visible — no
+     dead Menu button. Without JS at all, likewise. */
+  .nav-menu-ready .nav a.hide-sm{display:none}
+  .nav-menu-ready .menu-toggle{display:inline-flex;align-items:center}
   .versus{grid-template-columns:1fr}
   .bob::before{left:calc(-1*(var(--rail)+18px)+var(--rail)-5px)}
 }

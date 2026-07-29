@@ -47,6 +47,17 @@
       panel.setAttribute('aria-label', primary.getAttribute('aria-label') || 'Primary');
       var pk = primary.getAttribute('data-i18n-aria');
       if (pk) panel.setAttribute('data-i18n-aria', pk);
+      // A visible close control inside the dialog — the WAI modal pattern
+      // expects the dialog to be dismissable from its own descendants, not only
+      // via Escape/backdrop (which a touch or screen-reader user may not find).
+      var closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'mobile-menu-close';
+      closeBtn.setAttribute('data-i18n', 'closeMenu');
+      closeBtn.setAttribute('data-i18n-aria', 'ariaCloseMenu');
+      closeBtn.setAttribute('aria-label', 'Close menu');
+      closeBtn.textContent = 'Close';
+      panel.appendChild(closeBtn);
       // Clone the direct anchor children — not a data-i18n subset, so a link
       // that lost its data-i18n still appears; the drawer matches Primary exactly.
       var links = primary.querySelectorAll(':scope > a[href]');
@@ -78,7 +89,10 @@
           panel.appendChild(opNav);
         }
       }
-      toggle.parentNode.insertBefore(drawer, toggle.nextSibling);
+      // The drawer MUST be a direct child of <body>, not inside the header:
+      // backgroundEls() makes every top-level element except the drawer inert,
+      // and an inert ancestor would make the drawer's own links unfocusable.
+      document.body.appendChild(drawer);
     }
 
     var panelEl = drawer.querySelector('.mobile-menu-panel');
@@ -137,6 +151,8 @@
 
     toggle.addEventListener('click', function () { isOpen() ? close(true) : open(); });
     backdropEl.addEventListener('click', function () { close(true); });
+    var closeButton = panelEl.querySelector('.mobile-menu-close');
+    if (closeButton) closeButton.addEventListener('click', function () { close(true); });
 
     // A link click closes the drawer. For a link that stays in this document
     // (a #hash on the same page), don't fling focus back to the toggle — move
@@ -153,5 +169,13 @@
         if (target) { target.setAttribute('tabindex', '-1'); target.focus(); }
       }
     });
+
+    // Signal that the drawer is fully built and wired. The CSS only collapses
+    // the nav into the drawer once THIS class is present — so if this script
+    // fails to load or throws before here, the class is never added and the
+    // links stay visible (no dead Menu button). This is a stronger guarantee
+    // than the `js` class, which only proves scripting is on, not that the
+    // drawer actually initialised.
+    document.documentElement.classList.add('nav-menu-ready');
   });
 })();

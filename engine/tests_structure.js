@@ -125,11 +125,18 @@ function validateNavigation(body, label, opts) {
   add('has a menu-toggle button', /<button\b[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
   add('menu-toggle controls mobile-menu', /<button\b[^>]*class="[^"]*\bmenu-toggle\b[^>]*aria-controls="mobile-menu"|<button\b[^>]*aria-controls="mobile-menu"[^>]*class="[^"]*\bmenu-toggle\b/.test(body));
 
-  // Progressive enhancement: the page marks itself with a `js` class early, and
-  // the CSS only collapses the nav when that class is present. Without JS the
-  // links stay visible — the header degrades to plain navigation rather than a
-  // dead Menu button. Guard both halves.
-  add("sets the js class early", /document\.documentElement\.classList\.add\(['"]js['"]\)/.test(fullRaw));
+  // Progressive enhancement: the nav collapses into the drawer only once
+  // nav-menu.js has built and wired it (it then adds .nav-menu-ready). The CSS
+  // that hides the core links must be gated on that class — so if the script
+  // fails to load or throws, the links stay visible (no dead Menu button).
+  // Solver carries its own inline CSS; verify its hiding rule is gated and no
+  // ungated hide-sm:none slips through. (plumline.css is checked once below.)
+  if (opts.inlineNavCss) {
+    const hideRules = (fullRaw.match(/[^{}\n]*a\.hide-sm\s*\{\s*display:\s*none/g) || []);
+    add('inline mobile nav hiding is gated on nav-menu-ready',
+        hideRules.length > 0 && hideRules.every(r => /\.nav-menu-ready/.test(r)),
+        hideRules.length + ' hide rules');
+  }
 
   // Language switch carries a translatable accessible name.
   add('language select has data-i18n-aria', /<select\b[^>]*data-i18n-aria="ariaLanguage"/.test(body));
@@ -152,15 +159,25 @@ function validateNavigation(body, label, opts) {
 PAGES.forEach(function (p) {
   const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
   const body = stripScripts(raw);
-  validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html', fullRaw: raw })
+  validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html', fullRaw: raw, inlineNavCss: p === 'solver.html' })
     .forEach(r => ok(r.name, r.cond, r.detail));
 });
+
+// One-time: the shared stylesheet must gate its mobile nav hiding on
+// .nav-menu-ready too, so the six non-solver pages degrade gracefully if
+// nav-menu.js fails. Check the file directly.
+(function () {
+  const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
+  const hideRules = (css.match(/[^{}\n]*a\.hide-sm\s*\{\s*display:\s*none/g) || []);
+  ok('plumline.css gates mobile nav hiding on nav-menu-ready',
+     hideRules.length > 0 && hideRules.every(r => /\.nav-menu-ready/.test(r)),
+     hideRules.length + ' hide rules');
+})();
 
 // --- Permanent self-tests: run validateNavigation against deliberately broken
 // fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
 // the auditor could reintroduce must make at least one named check fail here.
 const GOOD_NAV = [
-  '<script>document.documentElement.classList.add(\'js\')</script>',
   '<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu">Menu</button>',
   '<nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">',
   '<a href="solver.html" class="hide-sm" aria-current="page" data-i18n="navSolver">Solver</a>',
@@ -213,10 +230,6 @@ ok('self-test: missing menu-toggle is caught', failsOn(noToggle, 'has a menu-tog
 const noAria = GOOD_NAV.replace(' data-i18n-aria="ariaPrimary"', '');
 ok('self-test: non-translatable Primary label is caught', failsOn(noAria, 'has data-i18n-aria'));
 
-// 6. Missing js-class classifier → progressive-enhancement check must fail
-//    (without it the CSS would hide links with no working menu).
-const noJs = GOOD_NAV.replace(/<script>document\.documentElement[\s\S]*?<\/script>\n/, '');
-ok('self-test: missing js-class classifier is caught', failsOn(noJs, 'sets the js class early'));
 
 // Exactly one canonical per page, pointing to the right URL.
 const CANONICALS = {

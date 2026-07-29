@@ -35,14 +35,19 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24.15.0'
 
       # 1. Full test battery — the job fails here if anything is red.
       - name: Install test deps
         run: npm ci
 
+      - name: Verify jsdom loads
+        run: node -e "require('jsdom'); console.log('jsdom loaded')"
+
       - name: Run tests
         id: tests
+        env:
+          CI: "true"
         run: |
           OUT=$(node engine/run_all.js)
           echo "$OUT"

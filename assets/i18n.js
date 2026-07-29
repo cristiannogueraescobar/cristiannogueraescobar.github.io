@@ -49,6 +49,7 @@
       },
       common: {
         navSolver:'Solver',
+        closeMenu:'Close', ariaCloseMenu:'Close menu',
         ariaPrimary:'Primary', ariaOnPage:'On this page', ariaLanguage:'Language', ariaMobileMenu:'Site menu', menuLabel:'Menu',
         navExamples:'Examples', navAddon:'Add-on', navGuide:'Guide', navHow:'How to use',
         footTool:'Tool', footProduct:'Product', footLegal:'Legal',
@@ -505,6 +506,7 @@
       },
       common: {
         navSolver:'Solver',
+        closeMenu:'Cerrar', ariaCloseMenu:'Cerrar men\u00fa',
         ariaPrimary:'Principal', ariaOnPage:'En esta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Men\u00fa del sitio', menuLabel:'Men\u00fa',
         navExamples:'Ejemplos', navAddon:'Complemento', navGuide:'Gu\u00eda', navHow:'C\u00f3mo se usa',
         footTool:'Herramienta', footProduct:'Producto', footLegal:'Legal',
@@ -961,6 +963,7 @@
       },
       common: {
         navSolver:'Solver',
+        closeMenu:'Fechar', ariaCloseMenu:'Fechar menu',
         ariaPrimary:'Principal', ariaOnPage:'Nesta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Menu do site', menuLabel:'Menu',
         navExamples:'Exemplos', navAddon:'Complemento', navGuide:'Guia', navHow:'Como usar',
         footTool:'Ferramenta', footProduct:'Produto', footLegal:'Legal',
@@ -1417,6 +1420,7 @@
       },
       common: {
         navSolver:'Solver',
+        closeMenu:'Schlie\u00dfen', ariaCloseMenu:'Men\u00fc schlie\u00dfen',
         ariaPrimary:'Haupt', ariaOnPage:'Auf dieser Seite', ariaLanguage:'Sprache', ariaMobileMenu:'Seitenmen\u00fc', menuLabel:'Men\u00fc',
         navExamples:'Beispiele', navAddon:'Add-on', navGuide:'Anleitung', navHow:'So geht\u2019s',
         footTool:'Werkzeug', footProduct:'Produkt', footLegal:'Rechtliches',
@@ -1873,6 +1877,7 @@
       },
       common: {
         navSolver:'Solveur',
+        closeMenu:'Fermer', ariaCloseMenu:'Fermer le menu',
         ariaPrimary:'Principale', ariaOnPage:'Sur cette page', ariaLanguage:'Langue', ariaMobileMenu:'Menu du site', menuLabel:'Menu',
         navExamples:'Exemples', navAddon:'Module', navGuide:'Guide', navHow:'Comment \u00e7a marche',
         footTool:'Outil', footProduct:'Produit', footLegal:'L\u00e9gal',
