@@ -41,6 +41,16 @@ was delivered. After this is in place you can state, with evidence:
    If `grep` returns 0 or `ls` fails, the delivered files were never copied into
    the repo — fix the copy step, not the source.
 
+   **Remove any stray `workflows/` folder in the repo root.** The workflow must
+   live ONLY at `.github/workflows/deploy.yml`. A copy at the top level
+   (`workflows/deploy.yml`) is not run by GitHub, is usually outdated, and would
+   be published to the site. Delete it:
+   ```
+   git rm -r workflows        # only if a top-level workflows/ folder exists
+   ```
+   The deploy now also excludes `workflows/` from the served site and the smoke
+   test asserts `/workflows/deploy.yml` returns 404, as belt-and-braces.
+
 3. **Switch Pages to "GitHub Actions"** (Settings → Pages → Source) so
    `deploy.yml` controls the deploy. Push to `main`. The Actions run must go
    green through the smoke job.

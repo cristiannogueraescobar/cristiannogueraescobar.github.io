@@ -76,31 +76,97 @@ setTimeout(function () {
     variableDomains: [], optimalityProven: true, plot: null
   };
 
-  function run(out, cb) {
-    api.presentResult(out, { wholeNumbers: false });
+  function run(out, cb, model) {
+    api.presentResult(out, model || { wholeNumbers: false });
     setTimeout(cb, 40);   // let announce()'s timer fire
   }
 
+  // Domain-failure variants: engine says optimal, but a variable domain/bound
+  // is violated. Verification must fail for each.
+  const badBinary = {
+    status: 'optimal', modelType: 'binary', objective: 5, objectiveLabel: 'Value',
+    labels: ['a'], previous: [0], values: [1], constraints: [],
+    variableDomains: [{ label: 'a', type: 'binary', value: 2, min: 0, max: 1, satisfied: false }],
+    optimalityProven: true, plot: null
+  };
+  const badBounds = {
+    status: 'optimal', modelType: 'continuous', objective: 50, objectiveLabel: 'Cost',
+    labels: ['q'], previous: [0], values: [80], constraints: [],
+    variableDomains: [{ label: 'q', type: 'continuous', value: 80, min: 0, max: 40, satisfied: false }],
+    optimalityProven: true, plot: null
+  };
+  const feasibleOut = {
+    status: 'feasible', modelType: 'integer', objective: 23, objectiveLabel: 'Crew',
+    labels: ['n'], previous: [0], values: [23], stopReason: 'time_limit',
+    constraints: [{ label: 'Coverage', used: 23, limit: 20, satisfied: true, binding: true }],
+    variableDomains: [], optimalityProven: false, plot: null
+  };
+
   run(goodOut, function () {
-    const txt = announceText();
-    ok('valid optimal announces success', /optimal|feasible|Profit|1,760|1760/i.test(txt), JSON.stringify(txt));
-    ok('valid optimal does NOT announce failure', !/fail|couldn|not verif/i.test(txt || ''), JSON.stringify(txt));
-    ok('valid optimal keeps exportable result', !!window.lastResult || document.getElementById('exp-csv'),
-       'exports present');
+    ok('valid optimal announces exact summary',
+       announceText() === 'Optimal solution found. Profit: 1,760', JSON.stringify(announceText()));
+    ok('valid optimal keeps exportable result', !!document.getElementById('exp-csv'));
 
-    run(badOut, function () {
-      const txt2 = announceText();
-      ok('verification failure does NOT announce optimal',
-         !/optimal solution found|feasible solution found/i.test(txt2 || ''), JSON.stringify(txt2));
-      ok('verification failure announces a failure message',
-         /fail|couldn|not verif|verif/i.test(txt2 || ''), JSON.stringify(txt2));
-      // Exports must be gone and the visible receipt must show the failure mark.
-      const html = document.getElementById('result').innerHTML;
-      ok('verification failure hides exports', !/id="exp-csv"/.test(html));
-      ok('verification failure shows failed mark visually', /check bad/.test(html));
+    run(feasibleOut, function () {
+      ok('valid feasible announces the feasible summary',
+         announceText() === 'Feasible solution found. Crew: 23', JSON.stringify(announceText()));
 
-      console.log('SOLVE ANNOUNCE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
-      process.exit(fail > 0 ? 1 : 0);
+      run(badOut, function () {
+        const t2 = announceText();
+        ok('constraint breach does not announce success',
+           !/solution found/i.test(t2 || ''), JSON.stringify(t2));
+        ok('constraint breach announces the verify-failed message',
+           /verification did not pass|do not rely/i.test(t2 || ''), JSON.stringify(t2));
+        const html = document.getElementById('result').innerHTML;
+        ok('constraint breach hides exports', !/id="exp-csv"/.test(html));
+        ok('constraint breach shows failed mark', /check bad/.test(html));
+
+        run(badBinary, function () {
+          ok('binary-domain breach does not announce success',
+             !/solution found/i.test(announceText() || ''), JSON.stringify(announceText()));
+          ok('binary-domain breach announces verify-failed',
+             /verification did not pass|do not rely/i.test(announceText() || ''));
+
+          run(badBounds, function () {
+            ok('bounds breach does not announce success',
+               !/solution found/i.test(announceText() || ''), JSON.stringify(announceText()));
+            ok('bounds breach announces verify-failed',
+               /verification did not pass|do not rely/i.test(announceText() || ''));
+
+            // Repeat the SAME successful result twice: the region must clear
+            // between announcements so a screen reader re-announces it.
+            run(goodOut, function () {
+              ok('first repeat announces the summary',
+                 announceText() === 'Optimal solution found. Profit: 1,760');
+              api.presentResult(goodOut, { wholeNumbers: false });
+              // Immediately after the call, announce() has cleared the region.
+              ok('identical repeat clears the region before re-setting',
+                 announceText() === '', JSON.stringify(announceText()));
+              setTimeout(function () {
+                ok('identical repeat re-sets the summary',
+                   announceText() === 'Optimal solution found. Profit: 1,760');
+
+                // Locale-aware number formatting across the five languages.
+                ok('EN formats 1760 as 1,760', (api.setLang('en'), api.fmt(1760)) === '1,760');
+                ok('DE formats 1760 as 1.760', (api.setLang('de'), api.fmt(1760)) === '1.760');
+                ok('ES formats 12345 as 12.345', (api.setLang('es'), api.fmt(12345)) === '12.345');
+                ok('PT formats 12345 with a non-comma group separator', (function () {
+                  api.setLang('pt'); const f = api.fmt(12345);
+                  return f.indexOf(',') === -1 && /12.?345/.test(f);
+                })(), (api.setLang('pt'), api.fmt(12345)));
+                ok('FR formats 12345 with a non-comma group separator', (function () {
+                  api.setLang('fr'); const f = api.fmt(12345);
+                  return f.indexOf(',') === -1 && /12.?345/.test(f);
+                })(), (api.setLang('fr'), api.fmt(12345)));
+                api.setLang('en');
+
+                console.log('SOLVE ANNOUNCE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
+                process.exit(fail > 0 ? 1 : 0);
+              }, 40);
+            });
+          });
+        });
+      });
     });
   });
 }, 100);

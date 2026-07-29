@@ -85,6 +85,7 @@ jobs:
             --exclude '.git' --exclude '.github' --exclude '_site' \
             --exclude 'engine' --exclude 'DEPLOY.md' --exclude 'hashes.txt' \
             --exclude 'node_modules' --exclude 'package.json' --exclude 'package-lock.json' \
+            --exclude 'workflows' \
             ./ _site/
 
       # 3. Record a SHA-256 of every file that will actually be served.
@@ -149,8 +150,17 @@ jobs:
             sleep 15
           done
           if [ "$DEPLOYED" != "$GITHUB_SHA" ]; then
-            echo "MISMATCH: production serves '$DEPLOYED', expected '$GITHUB_SHA' after ~8 min."
-            echo "This usually means slow Pages propagation, not a bad build. Re-run this job; if it persists, check that the deploy step published build-info.json with the new SHA."
+            echo "MISMATCH: production served commit '$DEPLOYED', expected '$GITHUB_SHA' after ~8 min of polling."
+            echo ""
+            echo "This check only proves the served build-info.json did not report the"
+            echo "expected commit in time. It does NOT identify which of these it was:"
+            echo "  - slow GitHub Pages CDN propagation (re-running this job often clears it)"
+            echo "  - the deploy published a different artifact than this build"
+            echo "  - the custom domain (plumline.online) points somewhere else or lagged"
+            echo "  - build-info.json was not stamped with the new SHA in the build job"
+            echo "  - a CDN/edge cache is still serving an older copy"
+            echo "To diagnose: check the deploy job's published artifact and the value of"
+            echo "commit in the live /build-info.json, then compare against '$GITHUB_SHA'."
             exit 1
           fi
 
@@ -189,9 +199,10 @@ jobs:
           if [ "$CODE" != "404" ]; then echo "Expected /engine/run_all.js to return 404, got $CODE"; exit 1; fi
           echo "  /engine/run_all.js -> 404 (not served, good)"
 
-          # Dev-only files must never be published (node_modules, package manifests).
+          # Dev-only files must never be published (node_modules, package
+          # manifests, and any stray workflows/ copy left in the repo root).
           echo "Checking dev-only files are not served ..."
-          for path in node_modules/jsdom/package.json package.json package-lock.json; do
+          for path in node_modules/jsdom/package.json package.json package-lock.json workflows/deploy.yml; do
             CODE=$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/$path?cb=$CB")
             if [ "$CODE" != "404" ]; then echo "Expected /$path to return 404, got $CODE"; exit 1; fi
             echo "  /$path -> 404 (not served, good)"
