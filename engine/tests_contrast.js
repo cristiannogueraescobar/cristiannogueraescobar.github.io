@@ -140,8 +140,8 @@ ok('build badges have no reduced opacity',
 // Also guard a future .build-badge CSS rule: if one is ever added, it must not
 // re-introduce a reduced opacity that would drop the badge below AA.
 ok('no .build-badge CSS rule sets reduced opacity',
-   !/\.build-badge\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(css) &&
-   !/\.build-badge\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(solver),
+   !/\.build-badge\b[^{]*\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/i.test(css) &&
+   !/\.build-badge\b[^{]*\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/i.test(solver),
    'a .build-badge rule sets opacity < 1');
 
 console.log('CONTRAST TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

@@ -800,7 +800,7 @@ function compareValues_(left, operator, right) {
   }
 }
 
-/** Matches a SUMIF/COUNTIF criterion such as "standard", ">10" or "<>0". */
+/** Matches a SUMIF criterion such as "standard", ">10" or "<>0". */
 function matchesCriterion_(value, criterion) {
   if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
   const text = String(criterion).trim();
@@ -1265,8 +1265,9 @@ const RELATION_TOKENS = {
 // Strict inequalities are intentionally NOT in RELATION_TOKENS: silently
 // treating "x < 10" as "x <= 10" changes the model and could report a solution
 // the user explicitly excluded. They are detected and rejected as constraint
-// operators (see readConstraint_). This does not affect SUMIF/COUNTIF criteria,
-// which parse their own comparison operators elsewhere.
+// operators (see readConstraint_). This does not affect SUMIF criteria or
+// strict comparisons inside supported formulas, which parse their own
+// comparison operators elsewhere.
 const STRICT_RELATION_TOKENS = { '<': true, '>': true };
 const APP = {
   NAME: 'Solver',

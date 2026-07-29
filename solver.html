@@ -1220,7 +1220,7 @@ function compareValues_(left, operator, right) {
   }
 }
 
-/** Matches a SUMIF/COUNTIF criterion such as "standard", ">10" or "<>0". */
+/** Matches a SUMIF criterion such as "standard", ">10" or "<>0". */
 function matchesCriterion_(value, criterion) {
   if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
   const text = String(criterion).trim();
@@ -1685,7 +1685,7 @@ const RELATION_TOKENS = {
 // Strict inequalities are intentionally NOT normalized here: silently treating
 // "x < 10" as "x <= 10" changes the model and could report a solution the user
 // excluded. They are rejected as constraint operators (see readConstraint_),
-// which does not affect SUMIF/COUNTIF criteria parsing.
+// which does not affect SUMIF criteria or strict comparisons inside formulas.
 const STRICT_RELATION_TOKENS = { '<': true, '>': true };
 const APP = {
   NAME: 'Solver',
@@ -2969,7 +2969,7 @@ function matchesAnyHint_(label, hints) {
     var sheet=sheetFromGrid();
     var model;
     try{ model=detectModel_(sheet); }
-    catch(err){ showTrouble(t('tRead'), String(err.message||err)); return; }
+    catch(err){ showTrouble(t('tRead'), localizeEngineError(err.message||err)); return; }
     var grid=loadGrid_(sheet);
     var cells=expandRange_(grid, model.variables);
     detectedVars=cells.map(function(cell){ return { cell:cell, label:labelFor_(grid, cell)||cell }; });
@@ -3303,7 +3303,7 @@ function matchesAnyHint_(label, hints) {
     var sheet=sheetFromGrid();
     var model;
     try{ model=detectModel_(sheet); }
-    catch(err){ return showTrouble(t('tRead'), String(err.message||err)); }
+    catch(err){ return showTrouble(t('tRead'), localizeEngineError(err.message||err)); }
     model.wholeNumbers=document.getElementById('whole').checked;
     var senseSel=(document.getElementById('senseSel')||{}).value;
     if(senseSel==='max'||senseSel==='min') model.objective.sense=senseSel;
@@ -3314,7 +3314,7 @@ function matchesAnyHint_(label, hints) {
 
     var out;
     try{ out=solveModel_(sheet,model); }
-    catch(err){ return showTrouble(t('tSolve'), String(err.message||err)); }
+    catch(err){ return showTrouble(t('tSolve'), localizeEngineError(err.message||err)); }
 
     presentResult(out, model);
   }

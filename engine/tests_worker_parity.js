@@ -194,5 +194,30 @@ Object.keys(EXAMPLES).forEach(function (key) {
      mLabels.join(',') + ' vs ' + wLabels.join(','));
 });
 
+// Strict-inequality parity: both the main-thread fallback and the worker path
+// (both using the inline engine) must REJECT "<" and ">" as constraint
+// operators with the same STRICT_INEQUALITY marker — never solve one and reject
+// the other.
+function strictGrid(rel) {
+  return [
+    ['Item', 'Units', 'x', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['B', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=3*B2+2*B3', '', ''],
+    ['Cap', '', '', '=B2+B3', rel, '4'],
+    ['UpperA', '', '', '=B2', '<=', '2'],
+  ];
+}
+['<', '>'].forEach(function (rel) {
+  let mErr = null, wErr = null;
+  try { mainThreadSolve(strictGrid(rel), false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { workerSolve(strictGrid(rel), false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('strict "' + rel + '": main-thread rejects with STRICT_INEQUALITY', mErr && /STRICT_INEQUALITY/.test(mErr), mErr);
+  ok('strict "' + rel + '": worker rejects with STRICT_INEQUALITY', wErr && /STRICT_INEQUALITY/.test(wErr), wErr);
+  ok('strict "' + rel + '": both paths name the same operator',
+     mErr && wErr && mErr.indexOf('"' + rel + '"') >= 0 && wErr.indexOf('"' + rel + '"') >= 0, mErr + ' | ' + wErr);
+});
+
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

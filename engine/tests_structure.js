@@ -218,6 +218,30 @@ PAGES.forEach(function (p) {
      !/scrollIntoView\s*\(\s*\{[^}]*behavior\s*:\s*['"]smooth['"]/.test(codeNoComments));
 })();
 
+// The optimisation engine exists twice — engine/engine.js (Node/tests) and the
+// inline copy in solver.html between the ENGINE markers — and they must not
+// drift. A full byte-diff is noisy (the Node build adds a module.exports
+// wrapper), so we pin the invariants most likely to diverge silently and most
+// dangerous if they do: the strict-inequality handling. Both copies must keep
+// "<" and ">" OUT of RELATION_TOKENS, define STRICT_RELATION_TOKENS, and throw
+// the STRICT_INEQUALITY marker.
+(function () {
+  const engineJs = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
+  const solverSrc = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const a = solverSrc.indexOf('/* ENGINE_START */'), b = solverSrc.indexOf('/* ENGINE_END */');
+  const inline = a >= 0 && b > a ? solverSrc.slice(a, b) : '';
+  ok('inline engine markers are present', !!inline, a + '/' + b);
+  [['engine.js', engineJs], ['inline engine', inline]].forEach(function (pair) {
+    const [name, src] = pair;
+    // RELATION_TOKENS must NOT map "<" or ">" (no silent widening).
+    const relBlock = (src.match(/const RELATION_TOKENS = \{[\s\S]*?\};/) || [''])[0];
+    ok(name + ': RELATION_TOKENS does not include strict "<"', relBlock && !/'<':/.test(relBlock), relBlock.slice(0, 60));
+    ok(name + ': RELATION_TOKENS does not include strict ">"', relBlock && !/'>':/.test(relBlock));
+    ok(name + ': defines STRICT_RELATION_TOKENS', /STRICT_RELATION_TOKENS\s*=\s*\{\s*'<':\s*true,\s*'>':\s*true\s*\}/.test(src));
+    ok(name + ': readConstraint_ throws STRICT_INEQUALITY', /throw new Error\('STRICT_INEQUALITY: '/.test(src));
+  });
+})();
+
 // --- Permanent self-tests: run validateNavigation against deliberately broken
 // fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
 // the auditor could reintroduce must make at least one named check fail here.
