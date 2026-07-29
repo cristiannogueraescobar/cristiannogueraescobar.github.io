@@ -239,6 +239,11 @@ PAGES.forEach(function (p) {
     ok(name + ': RELATION_TOKENS does not include strict ">"', relBlock && !/'>':/.test(relBlock));
     ok(name + ': defines STRICT_RELATION_TOKENS', /STRICT_RELATION_TOKENS\s*=\s*\{\s*'<':\s*true,\s*'>':\s*true\s*\}/.test(src));
     ok(name + ': readConstraint_ throws STRICT_INEQUALITY', /throw new Error\('STRICT_INEQUALITY: '/.test(src));
+    // matchesCriterion_ must recognise non-canonical numeric criteria (the
+    // numericPattern), not the old String(Number(x))===operand check that made
+    // ">10.0" compare as text.
+    ok(name + ': matchesCriterion_ uses a full numeric pattern',
+       /numericPattern\s*=\s*\/\^\[\+-\]\?/.test(src) && !/String\(numeric\)\s*===\s*operand/.test(src));
   });
 })();
 

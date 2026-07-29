@@ -806,10 +806,16 @@ function matchesCriterion_(value, criterion) {
   const text = String(criterion).trim();
   const match = /^(<=|>=|<>|<|>|=)\s*(.*)$/.exec(text);
   if (!match) return compareValues_(value, '=', text);
-  const operand = match[2];
-  const numeric = parseFloat(operand);
-  const comparable = (operand !== '' && !isNaN(numeric) && String(numeric) === operand)
-    ? numeric : operand;
+  const operand = match[2].trim();
+  // Recognise ANY finite numeric literal (10.0, .5, 01, 1e3, +10), not only the
+  // canonical String(Number(x)) form. Treating "10.0" as text made ">10.0"
+  // compare lexicographically ("2" > "10.0" is true), silently summing the
+  // wrong cells and, when the SUMIF feeds a constraint or objective, changing
+  // the solver's answer.
+  const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const parsed = Number(operand);
+  const comparable = (operand !== '' && numericPattern.test(operand) && Number.isFinite(parsed))
+    ? parsed : operand;
   return compareValues_(value, match[1], comparable);
 }
 

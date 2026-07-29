@@ -24,18 +24,37 @@ let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
 
 // ---- Layer 1: static route coverage -------------------------------------
-// Every showTrouble call that surfaces an engine error message must wrap it in
-// localizeEngineError. Count the raw ones that don't.
-const rawErrorDisplays = (solverSrc.match(/showTrouble\([^;]*String\(err\.message[^;]*\)/g) || [])
-  .filter(s => !/localizeEngineError/.test(s));
-ok('no showTrouble surfaces a raw engine error message', rawErrorDisplays.length === 0,
-   rawErrorDisplays.join(' | '));
-// The worker route surfaces e.data.error — it too must be localized.
-ok('worker error route uses localizeEngineError',
-   /showTrouble\(t\([^)]*\),\s*localizeEngineError\(e\.data\.error/.test(solverSrc));
-// At least four distinct localized display routes exist (worker + 3 fallbacks).
-const localizedRoutes = (solverSrc.match(/showTrouble\([^;]*localizeEngineError/g) || []).length;
-ok('at least four display routes localize engine errors', localizedRoutes >= 4, localizedRoutes + ' routes');
+// All engine-error display now funnels through ONE helper, showEngineTrouble,
+// which localizes internally. So the guarantee is: (a) the helper localizes,
+// and (b) no display route surfaces a raw engine message by any other path.
+const helperDef = (solverSrc.match(/function showEngineTrouble\([\s\S]*?\n\}/) || [''])[0];
+ok('showEngineTrouble exists and localizes', /localizeEngineError\(/.test(helperDef), helperDef.slice(0, 60));
+
+// No showTrouble call may pass a raw engine error. Catch every shape the
+// auditor named: String(err.message), err.message, error.message, or an
+// intermediate variable assigned from *.message then shown. We scan for
+// showTrouble(...) whose argument references ".message" or "err"/"error"
+// without going through localizeEngineError/showEngineTrouble.
+const showTroubleCalls = solverSrc.match(/showTrouble\([^;]*\)/g) || [];
+const rawErrorCalls = showTroubleCalls.filter(function (c) {
+  const surfacesError = /\.message\b/.test(c) || /\b(err|error)\b/.test(c);
+  const localized = /localizeEngineError/.test(c);
+  return surfacesError && !localized;
+});
+ok('no showTrouble call surfaces a raw engine error', rawErrorCalls.length === 0, rawErrorCalls.join(' | '));
+
+// The four known error-display routes must each call showEngineTrouble. Match
+// them by their surrounding context so we count DISTINCT routes, not just N
+// calls (a duplicate can't mask a missing one).
+const routes = {
+  'worker onmessage': /w\.onmessage\s*=\s*function[\s\S]{0,600}?showEngineTrouble\(/,
+  'compat fallback read (detectForPanel)': /function detectForPanel[\s\S]*?catch\s*\(err\)\s*\{\s*showEngineTrouble\('tRead'/,
+  'runSolve read catch': /function runSolve[\s\S]*?catch\s*\(err\)\s*\{\s*return showEngineTrouble\('tRead'/,
+  'runSolve solve catch': /function runSolve[\s\S]*?catch\s*\(err\)\s*\{\s*return showEngineTrouble\('tSolve'/,
+};
+Object.keys(routes).forEach(function (name) {
+  ok('route localizes via showEngineTrouble: ' + name, routes[name].test(solverSrc));
+});
 
 // ---- Layer 2: functional localization -----------------------------------
 let JSDOM;
@@ -68,23 +87,26 @@ setTimeout(function () {
   const document = window.document;
   const marker = 'STRICT_INEQUALITY: Cap uses "<". ...';
 
-  // Expected localized prefixes per language (first word is enough to tell them
-  // apart and confirms the right dictionary entry is used).
+  // Expected localized fragments per language (a distinctive phrase, matched
+  // anywhere — showTrouble prefixes a translated title before the message).
   const expect = {
-    en: /^Strict inequalities/, es: /^Las desigualdades estrictas/,
-    pt: /^Desigualdades estritas/, de: /^Strikte Ungleichungen/,
-    fr: /^Les in\u00e9galit\u00e9s strictes/
+    en: /Strict inequalities/, es: /desigualdades estrictas/,
+    pt: /Desigualdades estritas/, de: /Strikte Ungleichungen/,
+    fr: /in\u00e9galit\u00e9s strictes/
   };
   Object.keys(expect).forEach(function (lang) {
     api.setLang(lang);
-    const localized = api.localizeEngineError(marker);
-    ok('localizes strict-inequality error in ' + lang, expect[lang].test(localized), localized.slice(0, 40));
-    ok(lang + ': localized message drops the raw marker', localized.indexOf('STRICT_INEQUALITY') === -1, localized.slice(0, 40));
-    // And showTrouble must render that localized text into #result.
-    api.showTrouble('T', api.localizeEngineError(marker));
-    const shown = document.getElementById('result').textContent;
-    ok(lang + ': showTrouble renders the localized message', expect[lang].test(shown.replace(/^T\.?\s*/, '')) || expect[lang].test(shown),
-       shown.slice(0, 60));
+    // Fallback/panel routes pass an Error object to showEngineTrouble.
+    api.showEngineTrouble('tSolve', new Error(marker));
+    let shown = document.getElementById('result').textContent;
+    ok(lang + ': showEngineTrouble(Error) renders the localized message', expect[lang].test(shown), shown.slice(0, 60));
+    ok(lang + ': rendered message drops the raw marker', shown.indexOf('STRICT_INEQUALITY') === -1, shown.slice(0, 60));
+    // Worker route passes a plain string.
+    api.showEngineTrouble('tRead', marker);
+    shown = document.getElementById('result').textContent;
+    ok(lang + ': showEngineTrouble(string) renders the localized message', expect[lang].test(shown), shown.slice(0, 60));
+    // And the low-level helper still maps correctly.
+    ok(lang + ': localizeEngineError maps the marker', expect[lang].test(api.localizeEngineError(marker)), lang);
   });
 
   // A non-marker message must pass through unchanged (no accidental swallowing).
