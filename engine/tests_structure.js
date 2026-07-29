@@ -262,6 +262,11 @@ PAGES.forEach(function (p) {
        !/String\(numeric\)\s*===\s*operand/.test(src));
     ok(name + ': both criterion paths normalise via parseCriterionOperand_',
        (src.match(/parseCriterionOperand_\(/g) || []).length >= 3);
+    // Single-variable detection fallback must be present in both engines: a
+    // one-cell candidate reached by objective + >=1 constraint (cellReach >= 2),
+    // only when no multi-cell block qualified.
+    ok(name + ': has the single-variable detection fallback',
+       /cellReach/.test(src) && /cellReach\[cell\] < 2/.test(src));
   });
 })();
 

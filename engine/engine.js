@@ -1575,6 +1575,11 @@ function detectModel_(sheet) {
     });
   });
 
+  // Prefer multi-cell blocks exactly as before: whenever any block of two or
+  // more input cells feeds a total, it wins and the behaviour for normal models
+  // is unchanged. Only when NO multi-cell block qualifies do we consider a
+  // single cell as the sole decision variable — and even then only with real
+  // structural evidence (see below), so a stray constant is never promoted.
   let variables = null;
   let bestScore = -1;
   Object.keys(blockCells).forEach(function (block) {
@@ -1583,12 +1588,42 @@ function detectModel_(sheet) {
     const score = blockReach[block] * 1000 + size;
     if (score > bestScore) { bestScore = score; variables = block; }
   });
+
+  if (!variables) {
+    // Single-variable fallback. contiguousBlocks_ only ever forms blocks of two
+    // or more cells (runs_ skips length-1 runs), so a genuine one-variable model
+    // never produced a candidate block above. Compute single-cell candidates
+    // directly: a constant cell that is reached by the objective AND by at least
+    // one other output (a constraint) is the same "used by several totals"
+    // evidence a multi-cell block must show, expressed through one cell. That
+    // rules out a lone constant, a header + value, or a cell that only feeds an
+    // info formula. (Variable Settings such as binary/bounds are applied after
+    // detection and can't be seen here, so a model limited only by a bound is
+    // selected manually, as before.)
+    const cellReach = {};
+    outputs.forEach(function (output) {
+      reachableConstants_(grid, output, {}).forEach(function (cell) {
+        cellReach[cell] = (cellReach[cell] || 0) + 1;
+      });
+    });
+    let single = null;
+    let singleBest = -1;
+    Object.keys(cellReach).forEach(function (cell) {
+      if (cellReach[cell] < 2) return;               // objective + >=1 constraint
+      if (cellReach[cell] > singleBest) { singleBest = cellReach[cell]; single = cell; }
+    });
+    if (single) variables = single;
+  }
+
   if (!variables) {
     throw new Error('No block of input cells feeds several totals, so the ' +
       'quantities to decide are not obvious. Select them yourself.');
   }
 
-  const variableCells = toSet_(blockCells[variables]);
+  // variableCells is the set of decision cells. For a multi-cell block it comes
+  // from blockCells; for the single-cell fallback, `variables` is one cell that
+  // was never added to blockCells, so build the set from it directly.
+  const variableCells = toSet_(blockCells[variables] || expandRange_(grid, variables));
   const dependent = outputs.filter(function (output) {
     return reachableConstants_(grid, output, {}).some(function (cell) {
       return variableCells[cell];

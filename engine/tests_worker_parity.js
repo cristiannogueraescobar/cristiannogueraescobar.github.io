@@ -219,5 +219,28 @@ function strictGrid(rel) {
      mErr && wErr && mErr.indexOf('"' + rel + '"') >= 0 && wErr.indexOf('"' + rel + '"') >= 0, mErr + ' | ' + wErr);
 });
 
+// Single-variable parity: a genuine one-variable model must detect and solve
+// identically on the worker and the main-thread fallback (both inline engine).
+{
+  varSettings = {};   // clear any panel state left by the EXAMPLES loop above
+  const grid = [
+    ['Item', 'x', '', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', '5'],
+  ];
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('1-var: main-thread detects and solves', !mErr && mOut && mOut.status === 'optimal', mErr || (mOut && mOut.status));
+  ok('1-var: worker detects and solves', !wErr && wOut && wOut.status === 'optimal', wErr || (wOut && wOut.status));
+  ok('1-var: same objective on both paths', mOut && wOut && mOut.objective === wOut.objective,
+     (mOut && mOut.objective) + ' vs ' + (wOut && wOut.objective));
+  ok('1-var: exactly one variable on both paths',
+     mOut && wOut && (mOut.variables || []).length === 1 && (wOut.variables || []).length === 1,
+     (mOut && mOut.variables.length) + ' vs ' + (wOut && wOut.variables.length));
+}
+
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);
