@@ -89,6 +89,28 @@ setTimeout(function () {
   ok('close button closes the drawer', drawer.hidden === true);
   ok('close button returns focus to trigger', document.activeElement === openBtn);
 
+  // Tab trap: focus wraps within the drawer, both directions. Use the same
+  // focusable selector the solver's trap uses.
+  api.openDrawer();
+  const focusables = drawer.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  ok('drawer has at least two focusables to trap', focusables.length >= 2, focusables.length + ' focusables');
+  if (focusables.length >= 2) {
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    last.focus();
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    ok('Tab wraps from last to first', document.activeElement === first);
+    first.focus();
+    document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
+    ok('Shift+Tab wraps from first to last', document.activeElement === last);
+  }
+
+  // Backdrop click closes and returns focus to the trigger.
+  if (!drawer.hidden) { /* still open from the trap test */ }
+  else api.openDrawer();
+  document.getElementById('exDrawerBackdrop').dispatchEvent(new window.Event('click'));
+  ok('backdrop click closes the drawer', drawer.hidden === true);
+  ok('backdrop click returns focus to trigger', document.activeElement === openBtn);
+
   console.log('EX DRAWER TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
   process.exit(fail > 0 ? 1 : 0);
 }, 100);

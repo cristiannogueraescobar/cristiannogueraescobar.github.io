@@ -251,7 +251,7 @@ jobs:
             function addTarget(u){
               if(!u) return;
               if(/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) return;
-              u=u.split("#")[0].split("?")[0];
+              u=u.replace(/^\.\//,"").split("#")[0].split("?")[0];
               if(u) targets.add(u);
             }
             for(const p of pages){

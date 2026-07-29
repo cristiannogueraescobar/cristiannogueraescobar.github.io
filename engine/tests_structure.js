@@ -205,6 +205,17 @@ PAGES.forEach(function (p) {
   }
   reducesMotion(solver, 'solver.html');
   reducesMotion(css, 'plumline.css');
+
+  // Protect the JS side too: the solver must route programmatic scrolling
+  // through scrollBehavior() (which consults prefers-reduced-motion), and no
+  // scrollIntoView call may hardcode behavior:'smooth'. Strip comments first so
+  // an example in a comment can't trip the last check.
+  const codeNoComments = solver.replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  ok('solver defines scrollBehavior()', /function scrollBehavior\s*\(/.test(solver));
+  const helper = (solver.match(/function scrollBehavior\s*\([\s\S]*?\n  \}/) || [''])[0];
+  ok('scrollBehavior() checks reduced motion', /prefers-reduced-motion:\s*reduce/.test(helper));
+  ok('no scrollIntoView hardcodes behavior:smooth',
+     !/scrollIntoView\s*\(\s*\{[^}]*behavior\s*:\s*['"]smooth['"]/.test(codeNoComments));
 })();
 
 // --- Permanent self-tests: run validateNavigation against deliberately broken

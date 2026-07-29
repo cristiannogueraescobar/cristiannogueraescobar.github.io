@@ -96,6 +96,9 @@ table.grid td.rownum{position:sticky;left:0;z-index:1;background:var(--paper);co
 table.grid td{border:1px solid var(--line-fine);padding:0}
 table.grid input{width:100%;border:none;background:transparent;font-family:var(--mono);font-size:14.5px;padding:11px 12px;color:var(--ink);outline:none}
 table.grid input:focus{background:var(--brass-tint)}
+/* A clear, high-contrast focus ring for keyboard users — a background tint
+   alone is too subtle and can fail WCAG's focus-visibility expectation. */
+table.grid input:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;background:var(--brass-tint)}
 .gridnote{font-size:12px;color:var(--faint);margin-top:8px}
 .gridsize{font-size:12px;color:var(--faint);margin-top:4px;font-family:var(--mono)}
 .paste-tip{font-size:13px;color:var(--faint);margin:0 0 10px}
@@ -116,7 +119,7 @@ table.grid input:focus{background:var(--brass-tint)}
    and backdrop render on page load instead of staying closed. */
 .drawer[hidden],.drawer-backdrop[hidden]{display:none}
 .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--line)}
-.drawer-close{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink)}
+.drawer-close{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--ink);min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
 .drawer-body{padding:12px 18px 24px;overflow-y:auto}
 .drawer-section{margin-top:14px}
 .drawer-section h4{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
@@ -394,7 +397,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=47"></script>
+<script src="assets/i18n.js?v=48"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -408,6 +411,19 @@ function t(key){ return Plumline.i18n.t(LANG, 'solver', key); }
 function applyLang(lang){
   LANG = Plumline.i18n.dict[lang] ? lang : 'en';
   // the shared engine applies data-i18n nodes; we just track LANG for t()
+  // Refresh the grid cells' accessible names in the new language, without a
+  // full re-render (which would drop focus and in-progress edits).
+  try {
+    var grid = document.getElementById('grid');
+    if (grid) {
+      var tmpl = Plumline.i18n.t(LANG, 'solver', 'cellLabel');
+      var ins = grid.querySelectorAll('input[data-r]');
+      for (var i = 0; i < ins.length; i++) {
+        var ref = String.fromCharCode(65 + (+ins[i].getAttribute('data-c'))) + ((+ins[i].getAttribute('data-r')) + 1);
+        ins[i].setAttribute('aria-label', tmpl.replace('{ref}', ref));
+      }
+    }
+  } catch (e) {}
 }
 
 /* === Plumline engine: the exact same code as the Google Sheets add-on === */
@@ -2477,7 +2493,8 @@ function matchesAnyHint_(label, hints) {
       for(var c=0;c<COLS;c++){
         var v=(data[r]&&data[r][c])||'';
         var cellRef=colLetter(c+1)+(r+1);
-        html+='<td><input aria-label="Cell '+cellRef+'" data-r="'+r+'" data-c="'+c+'" value="'+v.replace(/"/g,'&quot;')+'"></td>';
+        var cellName=Plumline.i18n.t(LANG,'solver','cellLabel').replace('{ref}', cellRef);
+        html+='<td><input aria-label="'+cellName.replace(/"/g,'&quot;')+'" data-r="'+r+'" data-c="'+c+'" value="'+v.replace(/"/g,'&quot;')+'"></td>';
       }
       html+='</tr>';
     }
