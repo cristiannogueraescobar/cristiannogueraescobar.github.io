@@ -2736,16 +2736,28 @@ function matchesAnyHint_(label, hints) {
     };}};
   }
 
-  function fmt(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('en-GB',{maximumFractionDigits:4});}
+  // Number formatting follows the active interface language, so a Spanish page
+  // shows 1.760 and a French page 1 760 — the spoken announcement and the
+  // visible receipt both read naturally in that language.
+  function activeLocale(){
+    return {en:'en-GB',es:'es-ES',pt:'pt-PT',de:'de-DE',fr:'fr-FR'}[LANG] || 'en-GB';
+  }
+  function fmt(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString(activeLocale(),{maximumFractionDigits:4});}
 
   // Announce a CONCISE one-line outcome to the dedicated live region. The full
   // receipt is rendered into #result (not a live region), so a screen reader
   // hears a short summary ("Optimal solution found. Total: 1760") instead of
-  // the entire receipt read aloud. Setting textContent (not innerHTML) each
-  // time triggers exactly one polite announcement.
+  // the entire receipt read aloud. We clear the region first, then set the
+  // message on a short timer: if two solves produce the identical string, some
+  // screen readers won't re-announce an unchanged live region — the empty-then-
+  // set cycle guarantees a fresh announcement each time.
+  var announceTimer=null;
   function announce(msg){
     var el=document.getElementById('solveAnnounce');
-    if(el) el.textContent=msg||'';
+    if(!el) return;
+    clearTimeout(announceTimer);
+    el.textContent='';
+    announceTimer=setTimeout(function(){ el.textContent=msg||''; }, 20);
   }
 
   // --- Web Worker: run the solve off the main thread ------------------------
@@ -3260,7 +3272,10 @@ function matchesAnyHint_(label, hints) {
       else { title=t('tIncomplete'); body=t('statusUnknownBody'); }   // unknown, iteration_limit, time_limit, node_limit...
       return showTrouble(title, body, out, model);
     }
-    renderReceipt(out,model);
+    var verified = renderReceipt(out,model);
+    // The announcement must match what the receipt shows. If the defensive
+    // verification failed, never announce success — announce the failure.
+    if(!verified){ announce(t('verifyFailed')); return; }
     // Concise spoken summary (the receipt itself is not a live region).
     var word=(out.status==='optimal')?t('announceOptimal'):t('announceFeasible');
     announce(word+'. '+(out.objectiveLabel||t('exResult'))+': '+fmt(out.objective));
@@ -3396,6 +3411,11 @@ function matchesAnyHint_(label, hints) {
         out.plot && out.values && out.values.length === 2) {
       drawFeasibleRegion(out);
     }
+
+    // Tell the caller whether the defensive verification passed, so it can
+    // announce the right outcome. The screen-reader announcement must never
+    // contradict the visible "verification failed" message.
+    return verificationPassed;
   }
 
   function drawFeasibleRegion(out){
@@ -3859,6 +3879,14 @@ function matchesAnyHint_(label, hints) {
 
   var _ex=(function(){ try{ return new URLSearchParams(location.search).get('ex'); }catch(e){ return null; } })();
   loadExample(EXAMPLE_BY_SLUG[_ex] || 'production');
+
+  // Test-only hook: expose the presentation functions so the a11y test battery
+  // can drive presentResult() directly with crafted engine output. Guarded by a
+  // flag that production never sets, so it is inert on the live site.
+  if (typeof window !== 'undefined' && window.__PLUMLINE_TEST__) {
+    window.__plumline = { presentResult: presentResult, renderReceipt: renderReceipt,
+      announce: announce, fmt: fmt, setLang: function(l){ LANG=l; } };
+  }
 })();
 </script>
 <script src="assets/build-badge.js?v=1"></script>

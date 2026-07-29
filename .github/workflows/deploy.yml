@@ -133,18 +133,25 @@ jobs:
           CB="${GITHUB_SHA}-${RANDOM}"
           FETCH="curl -LfsS -H Cache-Control:no-cache"
 
-          # Wait until production reports THIS commit (up to ~3 min).
+          # Wait until production reports THIS commit. GitHub Pages CDN
+          # propagation after a deploy is variable and can exceed 3 minutes, so
+          # give it a generous budget (initial settle + up to ~8 min of polling)
+          # rather than failing a good deploy that simply hadn't propagated yet.
+          echo "Letting the Pages CDN settle briefly ..."
+          sleep 20
           echo "Waiting for production to report $GITHUB_SHA ..."
           DEPLOYED=""
-          for i in $(seq 1 18); do
+          for i in $(seq 1 32); do
             DEPLOYED=$($FETCH "$BASE/build-info.json?cb=$CB-$i" \
               | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).commit||"")}catch(e){}})' || true)
-            if [ "$DEPLOYED" = "$GITHUB_SHA" ]; then echo "Production is on the expected commit."; break; fi
-            echo "  attempt $i: production reports '$DEPLOYED', retrying in 10s"
-            sleep 10
+            if [ "$DEPLOYED" = "$GITHUB_SHA" ]; then echo "Production is on the expected commit (attempt $i)."; break; fi
+            echo "  attempt $i/32: production reports '$DEPLOYED', retrying in 15s"
+            sleep 15
           done
           if [ "$DEPLOYED" != "$GITHUB_SHA" ]; then
-            echo "MISMATCH: production serves '$DEPLOYED', expected '$GITHUB_SHA'"; exit 1
+            echo "MISMATCH: production serves '$DEPLOYED', expected '$GITHUB_SHA' after ~8 min."
+            echo "This usually means slow Pages propagation, not a bad build. Re-run this job; if it persists, check that the deploy step published build-info.json with the new SHA."
+            exit 1
           fi
 
           # Download everything ONCE to /tmp with the same cache-buster, then
