@@ -61,104 +61,203 @@ function walk(node, visit) {
   }
 }
 
-// Does an expression reference the caught-error binding, directly or through an
-// alias variable? aliasErr = names that ARE the error; aliasMsg = names that
-// hold <err>.message. Returns true if the expression surfaces the raw error and
-// is NOT wrapped in localizeEngineError.
-function surfacesRawError(node, aliasErr, aliasMsg) {
-  let raw = false, sawLocalizer = false;
-  walk(node, function (n) {
-    if (n.type === 'CallExpression' && n.callee.type === 'Identifier' &&
-        n.callee.name === 'localizeEngineError') sawLocalizer = true;
-    // <errName>.message  or  <errName>?.message
-    if (n.type === 'MemberExpression' && n.property && n.property.name === 'message' &&
-        n.object.type === 'Identifier' && aliasErr.has(n.object.name)) raw = true;
-    // a bare reference to the error binding (e.g. String(err), err passed along)
-    if (n.type === 'Identifier' && aliasErr.has(n.name)) raw = true;
-    // a reference to a variable that holds <err>.message
-    if (n.type === 'Identifier' && aliasMsg.has(n.name)) raw = true;
-  });
-  return raw && !sawLocalizer;
+// True if this expression surfaces the raw error, tracked PER REFERENCE: a
+// reference is "raw" only when it is NOT lexically inside a localizeEngineError
+// call. A localizer elsewhere in the same argument does not absolve a sibling
+// raw reference. `insideLocalizer` is threaded down the recursion.
+function containsUnlocalizedRaw(node, aliasErr, aliasMsg, insideLocalizer) {
+  if (!node || typeof node.type !== 'string') return false;
+  const isLocalizer = node.type === 'CallExpression' &&
+    node.callee.type === 'Identifier' && node.callee.name === 'localizeEngineError';
+  const localizedHere = insideLocalizer || isLocalizer;
+  const rawMember = node.type === 'MemberExpression' && node.property &&
+    node.property.name === 'message' && node.object.type === 'Identifier' &&
+    aliasErr.has(node.object.name);
+  const rawIdent = node.type === 'Identifier' && (aliasErr.has(node.name) || aliasMsg.has(node.name));
+  if ((rawMember || rawIdent) && !localizedHere) return true;
+  for (const key in node) {
+    if (key === 'type' || key === 'start' || key === 'end') continue;
+    const child = node[key];
+    if (Array.isArray(child)) {
+      if (child.some(c => c && typeof c.type === 'string' &&
+          containsUnlocalizedRaw(c, aliasErr, aliasMsg, localizedHere))) return true;
+    } else if (child && typeof child.type === 'string' &&
+               containsUnlocalizedRaw(child, aliasErr, aliasMsg, localizedHere)) return true;
+  }
+  return false;
 }
 
-// From an initializer expression, decide whether it aliases the error itself
-// (returns 'err'), the error's .message (returns 'msg'), or neither (null).
-function classifyInit(init, aliasErr) {
+// From an initializer, does it hold the error itself ('err'), its .message
+// ('msg'), or neither (null)? aliasErr/aliasMsg are the CURRENT known aliases.
+function classifyInit(init, aliasErr, aliasMsg) {
   if (!init) return null;
   if (init.type === 'Identifier' && aliasErr.has(init.name)) return 'err';
-  // <err>.message, <err>?.message, String(<err>.message), (<err> && <err>.message)
+  if (init.type === 'Identifier' && aliasMsg.has(init.name)) return 'msg';
   let holdsMsg = false, holdsErr = false;
   walk(init, function (n) {
     if (n.type === 'MemberExpression' && n.property && n.property.name === 'message' &&
         n.object.type === 'Identifier' && aliasErr.has(n.object.name)) holdsMsg = true;
     if (n.type === 'Identifier' && aliasErr.has(n.name)) holdsErr = true;
+    if (n.type === 'Identifier' && aliasMsg.has(n.name)) holdsMsg = true;
   });
   if (holdsMsg) return 'msg';
   if (holdsErr) return 'err';
   return null;
 }
 
-// Analyse one catch clause: returns true if it displays the raw error via
-// showTrouble/announce (directly or through any alias) without localizing.
-function catchClauseLeaks(cc) {
-  const aliasErr = new Set();
-  const aliasMsg = new Set();
-  if (cc.param && cc.param.type === 'Identifier') aliasErr.add(cc.param.name);
-  // Destructuring: catch ({ message }) — treat `message` as a message alias.
-  if (cc.param && cc.param.type === 'ObjectPattern') {
-    cc.param.properties.forEach(function (p) {
-      if (p.value && p.value.type === 'Identifier' && p.key && p.key.name === 'message') aliasMsg.add(p.value.name);
+// Names that a NESTED function re-binds (its own params / declarations) shadow
+// the outer error binding, so references inside that function are not the error.
+// We stop descending into any function that redeclares one of our alias names.
+function rebinds(fnNode, names) {
+  let hit = false;
+  (fnNode.params || []).forEach(function (p) {
+    walk(p, function (n) { if (n.type === 'Identifier' && names.has(n.name)) hit = true; });
+  });
+  return hit;
+}
+
+// Walk a region (any statement/function body), but do NOT descend into nested
+// functions that shadow our alias names — their `err` is a different binding.
+function walkRegion(node, aliasNames, visit) {
+  (function rec(n) {
+    if (!n || typeof n.type !== 'string') return;
+    if ((n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' ||
+         n.type === 'ArrowFunctionExpression') && rebinds(n, aliasNames)) return;
+    visit(n);
+    for (const key in n) {
+      if (key === 'type' || key === 'start' || key === 'end') continue;
+      const child = n[key];
+      if (Array.isArray(child)) child.forEach(c => c && typeof c.type === 'string' && rec(c));
+      else if (child && typeof child.type === 'string') rec(child);
+    }
+  })(node);
+}
+
+// Analyse a REGION that has one tainted source: either a catch clause (source =
+// the caught binding) or the worker onmessage (source = e.data.error). Collect
+// alias vars to a FIXED POINT (so out-of-order assignments are caught), then
+// check every showTrouble/announce call for an unlocalized raw reference.
+// `seedErr`/`seedMsg` seed the alias sets; `taintedMember` optionally marks a
+// member expression (e.data.error) as a message source.
+function regionLeaks(body, seedErr, seedMsg, taintedMemberTest) {
+  const aliasErr = new Set(seedErr || []);
+  const aliasMsg = new Set(seedMsg || []);
+  const names = new Set([].concat(seedErr || [], seedMsg || []));
+  // Fixed-point alias collection: repeat until no set grows.
+  let changed = true;
+  while (changed) {
+    changed = false;
+    walkRegion(body, names, function (n) {
+      function learn(target, kind) {
+        if (!kind) return;
+        const set = kind === 'err' ? aliasErr : aliasMsg;
+        if (!set.has(target)) { set.add(target); names.add(target); changed = true; }
+      }
+      if (n.type === 'VariableDeclarator') {
+        if (n.id.type === 'Identifier') {
+          // A tainted member (e.data.error) assigned into a var makes it a msg alias.
+          if (taintedMemberTest && n.init && taintedMemberTest(n.init)) learn(n.id.name, 'msg');
+          else learn(n.id.name, classifyInit(n.init, aliasErr, aliasMsg));
+        } else if (n.id.type === 'ObjectPattern' && n.init && n.init.type === 'Identifier' && aliasErr.has(n.init.name)) {
+          n.id.properties.forEach(function (p) {
+            if (p.value && p.value.type === 'Identifier' && p.key && p.key.name === 'message') learn(p.value.name, 'msg');
+          });
+        }
+      }
+      if (n.type === 'AssignmentExpression' && n.left.type === 'Identifier') {
+        if (taintedMemberTest && taintedMemberTest(n.right)) learn(n.left.name, 'msg');
+        else learn(n.left.name, classifyInit(n.right, aliasErr, aliasMsg));
+      }
     });
   }
-  // First pass: collect alias variables (const/let/var and plain assignments),
-  // including `const { message } = err`.
-  walk(cc.body, function (n) {
-    if (n.type === 'VariableDeclarator') {
-      if (n.id.type === 'Identifier') {
-        const kind = classifyInit(n.init, aliasErr);
-        if (kind === 'err') aliasErr.add(n.id.name);
-        else if (kind === 'msg') aliasMsg.add(n.id.name);
-      } else if (n.id.type === 'ObjectPattern' && n.init && n.init.type === 'Identifier' && aliasErr.has(n.init.name)) {
-        n.id.properties.forEach(function (p) {
-          if (p.value && p.value.type === 'Identifier' && p.key && p.key.name === 'message') aliasMsg.add(p.value.name);
-        });
-      }
-    }
-    if (n.type === 'AssignmentExpression' && n.left.type === 'Identifier') {
-      const kind = classifyInit(n.right, aliasErr);
-      if (kind === 'err') aliasErr.add(n.left.name);
-      else if (kind === 'msg') aliasMsg.add(n.left.name);
-    }
-  });
-  // Second pass: any showTrouble/announce call surfacing the raw error?
+  // Check display calls.
   let leaks = false;
-  walk(cc.body, function (n) {
+  walkRegion(body, names, function (n) {
     if (n.type === 'CallExpression' && n.callee.type === 'Identifier' &&
         (n.callee.name === 'showTrouble' || n.callee.name === 'announce')) {
-      if (n.arguments.some(function (a) { return surfacesRawError(a, aliasErr, aliasMsg); })) leaks = true;
+      const argRaw = n.arguments.some(function (a) { return containsUnlocalizedRaw(a, aliasErr, aliasMsg, false); });
+      // Also flag a tainted member passed straight to a display call.
+      const argTainted = taintedMemberTest && n.arguments.some(function (a) {
+        let hit = false;
+        walk(a, function (m) { if (taintedMemberTest(m)) hit = true; });
+        // …unless that tainted member is inside a localizeEngineError call.
+        return hit && !n.arguments.some(function (a2) {
+          return a2.type === 'CallExpression' && a2.callee.type === 'Identifier' &&
+                 a2.callee.name === 'localizeEngineError';
+        }) && hit;
+      });
+      if (argRaw || argTainted) leaks = true;
     }
   });
   return leaks;
 }
 
-// Collect every CatchClause across the inline scripts.
+// A catch clause is a region whose tainted source is its bound parameter.
+function catchClauseLeaks(cc) {
+  const seedErr = [], seedMsg = [];
+  if (cc.param && cc.param.type === 'Identifier') seedErr.push(cc.param.name);
+  if (cc.param && cc.param.type === 'ObjectPattern') {
+    cc.param.properties.forEach(function (p) {
+      if (p.value && p.value.type === 'Identifier' && p.key && p.key.name === 'message') seedMsg.push(p.value.name);
+    });
+  }
+  return regionLeaks(cc.body, seedErr, seedMsg, null);
+}
+
+// Is this node the member expression e.data.error (the worker's tainted source)?
+function isWorkerErrorMember(n) {
+  return n && n.type === 'MemberExpression' && n.property && n.property.name === 'error' &&
+    n.object && n.object.type === 'MemberExpression' && n.object.property &&
+    n.object.property.name === 'data';
+}
+
+// Collect every CatchClause AND the worker onmessage handler across the inline
+// scripts. Both are analysed by the SAME regionLeaks() — the worker path is no
+// longer a mere presence-regex.
 const catchClauses = [];
+const workerHandlers = [];   // FunctionExpression bodies assigned to w.onmessage
 inlineScripts(solverSrc).forEach(function (src) {
   let ast;
   try { ast = acorn.parse(src, { ecmaVersion: 2022 }); }
   catch (e) { return; }   // a non-JS or worker-string fragment; skip
-  walk(ast, function (n) { if (n.type === 'CatchClause') catchClauses.push(n); });
+  walk(ast, function (n) {
+    if (n.type === 'CatchClause') catchClauses.push(n);
+    // w.onmessage = function (e) { ... }
+    if (n.type === 'AssignmentExpression' && n.left.type === 'MemberExpression' &&
+        n.left.property && n.left.property.name === 'onmessage' &&
+        (n.right.type === 'FunctionExpression' || n.right.type === 'ArrowFunctionExpression')) {
+      workerHandlers.push(n.right);
+    }
+  });
 });
 ok('parsed catch clauses from the solver (AST)', catchClauses.length >= 4, catchClauses.length + ' clauses');
+ok('found the worker onmessage handler (AST)', workerHandlers.length >= 1, workerHandlers.length + ' handlers');
 
 const leakyClauses = catchClauses.filter(catchClauseLeaks);
 ok('no error catch shows a raw engine message (AST; helper presence does not absolve)',
    leakyClauses.length === 0,
    leakyClauses.map(c => solverSrc.slice(c.start, Math.min(c.end, c.start + 70)).replace(/\s+/g, ' ')).join(' | '));
 
-// The four known error-display routes must each call showEngineTrouble.
+// Worker handler: e.data.error is the tainted source. It must not reach
+// showTrouble/announce raw; only through localizeEngineError / showEngineTrouble.
+const leakyWorkers = workerHandlers.filter(function (fn) {
+  return regionLeaks(fn.body, [], [], isWorkerErrorMember);
+});
+ok('worker onmessage does not display e.data.error raw (AST)', leakyWorkers.length === 0,
+   leakyWorkers.map(f => solverSrc.slice(f.start, f.start + 70).replace(/\s+/g, ' ')).join(' | '));
+// And it must actually localize somewhere (route is covered, not just absent).
+const workerLocalizes = workerHandlers.some(function (fn) {
+  let ok2 = false;
+  walk(fn, function (n) {
+    if (n.type === 'CallExpression' && n.callee.type === 'Identifier' &&
+        (n.callee.name === 'showEngineTrouble' || n.callee.name === 'localizeEngineError')) ok2 = true;
+  });
+  return ok2;
+});
+ok('worker onmessage routes errors through the localizing helper', workerLocalizes);
+
+// The three catch-based routes must each call showEngineTrouble.
 const routes = {
-  'worker onmessage': /w\.onmessage\s*=\s*function[\s\S]{0,600}?showEngineTrouble\(/,
   'compat fallback read (detectForPanel)': /function detectForPanel[\s\S]*?catch\s*\(err\)\s*\{\s*showEngineTrouble\('tRead'/,
   'runSolve read catch': /function runSolve[\s\S]*?catch\s*\(err\)\s*\{\s*return showEngineTrouble\('tRead'/,
   'runSolve solve catch': /function runSolve[\s\S]*?catch\s*\(err\)\s*\{\s*return showEngineTrouble\('tSolve'/,
@@ -186,7 +285,14 @@ const LEAK_FIXTURES = {
   'optional chaining': "catch(err){ const m = err?.message; showTrouble(t('tRead'), m); }",
   'string with semicolon + raw': "catch(err){ showTrouble(t('tRead'), 'Error; ' + err.message); }",
   'alternate binding ex': "catch(ex){ const m = ex.message; showTrouble(t('tRead'), m); }",
-  'announce raw': "catch(err){ announce(err.message); }"
+  'announce raw': "catch(err){ announce(err.message); }",
+  // Issue 1: a localizer NEXT TO a raw reference in the SAME argument must not
+  // absolve the raw one.
+  'localizer + raw in same arg': "catch(err){ showTrouble(t('tRead'), localizeEngineError(err.message) + err.message); }",
+  'localizer(fixed) + raw in same arg': "catch(err){ showTrouble(t('tRead'), localizeEngineError('fixed') + err.message); }",
+  // Issue 3: aliases assigned out of order must still be caught (fixed point).
+  'reverse-order alias (2 links)': "catch(err){ let first; let second; second = first; first = err.message; showTrouble(t('tRead'), second); }",
+  'reverse-order alias (3 links)': "catch(err){ let a; let b; let c; c = b; b = a; a = err.message; showTrouble(t('tRead'), c); }"
 };
 Object.keys(LEAK_FIXTURES).forEach(function (name) {
   ok('guard fixture LEAKS: ' + name, fixtureLeaks(LEAK_FIXTURES[name]) === true);
@@ -195,11 +301,33 @@ const SAFE_FIXTURES = {
   'sole showEngineTrouble': "catch(err){ return showEngineTrouble('tRead', err); }",
   'explicit localizeEngineError': "catch(err){ showTrouble(t('tRead'), localizeEngineError(err.message)); }",
   'non-error message shown': "catch(err){ showTrouble(t('tCsvEmpty'), t('tCsvEmptyBody')); }",
-  'string with brace, no leak': "catch(err){ const irrelevant = '}'; return showEngineTrouble('tRead', err); }"
+  'string with brace, no leak': "catch(err){ const irrelevant = '}'; return showEngineTrouble('tRead', err); }",
+  // Issue 1 safe counterpart: two localizer calls, no raw sibling.
+  'two localizers, no raw': "catch(err){ showTrouble(t('tRead'), localizeEngineError(err.message) + localizeEngineError(err.message)); }",
+  // Issue 4: a nested function that re-binds `err` is a different scope; a raw
+  // display inside it must NOT be attributed to the outer catch binding.
+  'nested fn shadows err': "catch(err){ function unrelated(err){ showTrouble('x', err.message); } return showEngineTrouble('tRead', err); }"
 };
 Object.keys(SAFE_FIXTURES).forEach(function (name) {
   ok('guard fixture SAFE: ' + name, fixtureLeaks(SAFE_FIXTURES[name]) === false);
 });
+
+// Worker-handler fixtures — analysed by regionLeaks with e.data.error taint.
+function workerFixtureLeaks(snippet) {
+  const ast = acorn.parse('var w={}; ' + snippet, { ecmaVersion: 2022 });
+  let fn = null;
+  walk(ast, function (n) {
+    if (n.type === 'AssignmentExpression' && n.left.type === 'MemberExpression' &&
+        n.left.property && n.left.property.name === 'onmessage' && !fn) fn = n.right;
+  });
+  return fn ? regionLeaks(fn.body, [], [], isWorkerErrorMember) : null;
+}
+ok('guard fixture LEAKS: worker decorative helper + raw e.data.error',
+   workerFixtureLeaks("w.onmessage = function(e){ showEngineTrouble('tSolve', e.data.error); showTrouble(t('tSolve'), e.data.error); };") === true);
+ok('guard fixture LEAKS: worker raw e.data.error via variable',
+   workerFixtureLeaks("w.onmessage = function(e){ var m = e.data.error; showTrouble(t('tSolve'), m); };") === true);
+ok('guard fixture SAFE: worker localized e.data.error',
+   workerFixtureLeaks("w.onmessage = function(e){ showEngineTrouble('tSolve', e.data.error||''); };") === false);
 }  // end if (acorn)
 
 // ---- Layer 2: functional localization -----------------------------------
