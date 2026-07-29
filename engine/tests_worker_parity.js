@@ -221,6 +221,10 @@ function strictGrid(rel) {
 
 // Single-variable parity: a genuine one-variable model must detect and solve
 // identically on the worker and the main-thread fallback (both inline engine).
+// We assert the EXACT objective and value, not just "optimal", and run the same
+// adversarial fixtures the engine.js suite uses so the inline copy is verified
+// against the very regressions the auditor found (two-constraints-no-objective,
+// two-loose-cells, coefficient-in-neighbour).
 {
   varSettings = {};   // clear any panel state left by the EXAMPLES loop above
   const grid = [
@@ -233,13 +237,53 @@ function strictGrid(rel) {
   let mErr = null, wErr = null, mOut = null, wOut = null;
   try { mOut = mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
   try { wOut = workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
-  ok('1-var: main-thread detects and solves', !mErr && mOut && mOut.status === 'optimal', mErr || (mOut && mOut.status));
-  ok('1-var: worker detects and solves', !wErr && wOut && wOut.status === 'optimal', wErr || (wOut && wOut.status));
+  ok('1-var: main-thread solves to exact optimum (obj 5, x 5)',
+     !mErr && mOut && mOut.status === 'optimal' && mOut.objective === 5 &&
+     (mOut.variables || []).length === 1 && Math.abs(mOut.values[0] - 5) < 1e-9,
+     mErr || JSON.stringify(mOut));
+  ok('1-var: worker solves to exact optimum (obj 5, x 5)',
+     !wErr && wOut && wOut.status === 'optimal' && wOut.objective === 5 &&
+     (wOut.variables || []).length === 1 && Math.abs(wOut.values[0] - 5) < 1e-9,
+     wErr || JSON.stringify(wOut));
   ok('1-var: same objective on both paths', mOut && wOut && mOut.objective === wOut.objective,
      (mOut && mOut.objective) + ' vs ' + (wOut && wOut.objective));
-  ok('1-var: exactly one variable on both paths',
-     mOut && wOut && (mOut.variables || []).length === 1 && (wOut.variables || []).length === 1,
-     (mOut && mOut.variables.length) + ' vs ' + (wOut && wOut.variables.length));
+}
+
+// Adversarial fixtures against the INLINE engine (both paths). Each must be
+// REJECTED at detection on both the main-thread and worker paths, identically.
+[
+  { name: 'two constraints, no objective', grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Lower', '', '', '=B2', '>=', '1'], ['Upper', '', '', '=B2', '<=', '5'] ] },
+  { name: 'two separate decision cells', grid: [
+    ['Item', 'x', 'sep', 'y', '', 'Result', 'Rel', 'Limit'], ['V', '0', 'text', '0', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''], ['Total', '', '', '', '', '=B2+100*D2', '', ''],
+    ['Cap', '', '', '', '', '=B2+D2', '<=', '10'] ] },
+].forEach(function (fx) {
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(fx.grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(fx.grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline rejects (' + fx.name + '): main-thread', !!mErr, mOut && JSON.stringify(mOut));
+  ok('inline rejects (' + fx.name + '): worker', !!wErr, wOut && JSON.stringify(wOut));
+});
+
+// Coefficient-in-neighbour: one variable, objective = B2*C2, constraint on B2.
+// Inline engine must pick ONE variable and reach obj 50 on both paths.
+{
+  const grid = [
+    ['Product', 'Units', 'Profit', 'Contribution', 'Rel', 'Limit'],
+    ['A', '0', '10', '=B2*C2', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=D2', '', ''],
+    ['Capacity', '', '', '=B2', '<=', '5'],
+  ];
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline 1-var w/ coefficient: main-thread obj 50, one var',
+     !mErr && mOut && mOut.objective === 50 && (mOut.variables || []).length === 1, mErr || JSON.stringify(mOut));
+  ok('inline 1-var w/ coefficient: worker obj 50, one var',
+     !wErr && wOut && wOut.objective === 50 && (wOut.variables || []).length === 1, wErr || JSON.stringify(wOut));
 }
 
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

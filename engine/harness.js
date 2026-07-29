@@ -49,6 +49,12 @@ function run(grid, opts) {
     return { error: 'detect: ' + (e.message || e) };
   }
   if (opts && opts.integer) model.wholeNumbers = true;
+  // Allow a test to attach per-variable domains exactly as the panel would
+  // (e.g. a real binary: { integer:[0], bounds:[{lower:0,upper:1}] }), so
+  // binary/bounded models can be exercised through the engine, not just via the
+  // whole-numbers toggle.
+  if (opts && opts.domains) model.domains = opts.domains;
+  if (opts && typeof opts.mutate === 'function') opts.mutate(model);
   let out;
   try {
     out = Engine.solveModel_(sheet, model);

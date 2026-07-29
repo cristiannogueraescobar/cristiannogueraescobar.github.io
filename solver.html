@@ -2001,41 +2001,56 @@ function detectModel_(sheet) {
     });
   });
 
-  // Prefer multi-cell blocks exactly as before: whenever any block of two or
-  // more input cells feeds a total, it wins and normal models are unchanged.
-  // Only when NO multi-cell block qualifies do we consider a single cell as the
-  // sole decision variable — and only with real structural evidence.
+  // Prefer multi-cell blocks exactly as before, with one refinement: a block
+  // formed ONLY by the objective (never by a constraint) is weak evidence — it
+  // can be an accidental pairing like =B2*C2 where C2 is a coefficient — and
+  // must not out-rank a genuine single-cell variable with objective+constraint
+  // evidence.
   let variables = null;
   let bestScore = -1;
+  let bestReach = 0;
   Object.keys(blockCells).forEach(function (block) {
     const size = blockCells[block].length;
     if (size < 2) return;
     const score = blockReach[block] * 1000 + size;
-    if (score > bestScore) { bestScore = score; variables = block; }
+    if (score > bestScore) { bestScore = score; variables = block; bestReach = blockReach[block]; }
   });
 
-  if (!variables) {
-    // Single-variable fallback. contiguousBlocks_ never forms a 1-cell block, so
-    // a genuine one-variable model produced no candidate above. A constant cell
-    // reached by the objective AND by at least one other output (a constraint)
-    // shows the same "used by several totals" evidence a block must, via one
-    // cell — ruling out a lone constant, a header + value, or a cell that only
-    // feeds an info formula. (Variable Settings like binary/bounds are applied
-    // after detection and are not visible here, so a model limited only by a
-    // bound is selected manually, as before.)
+  // Single-cell candidates: reached by the objective AND by at least one
+  // constraint (proven per role — two constraints and no objective must not
+  // qualify, or picking one as the objective would drop a real limit).
+  const eligibleSingles = [];
+  {
     const cellReach = {};
     outputs.forEach(function (output) {
       reachableConstants_(grid, output, {}).forEach(function (cell) {
         cellReach[cell] = (cellReach[cell] || 0) + 1;
       });
     });
-    let single = null;
-    let singleBest = -1;
     Object.keys(cellReach).forEach(function (cell) {
-      if (cellReach[cell] < 2) return;               // objective + >=1 constraint
-      if (cellReach[cell] > singleBest) { singleBest = cellReach[cell]; single = cell; }
+      if (cellReach[cell] < 2) return;
+      const reached = outputs.filter(function (output) {
+        return reachableConstants_(grid, output, {}).indexOf(cell) !== -1;
+      });
+      let hasObjective = false, hasConstraint = false;
+      reached.forEach(function (output) {
+        if (readConstraint_(grid, output).guessed) hasObjective = true;
+        else hasConstraint = true;
+      });
+      if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
-    if (single) variables = single;
+  }
+
+  //  - strong block (reached by a constraint too): always wins.
+  //  - weak block (objective-only): a single valid cell wins over it.
+  //  - two or more separate single cells: ambiguous, refuse.
+  if (variables && bestReach >= 2) {
+    // keep the strong block
+  } else if (eligibleSingles.length === 1) {
+    variables = eligibleSingles[0];
+  } else if (eligibleSingles.length > 1 && !variables) {
+    throw new Error('Several separate cells look like decision variables, but ' +
+      'they do not form one block. Select the decision cells yourself.');
   }
 
   if (!variables) {

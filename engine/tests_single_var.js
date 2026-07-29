@@ -56,14 +56,18 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
-// Binary (with an explicit constraint x <= 1, since variable config is not
-// visible at detection time — the agreed P1 rule requires objective + at least
-// one constraint). Max 10x, x <= 1, x integer -> x = 1, objective 10.
+// Binary (real domain): Max 10x, x <= 1, with x set to a binary domain the way
+// the panel builds it (integer index 0, bounds 0..1). Checks not just the value
+// but that the model is classified binary with the right bounds.
 {
-  const r = run(oneVar('<=', 1, { coef: 10 }), { integer: true });
-  check('1-var binary-like: x=1, objective 10',
-    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 10) < 1e-9 &&
-    r.out.values.length === 1 && Math.abs(r.out.values[0] - 1) < 1e-9,
+  const r = run(oneVar('<=', 1, { coef: 10 }), {
+    domains: { integer: [0], bounds: [{ lower: 0, upper: 1 }] },
+  });
+  const dom = r.out && r.out.variableDomains && r.out.variableDomains[0];
+  check('1-var binary: modelType binary, domain 0..1, x=1, objective 10',
+    !r.error && r.out.status === 'optimal' && r.out.modelType === 'binary' &&
+    dom && dom.type === 'binary' && dom.min === 0 && dom.max === 1 &&
+    Math.abs(r.out.objective - 10) < 1e-9 && Math.abs(r.out.values[0] - 1) < 1e-9,
     r.error || JSON.stringify(r.out));
 }
 
@@ -72,26 +76,6 @@ function oneVar(rel, limit, opts) {
   const r = run(oneVar('>=', 0));
   check('1-var unbounded: Max x, x>=0 only',
     !r.error && r.out.status === 'unbounded', r.error || JSON.stringify(r.out));
-}
-
-// Binary: Max 10x with a structural constraint present so detection has grid
-// evidence (x <= 1), then x set binary. Detection runs on the grid first, so a
-// lone cell needs a constraint row to be recognised; the binary config is then
-// applied on top. Expected x = 1, objective 10.
-{
-  const grid = [
-    ['Item', 'x', '', 'Total', 'Rel', 'Limit'],
-    ['A', '0', '', '', '', ''],
-    ['', '', '', '', '', ''],
-    ['Total', '', '', '=10*B2', '', ''],
-    ['Cap', '', '', '=B2', '<=', '1'],
-  ];
-  // integer flag stands in for the binary domain in this harness path.
-  const r = run(grid, { integer: true });
-  check('1-var binary-ish: Max 10x, x<=1 integer -> x=1, objective 10',
-    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 10) < 1e-9 &&
-    r.out.values.length === 1 && Math.abs(r.out.values[0] - 1) < 1e-9,
-    r.error || JSON.stringify(r.out));
 }
 
 // Infeasible: x >= 5 and x <= 3.
@@ -134,7 +118,7 @@ function oneVar(rel, limit, opts) {
   ];
   const r = run(grid);
   check('negative: cell in objective only (no constraint) is not detected',
-    !!r.error, JSON.stringify(r.out));
+    !!r.error && /^detect:/.test(r.error), r.error || JSON.stringify(r.out));
 }
 
 // A single cell that feeds a constraint but NOT the objective is not a decision
@@ -164,6 +148,60 @@ function oneVar(rel, limit, opts) {
   // B2 is text; linearizing =B2 as a decision must not yield a clean 1-var LP.
   check('negative: text cell is not turned into a variable',
     !!r.error || (r.out && r.out.status !== 'optimal'), JSON.stringify(r.out && r.out.status));
+}
+
+// Two constraints and NO free objective: the cell is reached twice, but only by
+// constraint outputs. Picking one as the objective would silently drop a limit,
+// so detection must refuse rather than invent an objective.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Lower', '', '', '=B2', '>=', '1'],
+    ['Upper', '', '', '=B2', '<=', '5'],
+  ];
+  const r = run(grid);
+  check('negative: two constraints, no objective -> rejected at detection',
+    !!r.error && /^detect:/.test(r.error), r.error || JSON.stringify(r.out));
+}
+
+// Two SEPARATE loose cells (a non-numeric cell between them prevents a block)
+// that each feed objective + constraint. A real two-variable model whose cells
+// did not form one block: keeping only one would delete the other and change the
+// optimum. Must be reported as ambiguous, never silently reduced.
+{
+  const grid = [
+    ['Item', 'x', 'separator', 'y', '', 'Result', 'Rel', 'Limit'],
+    ['Values', '0', 'text', '0', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['Total', '', '', '', '', '=B2+100*D2', '', ''],
+    ['Capacity', '', '', '', '', '=B2+D2', '<=', '10'],
+  ];
+  const r = run(grid);
+  check('negative: two separate decision cells -> ambiguous, rejected',
+    !!r.error && /^detect:/.test(r.error) && /separate cells/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+// A very common one-variable layout: the coefficient lives in a NEIGHBOURING
+// cell, objective = quantity * unit-profit, constraint on the quantity only.
+// B2 is the decision; C2 is a coefficient. The accidental B2:C2 block is formed
+// only by the objective, so it must not out-rank the single cell B2. Expect one
+// variable, x = 5, objective 50.
+{
+  const grid = [
+    ['Product', 'Units', 'Profit', 'Contribution', 'Rel', 'Limit'],
+    ['A', '0', '10', '=B2*C2', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=D2', '', ''],
+    ['Capacity', '', '', '=B2', '<=', '5'],
+  ];
+  const r = run(grid);
+  check('1-var with coefficient in a neighbour cell: x=5, objective 50, one var',
+    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 50) < 1e-9 &&
+    r.out.values.length === 1 && Math.abs(r.out.values[0] - 5) < 1e-9,
+    r.error || JSON.stringify(r.out));
 }
 
 // ---- Regression: multi-variable detection is unchanged -----------------

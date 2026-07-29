@@ -1576,44 +1576,65 @@ function detectModel_(sheet) {
   });
 
   // Prefer multi-cell blocks exactly as before: whenever any block of two or
-  // more input cells feeds a total, it wins and the behaviour for normal models
-  // is unchanged. Only when NO multi-cell block qualifies do we consider a
-  // single cell as the sole decision variable — and even then only with real
-  // structural evidence (see below), so a stray constant is never promoted.
+  // more input cells feeds a total, it normally wins and the behaviour for
+  // normal models is unchanged. The one refinement (see below) is that a block
+  // which is only ever formed by the OBJECTIVE — never by a constraint — is weak
+  // evidence: it can be an accidental pairing like =B2*C2, where B2 is the
+  // decision and C2 a unit coefficient. Such a block must not out-rank a genuine
+  // single-cell variable that has objective + constraint evidence.
   let variables = null;
   let bestScore = -1;
+  let bestReach = 0;
   Object.keys(blockCells).forEach(function (block) {
     const size = blockCells[block].length;
     if (size < 2) return;
     const score = blockReach[block] * 1000 + size;
-    if (score > bestScore) { bestScore = score; variables = block; }
+    if (score > bestScore) { bestScore = score; variables = block; bestReach = blockReach[block]; }
   });
 
-  if (!variables) {
-    // Single-variable fallback. contiguousBlocks_ only ever forms blocks of two
-    // or more cells (runs_ skips length-1 runs), so a genuine one-variable model
-    // never produced a candidate block above. Compute single-cell candidates
-    // directly: a constant cell that is reached by the objective AND by at least
-    // one other output (a constraint) is the same "used by several totals"
-    // evidence a multi-cell block must show, expressed through one cell. That
-    // rules out a lone constant, a header + value, or a cell that only feeds an
-    // info formula. (Variable Settings such as binary/bounds are applied after
-    // detection and can't be seen here, so a model limited only by a bound is
-    // selected manually, as before.)
+  // Single-cell candidates: a cell reached by the objective AND by at least one
+  // constraint (proven per role, not by a bare count — two constraints and no
+  // objective must not qualify). Computed regardless of whether a block was
+  // found, so we can compare the evidence.
+  const eligibleSingles = [];
+  {
     const cellReach = {};
     outputs.forEach(function (output) {
       reachableConstants_(grid, output, {}).forEach(function (cell) {
         cellReach[cell] = (cellReach[cell] || 0) + 1;
       });
     });
-    let single = null;
-    let singleBest = -1;
     Object.keys(cellReach).forEach(function (cell) {
-      if (cellReach[cell] < 2) return;               // objective + >=1 constraint
-      if (cellReach[cell] > singleBest) { singleBest = cellReach[cell]; single = cell; }
+      if (cellReach[cell] < 2) return;
+      const reached = outputs.filter(function (output) {
+        return reachableConstants_(grid, output, {}).indexOf(cell) !== -1;
+      });
+      let hasObjective = false, hasConstraint = false;
+      reached.forEach(function (output) {
+        if (readConstraint_(grid, output).guessed) hasObjective = true;
+        else hasConstraint = true;
+      });
+      if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
-    if (single) variables = single;
   }
+
+  // Decide between a multi-cell block and a single cell:
+  //  - A strong block (reached by a constraint too, bestReach >= 2) always wins,
+  //    preserving normal multi-variable behaviour.
+  //  - A weak block (objective-only, bestReach < 2) is preferred ONLY if there
+  //    is no single cell with full objective + constraint evidence. When exactly
+  //    one such single cell exists, it wins (fixes =B2*C2 with C2 a coefficient).
+  //  - With no block at all, fall back to the single cell.
+  if (variables && bestReach >= 2) {
+    // keep the strong block
+  } else if (eligibleSingles.length === 1) {
+    variables = eligibleSingles[0];
+  } else if (eligibleSingles.length > 1 && !variables) {
+    throw new Error('Several separate cells look like decision variables, but ' +
+      'they do not form one block. Select the decision cells yourself.');
+  }
+  // else: keep whatever weak block we had (variables may still be a size-1-safe
+  // multi-cell block), or fall through to the error below if nothing qualified.
 
   if (!variables) {
     throw new Error('No block of input cells feeds several totals, so the ' +

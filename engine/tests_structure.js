@@ -262,11 +262,17 @@ PAGES.forEach(function (p) {
        !/String\(numeric\)\s*===\s*operand/.test(src));
     ok(name + ': both criterion paths normalise via parseCriterionOperand_',
        (src.match(/parseCriterionOperand_\(/g) || []).length >= 3);
-    // Single-variable detection fallback must be present in both engines: a
-    // one-cell candidate reached by objective + >=1 constraint (cellReach >= 2),
-    // only when no multi-cell block qualified.
-    ok(name + ': has the single-variable detection fallback',
-       /cellReach/.test(src) && /cellReach\[cell\] < 2/.test(src));
+    // Single-variable detection fallback must be present in both engines and
+    // must use the CORRECTED logic: a one-cell candidate needs objective AND
+    // constraint evidence (classified per role via readConstraint_().guessed),
+    // a weak objective-only block must not out-rank it (bestReach gate), and two
+    // eligible cells must be refused as ambiguous. Pinning these strings catches
+    // a divergence back to the bare cellReach>=2 count.
+    ok(name + ': single-variable fallback uses per-role evidence',
+       /eligibleSingles/.test(src) && /bestReach/.test(src) &&
+       /readConstraint_\([^)]*\)\.guessed/.test(src) && /hasObjective && hasConstraint/.test(src));
+    ok(name + ': single-variable fallback refuses ambiguous multiple cells',
+       /Several separate cells look like decision variables/.test(src));
   });
 })();
 
