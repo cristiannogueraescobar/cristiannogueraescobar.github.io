@@ -92,7 +92,7 @@ button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 table.grid{border-collapse:separate;border-spacing:0;font-family:var(--mono);font-size:14.5px;width:100%}
 table.grid th{position:sticky;top:0;z-index:2;background:var(--paper);color:var(--faint);font-weight:500;font-size:11px;text-align:center;padding:8px 6px;border:1px solid var(--line-fine);min-width:120px}
 table.grid th.corner{position:sticky;top:0;left:0;z-index:3;min-width:38px;width:38px}
-table.grid td.rownum{position:sticky;left:0;z-index:1;background:var(--paper);color:var(--faint);text-align:center;font-size:11px;border:1px solid var(--line-fine);width:38px}
+table.grid th.rownum{position:sticky;left:0;z-index:1;background:var(--paper);color:var(--faint);text-align:center;font-size:11px;font-weight:500;border:1px solid var(--line-fine);width:38px}
 table.grid td{border:1px solid var(--line-fine);padding:0}
 table.grid input{width:100%;border:none;background:transparent;font-family:var(--mono);font-size:14.5px;padding:11px 12px;color:var(--ink);outline:none}
 table.grid input:focus{background:var(--brass-tint)}
@@ -397,7 +397,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=48"></script>
+<script src="assets/i18n.js?v=49"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -416,6 +416,7 @@ function applyLang(lang){
   try {
     var grid = document.getElementById('grid');
     if (grid) {
+      grid.setAttribute('aria-label', Plumline.i18n.t(LANG, 'solver', 'gridLabel'));
       var tmpl = Plumline.i18n.t(LANG, 'solver', 'cellLabel');
       var ins = grid.querySelectorAll('input[data-r]');
       for (var i = 0; i < ins.length; i++) {
@@ -2485,11 +2486,12 @@ function matchesAnyHint_(label, hints) {
 
   function render(){
     var t=document.getElementById('grid');
+    t.setAttribute('aria-label', Plumline.i18n.t(LANG,'solver','gridLabel'));
     var html='<tr><th class="corner"></th>';
-    for(var c=0;c<COLS;c++)html+='<th>'+colLetter(c+1)+'</th>';
+    for(var c=0;c<COLS;c++)html+='<th scope="col">'+colLetter(c+1)+'</th>';
     html+='</tr>';
     for(var r=0;r<ROWS;r++){
-      html+='<tr><td class="rownum">'+(r+1)+'</td>';
+      html+='<tr><th scope="row" class="rownum">'+(r+1)+'</th>';
       for(var c=0;c<COLS;c++){
         var v=(data[r]&&data[r][c])||'';
         var cellRef=colLetter(c+1)+(r+1);
@@ -2756,9 +2758,9 @@ function matchesAnyHint_(label, hints) {
     };}};
   }
 
-  // Number formatting follows the active interface language, so a Spanish page
-  // shows 1.760 and a French page 1 760 — the spoken announcement and the
-  // visible receipt both read naturally in that language.
+  // Number formatting follows the active interface locale, so the spoken
+  // announcement and the visible receipt both read naturally in that language
+  // (grouping and decimal separators vary by locale, e.g. 12.345 vs 12 345).
   function activeLocale(){
     return {en:'en-GB',es:'es-ES',pt:'pt-PT',de:'de-DE',fr:'fr-FR'}[LANG] || 'en-GB';
   }
@@ -3892,7 +3894,7 @@ function matchesAnyHint_(label, hints) {
   LANG = Plumline.i18n.init('solver');
   var sel=document.getElementById('lang');
   if(sel) sel.addEventListener('change',function(){
-    LANG = sel.value;
+    applyLang(sel.value);                     // sets LANG and relabels grid cells
     setDetectLabel(panelStale);              // button label follows the language
     if(detectedVars.length) renderVarPanel(); // re-render dynamic panel in new language
     updateSenseHint();                        // hint text follows the language
