@@ -1221,21 +1221,26 @@ function compareValues_(left, operator, right) {
 }
 
 /** Matches a SUMIF criterion such as "standard", ">10" or "<>0". */
+// Normalise a SUMIF criterion operand: any finite numeric literal (20, 20.0,
+// 020, +20, 2e1, .5) becomes a Number so it compares numerically; otherwise it
+// stays text. Used for BOTH the operator form (">20.0") and the bare-equality
+// form ("20.0"), which Excel treats as "=20".
+function parseCriterionOperand_(operand) {
+  const text = String(operand).trim();
+  const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+  const parsed = Number(text);
+  return (text !== '' && numericPattern.test(text) && Number.isFinite(parsed)) ? parsed : text;
+}
+
 function matchesCriterion_(value, criterion) {
   if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
   const text = String(criterion).trim();
   const match = /^(<=|>=|<>|<|>|=)\s*(.*)$/.exec(text);
-  if (!match) return compareValues_(value, '=', text);
-  const operand = match[2].trim();
-  // Recognise ANY finite numeric literal (10.0, .5, 01, 1e3, +10), not only the
-  // canonical String(Number(x)) form. Treating "10.0" as text made ">10.0"
-  // compare lexicographically, silently summing the wrong cells and changing
-  // the solver's answer when the SUMIF feeds a constraint or objective.
-  const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
-  const parsed = Number(operand);
-  const comparable = (operand !== '' && numericPattern.test(operand) && Number.isFinite(parsed))
-    ? parsed : operand;
-  return compareValues_(value, match[1], comparable);
+  // A criterion with no leading operator is an equality test — Excel accepts a
+  // number or its textual form ("20", "20.0"). Normalise it too, so "20.0"
+  // matches the number 20 instead of failing a text comparison.
+  if (!match) return compareValues_(value, '=', parseCriterionOperand_(text));
+  return compareValues_(value, match[1], parseCriterionOperand_(match[2]));
 }
 
 function variableForm_(cell) {

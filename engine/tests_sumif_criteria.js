@@ -42,6 +42,14 @@ const cases = [
   ['>+10',   20],   // +10 == 10: only 20
   ['=20',    20],   // exact match
   ['=20.0',  20],
+  // Operator-LESS equality criteria: Excel treats "20" / "20.0" as "=20". These
+  // must normalise too — the bare-equality path was the one that still failed.
+  ['20',     20],
+  ['20.0',   20],
+  ['020',    20],
+  ['+20',    20],
+  ['2e1',    20],   // 2e1 == 20
+  ['2',       2],   // only the H2=2 cell
 ];
 
 cases.forEach(function (c) {
@@ -53,6 +61,15 @@ cases.forEach(function (c) {
   check('SUMIF "' + crit + '" sums to ' + sum + ' -> B2 = ' + expectedB2,
     okValue, r.error || ('status ' + (r.out && r.out.status) + ' obj ' + (r.out && r.out.objective)));
 });
+
+// A genuinely non-numeric equality criterion must NOT match the numbers, so the
+// SUMIF sums nothing and B2 can reach the full 25.
+{
+  const r = run(model('hello'));
+  check('operator-less text criterion "hello" matches nothing (B2 = 25)',
+    !r.error && r.out && r.out.status === 'optimal' && Math.abs(r.out.objective - 25) < 1e-6,
+    r.error || JSON.stringify(r.out));
+}
 
 // Text criteria must still work as equality/inequality on strings.
 {

@@ -30,18 +30,20 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
 const helperDef = (solverSrc.match(/function showEngineTrouble\([\s\S]*?\n\}/) || [''])[0];
 ok('showEngineTrouble exists and localizes', /localizeEngineError\(/.test(helperDef), helperDef.slice(0, 60));
 
-// No showTrouble call may pass a raw engine error. Catch every shape the
-// auditor named: String(err.message), err.message, error.message, or an
-// intermediate variable assigned from *.message then shown. We scan for
-// showTrouble(...) whose argument references ".message" or "err"/"error"
-// without going through localizeEngineError/showEngineTrouble.
+// This scan catches the DIRECT shapes — showTrouble(..., String(err.message)),
+// err.message, error.message — where the error reference appears in the call
+// itself. It does NOT catch an error hidden behind an intermediate variable
+// (var m = err.message; showTrouble(title, m)); that case is instead caught by
+// the per-route checks below, which require each of the four error routes to
+// call showEngineTrouble. The two guards are complementary: this one flags an
+// obvious raw display anywhere; the route checks pin the specific catches.
 const showTroubleCalls = solverSrc.match(/showTrouble\([^;]*\)/g) || [];
 const rawErrorCalls = showTroubleCalls.filter(function (c) {
   const surfacesError = /\.message\b/.test(c) || /\b(err|error)\b/.test(c);
   const localized = /localizeEngineError/.test(c);
   return surfacesError && !localized;
 });
-ok('no showTrouble call surfaces a raw engine error', rawErrorCalls.length === 0, rawErrorCalls.join(' | '));
+ok('no showTrouble call directly surfaces a raw engine error', rawErrorCalls.length === 0, rawErrorCalls.join(' | '));
 
 // The four known error-display routes must each call showEngineTrouble. Match
 // them by their surrounding context so we count DISTINCT routes, not just N
@@ -55,6 +57,21 @@ const routes = {
 Object.keys(routes).forEach(function (name) {
   ok('route localizes via showEngineTrouble: ' + name, routes[name].test(solverSrc));
 });
+
+// Belt-and-braces: no catch block anywhere in the solver may show a raw engine
+// error alongside (or instead of) the helper. Scan every "catch (err|e) { ... }"
+// body; if it calls showTrouble/announce with a raw *.message and does NOT route
+// that through localizeEngineError/showEngineTrouble, flag it. This catches the
+// intermediate-variable and decorative-call cases the arg-only scan misses.
+const catchBodies = solverSrc.match(/catch\s*\((?:err|e|error)\)\s*\{[\s\S]*?\n\s*\}/g) || [];
+const leakyCatches = catchBodies.filter(function (body) {
+  const showsRaw = /(showTrouble|announce)\([^;]*\b(?:err|e|error)\.message\b/.test(body) ||
+                   /(showTrouble|announce)\([^;]*\bmessage\b[^;]*\)/.test(body) && /=\s*(?:err|e|error)\.message/.test(body);
+  const routesThroughHelper = /showEngineTrouble\(|localizeEngineError\(/.test(body);
+  return showsRaw && !routesThroughHelper;
+});
+ok('no catch block displays a raw engine message (incl. via a variable)',
+   leakyCatches.length === 0, leakyCatches.map(b => b.slice(0, 50)).join(' | '));
 
 // ---- Layer 2: functional localization -----------------------------------
 let JSDOM;

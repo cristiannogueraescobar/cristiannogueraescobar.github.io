@@ -239,11 +239,15 @@ PAGES.forEach(function (p) {
     ok(name + ': RELATION_TOKENS does not include strict ">"', relBlock && !/'>':/.test(relBlock));
     ok(name + ': defines STRICT_RELATION_TOKENS', /STRICT_RELATION_TOKENS\s*=\s*\{\s*'<':\s*true,\s*'>':\s*true\s*\}/.test(src));
     ok(name + ': readConstraint_ throws STRICT_INEQUALITY', /throw new Error\('STRICT_INEQUALITY: '/.test(src));
-    // matchesCriterion_ must recognise non-canonical numeric criteria (the
-    // numericPattern), not the old String(Number(x))===operand check that made
-    // ">10.0" compare as text.
-    ok(name + ': matchesCriterion_ uses a full numeric pattern',
-       /numericPattern\s*=\s*\/\^\[\+-\]\?/.test(src) && !/String\(numeric\)\s*===\s*operand/.test(src));
+    // matchesCriterion_ must recognise non-canonical numeric criteria in BOTH
+    // the operator form (">20.0") and the bare-equality form ("20.0"), via the
+    // shared parseCriterionOperand_ helper — not the old String(Number(x))
+    // check that made "20.0" compare as text.
+    ok(name + ': defines parseCriterionOperand_ with a numeric pattern',
+       /function parseCriterionOperand_\([\s\S]*?numericPattern\s*=\s*\/\^\[\+-\]\?/.test(src) &&
+       !/String\(numeric\)\s*===\s*operand/.test(src));
+    ok(name + ': both criterion paths normalise via parseCriterionOperand_',
+       (src.match(/parseCriterionOperand_\(/g) || []).length >= 3);
   });
 })();
 
