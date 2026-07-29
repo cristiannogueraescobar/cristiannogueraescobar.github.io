@@ -84,6 +84,30 @@ setTimeout(function () {
   ok('row numbers are th scope="row"', rowHeads.length >= 3, rowHeads.length + ' row headers');
   ok('no row number is a plain td', grid.querySelectorAll('td.rownum').length === 0);
 
+  // Header counts must match the grid's actual dimensions, and the extreme
+  // cells (last column, last row) must carry the correct reference — this
+  // guards the 40x20 maximum and any >26-column letter logic (AA, AB...).
+  const bodyRows = grid.querySelectorAll('tr');
+  const nCols = colHeads.length;                       // data columns (corner excluded by scope)
+  const nRows = rowHeads.length;
+  // Every data row has exactly nCols inputs.
+  let rowsWellFormed = true;
+  grid.querySelectorAll('tr').forEach(function (tr) {
+    const inputs = tr.querySelectorAll('input[data-r]');
+    if (inputs.length && inputs.length !== nCols) rowsWellFormed = false;
+  });
+  ok('every data row has one input per column', rowsWellFormed, nCols + ' cols');
+  ok('cell count equals rows x cols', cells.length === nRows * nCols,
+     cells.length + ' vs ' + (nRows * nCols));
+  // Last cell's reference matches colLetter(nCols)+nRows via the DOM.
+  const lastCell = document.querySelector('#grid input[data-r="' + (nRows - 1) + '"][data-c="' + (nCols - 1) + '"]');
+  ok('last cell exists at the grid corner', !!lastCell, (nRows - 1) + ',' + (nCols - 1));
+  // In English, the last-column header letter equals the last cell's ref prefix.
+  const lastColLetter = colHeads[nCols - 1].textContent;
+  ok('last cell ref starts with the last column letter',
+     lastCell && lastCell.getAttribute('aria-label').indexOf(lastColLetter + '' + nRows) >= 0,
+     lastCell && lastCell.getAttribute('aria-label'));
+
   // The REAL user flow: changing the language <select> must relabel existing
   // cells, in every language, while preserving the cell's value and focus.
   const sel = document.getElementById('lang');

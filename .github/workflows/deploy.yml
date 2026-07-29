@@ -150,6 +150,20 @@ jobs:
           CB="${GITHUB_SHA}-${RANDOM}"
           FETCH="curl -LfsS -H Cache-Control:no-cache"
 
+          # Print what the domain serves RIGHT NOW, before any waiting — so the
+          # very first log lines show whether we're getting this build, an old
+          # build, or the DEV-LOCAL placeholder. Also show where the domain
+          # resolves and whether GitHub's Pages headers are present, which
+          # distinguishes "wrong Pages source" from "wrong DNS/hosting".
+          echo "=== Pre-flight: what is $BASE serving right now? ==="
+          echo "--- HTTP headers for /build-info.json ---"
+          curl -sSI "$BASE/build-info.json?cb=$CB-pre" | grep -iE '^(HTTP/|server|x-github|via|age|cache|last-modified)' || true
+          echo "--- Body of /build-info.json ---"
+          curl -LsS "$BASE/build-info.json?cb=$CB-pre" || true
+          echo ""
+          echo "Expected commit for this run: $GITHUB_SHA"
+          echo "=== end pre-flight ==="
+
           # Wait until production reports THIS commit. GitHub Pages CDN
           # propagation after a deploy is variable and can exceed 3 minutes, so
           # give it a generous budget (initial settle + up to ~8 min of polling)

@@ -408,6 +408,10 @@ var LANG = 'en';
 // The solver's text lives in the shared dictionary (assets/i18n.js) under the
 // 'solver' page. t() is kept as the name the dynamic result strings call.
 function t(key){ return Plumline.i18n.t(LANG, 'solver', key); }
+// Column index (1-based) to spreadsheet letter (1->A, 27->AA). Top-level so both
+// render() (in the IIFE) and applyLang() (here) use the ONE algorithm — no risk
+// of the two drifting if the column cap ever exceeds 26 (AA, AB...).
+function colLetter(i){var s='',n=i;while(n>0){var r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
 function applyLang(lang){
   LANG = Plumline.i18n.dict[lang] ? lang : 'en';
   // the shared engine applies data-i18n nodes; we just track LANG for t()
@@ -420,11 +424,13 @@ function applyLang(lang){
       var tmpl = Plumline.i18n.t(LANG, 'solver', 'cellLabel');
       var ins = grid.querySelectorAll('input[data-r]');
       for (var i = 0; i < ins.length; i++) {
-        var ref = String.fromCharCode(65 + (+ins[i].getAttribute('data-c'))) + ((+ins[i].getAttribute('data-r')) + 1);
+        var ref = colLetter((+ins[i].getAttribute('data-c')) + 1) + ((+ins[i].getAttribute('data-r')) + 1);
         ins[i].setAttribute('aria-label', tmpl.replace('{ref}', ref));
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Grid accessibility labels could not be updated', e);
+  }
 }
 
 /* === Plumline engine: the exact same code as the Google Sheets add-on === */
@@ -2481,8 +2487,6 @@ function matchesAnyHint_(label, hints) {
         (params.toString()?'?'+params.toString():'') + location.hash);
     }catch(e){}
   }
-
-  function colLetter(i){var s='',n=i;while(n>0){var r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
 
   function render(){
     var t=document.getElementById('grid');
