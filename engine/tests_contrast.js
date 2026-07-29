@@ -1,10 +1,12 @@
 /**
  * tests_contrast.js — WCAG AA contrast guard for the colour palette.
  *
- * Parses the CSS custom properties straight from solver.html and plumline.css,
- * then checks that every text/background pair the UI actually uses meets WCAG
- * 2.1 AA: 4.5:1 for normal text, 3:1 for large text (>=18px, or >=14px bold)
- * and for non-text focus indicators. Pure computation — no jsdom needed.
+ * Parses the CSS custom properties from the stylesheets, then checks a CURATED
+ * set of the critical text/background pairs the UI renders against WCAG 2.1 AA
+ * (4.5:1 normal text, 3:1 large text or non-text focus indicators). It is not a
+ * full audit of every possible pairing; it targets the pairs that have failed
+ * or are most at risk, plus rule-level guards on the specific fixes. Pure
+ * computation — no jsdom needed.
  *
  * Run: node engine/tests_contrast.js
  */
@@ -14,6 +16,9 @@ const path = require('path');
 const siteDir = path.join(__dirname, '..');
 const solver = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
 const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
+const examples = fs.readFileSync(path.join(siteDir, 'examples.html'), 'utf8');
+const PAGE_NAMES = ['index.html', 'solver.html', 'guide.html', 'about.html', 'privacy.html', 'terms.html', 'examples.html'];
+const allPages = PAGE_NAMES.map(p => fs.readFileSync(path.join(siteDir, p), 'utf8')).join('\n');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
@@ -66,6 +71,7 @@ const checks = [
   ['wrong', 'paper', 4.5, 'error text on paper'],
   ['wrong', 'wrong-lo', 4.5, 'error text on its own tint'],
   ['cream', 'deep', 4.5, 'hero/footer text on dark'],
+  ['brass-hi', 'deep', 4.5, 'eyebrow (brass-hi) on dark ground'],
   ['ink', 'brass-tint', 4.5, 'focused cell input text on brass tint'],
   // Button grounds: 15px semibold is NOT "large text", so needs 4.5:1.
   ['ink', 'brass', 4.5, 'primary .btn text (ink on brass)'],
@@ -108,6 +114,29 @@ ok('solve button hover does not lighten to --true-hi (solver)',
    !/button\.solve:hover\{[^}]*background:var\(--true-hi\)/.test(solver));
 ok('status-list uses a defined token (--soft, not --muted)',
    /\.status-list span\{color:var\(--soft\)\}/.test(css) && !/var\(--muted\)/.test(css));
+
+// examples.html uses inline styles the stylesheet guards above don't see. Its
+// card tags and open-link must use the AA-safe tokens (small text on white).
+ok('example card tags use --brass-text',
+   /\.xcard \.xtags\{[^}]*color:var\(--brass-text\)/.test(examples),
+   'xtags should be brass-text');
+ok('example open link uses --true',
+   /\.xcard \.xopen\{[^}]*color:var\(--true\)/.test(examples),
+   'xopen should be --true');
+ok('examples.html no longer references the undefined --green token',
+   !/var\(--green/.test(examples));
+// Confirm those tokens actually clear AA on the white card ground.
+ok('contrast >= 4.5: example tags (brass-text) on white', ratio(P['brass-text'], '#FFFFFF') >= 4.5,
+   ratio(P['brass-text'], '#FFFFFF').toFixed(2) + ':1');
+ok('contrast >= 4.5: example open link (true) on white', ratio(P['true'], '#FFFFFF') >= 4.5,
+   ratio(P['true'], '#FFFFFF').toFixed(2) + ':1');
+
+// The build badge must not carry a reduced opacity: it already inherits the
+// footer's translucent cream (.62), so an extra opacity:.6 would compound the
+// alpha and drop it below AA. Check every page.
+ok('build badges have no reduced opacity',
+   !/id="buildBadge"[^>]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(allPages),
+   'a buildBadge still has opacity < 1');
 
 console.log('CONTRAST TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);
