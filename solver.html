@@ -18,7 +18,7 @@
 <meta name="twitter:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online optimisation solver. Solve continuous, integer, binary and mixed-integer models in your browser: enter your model like a spreadsheet, set variable types and per-variable limits, and verify the result against your own formulas. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=9">
+<link rel="stylesheet" href="assets/plumline.css?v=10">
 <style>
 :root{
   --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#93958A;
@@ -248,6 +248,9 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 .cancel-solve{margin-left:auto;padding:8px 14px;font-size:13px;min-height:44px}
 .compat-solve{margin-left:12px;padding:8px 14px;font-size:13px;min-height:44px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
 .shadow-note{font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.5;font-style:italic}
 </style>
 </head>
@@ -2744,6 +2747,13 @@ function matchesAnyHint_(label, hints) {
   }
   function fmt(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString(activeLocale(),{maximumFractionDigits:4});}
 
+  // Respect the user's reduced-motion preference for programmatic scrolling:
+  // scrollIntoView's own 'smooth' bypasses the CSS scroll-behavior override, so
+  // we choose the behavior explicitly.
+  function scrollBehavior(){
+    return (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth';
+  }
+
   // Announce a CONCISE one-line outcome to the dedicated live region. The full
   // receipt is rendered into #result (not a live region), so a screen reader
   // hears a short summary ("Optimal solution found. Total: 1760") instead of
@@ -3287,7 +3297,7 @@ function matchesAnyHint_(label, hints) {
     // Escape title and msg: engine error messages can include fragments of a
     // user-written formula or cell label, so they must never be treated as HTML.
     res.innerHTML='<div class="trouble"><b>'+esc(title)+'.</b> '+esc(msg)+'</div>'+extra;
-    res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
+    res.classList.add('show'); res.scrollIntoView({behavior:scrollBehavior(),block:'nearest'});
     announce(title);   // concise: just the headline outcome
   }
 
@@ -3388,7 +3398,7 @@ function matchesAnyHint_(label, hints) {
          '<button class="chip" id="exp-xls">Excel</button>'+
          '<button class="chip" id="exp-txt">'+t('exportCopySummary')+'</button></div>';
     }
-    res.innerHTML=h; res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
+    res.innerHTML=h; res.classList.add('show'); res.scrollIntoView({behavior:scrollBehavior(),block:'nearest'});
 
     // Only keep an exportable result when it passed verification.
     lastResult = verificationPassed ? out : null;
@@ -3885,7 +3895,8 @@ function matchesAnyHint_(label, hints) {
   // flag that production never sets, so it is inert on the live site.
   if (typeof window !== 'undefined' && window.__PLUMLINE_TEST__) {
     window.__plumline = { presentResult: presentResult, renderReceipt: renderReceipt,
-      announce: announce, fmt: fmt, setLang: function(l){ LANG=l; } };
+      announce: announce, fmt: fmt, setLang: function(l){ LANG=l; },
+      openDrawer: openDrawer, closeDrawer: closeDrawer };
   }
 })();
 </script>

@@ -9,7 +9,7 @@ const path = require('path');
 const suites = [
   'tests', 'tests_states', 'tests_bounds', 'tests_worker_token', 'tests_panel',
   'tests_safety', 'tests_examples', 'tests_jsonld', 'tests_assets',
-  'tests_i18n_pages', 'tests_direction', 'tests_structure', 'tests_worker_parity', 'tests_nav_menu', 'tests_solve_announce'
+  'tests_i18n_pages', 'tests_direction', 'tests_structure', 'tests_worker_parity', 'tests_nav_menu', 'tests_solve_announce', 'tests_ex_drawer'
 ];
 
 let totalPass = 0, anyFail = false, anySkip = false;

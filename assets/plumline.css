@@ -307,7 +307,9 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   .exports{flex-wrap:wrap}
   .exports .chip{min-height:40px}
 }
-@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 
 /* ---- PROSE (legal & content pages) --------------------------------------- */
 .prose{padding:20px 0 10px;max-width:72ch;margin:0 auto}

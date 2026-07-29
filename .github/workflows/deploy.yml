@@ -244,26 +244,26 @@ jobs:
             const base="'"$BASE"'";
             const cb="'"$CB"'";
             const targets=new Set();
+            // One normaliser for every target: skip external/non-page URLs, and
+            // strip both the #fragment and the ?query so a script referenced as
+            // nav-menu.js (from <script src>) and nav-menu.js?v=5 (from the
+            // general src scan) collapse to a single entry — no duplicate fetch.
+            function addTarget(u){
+              if(!u) return;
+              if(/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) return;
+              u=u.split("#")[0].split("?")[0];
+              if(u) targets.add(u);
+            }
             for(const p of pages){
               const raw=fs.readFileSync("/tmp/prod/"+p,"utf8");
               // Collect <script src> assets BEFORE stripping, so external JS
               // (nav-menu.js, i18n.js, build-badge.js, examples-data.js) is
               // crawled for 404s too.
-              for(const m of raw.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)){
-                let u=m[1];
-                if(/^(https?:|\/\/|data:)/.test(u)) continue;
-                u=u.split("#")[0].split("?")[0]; if(!u) continue;
-                targets.add(u);
-              }
+              for(const m of raw.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)) addTarget(m[1]);
               // Strip only INLINE scripts (no src) before scanning href/src, so
               // JS string literals inside them are not mistaken for links.
               const s=raw.replace(/<script\b(?![^>]*\bsrc=)[\s\S]*?<\/script>/g,"");
-              for(const m of s.matchAll(/(?:href|src)="([^"]+)"/g)){
-                let u=m[1];
-                if(/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) continue;
-                u=u.split("#")[0]; if(!u) continue;
-                targets.add(u);
-              }
+              for(const m of s.matchAll(/(?:href|src)="([^"]+)"/g)) addTarget(m[1]);
             }
             (async()=>{
               let bad=0;

@@ -191,6 +191,22 @@ PAGES.forEach(function (p) {
   ok('solver #solveAnnounce is outside #result (before it)', iAnn >= 0 && iRes >= 0 && iAnn < iRes);
 })();
 
+// One-time: both stylesheets must honour prefers-reduced-motion, and the rule
+// must neutralise ANIMATIONS (the solve spinner) too, not only transitions —
+// otherwise a reduced-motion user still gets a spinning indicator.
+(function () {
+  const solver = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
+  function reducesMotion(src, label) {
+    const block = (src.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\n\}/) || [''])[0];
+    ok(label + ' has a prefers-reduced-motion block', block.length > 0);
+    ok(label + ' reduced-motion neutralises animation', /animation-duration\s*:\s*\.?0/.test(block), block.slice(0, 80));
+    ok(label + ' reduced-motion neutralises transition', /transition-duration\s*:\s*\.?0/.test(block));
+  }
+  reducesMotion(solver, 'solver.html');
+  reducesMotion(css, 'plumline.css');
+})();
+
 // --- Permanent self-tests: run validateNavigation against deliberately broken
 // fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
 // the auditor could reintroduce must make at least one named check fail here.
