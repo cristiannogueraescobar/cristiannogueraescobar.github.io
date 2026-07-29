@@ -218,6 +218,20 @@ PAGES.forEach(function (p) {
      !/scrollIntoView\s*\(\s*\{[^}]*behavior\s*:\s*['"]smooth['"]/.test(codeNoComments));
 })();
 
+// There must be exactly ONE production solver.html — the top-level file. A copy
+// under engine/ (a stale review snapshot from an earlier delivery) would carry
+// the OLD engine and confuse anyone auditing the tree. `tar -xzf` never deletes
+// files, so such a copy can survive an update; this guard fails if it exists,
+// forcing its removal. The same applies to any other stray HTML under engine/.
+(function () {
+  const stale = path.join(siteDir, 'engine', 'solver.html');
+  ok('no stale engine/solver.html (there is one solver.html, at the root)',
+     !fs.existsSync(stale), 'delete engine/solver.html — it is an old snapshot');
+  const engineHtml = fs.existsSync(path.join(siteDir, 'engine'))
+    ? fs.readdirSync(path.join(siteDir, 'engine')).filter(f => /\.html$/.test(f)) : [];
+  ok('no .html files under engine/ at all', engineHtml.length === 0, engineHtml.join(','));
+})();
+
 // The optimisation engine exists twice — engine/engine.js (Node/tests) and the
 // inline copy in solver.html between the ENGINE markers — and they must not
 // drift. A full byte-diff is noisy (the Node build adds a module.exports
