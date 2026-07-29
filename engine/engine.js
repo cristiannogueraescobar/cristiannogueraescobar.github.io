@@ -1258,10 +1258,16 @@ const MINIMISE_HINTS = [
   'coste', 'costo', 'costes', 'gasto', 'gastos', 'tiempo', 'perdida', 'merma',
 ];
 const RELATION_TOKENS = {
-  '<=': '<=', '=<': '<=', '≤': '<=', '<': '<=',
-  '>=': '>=', '=>': '>=', '≥': '>=', '>': '>=',
+  '<=': '<=', '=<': '<=', '≤': '<=',
+  '>=': '>=', '=>': '>=', '≥': '>=',
   '=': '=', '==': '=',
 };
+// Strict inequalities are intentionally NOT in RELATION_TOKENS: silently
+// treating "x < 10" as "x <= 10" changes the model and could report a solution
+// the user explicitly excluded. They are detected and rejected as constraint
+// operators (see readConstraint_). This does not affect SUMIF/COUNTIF criteria,
+// which parse their own comparison operators elsewhere.
+const STRICT_RELATION_TOKENS = { '<': true, '>': true };
 const APP = {
   NAME: 'Solver',
   SIDEBAR_TITLE: 'Solver',
@@ -1777,7 +1783,16 @@ function readConstraint_(grid, a1) {
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
     const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
     if (relation === null && typeof value === 'string') {
-      const token = RELATION_TOKENS[value.trim()];
+      const trimmed = value.trim();
+      if (STRICT_RELATION_TOKENS[trimmed]) {
+        // Reject strict inequalities as constraint operators rather than
+        // silently widening them to <= or >=. The 'STRICT_INEQUALITY' marker
+        // lets the UI show a localized explanation.
+        throw new Error('STRICT_INEQUALITY: ' + label + ' uses "' + trimmed +
+          '". Strict inequalities (< and >) are not supported as constraint ' +
+          'operators. Use <= or >= (equality at the limit is allowed).');
+      }
+      const token = RELATION_TOKENS[trimmed];
       if (token) { relation = token; continue; }
     }
     if (relation !== null && typeof value === 'number') { limit = value; break; }

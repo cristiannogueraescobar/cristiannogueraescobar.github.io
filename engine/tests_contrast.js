@@ -40,7 +40,7 @@ function lum(hex) {
 function ratio(a, b) { const l1 = lum(a), l2 = lum(b); const hi = Math.max(l1, l2), lo = Math.min(l1, l2); return (hi + 0.05) / (lo + 0.05); }
 
 // The palette must expose the tokens we depend on.
-['ink', 'ink-2', 'soft', 'faint', 'paper', 'panel', 'deep', 'cream', 'brass', 'brass-text', 'true', 'true-lo', 'wrong'].forEach(function (k) {
+['ink', 'ink-2', 'soft', 'faint', 'paper', 'panel', 'deep', 'deep-2', 'cream', 'brass', 'brass-text', 'true', 'true-lo', 'wrong'].forEach(function (k) {
   ok('palette defines --' + k, !!P[k], Object.keys(P).join(','));
 });
 
@@ -137,6 +137,12 @@ ok('contrast >= 4.5: example open link (true) on white', ratio(P['true'], '#FFFF
 ok('build badges have no reduced opacity',
    !/id="buildBadge"[^>]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(allPages),
    'a buildBadge still has opacity < 1');
+// Also guard a future .build-badge CSS rule: if one is ever added, it must not
+// re-introduce a reduced opacity that would drop the badge below AA.
+ok('no .build-badge CSS rule sets reduced opacity',
+   !/\.build-badge\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(css) &&
+   !/\.build-badge\{[^}]*opacity\s*:\s*(?:0?\.\d+|0)(?![0-9])/.test(solver),
+   'a .build-badge rule sets opacity < 1');
 
 console.log('CONTRAST TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

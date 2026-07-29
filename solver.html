@@ -405,7 +405,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=49"></script>
+<script src="assets/i18n.js?v=50"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -416,6 +416,14 @@ var LANG = 'en';
 // The solver's text lives in the shared dictionary (assets/i18n.js) under the
 // 'solver' page. t() is kept as the name the dynamic result strings call.
 function t(key){ return Plumline.i18n.t(LANG, 'solver', key); }
+// Some engine errors carry a stable 'CODE: english detail' prefix so the UI can
+// show a localized message instead of the raw English. Currently: strict
+// inequalities used as constraint operators.
+function localizeEngineError(msg){
+  msg = String(msg == null ? '' : msg);
+  if (msg.indexOf('STRICT_INEQUALITY:') === 0) return t('strictInequality');
+  return msg;
+}
 // Column index (1-based) to spreadsheet letter (1->A, 27->AA). Top-level so both
 // render() (in the IIFE) and applyLang() (here) use the ONE algorithm — no risk
 // of the two drifting if the column cap ever exceeds 26 (AA, AB...).
@@ -1670,10 +1678,15 @@ const MINIMISE_HINTS = [
   'coste', 'costo', 'costes', 'gasto', 'gastos', 'tiempo', 'perdida', 'merma',
 ];
 const RELATION_TOKENS = {
-  '<=': '<=', '=<': '<=', '≤': '<=', '<': '<=',
-  '>=': '>=', '=>': '>=', '≥': '>=', '>': '>=',
+  '<=': '<=', '=<': '<=', '≤': '<=',
+  '>=': '>=', '=>': '>=', '≥': '>=',
   '=': '=', '==': '=',
 };
+// Strict inequalities are intentionally NOT normalized here: silently treating
+// "x < 10" as "x <= 10" changes the model and could report a solution the user
+// excluded. They are rejected as constraint operators (see readConstraint_),
+// which does not affect SUMIF/COUNTIF criteria parsing.
+const STRICT_RELATION_TOKENS = { '<': true, '>': true };
 const APP = {
   NAME: 'Solver',
   SIDEBAR_TITLE: 'Solver',
@@ -2197,7 +2210,13 @@ function readConstraint_(grid, a1) {
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
     const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
     if (relation === null && typeof value === 'string') {
-      const token = RELATION_TOKENS[value.trim()];
+      const trimmed = value.trim();
+      if (STRICT_RELATION_TOKENS[trimmed]) {
+        throw new Error('STRICT_INEQUALITY: ' + label + ' uses "' + trimmed +
+          '". Strict inequalities (< and >) are not supported as constraint ' +
+          'operators. Use <= or >= (equality at the limit is allowed).');
+      }
+      const token = RELATION_TOKENS[trimmed];
       if (token) { relation = token; continue; }
     }
     if (relation !== null && typeof value === 'number') { limit = value; break; }
@@ -3186,7 +3205,7 @@ function matchesAnyHint_(label, hints) {
       if(e.data.ok){ presentResult(e.data.out, {wholeNumbers:e.data.wholeNumbers}); }
       else{
         var key=(e.data.phase==='read')?'tRead':'tSolve';
-        showTrouble(t(key), e.data.error||'');
+        showTrouble(t(key), localizeEngineError(e.data.error||''));
       }
     };
     w.onerror=function(){
