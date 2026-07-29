@@ -18,12 +18,12 @@
 <meta name="twitter:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online optimisation solver. Solve continuous, integer, binary and mixed-integer models in your browser: enter your model like a spreadsheet, set variable types and per-variable limits, and verify the result against your own formulas. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=10">
+<link rel="stylesheet" href="assets/plumline.css?v=11">
 <style>
 :root{
-  --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#93958A;
+  --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#68695E;
   --deep:#12211A;--cream:#F5F2EB;--line:#D8D4C7;--line-fine:#E9E5DA;
-  --brass:#B5822E;--brass-hi:#D8A94A;--brass-tint:#F2E7CF;
+  --brass:#B5822E;--brass-hi:#D8A94A;--brass-tint:#F2E7CF;--brass-text:#8A6222;
   --true:#1E7A54;--true-hi:#2FA06E;--true-lo:#E2F0E8;--wrong:#B23B2C;
   --serif:ui-serif,'New York','Iowan Old Style','Palatino Linotype',Palatino,Cambria,Georgia,serif;
   --mono:ui-monospace,'SF Mono','Cascadia Mono','Segoe UI Mono','Roboto Mono',Menlo,Consolas,monospace;
@@ -109,7 +109,7 @@ table.grid input:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;
 .solve-details .sd-v{color:var(--ink)}
 
 .sense-hint{font-size:12px;color:var(--faint);font-family:var(--mono)}
-.sense-hint.pending{color:var(--brass)}
+.sense-hint.pending{color:var(--brass-text)}
 .chip-more{border-style:dashed}
 .drawer-backdrop{position:fixed;inset:0;background:rgba(20,30,25,.45);z-index:40}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--paper);
@@ -129,7 +129,7 @@ table.grid input:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;
 .ex-card:active{transform:translateY(1px)}
 .ex-card .ex-name{font-weight:600;font-size:14.5px}
 .ex-card .ex-desc{font-size:13px;color:var(--faint);margin:2px 0 6px}
-.ex-card .ex-tags{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.03em}
+.ex-card .ex-tags{font-family:var(--mono);font-size:11px;color:var(--brass-text);letter-spacing:.03em}
 @media (max-width:560px){
   .drawer{width:100%;top:auto;bottom:0;height:78vh;border-left:none;border-top:1px solid var(--line);
     border-radius:14px 14px 0 0}
@@ -146,7 +146,7 @@ table.grid input:focus-visible{outline:2px solid var(--ink);outline-offset:-2px;
 .vs-mlabel{display:none}
 .vs-row select,.vs-row input{font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);width:100%}
 .vs-row input:disabled{opacity:.5;cursor:not-allowed}
-.vs-stale{font-size:12px;color:var(--brass);margin:0 0 10px;font-family:var(--mono)}
+.vs-stale{font-size:12px;color:var(--brass-text);margin:0 0 10px;font-family:var(--mono)}
 .vs-err{font-size:12px;color:#b4432f;margin:2px 0 8px;font-family:var(--mono)}
 @media(max-width:560px){
   .vs-row{grid-template-columns:1fr 1fr;gap:8px 10px}

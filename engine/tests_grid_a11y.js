@@ -86,8 +86,7 @@ setTimeout(function () {
 
   // Header counts must match the grid's actual dimensions, and the extreme
   // cells (last column, last row) must carry the correct reference — this
-  // guards the 40x20 maximum and any >26-column letter logic (AA, AB...).
-  const bodyRows = grid.querySelectorAll('tr');
+  // guards the >26-column letter logic (AA, AB...) at the current dimension.
   const nCols = colHeads.length;                       // data columns (corner excluded by scope)
   const nRows = rowHeads.length;
   // Every data row has exactly nCols inputs.
@@ -107,6 +106,31 @@ setTimeout(function () {
   ok('last cell ref starts with the last column letter',
      lastCell && lastCell.getAttribute('aria-label').indexOf(lastColLetter + '' + nRows) >= 0,
      lastCell && lastCell.getAttribute('aria-label'));
+
+  // Explicitly drive the grid to its MAXIMUM (40x20) via the controls, so the
+  // ceiling — 800 cells and the T40 corner reference — is actually exercised,
+  // not just whatever dimension the loaded example happened to have.
+  const addRow = document.getElementById('addRow');
+  const addCol = document.getElementById('addCol');
+  let guard = 0;
+  while (addRow && !addRow.disabled && guard++ < 100) addRow.click();
+  guard = 0;
+  while (addCol && !addCol.disabled && guard++ < 100) addCol.click();
+  ok('maximum grid has 20 columns', grid.querySelectorAll('th[scope="col"]').length === 20,
+     grid.querySelectorAll('th[scope="col"]').length);
+  ok('maximum grid has 40 rows', grid.querySelectorAll('th[scope="row"].rownum').length === 40,
+     grid.querySelectorAll('th[scope="row"].rownum').length);
+  ok('maximum grid has 800 cells', grid.querySelectorAll('input[data-r]').length === 800,
+     grid.querySelectorAll('input[data-r]').length);
+  const t40 = grid.querySelector('input[data-r="39"][data-c="19"]');
+  ok('maximum corner cell is Celda T40', t40 && t40.getAttribute('aria-label') === 'Celda T40',
+     t40 && t40.getAttribute('aria-label'));
+
+  // Guard the column-letter algorithm beyond the current 20-column cap, so if
+  // the ceiling is ever raised past Z the AA/AB logic is already proven.
+  ok('colLetter(26) is Z', window.colLetter(26) === 'Z', window.colLetter(26));
+  ok('colLetter(27) is AA', window.colLetter(27) === 'AA', window.colLetter(27));
+  ok('colLetter(28) is AB', window.colLetter(28) === 'AB', window.colLetter(28));
 
   // The REAL user flow: changing the language <select> must relabel existing
   // cells, in every language, while preserving the cell's value and focus.
