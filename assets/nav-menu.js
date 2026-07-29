@@ -30,6 +30,16 @@
     var primary = document.querySelector('nav[aria-label="Primary"], nav[data-i18n-aria="ariaPrimary"]');
     if (!toggle || !primary) return;
 
+    // Translate a key using the active language, for elements this script
+    // creates after i18n.init() has already run its one-time pass.
+    function translated(key, fallback) {
+      var api = window.Plumline && window.Plumline.i18n;
+      if (!api || !api.t) return fallback;
+      var lang = document.documentElement.lang || 'en';
+      var page = (document.body && document.body.getAttribute('data-page')) || 'home';
+      return api.t(lang, page, key) || fallback;
+    }
+
     // Build the drawer once, cloning every direct anchor child of Primary.
     var drawer = document.getElementById('mobile-menu');
     if (!drawer) {
@@ -55,8 +65,11 @@
       closeBtn.className = 'mobile-menu-close';
       closeBtn.setAttribute('data-i18n', 'closeMenu');
       closeBtn.setAttribute('data-i18n-aria', 'ariaCloseMenu');
-      closeBtn.setAttribute('aria-label', 'Close menu');
-      closeBtn.textContent = 'Close';
+      // Translate now: this button is created by the deferred script AFTER
+      // i18n.init() already ran, so it would otherwise keep the English default
+      // until the user changed language. data-i18n stays for later switches.
+      closeBtn.textContent = translated('closeMenu', 'Close');
+      closeBtn.setAttribute('aria-label', translated('ariaCloseMenu', 'Close menu'));
       panel.appendChild(closeBtn);
       // Clone the direct anchor children — not a data-i18n subset, so a link
       // that lost its data-i18n still appears; the drawer matches Primary exactly.
@@ -77,7 +90,7 @@
         var opLinks = onpage.querySelectorAll(':scope > a[href]');
         if (opLinks.length) {
           var opNav = document.createElement('nav');
-          opNav.className = 'mobile-menu-panel mobile-menu-onpage';
+          opNav.className = 'mobile-menu-onpage';
           opNav.setAttribute('aria-label', onpage.getAttribute('aria-label') || 'On this page');
           var ok2 = onpage.getAttribute('data-i18n-aria');
           if (ok2) opNav.setAttribute('data-i18n-aria', ok2);
@@ -169,6 +182,16 @@
         if (target) { target.setAttribute('tabindex', '-1'); target.focus(); }
       }
     });
+
+    // If the viewport grows past the mobile breakpoint while the drawer is
+    // open (rotate, resize), close it — otherwise it would linger with the
+    // body scroll-locked and the background inert on a desktop-width layout.
+    if (typeof window.matchMedia === 'function') {
+      var desktop = window.matchMedia('(min-width: 821px)');
+      var handleBreakpoint = function (e) { if (e.matches && isOpen()) close(false); };
+      if (desktop.addEventListener) desktop.addEventListener('change', handleBreakpoint);
+      else if (desktop.addListener) desktop.addListener(handleBreakpoint);
+    }
 
     // Signal that the drawer is fully built and wired. The CSS only collapses
     // the nav into the drawer once THIS class is present — so if this script

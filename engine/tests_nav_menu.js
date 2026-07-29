@@ -68,6 +68,7 @@ PAGES.forEach(function (p) {
   const onpage = drawer.querySelector('.mobile-menu-onpage');
   if (p === 'solver.html') {
     ok('solver: drawer has On this page section', !!onpage);
+    ok('solver: On this page is not a second drawer panel', onpage && !onpage.classList.contains('mobile-menu-panel'));
     const opHrefs = onpage ? [...onpage.querySelectorAll('a')].map(a => a.getAttribute('href')) : [];
     ok('solver: On this page section holds only #how', opHrefs.length === 1 && opHrefs[0] === '#how');
   } else {
@@ -143,6 +144,45 @@ ok('cross-document link click closes drawer', drawer.hasAttribute('hidden'));
 toggle.dispatchEvent(new window.Event('click'));
 drawer.querySelector('.mobile-menu-backdrop').dispatchEvent(new window.Event('click'));
 ok('backdrop click closes drawer', drawer.hasAttribute('hidden'));
+
+// Crossing above the mobile breakpoint while open closes the drawer.
+(function () {
+  // jsdom's matchMedia is static; install a controllable stub before boot.
+  const html = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const d = new JSDOM(html, { runScripts: 'outside-only', url: 'https://plumline.online/solver.html' });
+  const w = d.window;
+  let mqlHandler = null;
+  const mql = { matches: false, media: '(min-width: 821px)',
+    addEventListener: (_e, h) => { mqlHandler = h; }, addListener: h => { mqlHandler = h; } };
+  w.matchMedia = () => mql;
+  w.eval(navmenu);
+  w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+  const tg = w.document.querySelector('.menu-toggle');
+  const dr = w.document.getElementById('mobile-menu');
+  tg.dispatchEvent(new w.Event('click'));
+  const openedBefore = !dr.hasAttribute('hidden');
+  if (mqlHandler) mqlHandler({ matches: true });   // simulate growing past 820px
+  ok('growing past breakpoint closes an open drawer', openedBefore && dr.hasAttribute('hidden'));
+})();
+
+// Close button is translated at creation when the page loads in a non-English
+// language (deferred script runs after i18n.init). Simulate the real order.
+(function () {
+  const i18n = fs.readFileSync(path.join(siteDir, 'assets', 'i18n.js'), 'utf8');
+  const html = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const d = new JSDOM(html, { runScripts: 'outside-only', url: 'https://plumline.online/solver.html?lang=es' });
+  const w = d.window;
+  w.eval(i18n);                                    // define Plumline.i18n
+  w.Plumline.i18n.init('solver');                  // translate + set documentElement.lang = es
+  w.eval(navmenu);                                 // build drawer AFTER init
+  w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
+  const closeBtn = w.document.querySelector('.mobile-menu-close');
+  ok('close button exists after es init', !!closeBtn);
+  if (closeBtn) {
+    ok('close button text is translated to es', closeBtn.textContent === 'Cerrar');
+    ok('close button aria-label is translated to es', closeBtn.getAttribute('aria-label') === 'Cerrar menú');
+  }
+})();
 
 console.log('NAV MENU TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);
