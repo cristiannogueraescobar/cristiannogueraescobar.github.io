@@ -163,6 +163,9 @@ ok('backdrop click closes drawer', drawer.hasAttribute('hidden'));
   const openedBefore = !dr.hasAttribute('hidden');
   if (mqlHandler) mqlHandler({ matches: true });   // simulate growing past 820px
   ok('growing past breakpoint closes an open drawer', openedBefore && dr.hasAttribute('hidden'));
+  ok('breakpoint moves focus outside hidden drawer', !dr.contains(w.document.activeElement));
+  ok('breakpoint restores body scroll', w.document.body.style.overflow === '');
+  ok('breakpoint restores background inert', w.document.querySelector('header').inert !== true);
 })();
 
 // Close button is translated at creation when the page loads in a non-English

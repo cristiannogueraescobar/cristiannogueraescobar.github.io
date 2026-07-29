@@ -159,6 +159,7 @@ table.grid input:focus{background:var(--brass-tint)}
 label.toggle{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--ink-2)}
 
 /* result */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .result{margin-top:24px;display:none}
 .result.show{display:block}
 .receipt{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:24px 26px;font-family:var(--mono);font-size:14px}
@@ -337,7 +338,8 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <div id="varSettingsBody"></div>
     </details>
 
-    <div class="result" id="result" role="status" aria-live="polite">
+    <p class="sr-only" id="solveAnnounce" role="status" aria-live="polite"></p>
+    <div class="result" id="result">
       <div class="placeholder" id="placeholder">
         <svg width="30" height="46" viewBox="0 0 24 38" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <line x1="12" y1="0" x2="12" y2="10" stroke="var(--brass)" stroke-width="1.5"/>
@@ -389,8 +391,8 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=46"></script>
-  <script src="assets/nav-menu.js?v=4" defer></script>
+<script src="assets/i18n.js?v=47"></script>
+  <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
    strings read from I18N[lang] at render time. Five languages chosen from the
@@ -2736,6 +2738,16 @@ function matchesAnyHint_(label, hints) {
 
   function fmt(n){if(n==null||isNaN(n))return '—';return Number(n).toLocaleString('en-GB',{maximumFractionDigits:4});}
 
+  // Announce a CONCISE one-line outcome to the dedicated live region. The full
+  // receipt is rendered into #result (not a live region), so a screen reader
+  // hears a short summary ("Optimal solution found. Total: 1760") instead of
+  // the entire receipt read aloud. Setting textContent (not innerHTML) each
+  // time triggers exactly one polite announcement.
+  function announce(msg){
+    var el=document.getElementById('solveAnnounce');
+    if(el) el.textContent=msg||'';
+  }
+
   // --- Web Worker: run the solve off the main thread ------------------------
   // The engine is inline in this page (single source of truth, shared with the
   // add-on). To run it in a worker without duplicating it, we extract the
@@ -3249,6 +3261,9 @@ function matchesAnyHint_(label, hints) {
       return showTrouble(title, body, out, model);
     }
     renderReceipt(out,model);
+    // Concise spoken summary (the receipt itself is not a live region).
+    var word=(out.status==='optimal')?t('announceOptimal'):t('announceFeasible');
+    announce(word+'. '+(out.objectiveLabel||t('exResult'))+': '+fmt(out.objective));
   }
 
   function showTrouble(title,msg,out,model){
@@ -3258,6 +3273,7 @@ function matchesAnyHint_(label, hints) {
     // user-written formula or cell label, so they must never be treated as HTML.
     res.innerHTML='<div class="trouble"><b>'+esc(title)+'.</b> '+esc(msg)+'</div>'+extra;
     res.classList.add('show'); res.scrollIntoView({behavior:'smooth',block:'nearest'});
+    announce(title);   // concise: just the headline outcome
   }
 
   // A collapsible "Solve details" block that surfaces what the engine reports:

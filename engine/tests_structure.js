@@ -174,6 +174,23 @@ PAGES.forEach(function (p) {
      hideRules.length + ' hide rules');
 })();
 
+// One-time: the solver's solve result must be announced through a DEDICATED,
+// concise live region (#solveAnnounce), NOT by making the whole verbose
+// receipt (#result) a live region — otherwise a screen reader reads the entire
+// receipt aloud on every solve. Guard the structure that keeps announcements
+// short: #solveAnnounce is a live region, sits OUTSIDE #result (so innerHTML
+// rewrites don't wipe it), and #result itself is not a live region.
+(function () {
+  const s = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const resultTag = (s.match(/<div class="result" id="result"[^>]*>/) || [''])[0];
+  ok('solver #result is not itself a live region', !/aria-live/.test(resultTag), resultTag);
+  const ann = (s.match(/<[a-z]+ [^>]*id="solveAnnounce"[^>]*>/) || [''])[0];
+  ok('solver has a #solveAnnounce live region', /aria-live="polite"/.test(ann) && /role="status"/.test(ann), ann);
+  ok('solver #solveAnnounce is visually hidden', /class="sr-only"/.test(ann));
+  const iAnn = s.indexOf('id="solveAnnounce"'), iRes = s.indexOf('id="result"');
+  ok('solver #solveAnnounce is outside #result (before it)', iAnn >= 0 && iRes >= 0 && iAnn < iRes);
+})();
+
 // --- Permanent self-tests: run validateNavigation against deliberately broken
 // fixtures so the GUARD ITSELF is protected, not only the live HTML. A mutation
 // the auditor could reintroduce must make at least one named check fail here.

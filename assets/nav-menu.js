@@ -1,7 +1,9 @@
 /* nav-menu.js — accessible mobile navigation drawer, shared by every page.
  *
  * Below the 820px breakpoint the five core links are hidden (hide-sm, gated on
- * the `js` class so a JS-less page keeps them visible). This wires a "Menu"
+ * the `nav-menu-ready` class that THIS script adds only after the drawer is
+ * built — so a JS-less page, a failed asset load, or an init error all keep the
+ * links visible). This wires a "Menu"
  * button that opens a drawer holding the SAME links in the SAME order.
  *
  * Accessibility:
@@ -186,9 +188,19 @@
     // If the viewport grows past the mobile breakpoint while the drawer is
     // open (rotate, resize), close it — otherwise it would linger with the
     // body scroll-locked and the background inert on a desktop-width layout.
+    // Move focus back to a visible header element so it never gets stranded
+    // inside the now-hidden drawer.
+    function focusDesktopNav() {
+      var target = primary.querySelector('[aria-current="page"]') ||
+                   primary.querySelector('a[href]') ||
+                   document.querySelector('.lockup');
+      if (target) target.focus();
+    }
     if (typeof window.matchMedia === 'function') {
       var desktop = window.matchMedia('(min-width: 821px)');
-      var handleBreakpoint = function (e) { if (e.matches && isOpen()) close(false); };
+      var handleBreakpoint = function (e) {
+        if (e.matches && isOpen()) { close(false); focusDesktopNav(); }
+      };
       if (desktop.addEventListener) desktop.addEventListener('change', handleBreakpoint);
       else if (desktop.addListener) desktop.addListener(handleBreakpoint);
     }
