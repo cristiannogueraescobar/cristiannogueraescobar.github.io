@@ -405,7 +405,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=50"></script>
+<script src="assets/i18n.js?v=51"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -422,6 +422,7 @@ function t(key){ return Plumline.i18n.t(LANG, 'solver', key); }
 function localizeEngineError(msg){
   msg = String(msg == null ? '' : msg);
   if (msg.indexOf('STRICT_INEQUALITY:') === 0) return t('strictInequality');
+  if (msg.indexOf('AMBIGUOUS_DECISION_CELLS') === 0) return t('ambiguousDecisionCells');
   return msg;
 }
 // Column index (1-based) to spreadsheet letter (1->A, 27->AA). Top-level so both
@@ -1905,6 +1906,24 @@ function safeLinearize_(context, cell, role) {
   }
 }
 
+// Would treating `varCells` as the decision variables yield a LINEAR model?
+// Probes every output the variables feed; if any is non-linear in those cells
+// (e.g. B2*C2 when BOTH are variables), the candidate is non-linear. Never
+// throws — returns a boolean. Used to prefer a single-cell candidate over a
+// contiguous block that only looks like two variables (=B2*C2, C2 a coefficient).
+function candidateIsLinear_(grid, varCells, outputs, options) {
+  const context = newContext_(grid, varCells, options);
+  const varSet = toSet_(varCells);
+  const fed = outputs.filter(function (output) {
+    return reachableConstants_(grid, output, {}).some(function (cell) { return varSet[cell]; });
+  });
+  for (let i = 0; i < fed.length; i++) {
+    try { linearize_(context, fed[i], 0); }
+    catch (e) { return false; }
+  }
+  return true;
+}
+
 function explainStatus_(status, model) {
   if (status === 'infeasible') {
     return 'No combination of values satisfies every constraint at once. ' +
@@ -2044,13 +2063,28 @@ function detectModel_(sheet) {
   //  - strong block (reached by a constraint too): always wins.
   //  - weak block (objective-only): a single valid cell wins over it.
   //  - two or more separate single cells: ambiguous, refuse.
-  if (variables && bestReach >= 2) {
-    // keep the strong block
+  //  - a strong block that is NON-linear (=B2*C2 with C2 a coefficient) yields
+  //    to a single linear cell; if several linear singles, ambiguous.
+  const opts = { allowCachedFormulaFallback: false };
+  const linearSingles = eligibleSingles.filter(function (cell) {
+    return candidateIsLinear_(grid, expandRange_(grid, cell), outputs, opts);
+  });
+  const blockLinear = variables
+    ? candidateIsLinear_(grid, blockCells[variables] || expandRange_(grid, variables), outputs, opts)
+    : false;
+
+  if (variables && bestReach >= 2 && blockLinear) {
+    // keep the strong, linear block
+  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length === 1) {
+    variables = linearSingles[0];
+  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length > 1) {
+    throw new Error('AMBIGUOUS_DECISION_CELLS');
+  } else if (variables && bestReach >= 2) {
+    // non-linear block, no linear single: keep block so solve reports it.
   } else if (eligibleSingles.length === 1) {
     variables = eligibleSingles[0];
   } else if (eligibleSingles.length > 1 && !variables) {
-    throw new Error('Several separate cells look like decision variables, but ' +
-      'they do not form one block. Select the decision cells yourself.');
+    throw new Error('AMBIGUOUS_DECISION_CELLS');
   }
 
   if (!variables) {

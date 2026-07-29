@@ -388,6 +388,20 @@ setTimeout(function () {
   ok('non-marker messages pass through unchanged',
      api.localizeEngineError('plain engine detail') === 'plain engine detail');
 
+  // The AMBIGUOUS_DECISION_CELLS marker (single-variable detection) must also
+  // localize in every language and drop the raw marker from the shown text.
+  const ambExpect = {
+    en: /Several separate cells/, es: /Varias celdas separadas/,
+    pt: /V\u00e1rias c\u00e9lulas separadas/, de: /Mehrere separate Zellen/,
+    fr: /Plusieurs cellules distinctes/
+  };
+  Object.keys(ambExpect).forEach(function (lang) {
+    api.setLang(lang);
+    const out = api.localizeEngineError('AMBIGUOUS_DECISION_CELLS');
+    ok('localizes AMBIGUOUS_DECISION_CELLS in ' + lang, ambExpect[lang].test(out), out.slice(0, 40));
+    ok(lang + ': ambiguity message drops the raw marker', out.indexOf('AMBIGUOUS_DECISION_CELLS') === -1, out.slice(0, 40));
+  });
+
   console.log('ERROR I18N TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
   process.exit(fail > 0 ? 1 : 0);
 }, 100);

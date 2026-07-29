@@ -1479,6 +1479,25 @@ function safeLinearize_(context, cell, role) {
   }
 }
 
+// Would treating `varCells` as the decision variables yield a LINEAR model?
+// Probes every output the variables feed: if any output is non-linear in those
+// variables (e.g. B2*C2 when BOTH are variables), the candidate is non-linear.
+// Used to prefer a single-cell candidate over a contiguous block that only
+// looks like two variables because the cells happen to be adjacent (=B2*C2 with
+// C2 a coefficient). Never throws — returns a boolean.
+function candidateIsLinear_(grid, varCells, outputs, options) {
+  const context = newContext_(grid, varCells, options);
+  const varSet = toSet_(varCells);
+  const fed = outputs.filter(function (output) {
+    return reachableConstants_(grid, output, {}).some(function (cell) { return varSet[cell]; });
+  });
+  for (let i = 0; i < fed.length; i++) {
+    try { linearize_(context, fed[i], 0); }
+    catch (e) { return false; }
+  }
+  return true;
+}
+
 function explainStatus_(status, model) {
   if (status === 'infeasible') {
     return 'No combination of values satisfies every constraint at once. ' +
@@ -1619,22 +1638,38 @@ function detectModel_(sheet) {
   }
 
   // Decide between a multi-cell block and a single cell:
-  //  - A strong block (reached by a constraint too, bestReach >= 2) always wins,
-  //    preserving normal multi-variable behaviour.
-  //  - A weak block (objective-only, bestReach < 2) is preferred ONLY if there
-  //    is no single cell with full objective + constraint evidence. When exactly
-  //    one such single cell exists, it wins (fixes =B2*C2 with C2 a coefficient).
-  //  - With no block at all, fall back to the single cell.
-  if (variables && bestReach >= 2) {
-    // keep the strong block
+  //  - A strong block (reached by a constraint too, bestReach >= 2) normally
+  //    wins, preserving multi-variable behaviour. BUT if that block is
+  //    non-linear (e.g. =B2*C2 where C2 is a coefficient, and BOTH cells feed
+  //    the objective and a constraint so the block looked strong), while exactly
+  //    one single cell is a LINEAR candidate, prefer the single cell: a valid
+  //    one-variable model must not be rejected as non-linear just because two
+  //    cells were adjacent.
+  //  - A weak block (objective-only, bestReach < 2) yields to a single cell.
+  //  - Two or more separate single cells with no block: ambiguous, refuse.
+  const opts = { allowCachedFormulaFallback: false };
+  const linearSingles = eligibleSingles.filter(function (cell) {
+    return candidateIsLinear_(grid, expandRange_(grid, cell), outputs, opts);
+  });
+  const blockLinear = variables
+    ? candidateIsLinear_(grid, blockCells[variables] || expandRange_(grid, variables), outputs, opts)
+    : false;
+
+  if (variables && bestReach >= 2 && blockLinear) {
+    // keep the strong, linear block
+  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length === 1) {
+    variables = linearSingles[0];        // block is non-linear; one linear single wins
+  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length > 1) {
+    throw new Error('AMBIGUOUS_DECISION_CELLS');   // several linear singles: ambiguous
+  } else if (variables && bestReach >= 2) {
+    // block is non-linear and no linear single exists: keep the block so the
+    // downstream solve reports the genuine non-linear error as before.
   } else if (eligibleSingles.length === 1) {
     variables = eligibleSingles[0];
   } else if (eligibleSingles.length > 1 && !variables) {
-    throw new Error('Several separate cells look like decision variables, but ' +
-      'they do not form one block. Select the decision cells yourself.');
+    throw new Error('AMBIGUOUS_DECISION_CELLS');
   }
-  // else: keep whatever weak block we had (variables may still be a size-1-safe
-  // multi-cell block), or fall through to the error below if nothing qualified.
+  // else: keep whatever weak block we had, or fall through to the error below.
 
   if (!variables) {
     throw new Error('No block of input cells feeds several totals, so the ' +

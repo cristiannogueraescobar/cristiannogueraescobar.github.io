@@ -272,7 +272,7 @@ PAGES.forEach(function (p) {
        /eligibleSingles/.test(src) && /bestReach/.test(src) &&
        /readConstraint_\([^)]*\)\.guessed/.test(src) && /hasObjective && hasConstraint/.test(src));
     ok(name + ': single-variable fallback refuses ambiguous multiple cells',
-       /Several separate cells look like decision variables/.test(src));
+       /AMBIGUOUS_DECISION_CELLS/.test(src));
   });
 })();
 

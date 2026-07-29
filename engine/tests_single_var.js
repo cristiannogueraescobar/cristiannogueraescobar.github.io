@@ -133,7 +133,7 @@ function oneVar(rel, limit, opts) {
   ];
   const r = run(grid);
   check('negative: cell in a constraint only (not objective) is not detected',
-    !!r.error || (r.out && r.out.status !== 'optimal'), JSON.stringify(r.out && r.out.status));
+    !!r.error && /^detect:/.test(r.error), JSON.stringify(r.out && r.out.status));
 }
 
 // A text cell must never be read as a variable.
@@ -147,7 +147,7 @@ function oneVar(rel, limit, opts) {
   const r = run(grid);
   // B2 is text; linearizing =B2 as a decision must not yield a clean 1-var LP.
   check('negative: text cell is not turned into a variable',
-    !!r.error || (r.out && r.out.status !== 'optimal'), JSON.stringify(r.out && r.out.status));
+    !!r.error && /^detect:/.test(r.error), JSON.stringify(r.out && r.out.status));
 }
 
 // Two constraints and NO free objective: the cell is reached twice, but only by
@@ -180,7 +180,25 @@ function oneVar(rel, limit, opts) {
   ];
   const r = run(grid);
   check('negative: two separate decision cells -> ambiguous, rejected',
-    !!r.error && /^detect:/.test(r.error) && /separate cells/.test(r.error),
+    !!r.error && /^detect:/.test(r.error) && /AMBIGUOUS_DECISION_CELLS/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+// Symmetric =B2*C2 fed to BOTH objective and constraint: either cell could be
+// the variable with the other as coefficient, so detection cannot know which is
+// which. It must REFUSE (ambiguous) rather than guess and risk a wrong model.
+// This is the safe reading of the "prioritise no wrong result" contract.
+{
+  const grid = [
+    ['Item', 'x', 'coef', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '10', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=B2*C2', '', ''],
+    ['Cap', '', '', '=B2*C2', '<=', '50'],
+  ];
+  const r = run(grid);
+  check('negative: symmetric B2*C2 in objective and constraint -> ambiguous',
+    !!r.error && /^detect:/.test(r.error) && /AMBIGUOUS_DECISION_CELLS/.test(r.error),
     r.error || JSON.stringify(r.out));
 }
 
@@ -204,7 +222,29 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
-// ---- Regression: multi-variable detection is unchanged -----------------
+// Coefficient inside a block that feeds BOTH objective and constraint
+// (objective =B2*C2 AND constraint =B2*C2). Here nothing structural says whether
+// B2 or C2 is the decision and which is the coefficient — both single-cell
+// readings are linear and valid but describe DIFFERENT models (Max 10x vs
+// Max 10b). Per the "never return a wrong result" contract this is refused as
+// ambiguous, with the localizable AMBIGUOUS_DECISION_CELLS marker — NOT silently
+// resolved to one of them. (Contrast the neighbour-coefficient test above, where
+// the constraint is on B2 alone, so C2 is unambiguously the coefficient.)
+{
+  const grid = [
+    ['Item', 'Units', 'Coef', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '10', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Obj', '', '', '=B2*C2', '', ''],
+    ['Cap', '', '', '=B2*C2', '<=', '50'],
+  ];
+  const r = run(grid);
+  check('ambiguous block (B2*C2 in both objective and constraint) is refused, not guessed',
+    !!r.error && /^detect:/.test(r.error) && /AMBIGUOUS_DECISION_CELLS/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+
 {
   const grid = [
     ['Product', 'Units', 'Profit', 'Total', 'Hours', ''],
