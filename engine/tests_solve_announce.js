@@ -126,12 +126,18 @@ setTimeout(function () {
              !/solution found/i.test(announceText() || ''), JSON.stringify(announceText()));
           ok('binary-domain breach announces verify-failed',
              /verification did not pass|do not rely/i.test(announceText() || ''));
+          const binHtml = document.getElementById('result').innerHTML;
+          ok('binary-domain breach hides exports', !/id="exp-csv"/.test(binHtml));
+          ok('binary-domain breach shows failed mark', /check bad/.test(binHtml));
 
           run(badBounds, function () {
             ok('bounds breach does not announce success',
                !/solution found/i.test(announceText() || ''), JSON.stringify(announceText()));
             ok('bounds breach announces verify-failed',
                /verification did not pass|do not rely/i.test(announceText() || ''));
+            const bndHtml = document.getElementById('result').innerHTML;
+            ok('bounds breach hides exports', !/id="exp-csv"/.test(bndHtml));
+            ok('bounds breach shows failed mark', /check bad/.test(bndHtml));
 
             // Repeat the SAME successful result twice: the region must clear
             // between announcements so a screen reader re-announces it.
@@ -150,14 +156,14 @@ setTimeout(function () {
                 ok('EN formats 1760 as 1,760', (api.setLang('en'), api.fmt(1760)) === '1,760');
                 ok('DE formats 1760 as 1.760', (api.setLang('de'), api.fmt(1760)) === '1.760');
                 ok('ES formats 12345 as 12.345', (api.setLang('es'), api.fmt(12345)) === '12.345');
-                ok('PT formats 12345 with a non-comma group separator', (function () {
-                  api.setLang('pt'); const f = api.fmt(12345);
-                  return f.indexOf(',') === -1 && /12.?345/.test(f);
-                })(), (api.setLang('pt'), api.fmt(12345)));
-                ok('FR formats 12345 with a non-comma group separator', (function () {
-                  api.setLang('fr'); const f = api.fmt(12345);
-                  return f.indexOf(',') === -1 && /12.?345/.test(f);
-                })(), (api.setLang('fr'), api.fmt(12345)));
+                // PT and FR use a space-style thousands separator. Require an
+                // actual space character (normal, non-breaking, or narrow
+                // non-breaking) — not just "digits with maybe something between".
+                function hasSpaceGrouping(v){ return /^12[ \u00A0\u202F]345$/.test(v); }
+                ok('PT uses a space-style group separator',
+                   (api.setLang('pt'), hasSpaceGrouping(api.fmt(12345))), (api.setLang('pt'), api.fmt(12345)));
+                ok('FR uses a space-style group separator',
+                   (api.setLang('fr'), hasSpaceGrouping(api.fmt(12345))), (api.setLang('fr'), api.fmt(12345)));
                 api.setLang('en');
 
                 console.log('SOLVE ANNOUNCE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

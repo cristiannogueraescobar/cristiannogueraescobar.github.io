@@ -25,6 +25,15 @@ was delivered. After this is in place you can state, with evidence:
 
 ## How to close the diagnosis (do this once)
 
+> **If the smoke test fails with `production reports 'DEV-LOCAL'`:** the site is
+> serving the unstamped placeholder. The build job now verifies the uploaded
+> artifact IS stamped, so the artifact is fine — the problem is that Pages is
+> **not serving the Actions artifact**. Go to **Settings → Pages → Build and
+> deployment → Source** and set it to **"GitHub Actions"** (not "Deploy from a
+> branch"). A branch source publishes the committed `build-info.json`
+> (`DEV-LOCAL`) and ignores the Actions artifact entirely. Fix it, then re-run
+> the workflow.
+
 1. **Confirm what production publishes.** In the repo on GitHub:
    Settings → Pages. Note the **Source** (branch + folder, or "GitHub Actions").
    If it is a branch/folder that you are *not* pushing the delivered files to,
@@ -67,9 +76,9 @@ was delivered. After this is in place you can state, with evidence:
 
 ## Note on engine/
 
-The `engine/` folder is tests and the dev copy of the solver; the user's
-`.gitignore` excludes it from the *served* site, but the tests still need to be
-**in the repo** for CI to run them. Ensure `engine/` is committed (it can be in
-the repo without being served). If `.gitignore` currently ignores `engine/`
-entirely, change it to ignore only what should not ship, or run CI from a path
-that includes the tests.
+The `engine/` folder holds the tests and the dev copy of the solver. It is
+committed to the repo because **CI needs it** to run the test battery. What
+keeps it off the public site is the deploy workflow's `rsync --exclude 'engine'`
+when it builds `_site` — not `.gitignore`. `.gitignore` decides what enters Git;
+the workflow decides what gets served. **Do not add `engine/` to `.gitignore`** —
+that would remove the tests from the repo and CI would have nothing to run.

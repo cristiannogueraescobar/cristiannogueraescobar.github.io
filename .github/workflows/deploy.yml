@@ -100,6 +100,22 @@ jobs:
           ) > _site/assets/hashes.txt
           echo "Hashed $(wc -l < _site/assets/hashes.txt) served files"
 
+      # Fail the BUILD (not just the smoke) if the artifact still carries the
+      # DEV-LOCAL placeholder — that would mean the stamp step didn't take, and
+      # we should never upload an unstamped artifact.
+      - name: Verify build-info was stamped
+        run: |
+          COMMIT=$(node -e 'process.stdout.write(require("./_site/build-info.json").commit||"")')
+          if [ "$COMMIT" = "DEV-LOCAL" ] || [ -z "$COMMIT" ]; then
+            echo "build-info.json in _site is not stamped (commit='$COMMIT'). Stamp step failed."
+            exit 1
+          fi
+          if [ "$COMMIT" != "$GITHUB_SHA" ]; then
+            echo "build-info.json commit '$COMMIT' does not match GITHUB_SHA '$GITHUB_SHA'."
+            exit 1
+          fi
+          echo "Artifact build-info.json is stamped with $COMMIT."
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -152,12 +168,23 @@ jobs:
           if [ "$DEPLOYED" != "$GITHUB_SHA" ]; then
             echo "MISMATCH: production served commit '$DEPLOYED', expected '$GITHUB_SHA' after ~8 min of polling."
             echo ""
+            if [ "$DEPLOYED" = "DEV-LOCAL" ]; then
+              echo "Production is serving the UNSTAMPED placeholder (DEV-LOCAL)."
+              echo "The build job already verified the uploaded artifact WAS stamped,"
+              echo "so the artifact is correct. Serving DEV-LOCAL almost always means"
+              echo "GitHub Pages is NOT serving this workflow's artifact:"
+              echo "  -> Settings -> Pages -> Build and deployment -> Source must be"
+              echo "     'GitHub Actions', NOT 'Deploy from a branch'."
+              echo "  A branch source publishes the committed build-info.json (DEV-LOCAL)"
+              echo "  and ignores the Actions artifact entirely."
+              echo "Fix the Source setting, then re-run this workflow."
+              exit 1
+            fi
             echo "This check only proves the served build-info.json did not report the"
             echo "expected commit in time. It does NOT identify which of these it was:"
             echo "  - slow GitHub Pages CDN propagation (re-running this job often clears it)"
             echo "  - the deploy published a different artifact than this build"
             echo "  - the custom domain (plumline.online) points somewhere else or lagged"
-            echo "  - build-info.json was not stamped with the new SHA in the build job"
             echo "  - a CDN/edge cache is still serving an older copy"
             echo "To diagnose: check the deploy job's published artifact and the value of"
             echo "commit in the live /build-info.json, then compare against '$GITHUB_SHA'."
@@ -218,7 +245,19 @@ jobs:
             const cb="'"$CB"'";
             const targets=new Set();
             for(const p of pages){
-              const s=fs.readFileSync("/tmp/prod/"+p,"utf8").replace(/<script[\s\S]*?<\/script>/g,"");
+              const raw=fs.readFileSync("/tmp/prod/"+p,"utf8");
+              // Collect <script src> assets BEFORE stripping, so external JS
+              // (nav-menu.js, i18n.js, build-badge.js, examples-data.js) is
+              // crawled for 404s too.
+              for(const m of raw.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)){
+                let u=m[1];
+                if(/^(https?:|\/\/|data:)/.test(u)) continue;
+                u=u.split("#")[0].split("?")[0]; if(!u) continue;
+                targets.add(u);
+              }
+              // Strip only INLINE scripts (no src) before scanning href/src, so
+              // JS string literals inside them are not mistaken for links.
+              const s=raw.replace(/<script\b(?![^>]*\bsrc=)[\s\S]*?<\/script>/g,"");
               for(const m of s.matchAll(/(?:href|src)="([^"]+)"/g)){
                 let u=m[1];
                 if(/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) continue;
