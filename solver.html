@@ -18,7 +18,7 @@
 <meta name="twitter:description" content="Solve continuous, integer, binary and mixed-integer models in your browser. Set variable types and limits, verify the result against your formulas, and inspect binding constraints. Nothing uploaded.">
 <link rel="canonical" href="https://plumline.online/solver.html">
 <meta name="description" content="Free online optimisation solver. Solve continuous, integer, binary and mixed-integer models in your browser: enter your model like a spreadsheet, set variable types and per-variable limits, and verify the result against your own formulas. No sign-up, nothing uploaded.">
-<link rel="stylesheet" href="assets/plumline.css?v=11">
+<link rel="stylesheet" href="assets/plumline.css?v=12">
 <style>
 :root{
   --paper:#F5F2EB;--panel:#FFFFFF;--ink:#14170F;--ink-2:#3B3F33;--soft:#5A5E50;--faint:#68695E;
@@ -85,7 +85,7 @@ button:hover{opacity:.88}
 button.chip{background:var(--panel);color:var(--ink);border-color:var(--line);font-weight:500;border-radius:16px}
 button.chip:hover{border-color:var(--brass);opacity:1}
 button.solve{background:var(--true);border-color:var(--true);font-size:15px;padding:12px 26px}
-button.solve:hover{background:var(--true-hi);opacity:1}
+button.solve:hover{background:var(--true);box-shadow:0 8px 22px -8px rgba(30,122,84,.6);opacity:1}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 
 .gridwrap{overflow:auto;max-height:70vh;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
@@ -243,6 +243,14 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
   .wrap{padding-left:16px;padding-right:16px}
   .top .wrap{padding:14px 16px}
   footer .wrap{padding-left:16px;padding-right:16px}
+  /* On narrow phones, let receipt rows, solve-detail rows and the "solving"
+     line wrap instead of overflowing: a long German/French label or variable
+     name would otherwise push its value off a ~288px-wide card. Keep values
+     right-aligned, and break long tokens rather than force horizontal scroll. */
+  .receipt{padding:20px 16px}
+  .receipt .tot,.receipt .r,.solve-details .sd-row,.solving{flex-wrap:wrap;align-items:flex-start}
+  .receipt .r .k,.receipt .r .v,.solve-details .sd-k,.solve-details .sd-v{min-width:0;overflow-wrap:anywhere}
+  .receipt .r .v,.solve-details .sd-v{margin-left:auto;text-align:right}
 }
 .solving{display:flex;align-items:center;gap:12px;padding:22px 24px;font-family:var(--mono);
   font-size:14px;color:var(--soft);border:1px solid var(--line);border-radius:8px;background:var(--panel)}
