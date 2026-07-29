@@ -86,20 +86,25 @@ check('spaced " <= " solves optimally',
 // legitimate use of "<" / ">" that has nothing to do with constraint operators.
 {
   // The ">0" lives inside the SUMIF criterion string, NOT as a constraint
-  // operator, so it must never trigger the strict-inequality rejection. We
-  // assert precisely that invariant (the row uses "<=" as its real operator).
+  // operator. This model has a known optimum (3), so passing proves three
+  // things at once: ">0" is not read as a strict operator, SUMIF still parses,
+  // and the model reaches the expected result. The SUMIF term is multiplied by
+  // 0 so it doesn't change the maths — its only job is to exercise the parser.
   const g = [
-    ['Item', 'x', 'Data', 'Total', 'Rel', 'Limit'],
-    ['A', '0', '5', '', '', ''],
-    ['B', '', '5', '', '', ''],
-    ['C', '', '1', '', '', ''],
-    ['', '', '', '', '', ''],
-    ['Total', '', '', '=B2', '', ''],
-    ['CountPos', '', '', '=SUMIF(C2:C4,">0",C2:C4)*0+B2', '<=', '3'],
+    ['Item', 'Units', 'x', 'Total', 'Rel', 'Limit', '', 'Data'],
+    ['A', '0', '', '', '', '', '', '2'],
+    ['B', '0', '', '', '', '', '', '5'],
+    ['', '', '', '', '', '', '', '1'],
+    ['Total', '', '', '=1*B2+0*B3', '', '', '', ''],
+    ['CapA', '', '', '=1*B2+SUMIF(H2:H4,">0",H2:H4)*0', '<=', '3', '', ''],
+    ['CapAB', '', '', '=1*B2+1*B3', '<=', '10', '', ''],
   ];
   const r = run(g);
-  check('SUMIF ">0" criterion is never flagged as a strict constraint operator',
+  check('SUMIF ">0" is never flagged as a strict constraint operator',
     !isStrictError(r), r.error || JSON.stringify(r.out));
+  check('SUMIF model still parses and reaches its known optimum (3)',
+    !r.error && r.out && r.out.status === 'optimal' && Math.abs(r.out.objective - 3) < 1e-6,
+    r.error || JSON.stringify(r.out));
 }
 
 report('STRICT INEQUALITY TESTS');

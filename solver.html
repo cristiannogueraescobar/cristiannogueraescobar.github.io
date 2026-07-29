@@ -3946,7 +3946,8 @@ function matchesAnyHint_(label, hints) {
   if (typeof window !== 'undefined' && window.__PLUMLINE_TEST__) {
     window.__plumline = { presentResult: presentResult, renderReceipt: renderReceipt,
       announce: announce, fmt: fmt, setLang: function(l){ LANG=l; },
-      openDrawer: openDrawer, closeDrawer: closeDrawer };
+      openDrawer: openDrawer, closeDrawer: closeDrawer,
+      localizeEngineError: localizeEngineError, showTrouble: showTrouble };
   }
 })();
 </script>
