@@ -1603,12 +1603,11 @@ function detectModel_(sheet) {
   // single-cell variable that has objective + constraint evidence.
   let variables = null;
   let bestScore = -1;
-  let bestReach = 0;
   Object.keys(blockCells).forEach(function (block) {
     const size = blockCells[block].length;
     if (size < 2) return;
     const score = blockReach[block] * 1000 + size;
-    if (score > bestScore) { bestScore = score; variables = block; bestReach = blockReach[block]; }
+    if (score > bestScore) { bestScore = score; variables = block; }
   });
 
   // Single-cell candidates: a cell reached by the objective AND by at least one
@@ -1637,16 +1636,6 @@ function detectModel_(sheet) {
     });
   }
 
-  // Decide between a multi-cell block and a single cell:
-  //  - A strong block (reached by a constraint too, bestReach >= 2) normally
-  //    wins, preserving multi-variable behaviour. BUT if that block is
-  //    non-linear (e.g. =B2*C2 where C2 is a coefficient, and BOTH cells feed
-  //    the objective and a constraint so the block looked strong), while exactly
-  //    one single cell is a LINEAR candidate, prefer the single cell: a valid
-  //    one-variable model must not be rejected as non-linear just because two
-  //    cells were adjacent.
-  //  - A weak block (objective-only, bestReach < 2) yields to a single cell.
-  //  - Two or more separate single cells with no block: ambiguous, refuse.
   const opts = { allowCachedFormulaFallback: false };
   const linearSingles = eligibleSingles.filter(function (cell) {
     return candidateIsLinear_(grid, expandRange_(grid, cell), outputs, opts);
@@ -1655,18 +1644,26 @@ function detectModel_(sheet) {
     ? candidateIsLinear_(grid, blockCells[variables] || expandRange_(grid, variables), outputs, opts)
     : false;
 
-  if (variables && bestReach >= 2 && blockLinear) {
-    // keep the strong, linear block
-  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length === 1) {
-    variables = linearSingles[0];        // block is non-linear; one linear single wins
-  } else if (variables && bestReach >= 2 && !blockLinear && linearSingles.length > 1) {
+  // Priority (independent of how many outputs reach the block — that gate was
+  // the bug: a linear block reached only by the objective, e.g. =10*B2+20*C2 with a limit on B2 alone,
+  // is still a real multi-variable model and must NOT be reduced to one cell):
+  //  - A LINEAR multi-cell block always wins, preserving multi-variable models.
+  //  - A NON-LINEAR block (e.g. =B2*C2 with C2 a coefficient) yields to exactly
+  //    one linear single cell; if several single cells are linear, it is
+  //    ambiguous (which cell is the variable and which the coefficient?).
+  //  - With no block, one linear single is the model; several are ambiguous.
+  if (variables && blockLinear) {
+    // keep the linear multi-cell block — real multi-variable behaviour intact
+  } else if (variables && !blockLinear && linearSingles.length === 1) {
+    variables = linearSingles[0];        // block non-linear; one linear single wins
+  } else if (variables && !blockLinear && linearSingles.length > 1) {
     throw new Error('AMBIGUOUS_DECISION_CELLS');   // several linear singles: ambiguous
-  } else if (variables && bestReach >= 2) {
-    // block is non-linear and no linear single exists: keep the block so the
-    // downstream solve reports the genuine non-linear error as before.
-  } else if (eligibleSingles.length === 1) {
-    variables = eligibleSingles[0];
-  } else if (eligibleSingles.length > 1 && !variables) {
+  } else if (variables && !blockLinear) {
+    // block non-linear and no linear single: keep the block so the downstream
+    // solve reports the genuine non-linear error, as before.
+  } else if (!variables && linearSingles.length === 1) {
+    variables = linearSingles[0];
+  } else if (!variables && linearSingles.length > 1) {
     throw new Error('AMBIGUOUS_DECISION_CELLS');
   }
   // else: keep whatever weak block we had, or fall through to the error below.

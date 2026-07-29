@@ -269,10 +269,21 @@ PAGES.forEach(function (p) {
     // eligible cells must be refused as ambiguous. Pinning these strings catches
     // a divergence back to the bare cellReach>=2 count.
     ok(name + ': single-variable fallback uses per-role evidence',
-       /eligibleSingles/.test(src) && /bestReach/.test(src) &&
+       /eligibleSingles/.test(src) &&
        /readConstraint_\([^)]*\)\.guessed/.test(src) && /hasObjective && hasConstraint/.test(src));
     ok(name + ': single-variable fallback refuses ambiguous multiple cells',
        /AMBIGUOUS_DECISION_CELLS/.test(src));
+    // The linearity-aware decision must be present in both engines: a linear
+    // block always wins (no bestReach gate), a non-linear block yields to one
+    // linear single cell, and candidateIsLinear_ drives both linearSingles and
+    // blockLinear. Pinning these catches a divergence back to the buggy logic.
+    ok(name + ': defines candidateIsLinear_',
+       /function candidateIsLinear_\(/.test(src));
+    ok(name + ': uses candidateIsLinear_ for both single and block candidates',
+       /linearSingles/.test(src) && /blockLinear/.test(src) &&
+       /candidateIsLinear_\([^)]*\)/.test(src));
+    ok(name + ': linear block wins without a bestReach gate',
+       /if \(variables && blockLinear\)/.test(src) && !/bestReach/.test(src));
   });
 })();
 

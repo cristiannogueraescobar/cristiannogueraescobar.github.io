@@ -286,5 +286,41 @@ function strictGrid(rel) {
      !wErr && wOut && wOut.objective === 50 && (wOut.variables || []).length === 1, wErr || JSON.stringify(wOut));
 }
 
+// Symmetric =B2*C2 in objective AND constraint: ambiguous on both inline paths,
+// with the SAME marker — never a divergent non-linear error on one path only.
+{
+  const grid = [
+    ['Item', 'x', 'coef', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '10', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=B2*C2', '', ''],
+    ['Cap', '', '', '=B2*C2', '<=', '50'],
+  ];
+  let mErr = null, wErr = null;
+  try { mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline symmetric B2*C2: main-thread AMBIGUOUS', mErr && /AMBIGUOUS_DECISION_CELLS/.test(mErr), mErr);
+  ok('inline symmetric B2*C2: worker AMBIGUOUS', wErr && /AMBIGUOUS_DECISION_CELLS/.test(wErr), wErr);
+}
+
+// Linear objective-only block with a limit on one cell: BOTH variables kept,
+// unbounded on both paths — never silently reduced to one variable / optimal.
+{
+  const grid = [
+    ['Item', 'x', 'y', 'Result', 'Rel', 'Limit'],
+    ['Values', '0', '0', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Objective', '', '', '=10*B2+20*C2', '', ''],
+    ['CapX', '', '', '=B2', '<=', '5'],
+  ];
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline linear obj-only block: main-thread unbounded, two vars',
+     !mErr && mOut && mOut.status === 'unbounded' && (mOut.variables || []).length === 2, mErr || JSON.stringify(mOut));
+  ok('inline linear obj-only block: worker unbounded, two vars',
+     !wErr && wOut && wOut.status === 'unbounded' && (wOut.variables || []).length === 2, wErr || JSON.stringify(wOut));
+}
+
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

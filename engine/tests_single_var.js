@@ -1,10 +1,12 @@
 /**
- * tests_single_var.js — a genuine ONE-variable model must be detected without a
- * "Dummy" second variable, while an isolated cell with no model structure must
- * NOT be turned into a variable. The detector currently rejects any single-cell
- * block (`if (size < 2) return`), so these tests fail until single-variable
- * detection lands. They pin both the positive cases and the negative guards so
- * the fix cannot weaken normal (>=2 variable) detection.
+ * tests_single_var.js — a genuine ONE-variable model is detected without a
+ * "Dummy" second variable, while an isolated cell with no model structure is
+ * NOT turned into a variable. Detection accepts a single cell only with real
+ * structural evidence (reached by the objective AND a constraint, per role) and
+ * refuses ambiguous cases (several separate cells, or a symmetric =B2*C2 where
+ * either cell could be the variable). These tests pin the positive cases, the
+ * negative guards, and the multi-variable regressions so the single-variable
+ * support cannot weaken normal (>=2 variable) detection.
  *
  * Run: node engine/tests_single_var.js
  */
@@ -222,27 +224,9 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
-// Coefficient inside a block that feeds BOTH objective and constraint
-// (objective =B2*C2 AND constraint =B2*C2). Here nothing structural says whether
-// B2 or C2 is the decision and which is the coefficient — both single-cell
-// readings are linear and valid but describe DIFFERENT models (Max 10x vs
-// Max 10b). Per the "never return a wrong result" contract this is refused as
-// ambiguous, with the localizable AMBIGUOUS_DECISION_CELLS marker — NOT silently
-// resolved to one of them. (Contrast the neighbour-coefficient test above, where
-// the constraint is on B2 alone, so C2 is unambiguously the coefficient.)
-{
-  const grid = [
-    ['Item', 'Units', 'Coef', 'Total', 'Rel', 'Limit'],
-    ['A', '0', '10', '', '', ''],
-    ['', '', '', '', '', ''],
-    ['Obj', '', '', '=B2*C2', '', ''],
-    ['Cap', '', '', '=B2*C2', '<=', '50'],
-  ];
-  const r = run(grid);
-  check('ambiguous block (B2*C2 in both objective and constraint) is refused, not guessed',
-    !!r.error && /^detect:/.test(r.error) && /AMBIGUOUS_DECISION_CELLS/.test(r.error),
-    r.error || JSON.stringify(r.out));
-}
+// Coefficient inside a block that feeds BOTH objective and constraint is tested
+// above ("negative: symmetric B2*C2 ... -> ambiguous").
+
 
 
 {
@@ -260,6 +244,24 @@ function oneVar(rel, limit, opts) {
   check('regression: canonical 3-var model still 1760',
     !r.error && r.out.status === 'optimal' && r.out.objective === 1760 &&
     r.out.values.length === 3, r.error || JSON.stringify(r.out));
+}
+
+// A LINEAR block reached only by the objective (with a limit on just one of its
+// cells) is still a real two-variable model — it must NOT be silently reduced
+// to the one cell that also appears in the constraint. Here y is unbounded, so
+// the honest answer is unbounded with two variables, never optimal=50 with one.
+{
+  const grid = [
+    ['Item', 'x', 'y', 'Result', 'Rel', 'Limit'],
+    ['Values', '0', '0', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Objective', '', '', '=10*B2+20*C2', '', ''],
+    ['CapX', '', '', '=B2', '<=', '5'],
+  ];
+  const r = run(grid);
+  check('regression: linear objective-only block keeps BOTH variables (unbounded)',
+    !r.error && r.out.status === 'unbounded' && (r.out.variables || []).length === 2,
+    r.error || JSON.stringify(r.out));
 }
 
 report();

@@ -391,15 +391,23 @@ setTimeout(function () {
   // The AMBIGUOUS_DECISION_CELLS marker (single-variable detection) must also
   // localize in every language and drop the raw marker from the shown text.
   const ambExpect = {
-    en: /Several separate cells/, es: /Varias celdas separadas/,
-    pt: /V\u00e1rias c\u00e9lulas separadas/, de: /Mehrere separate Zellen/,
-    fr: /Plusieurs cellules distinctes/
+    en: /More than one interpretation/, es: /m\u00e1s de una interpretaci\u00f3n/,
+    pt: /mais de uma interpreta\u00e7\u00e3o/, de: /mehr als eine m\u00f6gliche Deutung/,
+    fr: /Plusieurs interpr\u00e9tations/
   };
   Object.keys(ambExpect).forEach(function (lang) {
     api.setLang(lang);
     const out = api.localizeEngineError('AMBIGUOUS_DECISION_CELLS');
     ok('localizes AMBIGUOUS_DECISION_CELLS in ' + lang, ambExpect[lang].test(out), out.slice(0, 40));
     ok(lang + ': ambiguity message drops the raw marker', out.indexOf('AMBIGUOUS_DECISION_CELLS') === -1, out.slice(0, 40));
+    // Render end-to-end through showEngineTrouble, as an Error and as a string,
+    // and check the text lands in #result (same coverage as STRICT_INEQUALITY).
+    api.showEngineTrouble('tRead', new Error('AMBIGUOUS_DECISION_CELLS'));
+    let shown = document.getElementById('result').textContent;
+    ok(lang + ': showEngineTrouble(Error) renders ambiguity message', ambExpect[lang].test(shown), shown.slice(0, 60));
+    api.showEngineTrouble('tRead', 'AMBIGUOUS_DECISION_CELLS');
+    shown = document.getElementById('result').textContent;
+    ok(lang + ': showEngineTrouble(string) renders ambiguity message', ambExpect[lang].test(shown), shown.slice(0, 60));
   });
 
   console.log('ERROR I18N TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
