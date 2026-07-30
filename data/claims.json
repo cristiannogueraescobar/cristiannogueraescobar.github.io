@@ -1,331 +1,7 @@
 {
   "generatedFrom": "assets/product-capabilities.js",
-  "note": "DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate.",
+  "note": "DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate. Public capabilities only.",
   "claims": [
-    {
-      "id": "model-continuous",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelContinuousName",
-      "descriptionKey": "capModelContinuousDesc",
-      "proof": {
-        "testFile": "tests.js",
-        "testMarker": "CAPABILITY: model-continuous"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-integer",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelIntegerName",
-      "descriptionKey": "capModelIntegerDesc",
-      "proof": {
-        "testFile": "tests_bounds.js",
-        "testMarker": "CAPABILITY: model-integer"
-      },
-      "example": "workforce",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-binary",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelBinaryName",
-      "descriptionKey": "capModelBinaryDesc",
-      "proof": {
-        "testFile": "tests_panel.js",
-        "testMarker": "CAPABILITY: model-binary"
-      },
-      "example": "project",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-mixed",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelMixedName",
-      "descriptionKey": "capModelMixedDesc",
-      "proof": {
-        "testFile": "tests_bounds.js",
-        "testMarker": "CAPABILITY: model-mixed"
-      },
-      "example": "supplier",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-direction",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelDirectionName",
-      "descriptionKey": "capModelDirectionDesc",
-      "proof": {
-        "testFile": "tests_direction.js",
-        "testMarker": "CAPABILITY: model-direction"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-single-variable",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelSingleVariableName",
-      "descriptionKey": "capModelSingleVariableDesc",
-      "proof": {
-        "testFile": "tests_single_var.js",
-        "testMarker": "CAPABILITY: model-single-variable"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "model-per-variable-bounds",
-      "group": "models",
-      "status": "available",
-      "nameKey": "capModelPerVariableBoundsName",
-      "descriptionKey": "capModelPerVariableBoundsDesc",
-      "proof": {
-        "testFile": "tests_bounds.js",
-        "testMarker": "CAPABILITY: model-per-variable-bounds"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-formula-limits",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetFormulaLimitsName",
-      "descriptionKey": "capSheetFormulaLimitsDesc",
-      "proof": {
-        "testFile": "tests.js",
-        "testMarker": "CAPABILITY: sheet-formula-limits"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-sumif",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetSumifName",
-      "descriptionKey": "capSheetSumifDesc",
-      "proof": {
-        "testFile": "tests_sumif_criteria.js",
-        "testMarker": "CAPABILITY: sheet-sumif"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-locale-us",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetLocaleUsName",
-      "descriptionKey": "capSheetLocaleUsDesc",
-      "proof": {
-        "testFile": "tests_locale.js",
-        "testMarker": "CAPABILITY: sheet-locale-us"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-locale-eu",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetLocaleEuName",
-      "descriptionKey": "capSheetLocaleEuDesc",
-      "proof": {
-        "testFile": "tests_locale.js",
-        "testMarker": "CAPABILITY: sheet-locale-eu"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-paste",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetPasteName",
-      "descriptionKey": "capSheetPasteDesc",
-      "proof": {
-        "testFile": "tests_grid_input.js",
-        "testMarker": "CAPABILITY: sheet-paste"
-      },
-      "example": null,
-      "exampleNotApplicable": "Input capability — demonstrated across every example, not a specific model",
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "sheet-export",
-      "group": "spreadsheet",
-      "status": "available",
-      "nameKey": "capSheetExportName",
-      "descriptionKey": "capSheetExportDesc",
-      "proof": {
-        "testFile": "tests_worker_parity.js",
-        "testMarker": "CAPABILITY: sheet-export"
-      },
-      "example": null,
-      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "verify-objective",
-      "group": "verification",
-      "status": "available",
-      "nameKey": "capVerifyObjectiveName",
-      "descriptionKey": "capVerifyObjectiveDesc",
-      "proof": {
-        "testFile": "tests.js",
-        "testMarker": "CAPABILITY: verify-objective"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "verify-constraints",
-      "group": "verification",
-      "status": "available",
-      "nameKey": "capVerifyConstraintsName",
-      "descriptionKey": "capVerifyConstraintsDesc",
-      "proof": {
-        "testFile": "tests.js",
-        "testMarker": "CAPABILITY: verify-constraints"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "verify-statuses",
-      "group": "verification",
-      "status": "available",
-      "nameKey": "capVerifyStatusesName",
-      "descriptionKey": "capVerifyStatusesDesc",
-      "proof": {
-        "testFile": "tests_states.js",
-        "testMarker": "CAPABILITY: verify-statuses"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "verify-reject-unsafe",
-      "group": "verification",
-      "status": "available",
-      "nameKey": "capVerifyRejectUnsafeName",
-      "descriptionKey": "capVerifyRejectUnsafeDesc",
-      "proof": {
-        "testFile": "tests_strict.js",
-        "testMarker": "CAPABILITY: verify-reject-unsafe"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
-    {
-      "id": "run-local",
-      "group": "verification",
-      "status": "available",
-      "nameKey": "capRunLocalName",
-      "descriptionKey": "capRunLocalDesc",
-      "proof": {
-        "testFile": "tests_worker_parity.js",
-        "testMarker": "CAPABILITY: run-local"
-      },
-      "example": null,
-      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
-    },
     {
       "id": "explain-detection",
       "group": "explanation",
@@ -336,85 +12,13 @@
         "testFile": "tests.js",
         "testMarker": "CAPABILITY: explain-detection"
       },
+      "exampleStatus": "covered",
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
         "path": "guide.html",
         "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "explain-solve-details",
-      "group": "explanation",
-      "status": "available",
-      "nameKey": "capExplainSolveDetailsName",
-      "descriptionKey": "capExplainSolveDetailsDesc",
-      "proof": {
-        "testFile": "tests_states.js",
-        "testMarker": "CAPABILITY: explain-solve-details"
-      },
-      "example": null,
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "explain-marginal",
-      "group": "explanation",
-      "status": "available",
-      "nameKey": "capExplainMarginalName",
-      "descriptionKey": "capExplainMarginalDesc",
-      "proof": {
-        "testFile": "tests.js",
-        "testMarker": "CAPABILITY: explain-marginal"
-      },
-      "example": "production",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "explain-region-chart",
-      "group": "explanation",
-      "status": "available",
-      "nameKey": "capExplainRegionChartName",
-      "descriptionKey": "capExplainRegionChartDesc",
-      "proof": {
-        "testFile": "tests_region_plot.js",
-        "testMarker": "CAPABILITY: explain-region-chart"
-      },
-      "example": "workshop",
-      "exampleNotApplicable": null,
-      "docs": {
-        "path": "guide.html",
-        "anchor": "status"
-      },
-      "public": true
-    },
-    {
-      "id": "explain-multilingual",
-      "group": "explanation",
-      "status": "available",
-      "nameKey": "capExplainMultilingualName",
-      "descriptionKey": "capExplainMultilingualDesc",
-      "proof": {
-        "testFile": "tests_i18n_pages.js",
-        "testMarker": "CAPABILITY: explain-multilingual"
-      },
-      "example": null,
-      "exampleNotApplicable": "Infrastructure capability — applies across the whole interface",
-      "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
-      },
-      "public": true
+      }
     },
     {
       "id": "explain-error-localisation",
@@ -426,13 +30,265 @@
         "testFile": "tests_error_i18n.js",
         "testMarker": "CAPABILITY: explain-error-localisation"
       },
+      "exampleStatus": "not-applicable",
       "example": null,
       "exampleNotApplicable": "Infrastructure capability — applies to every engine message",
       "docs": {
         "path": "guide.html",
         "anchor": "status"
+      }
+    },
+    {
+      "id": "explain-marginal",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainMarginalName",
+      "descriptionKey": "capExplainMarginalDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: explain-marginal"
       },
-      "public": true
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      }
+    },
+    {
+      "id": "explain-multilingual",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainMultilingualName",
+      "descriptionKey": "capExplainMultilingualDesc",
+      "proof": {
+        "testFile": "tests_i18n_pages.js",
+        "testMarker": "CAPABILITY: explain-multilingual"
+      },
+      "exampleStatus": "not-applicable",
+      "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies across the whole interface",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "explain-region-chart",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainRegionChartName",
+      "descriptionKey": "capExplainRegionChartDesc",
+      "proof": {
+        "testFile": "tests_region_plot.js",
+        "testMarker": "CAPABILITY: explain-region-chart"
+      },
+      "exampleStatus": "covered",
+      "example": "workshop",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      }
+    },
+    {
+      "id": "model-binary",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelBinaryName",
+      "descriptionKey": "capModelBinaryDesc",
+      "proof": {
+        "testFile": "tests_panel.js",
+        "testMarker": "CAPABILITY: model-binary"
+      },
+      "exampleStatus": "covered",
+      "example": "project",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "model-continuous",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelContinuousName",
+      "descriptionKey": "capModelContinuousDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: model-continuous"
+      },
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "model-direction",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelDirectionName",
+      "descriptionKey": "capModelDirectionDesc",
+      "proof": {
+        "testFile": "tests_direction.js",
+        "testMarker": "CAPABILITY: model-direction"
+      },
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "model-integer",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelIntegerName",
+      "descriptionKey": "capModelIntegerDesc",
+      "proof": {
+        "testFile": "tests_bounds.js",
+        "testMarker": "CAPABILITY: model-integer"
+      },
+      "exampleStatus": "covered",
+      "example": "workforce",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "model-mixed",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelMixedName",
+      "descriptionKey": "capModelMixedDesc",
+      "proof": {
+        "testFile": "tests_bounds.js",
+        "testMarker": "CAPABILITY: model-mixed"
+      },
+      "exampleStatus": "covered",
+      "example": "supplier",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "run-local",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capRunLocalName",
+      "descriptionKey": "capRunLocalDesc",
+      "proof": {
+        "testFile": "tests_worker_parity.js",
+        "testMarker": "CAPABILITY: run-local"
+      },
+      "exampleStatus": "not-applicable",
+      "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "sheet-export",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetExportName",
+      "descriptionKey": "capSheetExportDesc",
+      "proof": {
+        "testFile": "tests_worker_parity.js",
+        "testMarker": "CAPABILITY: sheet-export"
+      },
+      "exampleStatus": "not-applicable",
+      "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "sheet-formula-limits",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetFormulaLimitsName",
+      "descriptionKey": "capSheetFormulaLimitsDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: sheet-formula-limits"
+      },
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "sheet-paste",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetPasteName",
+      "descriptionKey": "capSheetPasteDesc",
+      "proof": {
+        "testFile": "tests_grid_input.js",
+        "testMarker": "CAPABILITY: sheet-paste"
+      },
+      "exampleStatus": "not-applicable",
+      "example": null,
+      "exampleNotApplicable": "Input capability — demonstrated across every example, not a specific model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      }
+    },
+    {
+      "id": "verify-constraints",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyConstraintsName",
+      "descriptionKey": "capVerifyConstraintsDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: verify-constraints"
+      },
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      }
+    },
+    {
+      "id": "verify-objective",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyObjectiveName",
+      "descriptionKey": "capVerifyObjectiveDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: verify-objective"
+      },
+      "exampleStatus": "covered",
+      "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      }
     }
   ]
 }

@@ -16,10 +16,14 @@ const siteDir = path.join(__dirname, '..');
 const caps = require(path.join(siteDir, 'assets', 'product-capabilities.js'));
 
 function buildClaims() {
-  return {
-    generatedFrom: 'assets/product-capabilities.js',
-    note: 'DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate.',
-    claims: caps.CAPABILITIES.map(function (c) {
+  // Public claims only: a pending capability has no public demonstration and
+  // must not enter the public manifest. Sorted by id for a deterministic,
+  // timestamp-free output so --check can compare byte for byte.
+  const publicClaims = caps.CAPABILITIES
+    .filter(function (c) { return c.public === true; })
+    .slice()
+    .sort(function (a, b) { return a.id < b.id ? -1 : (a.id > b.id ? 1 : 0); })
+    .map(function (c) {
       return {
         id: c.id,
         group: c.group,
@@ -27,14 +31,16 @@ function buildClaims() {
         nameKey: c.nameKey,
         descriptionKey: c.descriptionKey,
         proof: { testFile: c.testFile, testMarker: c.testMarker },
+        exampleStatus: c.exampleStatus,
         example: c.exampleId,
         exampleNotApplicable: c.exampleNotApplicable || null,
-        docs: { path: c.docsPath, anchor: c.docsAnchor },
-        // `public` is taken verbatim from the inventory — a product decision,
-        // not something this generator computes.
-        public: c.public === true
+        docs: { path: c.docsPath, anchor: c.docsAnchor }
       };
-    })
+    });
+  return {
+    generatedFrom: 'assets/product-capabilities.js',
+    note: 'DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate. Public capabilities only.',
+    claims: publicClaims
   };
 }
 

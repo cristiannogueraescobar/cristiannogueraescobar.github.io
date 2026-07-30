@@ -45,28 +45,39 @@ function hasI18n(lang, key) {
   return !!(L && L.capabilities && Object.prototype.hasOwnProperty.call(L.capabilities, key));
 }
 
-// The set of test modules that actually RUN in CI, read from run_all.js's
-// `suites` array — so a capability cannot point at a file that exists on disk
-// but is never executed.
-const runAllSrc = fs.readFileSync(path.join(siteDir, 'engine', 'run_all.js'), 'utf8');
-const suitesMatch = runAllSrc.match(/const suites\s*=\s*\[([\s\S]*?)\]/);
-const RUN_SUITES = new Set(
-  suitesMatch ? [...suitesMatch[1].matchAll(/'([^']+)'/g)].map(m => m[1]) : []
-);
-ok('capabilities: run_all.js suites array was parsed', RUN_SUITES.size > 0);
+// The set of test modules that actually RUN in CI, imported from the shared
+// suites module (not parsed from run_all.js text) — so a capability cannot
+// point at a file that exists on disk but is never executed.
+const RUN_SUITES = new Set(require(path.join(siteDir, 'engine', 'suites.js')));
+ok('capabilities: shared suites list is non-empty', RUN_SUITES.size > 0);
 
-// Cache page HTML so we can check a docsAnchor actually exists as an id.
+// Cache page HTML so we can check a docsAnchor exists as an EXACT id (not a
+// substring or partial match). Matches id="x" and id='x'.
 const pageCache = {};
 function anchorExists(docsPath, anchor) {
   if (!docsPath || !anchor) return false;
   const p = path.join(siteDir, docsPath);
   if (!fs.existsSync(p)) return false;
   if (!(docsPath in pageCache)) pageCache[docsPath] = fs.readFileSync(p, 'utf8');
-  return new RegExp('id="' + anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"').test(pageCache[docsPath]);
+  const esc = anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Exact id value: id="anchor" or id='anchor' with the full attribute value.
+  return new RegExp('id=("' + esc + '"|\'' + esc + '\')').test(pageCache[docsPath]);
+}
+
+// Count exact occurrences of a marker in a source string.
+function countOccurrences(src, needle) {
+  if (!needle) return 0;
+  let n = 0, i = 0;
+  while ((i = src.indexOf(needle, i)) !== -1) { n++; i += needle.length; }
+  return n;
 }
 
 // Running coverage tallies for the explicit report at the end.
-const coverage = { total: 0, tested: 0, withExample: 0, notApplicable: 0, documented: 0, translated: 0, publicCount: 0 };
+const coverage = {
+  total: 0, tested: 0, covered: 0, notApplicable: 0, pending: 0,
+  docTargetValid: 0, translated: 0, publicCount: 0
+};
+const seenMarkers = new Set();
 
 // ---- Shape of the file itself ------------------------------------------
 ok('capabilities: file exports a non-empty array', Array.isArray(caps.CAPABILITIES) && caps.CAPABILITIES.length > 0);
@@ -112,23 +123,45 @@ caps.CAPABILITIES.forEach(function (c) {
   let markerPresent = false;
   if (testExists) {
     const src = fs.readFileSync(testPath, 'utf8');
-    markerPresent = typeof c.testMarker === 'string' && src.includes(c.testMarker);
-    ok('capability ' + tag + ': testMarker present in ' + c.testFile, markerPresent, c.testMarker);
+    // Hardening: the marker must appear EXACTLY once (not just at least once).
+    const occ = countOccurrences(src, c.testMarker);
+    markerPresent = typeof c.testMarker === 'string' && occ === 1;
+    ok('capability ' + tag + ': testMarker appears exactly once in ' + c.testFile,
+       markerPresent, c.testMarker + ' (found ' + occ + ')');
   }
+  // Hardening: every testMarker is globally unique across capabilities.
+  ok('capability ' + tag + ': testMarker is globally unique',
+     c.testMarker && !seenMarkers.has(c.testMarker), 'duplicate marker');
+  if (c.testMarker) seenMarkers.add(c.testMarker);
+
   // The test file must be registered to run in CI (not just present on disk).
   const moduleName = (c.testFile || '').replace(/\.js$/, '');
   const runsInCI = RUN_SUITES.has(moduleName);
-  ok('capability ' + tag + ': testFile runs in CI (registered in run_all.js)', runsInCI, moduleName);
+  ok('capability ' + tag + ': testFile runs in CI (in shared suites list)', runsInCI, moduleName);
   const fullyTested = testExists && markerPresent && runsInCI;
 
-  // exampleId is real or explicitly null; if null, exampleNotApplicable is
-  // optional but must be a non-empty string when present.
-  const exampleOk = c.exampleId === null || exampleKeys.has(c.exampleId);
-  ok('capability ' + tag + ': exampleId is a real example or null', exampleOk, String(c.exampleId));
-  if (c.exampleId === null && 'exampleNotApplicable' in c) {
-    ok('capability ' + tag + ': exampleNotApplicable is a non-empty reason',
+  // exampleStatus drives the example rules.
+  const st = c.exampleStatus;
+  ok('capability ' + tag + ': exampleStatus is covered/not-applicable/pending',
+     ['covered', 'not-applicable', 'pending'].includes(st), String(st));
+  if (st === 'covered') {
+    ok('capability ' + tag + ': covered => real exampleId',
+       exampleKeys.has(c.exampleId), String(c.exampleId));
+    // Hardening: exampleNotApplicable is forbidden when there is an example.
+    ok('capability ' + tag + ': covered => no exampleNotApplicable',
+       !('exampleNotApplicable' in c));
+  } else if (st === 'not-applicable') {
+    ok('capability ' + tag + ': not-applicable => no exampleId', c.exampleId === null, String(c.exampleId));
+    ok('capability ' + tag + ': not-applicable => a non-empty reason',
        typeof c.exampleNotApplicable === 'string' && c.exampleNotApplicable.length > 0);
+  } else if (st === 'pending') {
+    ok('capability ' + tag + ': pending => no exampleId yet', c.exampleId === null, String(c.exampleId));
+    // A pending capability has no public demonstration, so it must not be public.
+    ok('capability ' + tag + ': pending => not public', c.public !== true, String(c.public));
   }
+  // Hardening (belt and braces): exampleNotApplicable never coexists with an id.
+  ok('capability ' + tag + ': exampleNotApplicable forbidden alongside exampleId',
+     !('exampleNotApplicable' in c) || c.exampleId === null);
 
   // Public strings exist in every language.
   let translatedAll = true;
@@ -139,30 +172,36 @@ caps.CAPABILITIES.forEach(function (c) {
     if (!n || !d) translatedAll = false;
   });
 
-  // Documentation anchor must exist on its page.
-  const documented = anchorExists(c.docsPath, c.docsAnchor);
-  ok('capability ' + tag + ': docsAnchor exists on ' + c.docsPath,
-     documented, (c.docsPath || '?') + '#' + (c.docsAnchor || '?'));
+  // Documentation TARGET must be a valid, existing anchor. Note: this proves the
+  // link is not broken — NOT that the section genuinely documents the capability.
+  // Reported below as "valid documentation target", not "documented".
+  const docTargetValid = anchorExists(c.docsPath, c.docsAnchor);
+  ok('capability ' + tag + ': docsAnchor is a real id on ' + c.docsPath,
+     docTargetValid, (c.docsPath || '?') + '#' + (c.docsAnchor || '?'));
 
   // `public` is EXPLICIT and boolean — never derived.
   ok('capability ' + tag + ': public is an explicit boolean', typeof c.public === 'boolean',
      String(c.public));
-  // When public, everything it implies must hold: available, tested, translated,
-  // documented. The validator does not decide what is public; it enforces that
-  // whatever IS public is fully backed up.
+  // When public, everything it implies must hold. The validator does not decide
+  // what is public; it enforces that whatever IS public is fully backed up:
+  // available, fully tested, translated, a valid docs target, and a real example
+  // (covered) or a justified not-applicable — never pending.
   if (c.public === true) {
     ok('capability ' + tag + ': public => status available', c.status === 'available', c.status);
-    ok('capability ' + tag + ': public => fully tested (exists, marked, runs in CI)', fullyTested);
+    ok('capability ' + tag + ': public => fully tested (exists, marked once, runs in CI)', fullyTested);
     ok('capability ' + tag + ': public => translated in all languages', translatedAll);
-    ok('capability ' + tag + ': public => documented', documented);
+    ok('capability ' + tag + ': public => valid documentation target', docTargetValid);
+    ok('capability ' + tag + ': public => example covered or not-applicable (not pending)',
+       st === 'covered' || st === 'not-applicable', String(st));
   }
 
   // Coverage tallies.
   coverage.total++;
   if (fullyTested) coverage.tested++;
-  if (c.exampleId !== null) coverage.withExample++;
-  else if (c.exampleNotApplicable) coverage.notApplicable++;
-  if (documented) coverage.documented++;
+  if (st === 'covered') coverage.covered++;
+  else if (st === 'not-applicable') coverage.notApplicable++;
+  else if (st === 'pending') coverage.pending++;
+  if (docTargetValid) coverage.docTargetValid++;
   if (translatedAll) coverage.translated++;
   if (c.public === true) coverage.publicCount++;
 });
@@ -189,24 +228,32 @@ caps.GROUP_ORDER.forEach(function (grp) {
 })();
 
 // ---- Explicit coverage report ------------------------------------------
-// A clear tally, as the audit asked: X/N tested, with-example, documented,
-// translated, public. Printed always (not just on failure) so CI logs show it.
+// A clear tally, as the audit asked. Note the deliberate wording: "valid
+// documentation target" (the link resolves to a real anchor) is NOT the same as
+// "documented" (the section genuinely explains the capability). We can only
+// claim the former until the dedicated capabilities.html page exists.
 const N = coverage.total;
 console.log('  coverage: ' + coverage.tested + '/' + N + ' with an executed test');
-console.log('  coverage: ' + coverage.withExample + '/' + N + ' with an example (' +
-            coverage.notApplicable + ' marked not-applicable, ' +
-            (N - coverage.withExample - coverage.notApplicable) + ' example pending)');
-console.log('  coverage: ' + coverage.documented + '/' + N + ' with documentation');
+console.log('  coverage: examples — ' + coverage.covered + ' covered, ' +
+            coverage.notApplicable + ' not-applicable, ' + coverage.pending + ' pending');
+console.log('  coverage: ' + coverage.docTargetValid + '/' + N + ' with a valid documentation target');
 console.log('  coverage: ' + coverage.translated + '/' + N + ' translated in all languages');
-console.log('  coverage: ' + coverage.publicCount + '/' + N + ' marked public');
-// Every capability must be fully tested, documented and translated regardless
-// of public flag (those are correctness guarantees, not marketing choices).
+console.log('  coverage: ' + coverage.publicCount + '/' + N + ' marked public (pending are excluded)');
+// Every capability must be fully tested and translated, and have a valid docs
+// target, regardless of the public flag (those are correctness guarantees, not
+// marketing choices). Example coverage is NOT required for every capability
+// (infrastructure ones are legitimately not-applicable, and pending ones are
+// simply not public yet).
 ok('coverage: all capabilities have an executed test', coverage.tested === N,
    coverage.tested + '/' + N);
-ok('coverage: all capabilities are documented', coverage.documented === N,
-   coverage.documented + '/' + N);
+ok('coverage: all capabilities have a valid documentation target', coverage.docTargetValid === N,
+   coverage.docTargetValid + '/' + N);
 ok('coverage: all capabilities are translated', coverage.translated === N,
    coverage.translated + '/' + N);
+// Every covered/not-applicable capability accounts for its example; pending
+// ones are explicitly tracked, never silently public.
+ok('coverage: covered + not-applicable + pending == total',
+   coverage.covered + coverage.notApplicable + coverage.pending === N);
 
 console.log('CAPABILITIES TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 process.exit(fail > 0 ? 1 : 0);

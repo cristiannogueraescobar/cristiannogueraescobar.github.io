@@ -27,9 +27,16 @@
  *                  run_all.js) — so a capability cannot claim a test that no
  *                  longer covers it, nor one that exists on disk but never runs.
  *   - exampleId    an example key in examples-data.js that demonstrates it, or
- *                  null. When null, exampleNotApplicable MAY give the reason
- *                  (e.g. an infrastructure capability that applies to every
- *                  model rather than one specific example).
+ *                  null.
+ *   - exampleStatus  'covered' | 'not-applicable' | 'pending':
+ *                    covered        -> requires a real exampleId.
+ *                    not-applicable -> requires exampleNotApplicable and forbids
+ *                                      an exampleId (an infrastructure capability
+ *                                      that applies to every model, not one).
+ *                    pending        -> no public demonstration exists yet, so it
+ *                                      MUST NOT be public until an example is
+ *                                      added. It stays in the inventory but out
+ *                                      of the public claims and the public page.
  *   - docsPath / docsAnchor  where this capability is documented. When public,
  *                  the validator requires the anchor to exist on that page, so
  *                  a public capability can never be undocumented. These
@@ -70,6 +77,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: model-continuous',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -85,6 +93,7 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-integer',
       exampleId: 'workforce',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -100,6 +109,7 @@
       testFile: 'tests_panel.js',
       testMarker: 'CAPABILITY: model-binary',
       exampleId: 'project',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -115,6 +125,7 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-mixed',
       exampleId: 'supplier',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -130,6 +141,7 @@
       testFile: 'tests_direction.js',
       testMarker: 'CAPABILITY: model-direction',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -145,7 +157,8 @@
       testFile: 'tests_single_var.js',
       testMarker: 'CAPABILITY: model-single-variable',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'A genuine one-variable model is detected without needing a second decision.'
@@ -160,7 +173,8 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-per-variable-bounds',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'Individual minimum and maximum per decision variable, set in Variable Settings.'
@@ -175,6 +189,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: sheet-formula-limits',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -190,7 +205,8 @@
       testFile: 'tests_sumif_criteria.js',
       testMarker: 'CAPABILITY: sheet-sumif',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'SUM, SUMIF (numeric and text criteria) and other linear formulas; non-linear functions are rejected.'
@@ -205,7 +221,8 @@
       testFile: 'tests_locale.js',
       testMarker: 'CAPABILITY: sheet-locale-us',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'US number format: 1.5 decimals and SUM(A,B) argument separators.'
@@ -220,7 +237,8 @@
       testFile: 'tests_locale.js',
       testMarker: 'CAPABILITY: sheet-locale-eu',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'European number format: 1,5 decimals and SUM(A;B) separators; auto-detected or set manually. No thousands grouping.'
@@ -235,6 +253,7 @@
       testFile: 'tests_grid_input.js',
       testMarker: 'CAPABILITY: sheet-paste',
       exampleId: null,
+      exampleStatus: 'not-applicable',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -251,6 +270,7 @@
       testFile: 'tests_worker_parity.js',
       testMarker: 'CAPABILITY: sheet-export',
       exampleId: null,
+      exampleStatus: 'not-applicable',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -267,6 +287,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: verify-objective',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
@@ -282,6 +303,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: verify-constraints',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
@@ -297,7 +319,8 @@
       testFile: 'tests_states.js',
       testMarker: 'CAPABILITY: verify-statuses',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'status',
       limits: 'Distinguishes proven-optimal, feasible-without-proof, incomplete search, infeasible and unbounded.'
@@ -312,7 +335,8 @@
       testFile: 'tests_strict.js',
       testMarker: 'CAPABILITY: verify-reject-unsafe',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
       limits: 'Rejects models it cannot interpret safely (strict inequalities, real non-linearity, variable-dependent limits) instead of guessing.'
@@ -327,6 +351,7 @@
       testFile: 'tests_worker_parity.js',
       testMarker: 'CAPABILITY: run-local',
       exampleId: null,
+      exampleStatus: 'not-applicable',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -343,6 +368,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: explain-detection',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
@@ -358,7 +384,8 @@
       testFile: 'tests_states.js',
       testMarker: 'CAPABILITY: explain-solve-details',
       exampleId: null,
-      public: true,
+      exampleStatus: 'pending',
+      public: false,
       docsPath: 'guide.html',
       docsAnchor: 'status',
       limits: 'Shows stop reason, nodes explored and solve time.'
@@ -373,6 +400,7 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: explain-marginal',
       exampleId: 'production',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
@@ -388,6 +416,7 @@
       testFile: 'tests_region_plot.js',
       testMarker: 'CAPABILITY: explain-region-chart',
       exampleId: 'workshop',
+      exampleStatus: 'covered',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
@@ -403,6 +432,7 @@
       testFile: 'tests_i18n_pages.js',
       testMarker: 'CAPABILITY: explain-multilingual',
       exampleId: null,
+      exampleStatus: 'not-applicable',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -419,6 +449,7 @@
       testFile: 'tests_error_i18n.js',
       testMarker: 'CAPABILITY: explain-error-localisation',
       exampleId: null,
+      exampleStatus: 'not-applicable',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'status',
