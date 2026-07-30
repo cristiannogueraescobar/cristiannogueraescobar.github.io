@@ -223,15 +223,6 @@
         capsEyebrow:'What it handles',
         capsTitle:'What Plumline can solve now.',
         capsLead:'Plumline solves linear models where the goal and every limit are weighted sums of your decisions. It supports three variable types, continuous, integer and binary, and mixed-integer models that combine them, and it checks the answer against your own numbers whichever you use.',
-        capsContH:'Continuous',
-        capsContP:'Quantities that can take any value from zero up: litres, hours, kilograms, currency. The default for every decision.',
-        capsIntH:'Integer',
-        capsIntP:'Whole-number quantities, for things you cannot split: people, vehicles, batches. Mark a decision as integer in Variable settings.',
-        capsBinH:'Binary',
-        capsBinP:'Yes or no choices fixed to 0 or 1: pick a project, open a site, take an order. Ideal for selection and knapsack-style problems.',
-        capsMixH:'Mixed-integer models',
-        capsMixP:'Continuous, integer and binary decisions in one model, for example a yes/no to use a supplier plus how much to buy from it.',
-        capsFoot:'You can give any decision its own minimum and maximum. Plumline handles up to twenty limit rows per model and solves in your browser. It does not solve genuinely non-linear models, such as one quantity multiplied by another, and it tells you when it meets one instead of guessing.',
         faqEyebrow:'Questions',
         faqTitle:'Before you try it.',
         faq1Q:'Do I need to install anything?',
@@ -804,15 +795,6 @@
         capsEyebrow:'Qué resuelve',
         capsTitle:'Qué puede resolver Plumline ahora.',
         capsLead:'Plumline resuelve modelos lineales donde el objetivo y cada límite son sumas ponderadas de tus decisiones. Admite tres tipos de variable, continua, entera y binaria, y modelos enteros mixtos que los combinan, y comprueba la respuesta con tus propios números sea cual sea el que uses.',
-        capsContH:'Continuas',
-        capsContP:'Cantidades que pueden tomar cualquier valor desde cero: litros, horas, kilogramos, dinero. El valor por defecto de cada decisión.',
-        capsIntH:'Enteras',
-        capsIntP:'Cantidades enteras, para cosas que no se pueden partir: personas, vehículos, lotes. Marca una decisión como entera en Ajustes de variables.',
-        capsBinH:'Binarias',
-        capsBinP:'Elecciones sí o no fijadas a 0 o 1: elegir un proyecto, abrir una sede, aceptar un pedido. Ideales para problemas de selección y tipo mochila.',
-        capsMixH:'Modelos enteros mixtos',
-        capsMixP:'Decisiones continuas, enteras y binarias en un mismo modelo, por ejemplo un sí/no para usar un proveedor más cuánto comprarle.',
-        capsFoot:'Puedes dar a cualquier decisión su propio mínimo y máximo. Plumline admite hasta veinte filas de límite por modelo y resuelve en tu navegador. No resuelve modelos realmente no lineales, como una cantidad multiplicada por otra, y te avisa cuando encuentra uno en vez de adivinar.',
         faqEyebrow:'Preguntas',
         faqTitle:'Antes de probarlo.',
         faq1Q:'¿Necesito instalar algo?',
@@ -1385,15 +1367,6 @@
         capsEyebrow:'O que resolve',
         capsTitle:'O que o Plumline resolve agora.',
         capsLead:'O Plumline resolve modelos lineares onde o objetivo e cada limite são somas ponderadas das suas decisões. Suporta três tipos de variável, contínua, inteira e binária, e modelos inteiros mistos que os combinam, e verifica a resposta com os seus próprios números seja qual for o que usar.',
-        capsContH:'Contínuas',
-        capsContP:'Quantidades que podem assumir qualquer valor a partir de zero: litros, horas, quilogramas, dinheiro. O padrão para cada decisão.',
-        capsIntH:'Inteiras',
-        capsIntP:'Quantidades inteiras, para coisas que não se podem dividir: pessoas, veículos, lotes. Marque uma decisão como inteira em Definições de variáveis.',
-        capsBinH:'Binárias',
-        capsBinP:'Escolhas sim ou não fixadas em 0 ou 1: escolher um projeto, abrir um local, aceitar um pedido. Ideais para problemas de seleção e tipo mochila.',
-        capsMixH:'Modelos inteiros mistos',
-        capsMixP:'Decisões contínuas, inteiras e binárias num mesmo modelo, por exemplo um sim/não para usar um fornecedor mais quanto comprar-lhe.',
-        capsFoot:'Pode dar a qualquer decisão o seu próprio mínimo e máximo. O Plumline suporta até vinte linhas de limite por modelo e resolve no seu navegador. Não resolve modelos genuinamente não lineares, como uma quantidade multiplicada por outra, e avisa quando encontra um em vez de adivinhar.',
         faqEyebrow:'Perguntas',
         faqTitle:'Antes de experimentar.',
         faq1Q:'Preciso instalar algo?',
@@ -1966,15 +1939,6 @@
         capsEyebrow:'Was es kann',
         capsTitle:'Was Plumline jetzt lösen kann.',
         capsLead:'Plumline löst lineare Modelle, bei denen das Ziel und jede Grenze gewichtete Summen deiner Entscheidungen sind. Es unterstützt drei Variablentypen, kontinuierlich, ganzzahlig und binär, sowie gemischt-ganzzahlige Modelle, die sie kombinieren, und prüft die Antwort mit deinen eigenen Zahlen, welchen du auch nutzt.',
-        capsContH:'Kontinuierlich',
-        capsContP:'Mengen, die jeden Wert ab null annehmen können: Liter, Stunden, Kilogramm, Geld. Der Standard für jede Entscheidung.',
-        capsIntH:'Ganzzahlig',
-        capsIntP:'Ganzzahlige Mengen für Dinge, die man nicht teilen kann: Personen, Fahrzeuge, Chargen. Markiere eine Entscheidung in den Variableneinstellungen als ganzzahlig.',
-        capsBinH:'Binär',
-        capsBinP:'Ja/Nein-Entscheidungen, fest auf 0 oder 1: ein Projekt wählen, einen Standort öffnen, einen Auftrag annehmen. Ideal für Auswahl- und Rucksack-Probleme.',
-        capsMixH:'Gemischt-ganzzahlige Modelle',
-        capsMixP:'Kontinuierliche, ganzzahlige und binäre Entscheidungen in einem Modell, etwa ein Ja/Nein zur Nutzung eines Lieferanten plus die Einkaufsmenge.',
-        capsFoot:'Du kannst jeder Entscheidung ein eigenes Minimum und Maximum geben. Plumline verarbeitet bis zu zwanzig Grenzzeilen pro Modell und löst im Browser. Echte nichtlineare Modelle, etwa eine Menge mal eine andere, löst es nicht und sagt es dir, statt zu raten.',
         faqEyebrow:'Fragen',
         faqTitle:'Bevor du es ausprobierst.',
         faq1Q:'Muss ich etwas installieren?',
@@ -2547,15 +2511,6 @@
         capsEyebrow:'Ce qu\'il traite',
         capsTitle:'Ce que Plumline peut résoudre aujourd\'hui.',
         capsLead:'Plumline résout des modèles linéaires où l\'objectif et chaque limite sont des sommes pondérées de vos décisions. Il prend en charge trois types de variables, continue, entière et binaire, et des modèles mixtes en nombres entiers qui les combinent, et il vérifie la réponse avec vos propres chiffres quel que soit celui que vous utilisez.',
-        capsContH:'Continues',
-        capsContP:'Des quantités qui peuvent prendre toute valeur à partir de zéro : litres, heures, kilogrammes, argent. Le choix par défaut pour chaque décision.',
-        capsIntH:'Entières',
-        capsIntP:'Des quantités entières, pour ce qui ne se divise pas : personnes, véhicules, lots. Marquez une décision comme entière dans les réglages des variables.',
-        capsBinH:'Binaires',
-        capsBinP:'Des choix oui ou non fixés à 0 ou 1 : choisir un projet, ouvrir un site, accepter une commande. Idéal pour les problèmes de sélection et de type sac à dos.',
-        capsMixH:'Modèles mixtes en nombres entiers',
-        capsMixP:'Des décisions continues, entières et binaires dans un même modèle, par exemple un oui/non pour utiliser un fournisseur et la quantité à lui acheter.',
-        capsFoot:'Vous pouvez donner à chaque décision son propre minimum et maximum. Plumline gère jusqu\'à vingt lignes de limite par modèle et résout dans votre navigateur. Il ne résout pas les modèles vraiment non linéaires, comme une quantité multipliée par une autre, et vous le signale au lieu de deviner.',
         faqEyebrow:'Questions',
         faqTitle:'Avant d’essayer.',
         faq1Q:'Dois-je installer quelque chose ?',
@@ -2934,15 +2889,29 @@
     return DICT[lang] ? lang : 'en';
   }
 
-  function apply(lang, page) {
+  function apply(lang, page, extra) {
     if (!DICT[lang]) lang = 'en';
     document.documentElement.lang = lang;
-    var tables = [DICT[lang].common || {}, (DICT[lang][page] || {})];
-    var en = [DICT.en.common || {}, (DICT.en[page] || {})];
+    // Resolution order: common, the page's own table, then any extra namespaces
+    // (e.g. 'capabilities' for the Home summary), then the English fallback in
+    // the same order. Extra namespaces let one page reuse another's keys without
+    // duplicating them into a second source of truth.
+    extra = extra || [];
+    var order = ['common', page].concat(extra);
+    var tables = [], en = [];
+    for (var t = 0; t < order.length; t++) {
+      tables.push(DICT[lang][order[t]] || {});
+      en.push(DICT.en[order[t]] || {});
+    }
+    function lookup(key) {
+      for (var a = 0; a < tables.length; a++) { if (tables[a][key]) return tables[a][key]; }
+      for (var b = 0; b < en.length; b++) { if (en[b][key]) return en[b][key]; }
+      return null;
+    }
     var nodes = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
       var key = nodes[i].getAttribute('data-i18n');
-      var val = tables[0][key] || tables[1][key] || en[0][key] || en[1][key];
+      var val = lookup(key);
       if (val) nodes[i].innerHTML = val;
     }
     // Also translate ARIA labels tagged with data-i18n-aria="key", so things
@@ -2950,7 +2919,7 @@
     var aria = document.querySelectorAll('[data-i18n-aria]');
     for (var k = 0; k < aria.length; k++) {
       var akey = aria[k].getAttribute('data-i18n-aria');
-      var aval = tables[0][akey] || tables[1][akey] || en[0][akey] || en[1][akey];
+      var aval = lookup(akey);
       if (aval) aria[k].setAttribute('aria-label', aval);
     }
   }
@@ -2965,18 +2934,18 @@
              (DICT[lang].common && DICT[lang].common[key]) ||
              (DICT.en[page] && DICT.en[page][key]) || key;
     },
-    init: function (page) {
+    init: function (page, extra) {
       var lang = pick();
       // If the URL carried an explicit ?lang=, treat it as a deliberate choice
       // and remember it, so navigating to other pages keeps it.
       var urlLang = (location.search.match(/[?&]lang=(\w\w)/) || [])[1];
       if (urlLang && DICT[urlLang]) remember(urlLang);
-      apply(lang, page);
+      apply(lang, page, extra);
       var sel = document.getElementById('lang');
       if (sel) {
         sel.value = lang;
         sel.addEventListener('change', function () {
-          apply(sel.value, page);
+          apply(sel.value, page, extra);
           remember(sel.value);
           // Preserve any other query parameters (e.g. ?ex=project-selection)
           // and the hash (e.g. #how) instead of overwriting the whole URL.

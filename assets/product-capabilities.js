@@ -33,6 +33,12 @@
  *                  set of capabilities that link to the solver, so the page does
  *                  not repeat one generic link that all points at the same
  *                  example. When absent, the capability shows no solver link.
+ *   - homeSummaryRank  OPTIONAL small integer (1..4). Present only on the
+ *                  capabilities featured in the Home summary; its value is the
+ *                  explicit display order WITHIN its group. This makes the Home
+ *                  selection a deliberate editorial choice, not an accident of
+ *                  inventory order. The validator requires ranks to be unique
+ *                  within a group and at most four per group.
  *   - exampleStatus  'covered' | 'not-applicable' | 'pending':
  *                    covered        -> requires a real exampleId.
  *                    not-applicable -> requires exampleNotApplicable and forbids
@@ -86,6 +92,7 @@
       exampleCtaKey: 'capCtaContinuous',
       limitationsKey: 'capLimitContinuous',
       public: true,
+      homeSummaryRank: 1,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-model-continuous',
       limits: 'Linear relationships only; non-linear formulas are rejected, not approximated.'
@@ -104,6 +111,7 @@
       exampleCtaKey: 'capCtaInteger',
       limitationsKey: 'capLimitInteger',
       public: true,
+      homeSummaryRank: 2,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-model-integer',
       limits: 'Whole-number variables; larger integer models take longer to prove optimal.'
@@ -121,6 +129,7 @@
       exampleStatus: 'covered',
       exampleCtaKey: 'capCtaBinary',
       public: true,
+      homeSummaryRank: 3,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-model-binary',
       limits: 'Each binary decision is 0 or 1.'
@@ -138,6 +147,7 @@
       exampleStatus: 'covered',
       exampleCtaKey: 'capCtaMixed',
       public: true,
+      homeSummaryRank: 4,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-model-mixed',
       limits: 'Mixes continuous and integer/binary variables in one model.'
@@ -202,6 +212,7 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
+      homeSummaryRank: 1,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-sheet-formula-limits',
       limits: 'A constraint can use a fixed number or a formula as its limit. Limits that depend on decision variables are rejected.'
@@ -266,6 +277,7 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
+      homeSummaryRank: 2,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-sheet-paste',
       exampleNotApplicable: 'Input capability — demonstrated across every example, not a specific model',
@@ -283,6 +295,7 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
+      homeSummaryRank: 3,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-sheet-export',
       exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
@@ -300,6 +313,7 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
+      homeSummaryRank: 1,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-verify-objective',
       limits: 'The reported objective is recomputed from your formulas at the solution.'
@@ -316,6 +330,7 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
+      homeSummaryRank: 2,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-verify-constraints',
       limits: 'Every constraint is checked again using the solved values.'
@@ -364,6 +379,7 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
+      homeSummaryRank: 3,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-run-local',
       exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
@@ -381,6 +397,7 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
+      homeSummaryRank: 1,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-explain-detection',
       limits: 'Reads the objective, decision cells and constraints from the sheet and shows what it understood before solving.'
@@ -414,6 +431,7 @@
       exampleStatus: 'covered',
       limitationsKey: 'capLimitMarginal',
       public: true,
+      homeSummaryRank: 2,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-explain-marginal',
       limits: 'For eligible binding constraints in continuous models, estimates how much the objective could improve if the limit increased by one unit.'
@@ -432,6 +450,7 @@
       exampleCtaKey: 'capCtaRegion',
       limitationsKey: 'capLimitRegionChart',
       public: true,
+      homeSummaryRank: 3,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-explain-region-chart',
       limits: 'Available for models with two decision variables when the region can be represented reliably within the supported display range.'
@@ -448,6 +467,7 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
+      homeSummaryRank: 4,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-explain-multilingual',
       exampleNotApplicable: 'Infrastructure capability — applies across the whole interface',

@@ -48,19 +48,24 @@ const GROUP_KEY = {
   models: 'capGroupModels', spreadsheet: 'capGroupSpreadsheet',
   verification: 'capGroupVerification', explanation: 'capGroupExplanation'
 };
-const SUMMARY_MAX = 4; // names shown per group on the Home summary
 
 function isShown(c) {
   return c.public === true && c.status === 'available' && c.exampleStatus !== 'pending';
 }
+// The capabilities featured on the Home summary, per group, in their explicit
+// homeSummaryRank order — a deliberate editorial choice, not inventory order.
+function featuredInGroup(grp) {
+  return caps.CAPABILITIES
+    .filter(c => isShown(c) && c.group === grp && typeof c.homeSummaryRank === 'number')
+    .sort((a, b) => a.homeSummaryRank - b.homeSummaryRank);
+}
 
 function buildBlock() {
-  const shown = caps.CAPABILITIES.filter(isShown);
-  const groups = caps.GROUP_ORDER.filter(grp => shown.some(c => c.group === grp));
+  const groups = caps.GROUP_ORDER.filter(grp => featuredInGroup(grp).length > 0);
   const L = [];
   L.push('    <div class="grid-2" style="gap:20px">');
   groups.forEach(function (grp) {
-    const names = shown.filter(c => c.group === grp).slice(0, SUMMARY_MAX);
+    const names = featuredInGroup(grp);
     L.push('      <div class="card">');
     L.push('        <h3 data-i18n="' + escAttr(GROUP_KEY[grp]) + '">' + escText(en(GROUP_KEY[grp])) + '</h3>');
     L.push('        <ul class="home-cap-list">');

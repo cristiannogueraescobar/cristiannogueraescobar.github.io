@@ -223,6 +223,30 @@ caps.GROUP_ORDER.forEach(function (grp) {
      caps.CAPABILITIES.some(c => c.group === grp));
 });
 
+// ---- Home summary selection is explicit and well-formed ----------------
+// homeSummaryRank makes the Home summary a deliberate choice. Rules: it appears
+// only on public/available/non-pending capabilities; within a group ranks are
+// unique and at most four; each is an integer 1..4.
+(function () {
+  const featured = caps.CAPABILITIES.filter(c => c.homeSummaryRank !== undefined);
+  featured.forEach(function (c) {
+    const tag = c.id || '(no id)';
+    ok('homeSummaryRank ' + tag + ': is an integer 1..4',
+       Number.isInteger(c.homeSummaryRank) && c.homeSummaryRank >= 1 && c.homeSummaryRank <= 4,
+       String(c.homeSummaryRank));
+    ok('homeSummaryRank ' + tag + ': only on a public, available, non-pending capability',
+       c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
+  });
+  caps.GROUP_ORDER.forEach(function (grp) {
+    const inG = featured.filter(c => c.group === grp);
+    ok('homeSummaryRank ' + grp + ': at most four featured', inG.length <= 4, inG.length + ' featured');
+    const ranks = inG.map(c => c.homeSummaryRank);
+    const uniq = new Set(ranks);
+    ok('homeSummaryRank ' + grp + ': ranks are unique within the group',
+       uniq.size === ranks.length, ranks.join(','));
+  });
+})();
+
 // ---- The derived claims manifest must be up to date --------------------
 // data/claims.json is generated from this inventory by engine/gen_claims.js.
 // If the inventory changed without regenerating, the manifest is stale — catch

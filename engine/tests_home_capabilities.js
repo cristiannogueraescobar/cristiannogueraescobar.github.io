@@ -36,29 +36,60 @@ const EN = g.Plumline.i18n.dict.en.capabilities;
 })();
 
 // 2. No stale hand-written capability keys remain. These were the old manual
-//    cards; the summary must be inventory-driven, so none may survive.
-['capsContH', 'capsIntH', 'capsBinH', 'capsMixH',
- 'capsContP', 'capsIntP', 'capsBinP', 'capsMixP', 'capsFoot'].forEach(function (k) {
-  ok('home summary: stale manual key ' + k + ' is gone',
+//    cards; the summary must be inventory-driven, so none may survive — neither
+//    in the HTML nor in the i18n dictionary (a dead key is a maintenance trap).
+const MANUAL_KEYS = ['capsContH', 'capsIntH', 'capsBinH', 'capsMixH',
+  'capsContP', 'capsIntP', 'capsBinP', 'capsMixP', 'capsFoot'];
+MANUAL_KEYS.forEach(function (k) {
+  ok('home summary: stale manual key ' + k + ' is gone from index.html',
      html.indexOf('data-i18n="' + k + '"') === -1, k);
+  ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+    const L = g.Plumline.i18n.dict[lang];
+    const inHome = L.home && Object.prototype.hasOwnProperty.call(L.home, k);
+    const inCaps = L.capabilities && Object.prototype.hasOwnProperty.call(L.capabilities, k);
+    ok('home summary: stale manual key ' + k + ' is gone from ' + lang + ' dictionary',
+       !inHome && !inCaps, k);
+  });
 });
 
-// 3. The four groups are present, each summarising its public capabilities from
-//    the inventory (name text inline for no-JS).
+// 3. The four groups are present, each summarising its FEATURED public
+//    capabilities from the inventory — exact names, in homeSummaryRank order,
+//    with no extra or missing entries (a weak "some name appears" check would
+//    miss three of four going wrong).
 const GROUP_KEY = {
   models: 'capGroupModels', spreadsheet: 'capGroupSpreadsheet',
   verification: 'capGroupVerification', explanation: 'capGroupExplanation'
 };
-const shown = caps.CAPABILITIES.filter(c =>
-  c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
+function featuredInGroup(grp) {
+  return caps.CAPABILITIES
+    .filter(c => c.homeSummaryRank !== undefined && c.group === grp &&
+                 c.public === true && c.status === 'available' && c.exampleStatus !== 'pending')
+    .sort((a, b) => a.homeSummaryRank - b.homeSummaryRank);
+}
+// Pull the <li> names rendered under a group's card, in document order.
+function renderedNames(groupKey) {
+  // Find the card whose <h3> uses this group key, then read its list items.
+  const cardRe = new RegExp(
+    '<h3 data-i18n="' + groupKey + '">[\\s\\S]*?<ul class="home-cap-list">([\\s\\S]*?)</ul>');
+  const m = html.match(cardRe);
+  if (!m) return null;
+  return [...m[1].matchAll(/<li><span data-i18n="([^"]+)"/g)].map(x => x[1]);
+}
 caps.GROUP_ORDER.forEach(function (grp) {
-  const inG = shown.filter(c => c.group === grp);
-  if (!inG.length) return;
+  const feat = featuredInGroup(grp);
+  if (!feat.length) return;
   ok('home summary: group ' + grp + ' heading present',
      html.indexOf('data-i18n="' + GROUP_KEY[grp] + '"') !== -1, GROUP_KEY[grp]);
-  // At least one of the group's public capability names appears inline.
-  const anyName = inG.slice(0, 4).some(c => html.indexOf('>' + EN[c.nameKey] + '<') !== -1);
-  ok('home summary: group ' + grp + ' lists inventory capability names', anyName);
+  const rendered = renderedNames(GROUP_KEY[grp]);
+  const expectedKeys = feat.map(c => c.nameKey);
+  ok('home summary: group ' + grp + ' lists exactly the featured names, in rank order',
+     rendered !== null && JSON.stringify(rendered) === JSON.stringify(expectedKeys),
+     'rendered ' + JSON.stringify(rendered) + ' vs expected ' + JSON.stringify(expectedKeys));
+  // And the English name text is inline for no-JS.
+  feat.forEach(function (c) {
+    ok('home summary: ' + c.id + ' name text inline',
+       html.indexOf('>' + EN[c.nameKey] + '<') !== -1, c.nameKey);
+  });
 });
 
 // 4. Links to the full capabilities page.
@@ -69,6 +100,8 @@ ok('home summary: uses the capsSeeAll link label',
 
 // 5. The summary is a SUMMARY, not the whole page: it must not carry the full
 //    descriptions (those live on capabilities.html), only names.
+const shown = caps.CAPABILITIES.filter(c =>
+  c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
 const anyDesc = shown.some(c => html.indexOf(EN[c.descriptionKey]) !== -1);
 ok('home summary: does not inline full capability descriptions', !anyDesc);
 
