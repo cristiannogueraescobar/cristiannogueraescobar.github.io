@@ -954,6 +954,31 @@ function isFormulaInput_(raw) {
   return !RELATION_TOKENS[text];
 }
 
+// The canonical TEXT to store for a formula cell: the trimmed form. Classifying
+// on trimmed text but storing the raw (untrimmed) string left a leading space
+// before '=', so the later `replace(/^=/, '')` could not strip it and the
+// formula failed to tokenize. Storing the trimmed form keeps classification and
+// canonicalisation consistent. Callers use it only when isFormulaInput_ is true.
+function formulaCellText_(raw) {
+  return String(raw).trim();
+}
+
+// Full cell conversion — the SINGLE source of truth for splitting a raw grid
+// cell into {formula, value}, shared by the app (sheetFromGrid) and every test
+// harness. Centralising the VALUE conversion too (not just the formula
+// classification) stops the harness from drifting from the app on inputs like
+// "01", "+3" or "3.0". A formula cell stores the trimmed formula and value 0;
+// anything else stores '' as the formula and, as its value, the number when the
+// raw string is cleanly numeric, else the raw text (operators, labels).
+function classifyGridCell_(raw) {
+  if (raw == null) return { formula: '', value: '' };
+  var text = String(raw);
+  if (isFormulaInput_(text)) return { formula: formulaCellText_(text), value: 0 };
+  if (text === '') return { formula: '', value: '' };
+  var n = Number(text);
+  return { formula: '', value: (!isNaN(n)) ? n : text };
+}
+
 // A European-locale sheet writes 1,5 for 1.5 and SUM(A;B) for SUM(A,B). The
 // tokenizer and Number() both expect the canonical (US) form: '.' decimal, ','
 // argument separator. We detect the sheet's locale ONCE and normalise every
@@ -2233,6 +2258,8 @@ function matchesAnyHint_(label, hints) {
     normalizeFormula_: normalizeFormula_,
     normalizeValue_: normalizeValue_,
     isFormulaInput_: isFormulaInput_,
+    formulaCellText_: formulaCellText_,
+    classifyGridCell_: classifyGridCell_,
     optimise_: optimise_,
     classifyModel_: classifyModel_,
     buildVariableDomains_: buildVariableDomains_,

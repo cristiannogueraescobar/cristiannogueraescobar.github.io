@@ -13,23 +13,19 @@ const Engine = require('./engine.js');
  * a {f:'=...', v:number} object.
  */
 function mkSheet(grid) {
-  // Relation operators are literal text in a sheet, not formulas, even though
-  // '<=', '>=', '=' start with or contain '='. The shared engine classifier is
-  // the single source of truth — a local reimplementation could drift from the
-  // real app converter (that drift once hid a '=' equality bug from CI).
-  const isFormula = Engine.isFormulaInput_;
+  // The shared engine converter (classifyGridCell_) is the single source of
+  // truth for splitting a cell into {formula, value} — the same code the app's
+  // sheetFromGrid uses. A {f,v} object carries an explicit formula + cached
+  // value (used to reproduce the web grid caching formulas as 0); everything
+  // else goes through the shared converter so the harness can never drift from
+  // the app on formula classification OR value conversion.
   const formulas = grid.map(row => row.map(cell => {
     if (cell && typeof cell === 'object') return cell.f || '';
-    return isFormula(cell) ? cell : '';
+    return Engine.classifyGridCell_(cell).formula;
   }));
   const values = grid.map(row => row.map(cell => {
     if (cell && typeof cell === 'object') return typeof cell.v === 'number' ? cell.v : 0;
-    if (isFormula(cell)) return 0;
-    if (cell === '' || cell == null) return '';
-    const n = Number(cell);
-    // A relation operator ('=', '<=', ...) or any other non-numeric string
-    // passes through as text; only a clean numeric string becomes a number.
-    return (!isNaN(n) && String(n) === String(cell).trim()) ? n : cell;
+    return Engine.classifyGridCell_(cell).value;
   }));
   return {
     getDataRange: () => ({

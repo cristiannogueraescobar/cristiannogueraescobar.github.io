@@ -158,5 +158,58 @@ ok('classify: empty is not a formula', isF('') === false);
   ok('real app: "==" is a value', row2.formulas[2] === '' && row2.values[2] === '==', JSON.stringify(row2));
 })();
 
+/* ---- Layer 4: leading/trailing whitespace consistency ---------------- */
+// A formula classified after trimming (" =B2" -> formula) must be STORED
+// trimmed, or the later `replace(/^=/,'')` leaves the leading space and the
+// formula fails to tokenize — a contradiction between the classifier and the
+// canonicaliser. classifyGridCell_ stores the trimmed form.
+{
+  const cell = Engine.classifyGridCell_(' =B2');
+  ok('whitespace: " =B2" stores the TRIMMED formula "=B2"',
+     cell.formula === '=B2' && cell.value === 0, JSON.stringify(cell));
+  const cell2 = Engine.classifyGridCell_('  =SUM(A1:A2)  ');
+  ok('whitespace: surrounding spaces are trimmed from the stored formula',
+     cell2.formula === '=SUM(A1:A2)', JSON.stringify(cell2));
+  // " = " (spaces around the equality operator) is still a relation VALUE, not
+  // a formula (isFormulaInput_ trims before classifying). The engine trims the
+  // value again at read time, so the surrounding spaces are harmless.
+  const cell3 = Engine.classifyGridCell_(' = ');
+  ok('whitespace: " = " is a relation VALUE, not a formula',
+     cell3.formula === '', JSON.stringify(cell3));
+  const cell4 = Engine.classifyGridCell_('  =< ');
+  ok('whitespace: "  =< " is a relation VALUE, not a formula',
+     cell4.formula === '', JSON.stringify(cell4));
+}
+
+// End-to-end: a spaced relation operator "  =< " still makes a <= constraint
+// (the engine trims the operator value at read time).
+{
+  const grid = [
+    ['Item', 'x', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '', '', ''],
+    ['', '', '', '', ''],
+    ['Obj', '', '=B2', '', ''],
+    ['Con', '', '=B2', '  =< ', '5'],
+  ];
+  const r = run(grid);
+  ok('e2e: spaced "  =< " operator makes a <= constraint (Max x<=5 => 5)',
+     !r.error && approx(r.out.objective, 5), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
+// End-to-end: a leading-space formula must SOLVE (it failed before, because the
+// stored " =B2" could not be canonicalised).
+{
+  const grid = [
+    ['Item', 'x', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '', '', ''],
+    ['', '', '', '', ''],
+    ['Obj', '', ' =B2', '', ''],
+    ['Con', '', '=B2', '<=', '5'],
+  ];
+  const r = run(grid);
+  ok('e2e: leading-space formula " =B2" solves (Max x<=5 => 5)',
+     !r.error && approx(r.out.objective, 5), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
 console.log('GRID INPUT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 process.exit(fail > 0 ? 1 : 0);

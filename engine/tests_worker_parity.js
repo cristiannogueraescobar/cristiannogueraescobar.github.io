@@ -52,7 +52,6 @@ const TOL = 1e-6;
 // Build a sheet from a grid, splitting into formulas/values arrays — the same
 // representation sheetToArrays() sends into the worker and mk() uses in tests.
 function arraysOf(g) {
-  const isF = isFormulaInput_;   // shared engine classifier (relation ops are values)
   const f = [], v = [];
   for (let r = 0; r < g.length; r++) {
     const fr = [], vr = [];
@@ -65,9 +64,10 @@ function arraysOf(g) {
         vr.push(typeof cell.v === 'number' ? cell.v : 0);
         continue;
       }
-      const raw = String(cell);
-      if (isF(raw)) { fr.push(raw); vr.push(0); }
-      else { fr.push(''); vr.push(raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw); }
+      // The shared engine converter — the SAME code sheetFromGrid uses — so the
+      // parity fixtures split cells exactly as the app does.
+      const conv = classifyGridCell_(cell);
+      fr.push(conv.formula); vr.push(conv.value);
     }
     f.push(fr); v.push(vr);
   }

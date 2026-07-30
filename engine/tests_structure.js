@@ -398,7 +398,7 @@ PAGES.forEach(function (p) {
 (function () {
   const engineSrc = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
   const solverRaw = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
-  const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_', 'isFormulaInput_'];
+  const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_', 'isFormulaInput_', 'formulaCellText_', 'classifyGridCell_'];
 
   // Extract a function body by balanced braces from a source string.
   function grab(src, name) {
@@ -434,11 +434,12 @@ PAGES.forEach(function (p) {
        inEngine && inInline && norm(inEngine) === norm(inInline), 'differs');
   });
 
-  // The app's grid->sheet converter must use the shared classifier, not a local
-  // "charAt(0)==='='" test that would swallow the '=' relation operator as a
-  // formula. Pin that sheetFromGrid references isFormulaInput_.
-  ok('locale: sheetFromGrid uses the shared isFormulaInput_ classifier',
-     /function sheetFromGrid\(\)\{[\s\S]{0,140}isFormulaInput_/.test(solverRaw));
+  // The app's grid->sheet converter must use the shared full-cell converter,
+  // not a local classification or value-conversion that could drift. Pin that
+  // sheetFromGrid references classifyGridCell_ (which itself uses the shared
+  // isFormulaInput_ + formulaCellText_).
+  ok('locale: sheetFromGrid uses the shared classifyGridCell_ converter',
+     /function sheetFromGrid\(\)\{[\s\S]{0,200}classifyGridCell_/.test(solverRaw));
 
   // The UI selector must exist.
   ok('locale: solver.html has a #localeSel selector',
@@ -449,23 +450,53 @@ PAGES.forEach(function (p) {
      /getElementById\('localeSel'\)[\s\S]{0,80}addEventListener\('change'/.test(solverRaw) ||
      /localeEl[\s\S]{0,80}addEventListener\('change'/.test(solverRaw));
 
-  // No detect/loadGrid/solveModel call in the APP portion (outside the ENGINE
-  // markers) may omit the locale argument. Match ANY single-argument call
-  // regardless of the variable name — matching only the literal "(sheet)" could
-  // be evaded by "(sh)" or "(mySheet)", which is exactly how the self-test once
-  // slipped a locale-less call past the guard. A locale-carrying call has a
-  // comma before ')'; a single-arg call does not.
-  const engStart = solverRaw.indexOf('/* ENGINE_START */');
-  const engEnd = solverRaw.indexOf('/* ENGINE_END */');
-  const appCode = solverRaw.slice(0, engStart) + solverRaw.slice(engEnd);
-  const singleArg = /\b(detectModel_|loadGrid_)\(\s*[A-Za-z_$][\w$]*\s*\)/g;
-  const bare = (appCode.match(singleArg) || []);
-  ok('locale: no single-argument detectModel_/loadGrid_ in app code (must pass locale)',
-     bare.length === 0, 'found: ' + bare.join(', '));
-  // solveModel_ in the app must also carry a locale argument (3rd param).
-  const bareSolve = (appCode.match(/\bsolveModel_\(\s*[A-Za-z_$][\w$]*\s*,\s*[A-Za-z_$][\w$]*\s*\)/g) || []);
-  ok('locale: no two-argument solveModel_ in app code (must pass locale)',
-     bareSolve.length === 0, 'found: ' + bareSolve.join(', '));
+  // No detect/loadGrid/solveModel call may omit the locale argument. Use an AST
+  // walk (acorn is already a project dep) so the check is by ARGUMENT COUNT
+  // regardless of the argument's shape: "(sheet)", "(sh)", "(state.sheet)" and
+  // "(getSheet())" are all caught, where a regex only matched simple
+  // identifiers. detect/loadGrid need >= 2 args (sheet + locale); solveModel
+  // needs >= 3 (sheet + model + locale). Parsing the whole inline script is safe
+  // because the engine's own internal calls already pass the locale argument.
+  let acorn;
+  try { acorn = require('acorn'); }
+  catch (e) {
+    if (process.env.CI) { console.log('  FAIL: acorn missing under CI (locale AST guard)'); fail++; }
+  }
+  if (acorn) {
+    const inlineScripts = [];
+    const reScript = /<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g;
+    let sm;
+    while ((sm = reScript.exec(solverRaw))) inlineScripts.push(sm[1]);
+
+    const MIN_ARGS = { detectModel_: 2, loadGrid_: 2, solveModel_: 3 };
+    const violations = [];
+    let parseFailed = false;
+    inlineScripts.forEach(function (src) {
+      let ast;
+      try { ast = acorn.parse(src, { ecmaVersion: 2022 }); }
+      catch (e) { parseFailed = true; return; }
+      (function walk(node) {
+        if (!node || typeof node.type !== 'string') return;
+        if (node.type === 'CallExpression' &&
+            node.callee && node.callee.type === 'Identifier' &&
+            Object.prototype.hasOwnProperty.call(MIN_ARGS, node.callee.name)) {
+          const hasSpread = node.arguments.some(a => a.type === 'SpreadElement');
+          if (!hasSpread && node.arguments.length < MIN_ARGS[node.callee.name]) {
+            violations.push(node.callee.name + '(' + node.arguments.length + ' args)');
+          }
+        }
+        for (const key in node) {
+          if (key === 'type') continue;
+          const child = node[key];
+          if (Array.isArray(child)) child.forEach(walk);
+          else if (child && typeof child.type === 'string') walk(child);
+        }
+      })(ast);
+    });
+    ok('locale: solver inline scripts parse for the AST guard', !parseFailed);
+    ok('locale: every detect/loadGrid/solveModel call passes a locale arg (AST)',
+       violations.length === 0, 'missing locale: ' + violations.join(', '));
+  }
 
   // The worker payload and both solve paths must carry localeMode.
   ok('locale: worker payload includes localeMode',
