@@ -13,6 +13,11 @@
         "testMarker": "CAPABILITY: model-continuous"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -26,6 +31,11 @@
         "testMarker": "CAPABILITY: model-integer"
       },
       "example": "workforce",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -39,6 +49,11 @@
         "testMarker": "CAPABILITY: model-binary"
       },
       "example": "project",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -52,6 +67,11 @@
         "testMarker": "CAPABILITY: model-mixed"
       },
       "example": "supplier",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -65,6 +85,11 @@
         "testMarker": "CAPABILITY: model-direction"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -78,6 +103,11 @@
         "testMarker": "CAPABILITY: model-single-variable"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -91,6 +121,11 @@
         "testMarker": "CAPABILITY: model-per-variable-bounds"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -104,6 +139,11 @@
         "testMarker": "CAPABILITY: sheet-formula-limits"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -117,6 +157,11 @@
         "testMarker": "CAPABILITY: sheet-sumif"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -130,6 +175,11 @@
         "testMarker": "CAPABILITY: sheet-locale-us"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -143,6 +193,11 @@
         "testMarker": "CAPABILITY: sheet-locale-eu"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -156,6 +211,11 @@
         "testMarker": "CAPABILITY: sheet-paste"
       },
       "example": null,
+      "exampleNotApplicable": "Input capability — demonstrated across every example, not a specific model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -169,6 +229,11 @@
         "testMarker": "CAPABILITY: sheet-export"
       },
       "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -182,6 +247,11 @@
         "testMarker": "CAPABILITY: verify-objective"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -195,6 +265,11 @@
         "testMarker": "CAPABILITY: verify-constraints"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -208,6 +283,11 @@
         "testMarker": "CAPABILITY: verify-statuses"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -221,6 +301,11 @@
         "testMarker": "CAPABILITY: verify-reject-unsafe"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -234,6 +319,11 @@
         "testMarker": "CAPABILITY: run-local"
       },
       "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -247,6 +337,11 @@
         "testMarker": "CAPABILITY: explain-detection"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -260,6 +355,11 @@
         "testMarker": "CAPABILITY: explain-solve-details"
       },
       "example": null,
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -273,6 +373,11 @@
         "testMarker": "CAPABILITY: explain-marginal"
       },
       "example": "production",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -286,6 +391,11 @@
         "testMarker": "CAPABILITY: explain-region-chart"
       },
       "example": "workshop",
+      "exampleNotApplicable": null,
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     },
     {
@@ -299,6 +409,11 @@
         "testMarker": "CAPABILITY: explain-multilingual"
       },
       "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies across the whole interface",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "limits"
+      },
       "public": true
     },
     {
@@ -312,6 +427,11 @@
         "testMarker": "CAPABILITY: explain-error-localisation"
       },
       "example": null,
+      "exampleNotApplicable": "Infrastructure capability — applies to every engine message",
+      "docs": {
+        "path": "guide.html",
+        "anchor": "status"
+      },
       "public": true
     }
   ]

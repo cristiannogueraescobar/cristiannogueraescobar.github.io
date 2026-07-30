@@ -20,8 +20,6 @@ function buildClaims() {
     generatedFrom: 'assets/product-capabilities.js',
     note: 'DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate.',
     claims: caps.CAPABILITIES.map(function (c) {
-      const proven = c.status === 'available' && !!c.testFile && !!c.testMarker &&
-                     !!c.nameKey && !!c.descriptionKey;
       return {
         id: c.id,
         group: c.group,
@@ -30,8 +28,11 @@ function buildClaims() {
         descriptionKey: c.descriptionKey,
         proof: { testFile: c.testFile, testMarker: c.testMarker },
         example: c.exampleId,
-        // A claim may appear in public marketing only when it is proven.
-        public: proven
+        exampleNotApplicable: c.exampleNotApplicable || null,
+        docs: { path: c.docsPath, anchor: c.docsAnchor },
+        // `public` is taken verbatim from the inventory — a product decision,
+        // not something this generator computes.
+        public: c.public === true
       };
     })
   };

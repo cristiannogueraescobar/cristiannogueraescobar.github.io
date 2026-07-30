@@ -23,16 +23,29 @@
  *   - testMarker   a unique anchor string placed in that test file next to the
  *                  block that exercises this capability (a "CAPABILITY: <id>"
  *                  comment). The validator checks the marker is PRESENT in the
- *                  file, so a capability cannot claim a test that no longer
- *                  covers it — deleting the block (and its marker) fails the
- *                  build.
+ *                  file AND that the file actually runs in CI (registered in
+ *                  run_all.js) — so a capability cannot claim a test that no
+ *                  longer covers it, nor one that exists on disk but never runs.
  *   - exampleId    an example key in examples-data.js that demonstrates it, or
- *                  null when the capability is structural rather than
- *                  example-shaped.
+ *                  null. When null, exampleNotApplicable MAY give the reason
+ *                  (e.g. an infrastructure capability that applies to every
+ *                  model rather than one specific example).
+ *   - docsPath / docsAnchor  where this capability is documented. When public,
+ *                  the validator requires the anchor to exist on that page, so
+ *                  a public capability can never be undocumented. These
+ *                  currently point at the guide's existing sections; once the
+ *                  dedicated capabilities.html page is generated, they will be
+ *                  repointed to a per-capability anchor there.
+ *   - public       EXPLICIT, per capability — NOT derived. "Available + tested +
+ *                  translated" does not by itself mean "should be advertised";
+ *                  that is a product decision made here. The validator does not
+ *                  choose what is public; it only enforces that anything marked
+ *                  public IS available, documented, translated and tested.
  *
  * A companion test (tests_capabilities.js) asserts every nameKey/descriptionKey
- * exists in all five languages, every testFile+testMarker resolves, and every
- * exampleId is real — so this file cannot claim something the codebase does not
+ * exists in all five languages, every testFile+testMarker resolves and runs in
+ * CI, every exampleId is real or null, and every public capability is available
+ * and documented — so this file cannot claim something the codebase does not
  * back up.
  *
  * status: 'available' | 'experimental' | 'planned'.
@@ -57,6 +70,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: model-continuous',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Linear relationships only; non-linear formulas are rejected, not approximated.'
     },
     {
@@ -69,6 +85,9 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-integer',
       exampleId: 'workforce',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Whole-number variables; larger integer models take longer to prove optimal.'
     },
     {
@@ -81,6 +100,9 @@
       testFile: 'tests_panel.js',
       testMarker: 'CAPABILITY: model-binary',
       exampleId: 'project',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Each binary decision is 0 or 1 (yes/no).'
     },
     {
@@ -93,6 +115,9 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-mixed',
       exampleId: 'supplier',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Mixes continuous and integer/binary variables in one model.'
     },
     {
@@ -105,6 +130,9 @@
       testFile: 'tests_direction.js',
       testMarker: 'CAPABILITY: model-direction',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Maximise or minimise; the detected direction can be confirmed manually.'
     },
     {
@@ -117,6 +145,9 @@
       testFile: 'tests_single_var.js',
       testMarker: 'CAPABILITY: model-single-variable',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'A genuine one-variable model is detected without needing a second decision.'
     },
     {
@@ -129,6 +160,9 @@
       testFile: 'tests_bounds.js',
       testMarker: 'CAPABILITY: model-per-variable-bounds',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Individual minimum and maximum per decision variable, set in Variable Settings.'
     },
     {
@@ -141,6 +175,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: sheet-formula-limits',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'A constraint limit can be a number or a formula; a limit that depends on a decision variable is rejected.'
     },
     {
@@ -153,6 +190,9 @@
       testFile: 'tests_sumif_criteria.js',
       testMarker: 'CAPABILITY: sheet-sumif',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'SUM, SUMIF (numeric and text criteria) and other linear formulas; non-linear functions are rejected.'
     },
     {
@@ -165,6 +205,9 @@
       testFile: 'tests_locale.js',
       testMarker: 'CAPABILITY: sheet-locale-us',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'US number format: 1.5 decimals and SUM(A,B) argument separators.'
     },
     {
@@ -177,6 +220,9 @@
       testFile: 'tests_locale.js',
       testMarker: 'CAPABILITY: sheet-locale-eu',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'European number format: 1,5 decimals and SUM(A;B) separators; auto-detected or set manually. No thousands grouping.'
     },
     {
@@ -189,6 +235,10 @@
       testFile: 'tests_grid_input.js',
       testMarker: 'CAPABILITY: sheet-paste',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
+      exampleNotApplicable: 'Input capability — demonstrated across every example, not a specific model',
       limits: 'Paste a spreadsheet-shaped range from Excel or Google Sheets, or type into the grid.'
     },
     {
@@ -201,6 +251,10 @@
       testFile: 'tests_worker_parity.js',
       testMarker: 'CAPABILITY: sheet-export',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
+      exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
       limits: 'Export results as CSV or Excel, or copy a plain-text summary.'
     },
     {
@@ -213,6 +267,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: verify-objective',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'The reported objective is recomputed from your formulas at the solution.'
     },
     {
@@ -225,6 +282,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: verify-constraints',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'Every constraint is re-checked against the solved values.'
     },
     {
@@ -237,6 +297,9 @@
       testFile: 'tests_states.js',
       testMarker: 'CAPABILITY: verify-statuses',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'Distinguishes proven-optimal, feasible-without-proof, incomplete search, infeasible and unbounded.'
     },
     {
@@ -249,6 +312,9 @@
       testFile: 'tests_strict.js',
       testMarker: 'CAPABILITY: verify-reject-unsafe',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
       limits: 'Rejects models it cannot interpret safely (strict inequalities, real non-linearity, variable-dependent limits) instead of guessing.'
     },
     {
@@ -261,6 +327,10 @@
       testFile: 'tests_worker_parity.js',
       testMarker: 'CAPABILITY: run-local',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
+      exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
       limits: 'Solving runs in your browser (a background worker, with a synchronous fallback); the model is not uploaded to a server.'
     },
     {
@@ -273,6 +343,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: explain-detection',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'Reads the objective, decision cells and constraints from the sheet and shows what it understood before solving.'
     },
     {
@@ -285,6 +358,9 @@
       testFile: 'tests_states.js',
       testMarker: 'CAPABILITY: explain-solve-details',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'Shows stop reason, nodes explored and solve time.'
     },
     {
@@ -297,6 +373,9 @@
       testFile: 'tests.js',
       testMarker: 'CAPABILITY: explain-marginal',
       exampleId: 'production',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'For eligible binding constraints in continuous models, estimates how much the objective could improve if the limit increased by one unit.'
     },
     {
@@ -309,6 +388,9 @@
       testFile: 'tests_region_plot.js',
       testMarker: 'CAPABILITY: explain-region-chart',
       exampleId: 'workshop',
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
       limits: 'Draws the feasible region for two-variable models, bounded or unbounded, within a practical numeric range.'
     },
     {
@@ -321,6 +403,10 @@
       testFile: 'tests_i18n_pages.js',
       testMarker: 'CAPABILITY: explain-multilingual',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'limits',
+      exampleNotApplicable: 'Infrastructure capability — applies across the whole interface',
       limits: 'Interface and explanations in English, Spanish, Portuguese, German and French.'
     },
     {
@@ -333,6 +419,10 @@
       testFile: 'tests_error_i18n.js',
       testMarker: 'CAPABILITY: explain-error-localisation',
       exampleId: null,
+      public: true,
+      docsPath: 'guide.html',
+      docsAnchor: 'status',
+      exampleNotApplicable: 'Infrastructure capability — applies to every engine message',
       limits: 'Engine errors are shown in the active language on every display path.'
     }
   ];
