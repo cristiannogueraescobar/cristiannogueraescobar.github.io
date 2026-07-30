@@ -89,15 +89,15 @@
         capStepPaste:'Paste your model',
         capStepPasteDesc:'Copy a range from Excel or Google Sheets and paste it into the grid.',
         capStepAdjust:'Adjust it',
-        capStepAdjustDesc:'Set limits as fixed numbers or formulas, and confirm the direction.',
+        capStepAdjustDesc:'Set fixed or formula-based limits, then choose whether to maximise or minimise.',
         capStepExport:'Export the result',
         capStepExportDesc:'Download as CSV or Excel, or copy a plain text summary.',
         capVerifyHeading:'Every result is checked against your own formulas',
         capImgHeroModel:'Illustration of a production planning model, showing decision cells and detected decision variables.',
-        capImgVerification:'Illustration of a checked result, showing the objective and constraints re-checked and the solution status.',
+        capImgVerification:'Illustration of a checked result, showing the objective and constraints checked again, together with the solution status.',
         capImgFeasibleRegion:'Illustration of a two-variable feasible region with its optimal point marked.',
         capFigHero:'Plumline detecting the decision variables in a production plan',
-        capFigVerification:'An illustration of how Plumline re-checks the objective, constraints and solution status after solving.',
+        capFigVerification:'An illustration of how Plumline checks the objective, constraints and solution status after solving.',
         capFigRegion:'An illustration of a two-variable feasible region and its optimal solution.',
 
         capTrustLocal:'Runs locally',
@@ -106,6 +106,13 @@
         capTrustChecked:'Checked against your formulas',
 
         capOpenFullImage:'Open the full-size image',
+
+        capFullSizeHint:'Tap the image to open it full size',
+        capNavModels:'Models',
+        capNavSpreadsheet:'Spreadsheet',
+        capNavChecks:'Checks',
+        capNavExplanation:'Explanation',
+        capWhenAppears:'When this appears',
 },
       examples: {
         exCat_start:'Start here',
@@ -676,6 +683,13 @@
         capTrustChecked:'Checked against your formulas',
 
         capOpenFullImage:'Open the full-size image',
+
+        capFullSizeHint:'Tap the image to open it full size',
+        capNavModels:'Models',
+        capNavSpreadsheet:'Spreadsheet',
+        capNavChecks:'Checks',
+        capNavExplanation:'Explanation',
+        capWhenAppears:'When this appears',
 },
       examples: {
         exCat_start:'Empieza aquí',
@@ -1246,6 +1260,13 @@
         capTrustChecked:'Checked against your formulas',
 
         capOpenFullImage:'Open the full-size image',
+
+        capFullSizeHint:'Tap the image to open it full size',
+        capNavModels:'Models',
+        capNavSpreadsheet:'Spreadsheet',
+        capNavChecks:'Checks',
+        capNavExplanation:'Explanation',
+        capWhenAppears:'When this appears',
 },
       examples: {
         exCat_start:'Comece aqui',
@@ -1816,6 +1837,13 @@
         capTrustChecked:'Checked against your formulas',
 
         capOpenFullImage:'Open the full-size image',
+
+        capFullSizeHint:'Tap the image to open it full size',
+        capNavModels:'Models',
+        capNavSpreadsheet:'Spreadsheet',
+        capNavChecks:'Checks',
+        capNavExplanation:'Explanation',
+        capWhenAppears:'When this appears',
 },
       examples: {
         exCat_start:'Starte hier',
@@ -2386,6 +2414,13 @@
         capTrustChecked:'Checked against your formulas',
 
         capOpenFullImage:'Open the full-size image',
+
+        capFullSizeHint:'Tap the image to open it full size',
+        capNavModels:'Models',
+        capNavSpreadsheet:'Spreadsheet',
+        capNavChecks:'Checks',
+        capNavExplanation:'Explanation',
+        capWhenAppears:'When this appears',
 },
       examples: {
         exCat_start:'Commencez ici',

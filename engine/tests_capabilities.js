@@ -426,6 +426,11 @@ ok('coverage: covered + not-applicable + pending == total',
   ok('capabilities.html: main uses the shared .plumb width container',
      /<main class="plumb">/.test(html));
 
+  // Terminology: we normalised on "checked again", never "re-checked". Guard
+  // against it creeping back into the page (alt/caption included).
+  ok('capabilities.html: uses "checked again", not "re-checked"',
+     !/re-check/i.test(html), 'found "re-check" wording');
+
   // Exactly one <main> and one <h1>.
   ok('capabilities.html: exactly one <main>', (html.match(/<main[\s>]/g) || []).length === 1);
   ok('capabilities.html: exactly one <h1', (html.match(/<h1[\s>]/g) || []).length === 1);

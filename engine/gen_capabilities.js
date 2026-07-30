@@ -109,10 +109,13 @@ function figure(slot) {
   const m = media.slots[slot];
   const file = media.basePath + m.file;
   const cap = m && m.captionKey ? '\n      ' + t('figcaption', m.captionKey) : '';
+  // A translatable mobile hint on every figure (the hero has no caption, so this
+  // is how it gets a full-size affordance too). Hidden on wide screens by CSS.
+  const hint = '\n      ' + tspan('capFullSizeHint', 'cap-fullsize-hint');
   return '<figure class="cap-figure">\n' +
          '      <a class="cap-figure-link" href="' + escAttr(file) + '" ' +
          'aria-label="' + escAttr(en('capOpenFullImage')) + '" ' +
-         'data-i18n-aria="capOpenFullImage">' + image(slot) + '</a>' + cap +
+         'data-i18n-aria="capOpenFullImage">' + image(slot) + '</a>' + cap + hint +
          '\n    </figure>';
 }
 
@@ -145,6 +148,12 @@ const GROUP_KEY = {
   models: 'capGroupModels', spreadsheet: 'capGroupSpreadsheet',
   verification: 'capGroupVerification', explanation: 'capGroupExplanation'
 };
+// Short labels for the in-page group nav, so it stays compact on small screens
+// instead of repeating the long section headings.
+const GROUP_NAV_KEY = {
+  models: 'capNavModels', spreadsheet: 'capNavSpreadsheet',
+  verification: 'capNavChecks', explanation: 'capNavExplanation'
+};
 
 // Models: a table of the four model types, then the Maximise/minimise note.
 function renderModels() {
@@ -169,14 +178,14 @@ function renderModels() {
   });
   L.push('      </tbody>');
   L.push('    </table>');
-  // "Good to know" notes for continuous and integer sit BELOW the table.
+  // "Good to know" notes for continuous and integer sit BELOW the table, without
+  // a repeated monospace label — just the model name and its note.
   const notes = ['model-continuous', 'model-integer']
     .map(byId).filter(c => c && c.limitationsKey);
   if (notes.length) {
     L.push('    <div class="cap-notes">');
     notes.forEach(function (c) {
-      L.push('      <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">' +
-             escText(en('capLimitLabel')) + '</span> ' +
+      L.push('      <p class="cap-goodtoknow">' +
              '<strong data-i18n="' + escAttr(c.nameKey) + '">' + escText(en(c.nameKey)) + '</strong>: ' +
              '<span data-i18n="' + escAttr(c.limitationsKey) + '">' + escText(en(c.limitationsKey)) + '</span></p>');
     });
@@ -257,8 +266,8 @@ function renderExplanation() {
     L.push('          ' + t('h3', c.nameKey));
     L.push('          ' + t('p', c.descriptionKey));
     if (c.limitationsKey) {
-      L.push('          <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">' +
-             escText(en('capLimitLabel')) + '</span> ' +
+      L.push('          <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capWhenAppears">' +
+             escText(en('capWhenAppears')) + '</span> ' +
              '<span data-i18n="' + escAttr(c.limitationsKey) + '">' + escText(en(c.limitationsKey)) + '</span></p>');
     }
     const link = exampleLink(c);
@@ -299,8 +308,8 @@ function buildContent() {
   L.push('  <nav class="cap-groupnav" aria-label="' + escAttr(en('capGroupsNavLabel')) +
          '" data-i18n-aria="capGroupsNavLabel">');
   nonEmpty.forEach(function (grp) {
-    L.push('    <a href="#' + escAttr(grp) + '" data-i18n="' + escAttr(GROUP_KEY[grp]) + '">' +
-           escText(en(GROUP_KEY[grp])) + '</a>');
+    L.push('    <a href="#' + escAttr(grp) + '" data-i18n="' + escAttr(GROUP_NAV_KEY[grp]) + '">' +
+           escText(en(GROUP_NAV_KEY[grp])) + '</a>');
   });
   L.push('  </nav>');
 

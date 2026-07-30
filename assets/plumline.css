@@ -498,12 +498,18 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 .cap-cta h2{margin:0 0 8px;color:var(--cream)}
 .cap-cta p{margin:0 auto 16px;max-width:52ch;color:var(--cream);opacity:.85}
 
+/* Notes: two columns on desktop so continuous + integer sit side by side */
+@media(min-width:901px){
+  .cap-notes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+}
 @media(max-width:900px){
   .cap-hero{grid-template-columns:1fr;gap:20px}
+  /* Verification and Explanation stack (they hold images); steps do NOT yet */
   .cap-verify,.cap-explain{grid-template-columns:1fr;gap:20px}
-  .cap-steps{grid-template-columns:1fr}
 }
 @media(max-width:680px){
+  /* Three-step flow stays horizontal on tablet, stacks only on phones */
+  .cap-steps{grid-template-columns:1fr}
   /* Models table -> stacked cards on small screens */
   .cap-table,.cap-table thead,.cap-table tbody,.cap-table tr,.cap-table th,.cap-table td{
     display:block;width:auto}
@@ -513,6 +519,11 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   .cap-table tbody th,.cap-table tbody td{border-bottom:none;white-space:normal;padding:8px 14px}
   .cap-table tbody th{font-size:17px}
 }
+@media(max-width:560px){
+  /* Group nav: compact 2x2 grid with comfortable touch targets */
+  .cap-groupnav{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .cap-groupnav a{justify-content:center;min-height:44px;text-align:center}
+}
 
 /* Grid children must be allowed to shrink below their intrinsic (image) width */
 .cap-hero > *,.cap-verify > *,.cap-explain > *{min-width:0}
@@ -521,10 +532,12 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 [id^="cap-"]{scroll-margin-top:24px}
 
 /* Figure images link to the full-size illustration; on small screens the
-   in-page image shrinks, so the link makes the full version reachable. */
+   in-page image shrinks, so the link makes the full version reachable. The hint
+   text is a real translatable element (see capFullSizeHint), not CSS content,
+   so it localises and is protected by the pending-translations guard. */
 .cap-figure-link{display:block}
 .cap-figure-link:focus-visible{outline:2px solid var(--brass-text);outline-offset:2px}
+.cap-fullsize-hint{display:none}
 @media(max-width:560px){
-  .cap-figure figcaption::after{content:" — tap the image to open it full size";
-    color:var(--faint)}
+  .cap-fullsize-hint{display:block;margin-top:8px;font-size:13px;color:var(--faint)}
 }
