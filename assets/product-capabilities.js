@@ -123,7 +123,7 @@
       public: true,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-model-binary',
-      limits: 'Each binary decision is 0 or 1 (yes/no).'
+      limits: 'Each binary decision is 0 or 1.'
     },
     {
       id: 'model-mixed',
@@ -204,7 +204,7 @@
       public: true,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-sheet-formula-limits',
-      limits: 'A constraint limit can be a number or a formula; a limit that depends on a decision variable is rejected.'
+      limits: 'A constraint can use a fixed number or a formula as its limit. Limits that depend on decision variables are rejected.'
     },
     {
       id: 'sheet-sumif',
@@ -318,7 +318,7 @@
       public: true,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-verify-constraints',
-      limits: 'Every constraint is re-checked against the solved values.'
+      limits: 'Every constraint is checked again using the solved values.'
     },
     {
       id: 'verify-statuses',
@@ -434,7 +434,7 @@
       public: true,
       docsPath: 'capabilities.html',
       docsAnchor: 'cap-explain-region-chart',
-      limits: 'Draws the feasible region for two-variable models, bounded or unbounded, within a practical numeric range.'
+      limits: 'Available for models with two decision variables when the region can be represented reliably within the supported display range.'
     },
     {
       id: 'explain-multilingual',

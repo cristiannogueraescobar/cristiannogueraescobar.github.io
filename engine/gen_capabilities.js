@@ -139,7 +139,31 @@ function buildHead() {
   L.push('<meta name="twitter:image" content="https://plumline.online/assets/og-image.png">');
   L.push('<meta name="twitter:title" content="' + escAttr(title) + '">');
   L.push('<meta name="twitter:description" content="' + escAttr(desc) + '">');
+  // Structured data: a SoftwareApplication whose featureList is DERIVED from the
+  // public inventory (same source as the page body), so search engines see the
+  // same capabilities the page documents. Compact, deterministic JSON.
+  const jsonld = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Plumline',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: 'https://plumline.online/capabilities.html',
+    description: desc,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    inLanguage: caps.ALL_LANGS,
+    featureList: featureList()
+  };
+  L.push('<script type="application/ld+json">' + JSON.stringify(jsonld) + '</script>');
   return L.join('\n');
+}
+
+// The public capabilities, as a plain feature-name list (English names), in
+// inventory order. Shared shape used by index.html's featureList too.
+function featureList() {
+  return caps.CAPABILITIES
+    .filter(isShown)
+    .map(function (c) { return en(c.nameKey); });
 }
 
 /* ---- Per-group renderers ---------------------------------------------- */

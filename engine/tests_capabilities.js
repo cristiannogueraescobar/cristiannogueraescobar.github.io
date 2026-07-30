@@ -104,6 +104,17 @@ caps.CAPABILITIES.forEach(function (c) {
 
   ok('capability ' + tag + ': group is known', GROUPS.has(c.group), c.group);
   ok('capability ' + tag + ': status is known', STATUSES.has(c.status), c.status);
+  // The internal `limits` field is a source of truth for the Home, Guide and
+  // JSON-LD, so it must use the same normalised terminology as the public copy:
+  // "checked again" not "re-checked", no "yes/no", no vague "practical range".
+  if (typeof c.limits === 'string') {
+    ok('capability ' + tag + ': limits uses "checked again", not "re-checked"',
+       !/re-check/i.test(c.limits), c.limits);
+    ok('capability ' + tag + ': limits avoids the "yes/no" shorthand',
+       !/yes\/no/i.test(c.limits), c.limits);
+    ok('capability ' + tag + ': limits avoids the vague "practical numeric range"',
+       !/practical numeric range/i.test(c.limits), c.limits);
+  }
   ok('capability ' + tag + ': langs == ALL_LANGS',
      JSON.stringify(c.langs) === JSON.stringify(LANGS), JSON.stringify(c.langs));
 

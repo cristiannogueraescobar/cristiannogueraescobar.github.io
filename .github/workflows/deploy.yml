@@ -233,13 +233,21 @@ jobs:
           grep -q 'id="cap-model-continuous"' /tmp/prod/capabilities.html || { echo "capabilities.html missing #cap-model-continuous"; exit 1; }
 
           # JSON-LD on production must actually PARSE (not merely be present).
+          # Check examples.html (ItemList), index.html and capabilities.html
+          # (SoftwareApplication with the inventory-derived featureList).
           echo "Parsing production JSON-LD ..."
           node -e '
-            const fs=require("fs"); const s=fs.readFileSync("/tmp/prod/examples.html","utf8");
-            const blocks=[...s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
-            if(!blocks.length){ console.error("no JSON-LD found"); process.exit(1); }
-            blocks.forEach((m,i)=>{ try{ JSON.parse(m[1]); }catch(e){ console.error("block "+(i+1)+" invalid: "+e.message); process.exit(1); } });
-            console.log("  "+blocks.length+" JSON-LD block(s) parsed OK");'
+            const fs=require("fs");
+            const files=["examples.html","index.html","capabilities.html"];
+            let total=0;
+            for(const f of files){
+              const s=fs.readFileSync("/tmp/prod/"+f,"utf8");
+              const blocks=[...s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+              if(!blocks.length){ console.error(f+": no JSON-LD found"); process.exit(1); }
+              blocks.forEach((m,i)=>{ try{ JSON.parse(m[1]); }catch(e){ console.error(f+" block "+(i+1)+" invalid: "+e.message); process.exit(1); } });
+              total+=blocks.length;
+            }
+            console.log("  "+total+" JSON-LD block(s) across "+files.length+" pages parsed OK");'
 
           # The tests folder must return exactly 404 (repo-only, never served).
           echo "Checking /engine/ is not served ..."
