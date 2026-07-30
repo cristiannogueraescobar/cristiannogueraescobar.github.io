@@ -816,22 +816,29 @@ function compareValues_(left, operator, right) {
 // 020, +20, 2e1, .5) becomes a Number so it compares numerically; otherwise it
 // stays text. Used for BOTH the operator form (">20.0") and the bare-equality
 // form ("20.0"), which Excel treats as "=20".
-function parseCriterionOperand_(operand) {
-  const text = String(operand).trim();
+function parseCriterionOperand_(operand, locale) {
+  let text = String(operand).trim();
+  // On a European sheet the criterion string is preserved verbatim by the
+  // normaliser (it's a string literal), so a decimal-comma literal like "10,0"
+  // arrives here unchanged. Convert it to canonical form so it compares
+  // numerically instead of falling back to a (wrong) textual comparison.
+  if (locale === 'eu' && /^[+-]?(?:\d+,\d*|,\d+)(?:[eE][+-]?\d+)?$/.test(text)) {
+    text = text.replace(',', '.');
+  }
   const numericPattern = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
   const parsed = Number(text);
   return (text !== '' && numericPattern.test(text) && Number.isFinite(parsed)) ? parsed : text;
 }
 
-function matchesCriterion_(value, criterion) {
+function matchesCriterion_(value, criterion, locale) {
   if (typeof criterion === 'number') return compareValues_(value, '=', criterion);
   const text = String(criterion).trim();
   const match = /^(<=|>=|<>|<|>|=)\s*(.*)$/.exec(text);
   // A criterion with no leading operator is an equality test — Excel accepts a
   // number or its textual form ("20", "20.0"). Normalise it too, not only the
   // explicit-operator operand, so "20.0" matches the number 20.
-  if (!match) return compareValues_(value, '=', parseCriterionOperand_(text));
-  return compareValues_(value, match[1], parseCriterionOperand_(match[2]));
+  if (!match) return compareValues_(value, '=', parseCriterionOperand_(text, locale));
+  return compareValues_(value, match[1], parseCriterionOperand_(match[2], locale));
 }
 
 function variableForm_(cell) {
@@ -931,6 +938,11 @@ function linearize_(context, a1, depth) {
 // argument separator. We detect the sheet's locale ONCE and normalise every
 // formula and value into canonical form before parsing. Only two locales are
 // supported (European and US); thousands separators are out of scope.
+//
+// SCOPE / KNOWN LIMITS (by design): auto-detect needs a signal (';' or a
+// decimal-comma value); a lone "=1,5*B2" stays US under auto and needs the
+// manual EU selector. Value detection accepts 7,5 and -3,75 but not +7,5, ,5,
+// 7, or 1,5e3. Variable-Settings bound fields still parse with Number().
 
 // Is a raw string a European decimal number like "7,5" or "-12,0"? (No
 // thousands grouping — a bare integer-comma-fraction only.)
@@ -1230,7 +1242,7 @@ function parseFunction_(parser) {
       if (!isConstant_(probe)) {
         throw new Error('the SUMIF criteria range depends on a decision variable');
       }
-      if (matchesCriterion_(rawValue_(probe), criterion)) {
+      if (matchesCriterion_(rawValue_(probe), criterion, parser.context.grid.locale)) {
         total = addForms_(total,
           linearize_(parser.context, sumCells[i], parser.depth + 1), 1);
       }

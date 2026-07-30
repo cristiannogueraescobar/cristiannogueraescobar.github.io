@@ -78,32 +78,33 @@ function sheetFrom(formulas, values) {
 }
 
 // MAIN-THREAD path (mirrors runSolve): detect, apply sense + wholeNumbers,
-// compute domains with the app's variableDomains(), then solve.
-function mainThreadSolve(grid, whole, sense) {
+// compute domains with the app's variableDomains(), then solve. localeMode is
+// threaded exactly as the app does (currentLocaleMode()).
+function mainThreadSolve(grid, whole, sense, localeMode) {
   const { formulas, values } = arraysOf(grid);
   const sheet = sheetFrom(formulas, values);
-  const model = detectModel_(sheet);
+  const model = detectModel_(sheet, localeMode);
   model.wholeNumbers = whole === true;
   if (sense === 'max' || sense === 'min') model.objective.sense = sense;
   try {
-    const cells = expandRange_(loadGrid_(sheet), model.variables);
+    const cells = expandRange_(loadGrid_(sheet, localeMode), model.variables);
     model.domains = variableDomains(cells, model.wholeNumbers);
   } catch (e) { model.domains = null; }
-  return solveModel_(sheet, model);
+  return solveModel_(sheet, model, localeMode);
 }
 
 // WORKER path (mirrors the worker glue): rebuild sheet from the SAME raw arrays,
 // detect, apply the domains COMPUTED ON THE MAIN THREAD and passed in, + sense,
 // then solve. The worker cannot compute domains itself (variableDomains is app
 // code), so it must rely on what the main thread sends — this is the contract.
-function workerSolve(grid, whole, sense, passedDomains) {
+function workerSolve(grid, whole, sense, passedDomains, localeMode) {
   const { formulas, values } = arraysOf(grid);
   const sheet = sheetFrom(formulas, values);
-  const model = detectModel_(sheet);
+  const model = detectModel_(sheet, localeMode);
   model.wholeNumbers = whole === true;
   if (passedDomains) model.domains = passedDomains;
   if (sense === 'max' || sense === 'min') model.objective.sense = sense;
-  return solveModel_(sheet, model);
+  return solveModel_(sheet, model, localeMode);
 }
 
 // variableDomains() reads the app global `varSettings` (the Variable settings
@@ -113,12 +114,12 @@ function workerSolve(grid, whole, sense, passedDomains) {
 var varSettings = {};
 
 // Compute the domains the main thread would send to the worker, the app way.
-function computeDomains(grid, whole) {
+function computeDomains(grid, whole, localeMode) {
   const { formulas, values } = arraysOf(grid);
   const sheet = sheetFrom(formulas, values);
   try {
-    const model = detectModel_(sheet);
-    const cells = expandRange_(loadGrid_(sheet), model.variables);
+    const model = detectModel_(sheet, localeMode);
+    const cells = expandRange_(loadGrid_(sheet, localeMode), model.variables);
     return variableDomains(cells, whole === true);
   } catch (e) { return null; }
 }
@@ -422,6 +423,75 @@ function strictGrid(rel) {
        wErr && wErr.indexOf(fx.marker) !== -1, wErr);
   }
 });
+
+// ---- Locale parity: the worker and the main thread must agree under every
+// locale mode, including the EU wiring (forced eu/us, auto by ';' or by value,
+// and an EU-only formula with a bound that changes the result). -------------
+(function () {
+  const tiny = function (obj) {
+    return [
+      ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+      ['A', '0', 'val' === obj ? '2' : '', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['Tot', '', '', obj, '', ''],
+      ['Cap', '', '', '=B2', '<=', '5'],
+    ];
+  };
+  const fixtures = [
+    { name: 'forced eu =1,5*B2', grid: tiny('=1,5*B2'), locale: 'eu', whole: false },
+    { name: 'forced us =1.5*B2', grid: tiny('=1.5*B2'), locale: 'us', whole: false },
+    { name: 'auto eu via SUMPRODUCT(;)', locale: 'auto', whole: false, grid: [
+      ['Prod', 'x', 'Profit', 'Line', 'Hrs', ''],
+      ['A', '0', '30', '=B2*C2', '2', ''],
+      ['B', '0', '20', '=B3*C3', '1', ''],
+      ['', '', '', '', '', ''],
+      ['Total', '', '', '=SUM(D2:D3)', '', ''],
+      ['Hours', '', '', '=SUMPRODUCT(B2:B3;E2:E3)', '<=', '100'],
+      ['CapA', '', '', '=B2', '<=', '40'],
+      ['CapB', '', '', '=B3', '<=', '40'],
+    ] },
+    { name: 'auto eu via value 7,5', locale: 'auto', whole: false, grid: [
+      ['Item', 'x', 'coef', 'Total', 'Rel', 'Limit'],
+      ['A', '0', '7,5', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['Tot', '', '', '=C2*B2', '', ''],
+      ['Cap', '', '', '=B2', '<=', '5'],
+    ] },
+    { name: 'eu SUMIF ">10,0" criterion', locale: 'eu', whole: false, grid: [
+      ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+      ['A', '0', '2', '', '', ''],
+      ['B', '', '20', '', '', ''],
+      ['', '', '', '', '', ''],
+      ['Obj', '', '', '=B2', '', ''],
+      ['Lim', '', '', '=B2', '<=', '=SUMIF(C2:C3;">10,0";C2:C3)'],
+    ] },
+  ];
+  fixtures.forEach(function (fx) {
+    varSettings = {};
+    const domains = computeDomains(fx.grid, fx.whole, fx.locale);
+    const m = mainThreadSolve(fx.grid, fx.whole, undefined, fx.locale);
+    const w = workerSolve(fx.grid, fx.whole, undefined, domains, fx.locale);
+    ok('locale parity (' + fx.name + '): same objective',
+       m && w && m.status === w.status &&
+       (m.objective == null ? w.objective == null : Math.abs(m.objective - w.objective) < TOL),
+       'main=' + (m && m.objective) + ' worker=' + (w && w.objective));
+    ok('locale parity (' + fx.name + '): same variable values',
+       JSON.stringify(valuesOf(m)) === JSON.stringify(valuesOf(w)),
+       'main=' + JSON.stringify(valuesOf(m)) + ' worker=' + JSON.stringify(valuesOf(w)));
+  });
+
+  // A bounded EU-only formula: without the locale on BOTH paths, the domain prep
+  // and the solve would disagree. Bound the single variable to 3 so =1,5*B2
+  // caps at 4.5, and require both paths to reach it identically.
+  varSettings = { B2: { type: 'continuous', min: 0, max: 3 } };
+  const bGrid = tiny('=1,5*B2');
+  const bDomains = computeDomains(bGrid, false, 'eu');
+  const bm = mainThreadSolve(bGrid, false, undefined, 'eu');
+  const bw = workerSolve(bGrid, false, undefined, bDomains, 'eu');
+  ok('locale parity (eu bounded =1,5*B2): both cap at 4.5',
+     bm && bw && Math.abs(bm.objective - 4.5) < TOL && Math.abs(bw.objective - 4.5) < TOL,
+     'main=' + (bm && bm.objective) + ' worker=' + (bw && bw.objective));
+})();
 
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

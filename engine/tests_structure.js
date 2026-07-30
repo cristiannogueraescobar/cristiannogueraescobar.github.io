@@ -389,5 +389,81 @@ PAGES.forEach(function (p) {
   ok(p + ' canonical is ' + CANONICALS[p], canons[0] === CANONICALS[p], canons[0]);
 });
 
+// ---- Locale (decimal comma / semicolon) wiring guards -------------------
+// These make the EU/US wiring permanent: the helpers must exist in BOTH the
+// standalone engine and the inline copy, be byte-identical, the UI must carry
+// the selector, and no detect/solve/loadGrid call site may run WITHOUT a locale
+// argument (a bare call silently defaults to auto and can diverge from a forced
+// selector — the class of bug this suite is guarding against).
+(function () {
+  const engineSrc = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
+  const solverRaw = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_'];
+
+  // Extract a function body by balanced braces from a source string.
+  function grab(src, name) {
+    const start = src.indexOf('function ' + name + '(');
+    if (start === -1) return null;
+    let depth = 0, started = false;
+    for (let j = start; j < src.length; j++) {
+      const c = src[j];
+      if (c === '{') { depth++; started = true; }
+      else if (c === '}') { depth--; if (started && depth === 0) return src.slice(start, j + 1); }
+    }
+    return null;
+  }
+  const norm = s => (s == null ? null : s.replace(/\s+/g, ' ').trim());
+
+  LOCALE_FNS.forEach(function (fn) {
+    const inEngine = grab(engineSrc, fn);
+    const inInline = grab(solverRaw, fn);
+    ok('locale: ' + fn + ' defined in engine.js', !!inEngine);
+    ok('locale: ' + fn + ' defined inline in solver.html', !!inInline);
+    ok('locale: ' + fn + ' is byte-identical across engine.js and inline',
+       inEngine && inInline && norm(inEngine) === norm(inInline),
+       'differs');
+  });
+
+  // The SUMIF criterion parser must be locale-aware in both copies (the EU
+  // decimal-comma criterion bug fix), also byte-identical.
+  ['parseCriterionOperand_', 'matchesCriterion_'].forEach(function (fn) {
+    const inEngine = grab(engineSrc, fn), inInline = grab(solverRaw, fn);
+    ok('locale: ' + fn + ' takes a locale param (engine.js)',
+       inEngine && /function\s+\w+\([^)]*locale/.test(inEngine), 'no locale param');
+    ok('locale: ' + fn + ' byte-identical across copies',
+       inEngine && inInline && norm(inEngine) === norm(inInline), 'differs');
+  });
+
+  // The UI selector must exist.
+  ok('locale: solver.html has a #localeSel selector',
+     /id="localeSel"/.test(solverRaw));
+  ok('locale: currentLocaleMode() helper exists',
+     /function currentLocaleMode\(/.test(solverRaw));
+  ok('locale: a change listener invalidates the model on #localeSel',
+     /getElementById\('localeSel'\)[\s\S]{0,80}addEventListener\('change'/.test(solverRaw) ||
+     /localeEl[\s\S]{0,80}addEventListener\('change'/.test(solverRaw));
+
+  // No detect/loadGrid call in the APP portion (outside the ENGINE markers) may
+  // omit the locale argument. Inside the engine the functions are DEFINED and
+  // called internally with their own params, so we scan only the app code.
+  const engStart = solverRaw.indexOf('/* ENGINE_START */');
+  const engEnd = solverRaw.indexOf('/* ENGINE_END */');
+  const appCode = solverRaw.slice(0, engStart) + solverRaw.slice(engEnd);
+  const bareDetect = appCode.match(/detectModel_\(sheet\)/g) || [];
+  const bareLoad = appCode.match(/loadGrid_\(sheet\)/g) || [];
+  ok('locale: no bare detectModel_(sheet) in app code (must pass locale)',
+     bareDetect.length === 0, 'found ' + bareDetect.length);
+  ok('locale: no bare loadGrid_(sheet) in app code (must pass locale)',
+     bareLoad.length === 0, 'found ' + bareLoad.length);
+
+  // The worker payload and both solve paths must carry localeMode.
+  ok('locale: worker payload includes localeMode',
+     /payload\.localeMode\s*=/.test(solverRaw));
+  ok('locale: worker glue detects with d.localeMode',
+     /detectModel_\(sheet, d\.localeMode\)/.test(solverRaw));
+  ok('locale: worker glue solves with d.localeMode',
+     /solveModel_\(sheet,model, d\.localeMode\)/.test(solverRaw));
+})();
+
 console.log('STRUCTURE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

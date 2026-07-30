@@ -147,5 +147,82 @@ function tinyModel(objFormula) {
      r.error || ('obj=' + (r.out && r.out.objective)));
 }
 
+// SUMIF with a European decimal criterion ">10,0": on an EU sheet it must
+// compare NUMERICALLY (only 20 passes, not 2), giving 20 — a text comparison
+// would wrongly pass both and give 22.
+{
+  const grid = [
+    ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '2', '', '', ''],
+    ['B', '', '20', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Obj', '', '', '=B2', '', ''],
+    ['Lim', '', '', '=B2', '<=', '=SUMIF(C2:C3;">10,0";C2:C3)'],
+  ];
+  const r = run(grid, { locale: 'eu' });
+  ok('e2e: SUMIF ">10,0" compares numerically on an EU sheet (=> 20)',
+     !r.error && approx(r.out.objective, 20), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
+// SUMIF implicit-equality European criterion "20,0" matches only the 20.
+{
+  const grid = [
+    ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '2', '', '', ''],
+    ['B', '', '20', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Obj', '', '', '=B2', '', ''],
+    ['Lim', '', '', '=B2', '<=', '=SUMIF(C2:C3;"20,0";C2:C3)'],
+  ];
+  const r = run(grid, { locale: 'eu' });
+  ok('e2e: SUMIF "20,0" implicit equality matches the 20 (=> 20)',
+     !r.error && approx(r.out.objective, 20), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
+// US SUMIF with a canonical ">10.0" criterion is unaffected.
+{
+  const grid = [
+    ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '2', '', '', ''],
+    ['B', '', '20', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Obj', '', '', '=B2', '', ''],
+    ['Lim', '', '', '=B2', '<=', '=SUMIF(C2:C3,">10.0",C2:C3)'],
+  ];
+  const r = run(grid);
+  ok('e2e: US SUMIF ">10.0" still works (=> 20)',
+     !r.error && approx(r.out.objective, 20), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
+// Numeric-vs-text guard: EU ">100,0" excludes BOTH values (2 and 20), so the
+// SUMIF is 0 — proving the criterion is compared numerically, not as text
+// (where "2">"100,0" and "20">"100,0" would both wrongly pass).
+{
+  const grid = [
+    ['Item', 'x', 'val', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '2', '', '', ''],
+    ['B', '', '20', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Obj', '', '', '=B2', '', ''],
+    ['Lim', '', '', '=B2', '<=', '=SUMIF(C2:C3;">100,0";C2:C3)'],
+  ];
+  const r = run(grid, { locale: 'eu' });
+  ok('e2e: SUMIF ">100,0" excludes both values numerically (=> 0)',
+     !r.error && approx(r.out.objective, 0), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
+// EU formula + a Variable-Settings DOMAIN that changes the result: =1,5*B2 with
+// an upper bound of 3 on the single variable caps the objective at 4.5 (not
+// 7.5). This exercises the domain path under a forced EU locale end-to-end.
+{
+  const grid = tinyModel('=1,5*B2');
+  const r = run(grid, {
+    locale: 'eu',
+    domains: { integer: [], bounds: [{ lower: 0, upper: 3 }] },
+  });
+  ok('e2e: EU =1,5*B2 with an upper-bound domain caps at 4.5',
+     !r.error && approx(r.out.objective, 4.5), r.error || ('obj=' + (r.out && r.out.objective)));
+}
+
 console.log('LOCALE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 process.exit(fail > 0 ? 1 : 0);
