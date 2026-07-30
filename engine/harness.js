@@ -14,9 +14,10 @@ const Engine = require('./engine.js');
  */
 function mkSheet(grid) {
   // Relation operators are literal text in a sheet, not formulas, even though
-  // '<=', '>=', '=' start with or contain '='. Treat them as text values.
-  const RELATIONS = { '<=': 1, '>=': 1, '=': 1, '<': 1, '>': 1 };
-  const isFormula = x => typeof x === 'string' && x[0] === '=' && !RELATIONS[x];
+  // '<=', '>=', '=' start with or contain '='. The shared engine classifier is
+  // the single source of truth — a local reimplementation could drift from the
+  // real app converter (that drift once hid a '=' equality bug from CI).
+  const isFormula = Engine.isFormulaInput_;
   const formulas = grid.map(row => row.map(cell => {
     if (cell && typeof cell === 'object') return cell.f || '';
     return isFormula(cell) ? cell : '';
@@ -25,8 +26,9 @@ function mkSheet(grid) {
     if (cell && typeof cell === 'object') return typeof cell.v === 'number' ? cell.v : 0;
     if (isFormula(cell)) return 0;
     if (cell === '' || cell == null) return '';
-    if (RELATIONS[cell]) return cell;           // operator text passes through
     const n = Number(cell);
+    // A relation operator ('=', '<=', ...) or any other non-numeric string
+    // passes through as text; only a clean numeric string becomes a number.
     return (!isNaN(n) && String(n) === String(cell).trim()) ? n : cell;
   }));
   return {

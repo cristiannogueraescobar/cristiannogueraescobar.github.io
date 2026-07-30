@@ -52,7 +52,7 @@ const TOL = 1e-6;
 // Build a sheet from a grid, splitting into formulas/values arrays — the same
 // representation sheetToArrays() sends into the worker and mk() uses in tests.
 function arraysOf(g) {
-  const isF = x => typeof x === 'string' && x.charAt(0) === '=' && !({ '<=':1, '>=':1, '=':1 }[x]);
+  const isF = isFormulaInput_;   // shared engine classifier (relation ops are values)
   const f = [], v = [];
   for (let r = 0; r < g.length; r++) {
     const fr = [], vr = [];

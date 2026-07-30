@@ -933,6 +933,27 @@ function linearize_(context, a1, depth) {
 /* Locale (decimal comma / semicolon separator) normalisation          */
 /* ================================================================== */
 
+/* ================================================================== */
+/* Grid-input classification (formula vs relation-operator value)      */
+/* ================================================================== */
+
+// Classify a raw grid cell: is it a FORMULA, or a relation-operator VALUE?
+// A formula starts with '=' — but so do the relation operators the grid uses
+// in the operator column ('=', '==', '=<', '=>'), which are plain text VALUES,
+// not formulas. Treating '=' as a formula turned an equality constraint into a
+// formula cell with value 0, silently dropping the relation. This ONE helper is
+// the single source of truth used by both the app (sheetFromGrid) and the tests
+// so a test copy can never drift from the real converter again.
+function isFormulaInput_(raw) {
+  var text = String(raw).trim();
+  if (text.charAt(0) !== '=') return false;
+  var RELATION_TOKENS = {
+    '=': true, '==': true, '<=': true, '>=': true,
+    '=<': true, '=>': true, '\u2264': true, '\u2265': true, '<': true, '>': true
+  };
+  return !RELATION_TOKENS[text];
+}
+
 // A European-locale sheet writes 1,5 for 1.5 and SUM(A;B) for SUM(A,B). The
 // tokenizer and Number() both expect the canonical (US) form: '.' decimal, ','
 // argument separator. We detect the sheet's locale ONCE and normalise every
@@ -2211,6 +2232,7 @@ function matchesAnyHint_(label, hints) {
     detectLocale_: detectLocale_,
     normalizeFormula_: normalizeFormula_,
     normalizeValue_: normalizeValue_,
+    isFormulaInput_: isFormulaInput_,
     optimise_: optimise_,
     classifyModel_: classifyModel_,
     buildVariableDomains_: buildVariableDomains_,

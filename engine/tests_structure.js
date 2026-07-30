@@ -398,7 +398,7 @@ PAGES.forEach(function (p) {
 (function () {
   const engineSrc = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
   const solverRaw = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
-  const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_'];
+  const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_', 'isFormulaInput_'];
 
   // Extract a function body by balanced braces from a source string.
   function grab(src, name) {
@@ -434,6 +434,12 @@ PAGES.forEach(function (p) {
        inEngine && inInline && norm(inEngine) === norm(inInline), 'differs');
   });
 
+  // The app's grid->sheet converter must use the shared classifier, not a local
+  // "charAt(0)==='='" test that would swallow the '=' relation operator as a
+  // formula. Pin that sheetFromGrid references isFormulaInput_.
+  ok('locale: sheetFromGrid uses the shared isFormulaInput_ classifier',
+     /function sheetFromGrid\(\)\{[\s\S]{0,140}isFormulaInput_/.test(solverRaw));
+
   // The UI selector must exist.
   ok('locale: solver.html has a #localeSel selector',
      /id="localeSel"/.test(solverRaw));
@@ -443,18 +449,23 @@ PAGES.forEach(function (p) {
      /getElementById\('localeSel'\)[\s\S]{0,80}addEventListener\('change'/.test(solverRaw) ||
      /localeEl[\s\S]{0,80}addEventListener\('change'/.test(solverRaw));
 
-  // No detect/loadGrid call in the APP portion (outside the ENGINE markers) may
-  // omit the locale argument. Inside the engine the functions are DEFINED and
-  // called internally with their own params, so we scan only the app code.
+  // No detect/loadGrid/solveModel call in the APP portion (outside the ENGINE
+  // markers) may omit the locale argument. Match ANY single-argument call
+  // regardless of the variable name — matching only the literal "(sheet)" could
+  // be evaded by "(sh)" or "(mySheet)", which is exactly how the self-test once
+  // slipped a locale-less call past the guard. A locale-carrying call has a
+  // comma before ')'; a single-arg call does not.
   const engStart = solverRaw.indexOf('/* ENGINE_START */');
   const engEnd = solverRaw.indexOf('/* ENGINE_END */');
   const appCode = solverRaw.slice(0, engStart) + solverRaw.slice(engEnd);
-  const bareDetect = appCode.match(/detectModel_\(sheet\)/g) || [];
-  const bareLoad = appCode.match(/loadGrid_\(sheet\)/g) || [];
-  ok('locale: no bare detectModel_(sheet) in app code (must pass locale)',
-     bareDetect.length === 0, 'found ' + bareDetect.length);
-  ok('locale: no bare loadGrid_(sheet) in app code (must pass locale)',
-     bareLoad.length === 0, 'found ' + bareLoad.length);
+  const singleArg = /\b(detectModel_|loadGrid_)\(\s*[A-Za-z_$][\w$]*\s*\)/g;
+  const bare = (appCode.match(singleArg) || []);
+  ok('locale: no single-argument detectModel_/loadGrid_ in app code (must pass locale)',
+     bare.length === 0, 'found: ' + bare.join(', '));
+  // solveModel_ in the app must also carry a locale argument (3rd param).
+  const bareSolve = (appCode.match(/\bsolveModel_\(\s*[A-Za-z_$][\w$]*\s*,\s*[A-Za-z_$][\w$]*\s*\)/g) || []);
+  ok('locale: no two-argument solveModel_ in app code (must pass locale)',
+     bareSolve.length === 0, 'found: ' + bareSolve.join(', '));
 
   // The worker payload and both solve paths must carry localeMode.
   ok('locale: worker payload includes localeMode',

@@ -1065,6 +1065,23 @@ function pivot_(tableau, row, column) {
 /* Grid — the whole sheet read in one call                             */
 /* ================================================================== */
 
+// Classify a raw grid cell: is it a FORMULA, or a relation-operator VALUE?
+// A formula starts with '=' — but so do the relation operators the grid uses
+// in the operator column ('=', '==', '=<', '=>'), which are plain text VALUES,
+// not formulas. Treating '=' as a formula turned an equality constraint into a
+// formula cell with value 0, silently dropping the relation. This ONE helper is
+// the single source of truth used by both the app (sheetFromGrid) and the tests
+// so a test copy can never drift from the real converter again.
+function isFormulaInput_(raw) {
+  var text = String(raw).trim();
+  if (text.charAt(0) !== '=') return false;
+  var RELATION_TOKENS = {
+    '=': true, '==': true, '<=': true, '>=': true,
+    '=<': true, '=>': true, '\u2264': true, '\u2265': true, '<': true, '>': true
+  };
+  return !RELATION_TOKENS[text];
+}
+
 // Locale (decimal comma / semicolon separator) normalisation. A European sheet
 // writes 1,5 and SUM(A;B); the tokenizer and Number() expect '.' decimals and
 // ',' separators, so we detect the sheet locale once and normalise formulas and
@@ -3053,7 +3070,7 @@ function matchesAnyHint_(label, hints) {
 
   // Build the sheet object the engine expects from the current grid.
   function sheetFromGrid(){
-    var isF=function(x){return typeof x==='string'&&x.charAt(0)==='=';};
+    var isF=isFormulaInput_;   // single source of truth (relation ops are values)
     var formulas=[],values=[];
     for(var r=0;r<ROWS;r++){
       var fr=[],vr=[];
@@ -4444,7 +4461,7 @@ function matchesAnyHint_(label, hints) {
       out.appendChild(d);
     }
     function sheetFrom(grid){
-      var isF=function(x){return typeof x==='string'&&x.charAt(0)==='='&&!({'<=':1,'>=':1,'=':1}[x]);};
+      var isF=isFormulaInput_;   // single source of truth (relation ops are values)
       var F=[],V=[];
       for(var r=0;r<grid.length;r++){var fr=[],vr=[];for(var c=0;c<grid[r].length;c++){
         var raw=String(grid[r][c]);
@@ -4457,11 +4474,12 @@ function matchesAnyHint_(label, hints) {
     function solveExample(ex, senseOverride){
       try{
         var sh=sheetFrom(ex.grid);
-        var m=detectModel_(sh);
+        var lm=currentLocaleMode();
+        var m=detectModel_(sh, lm);
         m.objective.sense=senseOverride||ex.sense;
         m.wholeNumbers=!!ex.whole;
         if(ex.domains){
-          var cells=expandRange_(loadGrid_(sh), m.variables);
+          var cells=expandRange_(loadGrid_(sh, lm), m.variables);
           var integer=[],bounds=[];
           cells.forEach(function(cell,i){
             var d=ex.domains[cell]; if(!d) return;
@@ -4471,7 +4489,7 @@ function matchesAnyHint_(label, hints) {
           });
           m.domains={integer:(ex.whole?true:(integer.length?integer:null)),bounds:bounds.length?bounds:null};
         }
-        return solveModel_(sh,m);
+        return solveModel_(sh,m, lm);
       }catch(e){ return {status:'error',error:String(e.message||e)}; }
     }
     // Every example must solve to its expected status, model type, objective
@@ -4542,7 +4560,20 @@ function matchesAnyHint_(label, hints) {
       drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_,
       polygonDimension_: polygonDimension_, normalizeConstraint_: normalizeConstraint_,
       lineAcrossBox: lineAcrossBox, geometryEpsilon_: geometryEpsilon_,
-      addWorkedSteps: addWorkedSteps };
+      addWorkedSteps: addWorkedSteps,
+      isFormulaInput_: isFormulaInput_,
+      classifyGridRow_: function(row){
+        // Run the REAL app converter on a single row: returns {formulas,values}
+        // exactly as sheetFromGrid would, so tests exercise the app's own
+        // classification (not a reimplementation).
+        var save=data, sr=ROWS, sc=COLS;
+        data=[row.slice()]; ROWS=1; COLS=row.length;
+        var sheet=sheetFromGrid();
+        var out={ formulas: sheet.getDataRange().getFormulas()[0],
+                  values: sheet.getDataRange().getValues()[0] };
+        data=save; ROWS=sr; COLS=sc;
+        return out;
+      } };
   }
 })();
 </script>
