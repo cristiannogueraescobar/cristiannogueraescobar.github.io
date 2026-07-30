@@ -1,11 +1,13 @@
 /**
  * tests_region_plot.js — the 2-variable feasible-region plot must tell the
  * truth about unbounded regions. solve2D() detects whether the region recedes
- * to infinity; drawFeasibleRegion() then draws an OPEN band (never a closed
- * polygon that misrepresents an infinite region as finite).
+ * to infinity (via an EXACT recession-cone check, not an angular mesh that can
+ * miss rays like the 45-degree x=y ray); drawFeasibleRegion() then renders an
+ * OPEN band with a localized note and aria-label — never a closed polygon that
+ * misrepresents an infinite region as finite.
  *
- * This drives the real inline solve2D() from solver.html (exposed via the
- * test-only hook) inside jsdom. Requires jsdom (CI installs it).
+ * Drives the real inline solve2D() and drawFeasibleRegion() from solver.html
+ * (exposed via the test-only hook) inside jsdom. Requires jsdom (CI installs).
  *
  * Run: node engine/tests_region_plot.js
  */
@@ -46,45 +48,109 @@ const { window } = dom;
 
 setTimeout(function () {
   const api = window.__plumline;
-  if (!api || !api.solve2D) { console.log('REGION PLOT TESTS  FAILED: test hook not installed'); process.exit(1); }
+  if (!api || !api.solve2D || !api.drawFeasibleRegion) {
+    console.log('REGION PLOT TESTS  FAILED: test hook not installed'); process.exit(1);
+  }
+  const document = window.document;
   const solve2D = api.solve2D;
   const obj = { x: 1, y: 1 };
 
-  // BOUNDED region: x <= 4, y <= 3 (plus x,y >= 0). A closed quadrilateral, no
-  // recession direction — must NOT be flagged unbounded.
+  // ---- solve2D detection ------------------------------------------------
+
   {
-    const cons = [
-      { x: 1, y: 0, op: '<=', b: 4 },
-      { x: 0, y: 1, op: '<=', b: 3 },
-    ];
-    const geo = solve2D(obj, cons);
+    const geo = solve2D(obj, [ { x:1, y:0, op:'<=', b:4 }, { x:0, y:1, op:'<=', b:3 } ]);
     ok('bounded region: has vertices', geo.vertices.length >= 3, JSON.stringify(geo.vertices));
     ok('bounded region: NOT flagged unbounded', geo.unbounded === false, String(geo.unbounded));
   }
 
-  // UNBOUNDED region: only x <= 5 (y free upward), plus x,y >= 0. The region
-  // extends to infinity along +y, so a recession direction exists and the flag
-  // must be set. (The objective may still be bounded; that's a separate fact —
-  // this is about the SHAPE of the feasible set.)
   {
-    const cons = [
-      { x: 1, y: 0, op: '<=', b: 5 },
-    ];
-    const geo = solve2D(obj, cons);
-    ok('unbounded region: flagged unbounded', geo.unbounded === true, String(geo.unbounded));
-    ok('unbounded region: has a recession direction', !!geo.recession &&
-       (geo.recession.x > 1e-9 || geo.recession.y > 1e-9), JSON.stringify(geo.recession));
+    const geo = solve2D(obj, [ { x:1, y:0, op:'<=', b:5 } ]);
+    ok('x<=5 region: flagged unbounded', geo.unbounded === true, String(geo.unbounded));
+    ok('x<=5 region: recession has +y component', !!geo.recession && geo.recession.y > 0.5,
+       JSON.stringify(geo.recession));
   }
 
-  // UNBOUNDED with a bounded optimum: minimise-style feasible set x + y >= 2
-  // (plus x,y >= 0) is unbounded above, yet a minimum exists. The region SHAPE
-  // is still unbounded and must be flagged so the plot never closes it.
   {
-    const cons = [
-      { x: 1, y: 1, op: '>=', b: 2 },
-    ];
-    const geo = solve2D(obj, cons);
-    ok('half-plane region: flagged unbounded', geo.unbounded === true, String(geo.unbounded));
+    const geo = solve2D(obj, [ { x:1, y:1, op:'>=', b:2 } ]);
+    ok('x+y>=2 region: flagged unbounded', geo.unbounded === true, String(geo.unbounded));
+  }
+
+  // EXACT 45-degree ray: x - y = 0, x + y >= 2. Direction is exactly (1,1)/√2;
+  // an even-degree angular mesh would miss it. The exact check must catch it.
+  {
+    const geo = solve2D(obj, [ { x:1, y:-1, op:'=', b:0 }, { x:1, y:1, op:'>=', b:2 } ]);
+    ok('x=y ray (45 deg exact): flagged unbounded', geo.unbounded === true, String(geo.unbounded));
+    ok('x=y ray: recession ~ (1,1) normalized', !!geo.recession &&
+       Math.abs(geo.recession.x - geo.recession.y) < 1e-6 && geo.recession.x > 0.5,
+       JSON.stringify(geo.recession));
+  }
+
+  // Narrow cone (a wedge thinner than the old mesh step).
+  {
+    const geo = solve2D(obj, [ { x:3, y:-1, op:'>=', b:0 }, { x:1, y:-3, op:'<=', b:0 },
+                               { x:1, y:1, op:'>=', b:1 } ]);
+    ok('narrow cone: flagged unbounded', geo.unbounded === true, String(geo.unbounded));
+  }
+
+  {
+    const geo = solve2D(obj, [ { x:1, y:1, op:'<=', b:10 }, { x:1, y:0, op:'<=', b:4 },
+                               { x:0, y:1, op:'<=', b:8 } ]);
+    ok('bounded triangle: NOT flagged unbounded', geo.unbounded === false, String(geo.unbounded));
+  }
+
+  // ---- drawFeasibleRegion DOM rendering --------------------------------
+
+  function clearResult() { document.getElementById('result').innerHTML = ''; }
+  function mkOut(constraints, values) {
+    return {
+      status: 'optimal', modelType: 'continuous', objective: 0,
+      objectiveLabel: 'Z', labels: ['x', 'y'], previous: [0, 0], values: values,
+      constraints: constraints,
+      plot: { objective: [1, 1], variableLabels: ['x', 'y'] },
+    };
+  }
+
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([{ label: 'CapX', coefficients: [1, 0], relation: '<=', limit: 5, binding: true }], [5, 6]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    const openPoly = result.querySelector('.region.open');
+    const closedPoly = result.querySelector('.region:not(.open)');
+    const note = result.querySelector('.region-unbounded-note');
+    const svg = result.querySelector('svg.plot');
+    ok('unbounded render: draws .region.open (not a closed polygon)', !!openPoly && !closedPoly,
+       'open=' + !!openPoly + ' closed=' + !!closedPoly);
+    ok('unbounded render: shows the localized unbounded note', !!note && /unbounded/i.test(note.textContent),
+       note ? note.textContent.slice(0, 40) : 'no note');
+    ok('unbounded render: aria-label mentions unbounded', !!svg && /unbounded/i.test(svg.getAttribute('aria-label')),
+       svg ? svg.getAttribute('aria-label') : 'no svg');
+    ok('unbounded render: open polygon has finite points',
+       !!openPoly && /^[\d.,\s-]+$/.test(openPoly.getAttribute('points')) &&
+       openPoly.getAttribute('points').trim().length > 0,
+       openPoly ? openPoly.getAttribute('points').slice(0, 40) : 'no poly');
+  }
+
+  {
+    window.__plumline.setLang('es');
+    clearResult();
+    const out = mkOut([
+      { label: 'CapX', coefficients: [1, 0], relation: '<=', limit: 4, binding: true },
+      { label: 'CapY', coefficients: [0, 1], relation: '<=', limit: 3, binding: true },
+    ], [4, 3]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    const openPoly = result.querySelector('.region.open');
+    const closedPoly = result.querySelector('.region:not(.open)');
+    const note = result.querySelector('.region-unbounded-note');
+    const svg = result.querySelector('svg.plot');
+    ok('bounded render: draws a closed .region (not .open)', !!closedPoly && !openPoly,
+       'open=' + !!openPoly + ' closed=' + !!closedPoly);
+    ok('bounded render: no unbounded note', !note, note ? note.textContent : '');
+    ok('bounded render: aria-label is localized (not English)',
+       !!svg && svg.getAttribute('aria-label') === 'Regi\u00f3n factible con el \u00f3ptimo marcado',
+       svg ? svg.getAttribute('aria-label') : 'no svg');
   }
 
   console.log('REGION PLOT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

@@ -406,7 +406,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=53"></script>
+<script src="assets/i18n.js?v=54"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -3702,7 +3702,7 @@ function matchesAnyHint_(label, hints) {
     var lab = out.plot.variableLabels || ['x','y'];
 
     var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="plot" role="img" aria-label="'+
-      (geo.unbounded ? esc(t('regionUnboundedAria')) : 'Feasible region')+'">';
+      (geo.unbounded ? esc(t('regionUnboundedAria')) : esc(t('regionBoundedAria')))+'">';
     // axes
     svg += '<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" class="ax"/>';
     svg += '<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-pad)+'" class="ax"/>';
@@ -3740,7 +3740,9 @@ function matchesAnyHint_(label, hints) {
 
     var box = document.createElement('div');
     box.className = 'plotwrap';
-    var cap = geo.unbounded ? (t('regionCap')+' '+t('regionUnboundedNote')) : t('regionCap');
+    var cap = geo.unbounded
+      ? (t('regionCap')+' <span class="region-unbounded-note">'+t('regionUnboundedNote')+'</span>')
+      : t('regionCap');
     box.innerHTML = '<p class="plotcap">'+cap+'</p>' + svg;
     document.getElementById('result').appendChild(box);
 
@@ -3817,28 +3819,41 @@ function matchesAnyHint_(label, hints) {
       verts.sort(function(a,b){return Math.atan2(a.y-cy,a.x-cx)-Math.atan2(b.y-cy,b.x-cx);});
     }
 
-    // Is the feasible region unbounded? Test whether a ray can leave any vertex
-    // and travel to infinity without leaving the region. The recession cone is
-    // spanned by non-negative directions (x,y >= 0), so it suffices to probe a
-    // fan of directions in the first quadrant and see if any satisfies every
-    // constraint in the limit (a<=b as a*d <= 0, a>=b as a*d >= 0). If one does,
-    // the polygon of vertices is only PART of the region and must not be drawn
-    // as a closed shape.
+    // Is the feasible region unbounded? A ray can leave a vertex and travel to
+    // infinity without leaving the region iff a non-zero recession direction
+    // d = (dx,dy) exists with dx,dy >= 0 and, for every constraint, a*d <= 0 for
+    // <=, a*d >= 0 for >=, a*d == 0 for =. In 2D the recession cone's extreme
+    // rays are among a small EXACT candidate set — the axes and each
+    // constraint line's two in-plane directions (b,-a)/(-b,a) — so we test those
+    // directly instead of sampling angles (a fixed angular mesh misses exact
+    // rays like the 45-degree x=y ray, whose direction lands between samples).
     function recedes(d){
+      var mag = Math.abs(d.x) + Math.abs(d.y);
+      if (mag < 1e-12) return false;            // must be a non-zero direction
+      if (d.x < -1e-9 || d.y < -1e-9) return false;  // first quadrant only (x,y >= 0)
       return cons.every(function(c){
         var proj = c.x*d.x + c.y*d.y;
         if(c.op==='<=') return proj <= 1e-9;
         if(c.op==='>=') return proj >= -1e-9;
-        return Math.abs(proj) < 1e-9;   // equality: only along the line
+        return Math.abs(proj) < 1e-9;           // equality: only along the line
       });
     }
     var unbounded = false, recession = null;
     if(verts.length){
-      // Probe directions across the first quadrant (0..90 deg). A coarse fan is
-      // enough to detect an open cone; we keep the first direction that recedes.
-      for(var a=0; a<=90; a+=2){
-        var rad=a*Math.PI/180, d={x:Math.cos(rad), y:Math.sin(rad)};
-        if((d.x>1e-9||d.y>1e-9) && recedes(d)){ unbounded=true; recession=d; break; }
+      var candidates = [ {x:1,y:0}, {x:0,y:1} ];
+      cons.forEach(function(c){
+        // Directions along this constraint's boundary line a*d = 0.
+        candidates.push({ x: c.y, y: -c.x });
+        candidates.push({ x: -c.y, y: c.x });
+      });
+      for(var i=0;i<candidates.length;i++){
+        // Normalise so the returned recession direction has unit-ish scale for
+        // drawing, and so tiny magnitudes don't slip past the checks.
+        var d = candidates[i];
+        var norm = Math.sqrt(d.x*d.x + d.y*d.y);
+        if(norm < 1e-12) continue;
+        var unit = { x:d.x/norm, y:d.y/norm };
+        if(recedes(unit)){ unbounded=true; recession=unit; break; }
       }
     }
     return { vertices:verts, unbounded:unbounded, recession:recession };
@@ -4195,7 +4210,8 @@ function matchesAnyHint_(label, hints) {
       announce: announce, fmt: fmt, setLang: function(l){ LANG=l; },
       openDrawer: openDrawer, closeDrawer: closeDrawer,
       localizeEngineError: localizeEngineError, showTrouble: showTrouble,
-      showEngineTrouble: showEngineTrouble, solve2D: solve2D };
+      showEngineTrouble: showEngineTrouble, solve2D: solve2D,
+      drawFeasibleRegion: drawFeasibleRegion };
   }
 })();
 </script>
