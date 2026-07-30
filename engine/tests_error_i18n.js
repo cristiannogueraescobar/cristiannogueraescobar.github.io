@@ -410,6 +410,32 @@ setTimeout(function () {
     ok(lang + ': showEngineTrouble(string) renders ambiguity message', ambExpect[lang].test(shown), shown.slice(0, 60));
   });
 
+  // NO_OBJECTIVE_CELL and CONSTRAINT_MISSING_LIMIT must localize and render
+  // through showEngineTrouble in every language, same as the other markers.
+  const markerExpect = {
+    NO_OBJECTIVE_CELL: {
+      en: /No cell looks like the objective/, es: /Ninguna celda parece el objetivo/,
+      pt: /Nenhuma c\u00e9lula parece o objetivo/, de: /Keine Zelle sieht wie das Ziel/,
+      fr: /Aucune cellule ne ressemble/
+    },
+    CONSTRAINT_MISSING_LIMIT: {
+      en: /relation operator but no limit/, es: /operador de relaci\u00f3n pero no valor l\u00edmite/,
+      pt: /operador de rela\u00e7\u00e3o mas nenhum valor limite/, de: /Relationsoperator, aber keinen Grenzwert/,
+      fr: /op\u00e9rateur de relation mais aucune valeur limite/
+    }
+  };
+  Object.keys(markerExpect).forEach(function (marker) {
+    Object.keys(markerExpect[marker]).forEach(function (lang) {
+      api.setLang(lang);
+      const out = api.localizeEngineError(marker);
+      ok('localizes ' + marker + ' in ' + lang, markerExpect[marker][lang].test(out), out.slice(0, 40));
+      ok(lang + ': ' + marker + ' drops the raw marker', out.indexOf(marker) === -1, out.slice(0, 40));
+      api.showEngineTrouble('tRead', new Error(marker));
+      const shown = document.getElementById('result').textContent;
+      ok(lang + ': showEngineTrouble renders ' + marker, markerExpect[marker][lang].test(shown), shown.slice(0, 60));
+    });
+  });
+
   console.log('ERROR I18N TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
   process.exit(fail > 0 ? 1 : 0);
 }, 100);

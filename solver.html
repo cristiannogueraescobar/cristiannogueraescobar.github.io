@@ -423,6 +423,8 @@ function localizeEngineError(msg){
   msg = String(msg == null ? '' : msg);
   if (msg.indexOf('STRICT_INEQUALITY:') === 0) return t('strictInequality');
   if (msg.indexOf('AMBIGUOUS_DECISION_CELLS') === 0) return t('ambiguousDecisionCells');
+  if (msg.indexOf('NO_OBJECTIVE_CELL') === 0) return t('noObjectiveCell');
+  if (msg.indexOf('CONSTRAINT_MISSING_LIMIT') === 0) return t('constraintMissingLimit');
   return msg;
 }
 // Column index (1-based) to spreadsheet letter (1->A, 27->AA). Top-level so both
@@ -2009,6 +2011,12 @@ function detectModel_(sheet) {
       'them looks like a final total. Pick the objective yourself.');
   }
 
+  // An output with a relation but no limit is an INCOMPLETE constraint; refuse
+  // rather than treat it as complete (limit 0) or promote it to the objective.
+  if (outputs.some(function (cell) { return readConstraint_(grid, cell).isIncompleteConstraint; })) {
+    throw new Error('CONSTRAINT_MISSING_LIMIT');
+  }
+
   // Constant cells reachable from each output, grouped into contiguous blocks.
   const blockReach = {};
   const blockCells = {};
@@ -2052,8 +2060,9 @@ function detectModel_(sheet) {
       });
       let hasObjective = false, hasConstraint = false;
       reached.forEach(function (output) {
-        if (readConstraint_(grid, output).guessed) hasObjective = true;
-        else hasConstraint = true;
+        const role = readConstraint_(grid, output);
+        if (role.isObjective) hasObjective = true;
+        else if (role.isCompleteConstraint) hasConstraint = true;
       });
       if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
@@ -2103,7 +2112,16 @@ function detectModel_(sheet) {
     });
   });
 
-  const objectiveCell = pickObjective_(grid, dependent);
+  // No genuine objective (every dependent output is a complete constraint) must
+  // refuse rather than let pickObjective_ invent one from a constraint.
+  const objectiveCandidates = dependent.filter(function (cell) {
+    return readConstraint_(grid, cell).isObjective;
+  });
+  if (!objectiveCandidates.length) {
+    throw new Error('NO_OBJECTIVE_CELL');
+  }
+
+  const objectiveCell = pickObjective_(grid, objectiveCandidates);
   const label = labelFor_(grid, objectiveCell);
 
   const constraints = [];
@@ -2300,6 +2318,10 @@ function readConstraint_(grid, a1) {
   let limit = null;
 
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
+    // Stop at the grid's right edge: cellAt_ returns {value:0} out of bounds,
+    // and reading that would turn an EMPTY limit into 0 (incomplete looking
+    // complete). Only scan real cells.
+    if (address.column + step - grid.firstColumn >= grid.columns) break;
     const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
     if (relation === null && typeof value === 'string') {
       const trimmed = value.trim();
@@ -2321,6 +2343,11 @@ function readConstraint_(grid, a1) {
     relation: relation === null ? '<=' : relation,
     limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
     guessed: relation === null || limit === null,
+    hasRelation: relation !== null,
+    hasLimit: limit !== null,
+    isObjective: relation === null,
+    isCompleteConstraint: relation !== null && limit !== null,
+    isIncompleteConstraint: relation !== null && limit === null,
   };
 }
 

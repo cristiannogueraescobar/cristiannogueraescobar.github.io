@@ -322,5 +322,23 @@ function strictGrid(rel) {
      !wErr && wOut && wOut.status === 'unbounded' && (wOut.variables || []).length === 2, wErr || JSON.stringify(wOut));
 }
 
+// Invented objective must be refused identically on both inline paths.
+[
+  { name: 'two vars, two constraints, no objective', marker: 'NO_OBJECTIVE_CELL', grid: [
+    ['Item', 'x', 'y', 'Result', 'Rel', 'Limit'], ['V', '0', '0', '', '', ''],
+    ['', '', '', '', '', ''], ['Lower', '', '', '=B2+C2', '>=', '1'], ['Upper', '', '', '=B2+C2', '<=', '5'] ] },
+  { name: 'constraint operator but no limit', marker: 'CONSTRAINT_MISSING_LIMIT', grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Total', '', '', '=1*B2', '', ''], ['Cap', '', '', '=B2', '<=', ''] ] },
+].forEach(function (fx) {
+  let mErr = null, wErr = null;
+  try { mainThreadSolve(fx.grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { workerSolve(fx.grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline refuses (' + fx.name + '): main-thread ' + fx.marker,
+     mErr && mErr.indexOf(fx.marker) !== -1, mErr);
+  ok('inline refuses (' + fx.name + '): worker ' + fx.marker,
+     wErr && wErr.indexOf(fx.marker) !== -1, wErr);
+});
+
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

@@ -1583,6 +1583,15 @@ function detectModel_(sheet) {
       'them looks like a final total. Pick the objective yourself.');
   }
 
+  // An output with a relation operator but no limit is an INCOMPLETE constraint
+  // (e.g. "=B2 <=" with an empty limit cell). It must never be silently treated
+  // as a complete constraint (limit 0) or promoted to the objective; refuse so
+  // the user fills in the limit. Checked up front so the specific marker wins
+  // over the generic "no obvious variables" message.
+  if (outputs.some(function (cell) { return readConstraint_(grid, cell).isIncompleteConstraint; })) {
+    throw new Error('CONSTRAINT_MISSING_LIMIT');
+  }
+
   // Constant cells reachable from each output, grouped into contiguous blocks.
   const blockReach = {};
   const blockCells = {};
@@ -1629,8 +1638,12 @@ function detectModel_(sheet) {
       });
       let hasObjective = false, hasConstraint = false;
       reached.forEach(function (output) {
-        if (readConstraint_(grid, output).guessed) hasObjective = true;
-        else hasConstraint = true;
+        const role = readConstraint_(grid, output);
+        // Use precise signals, not `guessed` (which lumps an objective together
+        // with an incomplete constraint). Only a real objective (no relation)
+        // counts as the objective; only a complete constraint counts as one.
+        if (role.isObjective) hasObjective = true;
+        else if (role.isCompleteConstraint) hasConstraint = true;
       });
       if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
@@ -1683,7 +1696,23 @@ function detectModel_(sheet) {
     });
   });
 
-  const objectiveCell = pickObjective_(grid, dependent);
+  // Classify each dependent output by role before choosing the objective. An
+  // INCOMPLETE constraint (relation but no limit) must never be promoted to the
+  // objective, and if there is no genuine objective (every output is a complete
+  // constraint) we must refuse rather than invent one from a constraint. This
+  // holds for multi-cell blocks too, not just the single-cell fallback.
+  const roles = dependent.map(function (cell) { return readConstraint_(grid, cell); });
+  if (roles.some(function (r) { return r.isIncompleteConstraint; })) {
+    throw new Error('CONSTRAINT_MISSING_LIMIT');
+  }
+  const objectiveCandidates = dependent.filter(function (cell) {
+    return readConstraint_(grid, cell).isObjective;
+  });
+  if (!objectiveCandidates.length) {
+    throw new Error('NO_OBJECTIVE_CELL');
+  }
+
+  const objectiveCell = pickObjective_(grid, objectiveCandidates);
   const label = labelFor_(grid, objectiveCell);
 
   const constraints = [];
@@ -1880,6 +1909,10 @@ function readConstraint_(grid, a1) {
   let limit = null;
 
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
+    // Stop at the grid's right edge: cellAt_ returns {value:0} for out-of-bounds
+    // cells, and reading that as a limit would silently turn an EMPTY limit into
+    // 0 (making an incomplete constraint look complete). Only scan real cells.
+    if (address.column + step - grid.firstColumn >= grid.columns) break;
     const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
     if (relation === null && typeof value === 'string') {
       const trimmed = value.trim();
@@ -1904,6 +1937,15 @@ function readConstraint_(grid, a1) {
     relation: relation === null ? '<=' : relation,
     limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
     guessed: relation === null || limit === null,
+    // Separated role signals so callers can distinguish a real objective (no
+    // relation) from an INCOMPLETE constraint (relation present, limit missing).
+    // Both make `guessed` true, but only the former is a legitimate objective;
+    // conflating them let an incomplete constraint be promoted to the objective.
+    hasRelation: relation !== null,
+    hasLimit: limit !== null,
+    isObjective: relation === null,
+    isCompleteConstraint: relation !== null && limit !== null,
+    isIncompleteConstraint: relation !== null && limit === null,
   };
 }
 
@@ -1983,7 +2025,8 @@ function matchesAnyHint_(label, hints) {
     finiteModel_: finiteModel_,
     validModelShape_: validModelShape_,
     senseFor_: senseFor_,
-    loadGrid_: loadGrid_
+    loadGrid_: loadGrid_,
+    readConstraint_: readConstraint_
   };
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = api;

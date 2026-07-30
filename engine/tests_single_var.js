@@ -264,4 +264,39 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
+// Two variables, two complete constraints, and NO objective (every output has a
+// relation). Detection must refuse rather than promote a constraint to the
+// objective and silently drop it. Multi-cell version — the single-cell guard
+// alone would miss this.
+{
+  const grid = [
+    ['Item', 'x', 'y', 'Result', 'Rel', 'Limit'],
+    ['V', '0', '0', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Lower', '', '', '=B2+C2', '>=', '1'],
+    ['Upper', '', '', '=B2+C2', '<=', '5'],
+  ];
+  const r = run(grid);
+  check('negative: two variables, two constraints, no objective -> NO_OBJECTIVE_CELL',
+    !!r.error && /^detect:/.test(r.error) && /NO_OBJECTIVE_CELL/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+// A constraint with a relation operator but an EMPTY limit is incomplete. It
+// must never be read as a complete constraint (limit 0) or promoted to the
+// objective; refuse so the user fills in the limit.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', ''],
+  ];
+  const r = run(grid);
+  check('negative: constraint with operator but no limit -> CONSTRAINT_MISSING_LIMIT',
+    !!r.error && /^detect:/.test(r.error) && /CONSTRAINT_MISSING_LIMIT/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
 report();

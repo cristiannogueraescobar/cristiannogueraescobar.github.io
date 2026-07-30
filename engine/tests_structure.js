@@ -284,6 +284,18 @@ PAGES.forEach(function (p) {
        /candidateIsLinear_\([^)]*\)/.test(src));
     ok(name + ': linear block wins without a bestReach gate',
        /if \(variables && blockLinear\)/.test(src) && !/bestReach/.test(src));
+    // Invented-objective guards must be present in both engines: separated role
+    // signals on readConstraint_, an incomplete-constraint refusal, and a
+    // no-objective refusal (so pickObjective_ is never handed a pool that
+    // contains constraints).
+    ok(name + ': readConstraint_ exposes separated role signals',
+       /isObjective/.test(src) && /isCompleteConstraint/.test(src) && /isIncompleteConstraint/.test(src));
+    ok(name + ': refuses an incomplete constraint',
+       /CONSTRAINT_MISSING_LIMIT/.test(src) && /isIncompleteConstraint/.test(src));
+    ok(name + ': refuses when there is no objective candidate',
+       /NO_OBJECTIVE_CELL/.test(src) && /objectiveCandidates/.test(src));
+    ok(name + ': constraint scan stops at the grid edge',
+       /grid\.firstColumn >= grid\.columns\) break/.test(src));
   });
 })();
 
