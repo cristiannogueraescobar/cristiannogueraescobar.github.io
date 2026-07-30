@@ -1632,9 +1632,14 @@ function detectModel_(sheet) {
         const role = readConstraint_(grid, output);
         // Use precise signals, not `guessed` (which lumps an objective together
         // with an incomplete constraint). Only a real objective (no relation)
-        // counts as the objective; only a complete constraint counts as one.
+        // counts as the objective; a complete constraint counts as one. A
+        // FORMULA limit reads as incomplete here (no variable context yet), but
+        // it MIGHT resolve to a constant, so count it as a provisional
+        // constraint — the later variable-aware pass rejects it if it truly
+        // depends on a decision variable.
         if (role.isObjective) hasObjective = true;
         else if (role.isCompleteConstraint) hasConstraint = true;
+        else if (role.hasRelation && role.limitFormula) hasConstraint = true;
       });
       if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
@@ -1717,15 +1722,20 @@ function detectModel_(sheet) {
 
   // Classify each dependent output by role before choosing the objective. An
   // INCOMPLETE constraint (relation but no limit) must never be promoted to the
-  // objective, and if there is no genuine objective (every output is a complete
-  // constraint) we must refuse rather than invent one from a constraint. This
-  // holds for multi-cell blocks too, not just the single-cell fallback.
-  const roles = dependent.map(function (cell) { return readConstraint_(grid, cell); });
+  // objective, and if there is no genuine objective (every output is a genuine
+  // constraint) we must refuse rather than invent one from a constraint. Pass
+  // the decision variables so a FORMULA limit (e.g. =100) resolves to its
+  // constant instead of reading as incomplete from the web's cached 0.
+  const variableList = expandRange_(grid, variables);
+  const roles = dependent.map(function (cell) { return readConstraint_(grid, cell, variableList); });
+  if (roles.some(function (r) { return r.limitDependsOnVariable; })) {
+    throw new Error('LIMIT_DEPENDS_ON_VARIABLE');
+  }
   if (roles.some(function (r) { return r.isIncompleteConstraint; })) {
     throw new Error('CONSTRAINT_MISSING_LIMIT');
   }
   const objectiveCandidates = dependent.filter(function (cell) {
-    return readConstraint_(grid, cell).isObjective;
+    return readConstraint_(grid, cell, variableList).isObjective;
   });
   if (!objectiveCandidates.length) {
     throw new Error('NO_OBJECTIVE_CELL');
@@ -1737,7 +1747,20 @@ function detectModel_(sheet) {
   const constraints = [];
   dependent.forEach(function (cell) {
     if (cell === objectiveCell) return;
-    constraints.push(readConstraint_(grid, cell));
+    // Pass the decision variables so a FORMULA limit is evaluated safely (a
+    // finite constant is accepted; the cached web value 0 is never trusted).
+    const parsed = readConstraint_(grid, cell, variableList);
+    if (parsed.limitDependsOnVariable) {
+      // A limit that depends on a decision variable is not a fixed right-hand
+      // side; refuse rather than freeze the current value into a wrong model.
+      throw new Error('LIMIT_DEPENDS_ON_VARIABLE');
+    }
+    if (parsed.isIncompleteConstraint) {
+      // A formula limit that resolved to text/empty leaves the constraint
+      // without a usable limit; refuse with the specific marker.
+      throw new Error('CONSTRAINT_MISSING_LIMIT');
+    }
+    constraints.push(parsed);
   });
   // Never silently drop constraints: a model with more limits than we support
   // must fail loudly, or we'd "verify" a smaller model than the user built and
@@ -1921,18 +1944,22 @@ function readLabels_(grid, rangeA1, variables) {
   });
 }
 
-function readConstraint_(grid, a1) {
+function readConstraint_(grid, a1, variables) {
   const address = parseAddress_(a1);
   const label = labelFor_(grid, a1);
   let relation = null;
   let limit = null;
+  let limitFormula = null;   // set when the limit cell holds a formula
+  let limitCell = null;      // A1 of the cell we took the limit from
 
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
     // Stop at the grid's right edge: cellAt_ returns {value:0} for out-of-bounds
     // cells, and reading that as a limit would silently turn an EMPTY limit into
     // 0 (making an incomplete constraint look complete). Only scan real cells.
     if (address.column + step - grid.firstColumn >= grid.columns) break;
-    const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
+    const addr = columnLetter_(address.column + step) + address.row;
+    const entry = cellAt_(grid, addr);
+    const value = entry.value;
     if (relation === null && typeof value === 'string') {
       const trimmed = value.trim();
       if (STRICT_RELATION_TOKENS[trimmed]) {
@@ -1949,12 +1976,46 @@ function readConstraint_(grid, a1) {
     if (relation !== null) {
       // The limit is the FIRST real cell after the operator. Blank cells between
       // the operator and the limit are allowed and skipped, but any non-blank,
-      // non-numeric content (text, a stray label, a formula) stops the scan with
-      // no limit — so the constraint reads as incomplete rather than silently
-      // reaching past that content to grab an unrelated number further right.
+      // non-numeric content stops the scan.
+      //
+      // A FORMULA in the limit cell must NOT be read from its cached value: on
+      // the web the grid caches every formula as 0, so "<= =100" would silently
+      // become "<= 0" (a false model). Record the formula and defer to a
+      // variable-aware evaluation below; a literal number is taken directly.
+      if (entry.formula) { limitFormula = entry.formula; limitCell = addr; break; }
       if (value === '' || value === null || value === undefined) continue;
-      if (typeof value === 'number') { limit = value; }
+      if (typeof value === 'number') { limit = value; limitCell = addr; }
       break;
+    }
+  }
+
+  // Evaluate a formula limit safely: it is valid ONLY if it reduces to a finite
+  // numeric constant with no decision-variable terms. This accepts =100,
+  // =50+50, =H1 (constant cells), and rejects =2*B2 (depends on a variable) and
+  // ="" (text). Without a variable set we cannot prove independence, so a
+  // formula limit stays unresolved (hasLimit false) and reads as incomplete.
+  let limitDependsOnVariable = false;
+  if (limitFormula !== null) {
+    if (variables) {
+      const context = {
+        grid: grid,
+        variables: toSet_(variables),
+        memo: {},
+        constantFallbacks: [],
+        allowCachedFormulaFallback: false,
+      };
+      try {
+        const form = linearize_(context, limitCell, 0);
+        if (form.text !== undefined) {
+          // formula resolves to text (e.g. =""): treated as a missing limit
+        } else if (!isConstant_(form)) {
+          limitDependsOnVariable = true;
+        } else if (Number.isFinite(form.constant)) {
+          limit = form.constant;
+        }
+      } catch (err) {
+        // Unparseable or cyclic: leave the limit unresolved (incomplete).
+      }
     }
   }
 
@@ -1974,6 +2035,11 @@ function readConstraint_(grid, a1) {
     isObjective: relation === null,
     isCompleteConstraint: relation !== null && limit !== null,
     isIncompleteConstraint: relation !== null && limit === null,
+    // A formula-valued limit that depends on a decision variable is unsafe: it
+    // can't be a fixed right-hand side. Surfaced so detection can refuse it with
+    // a specific marker instead of freezing a wrong value.
+    limitFormula: limitFormula,
+    limitDependsOnVariable: limitDependsOnVariable,
   };
 }
 

@@ -57,7 +57,15 @@ function arraysOf(g) {
   for (let r = 0; r < g.length; r++) {
     const fr = [], vr = [];
     for (let c = 0; c < g[r].length; c++) {
-      const raw = String(g[r][c]);
+      const cell = g[r][c];
+      // A {f,v} object carries an explicit formula and cached value — used to
+      // reproduce the web grid caching formulas as 0.
+      if (cell && typeof cell === 'object') {
+        fr.push(cell.f || '');
+        vr.push(typeof cell.v === 'number' ? cell.v : 0);
+        continue;
+      }
+      const raw = String(cell);
       if (isF(raw)) { fr.push(raw); vr.push(0); }
       else { fr.push(''); vr.push(raw !== '' && !isNaN(Number(raw)) ? Number(raw) : raw); }
     }
@@ -377,6 +385,43 @@ function strictGrid(rel) {
   ok('inline scoped check: worker resolves obj 5',
      !wErr && wOut && Math.abs(wOut.objective - 5) < 1e-9, wErr || JSON.stringify(wOut));
 }
+
+// Formula-valued limits: both inline paths must evaluate the formula against
+// the decision variables, never read the web's cached 0. A finite constant is
+// accepted; a variable-dependent or text formula is refused identically.
+[
+  { name: 'formula limit =100 -> obj 100', accept: true, obj: 100, grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=100', v: 0 }] ] },
+  { name: 'formula limit =50+50 -> obj 100', accept: true, obj: 100, grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=50+50', v: 0 }] ] },
+  { name: 'formula limit ="" -> CONSTRAINT_MISSING_LIMIT', accept: false, marker: 'CONSTRAINT_MISSING_LIMIT', grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=""', v: 0 }] ] },
+  { name: 'formula limit =2*B2 -> LIMIT_DEPENDS_ON_VARIABLE', accept: false, marker: 'LIMIT_DEPENDS_ON_VARIABLE', grid: [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'], ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''], ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=2*B2', v: 0 }] ] },
+].forEach(function (fx) {
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(fx.grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(fx.grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  if (fx.accept) {
+    ok('inline (' + fx.name + '): main-thread obj ' + fx.obj,
+       !mErr && mOut && Math.abs(mOut.objective - fx.obj) < 1e-9, mErr || JSON.stringify(mOut));
+    ok('inline (' + fx.name + '): worker obj ' + fx.obj,
+       !wErr && wOut && Math.abs(wOut.objective - fx.obj) < 1e-9, wErr || JSON.stringify(wOut));
+  } else {
+    ok('inline (' + fx.name + '): main-thread ' + fx.marker,
+       mErr && mErr.indexOf(fx.marker) !== -1, mErr);
+    ok('inline (' + fx.name + '): worker ' + fx.marker,
+       wErr && wErr.indexOf(fx.marker) !== -1, wErr);
+  }
+});
 
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

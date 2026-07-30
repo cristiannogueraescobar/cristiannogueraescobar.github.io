@@ -422,6 +422,11 @@ setTimeout(function () {
       en: /relation operator but no limit/, es: /operador de relaci\u00f3n pero no valor l\u00edmite/,
       pt: /operador de rela\u00e7\u00e3o mas nenhum valor limite/, de: /Relationsoperator, aber keinen Grenzwert/,
       fr: /op\u00e9rateur de relation mais aucune valeur limite/
+    },
+    LIMIT_DEPENDS_ON_VARIABLE: {
+      en: /depends on a decision variable/, es: /depende de una variable de decisi\u00f3n/,
+      pt: /depende de uma vari\u00e1vel de decis\u00e3o/, de: /von einer Entscheidungsvariablen abh\u00e4ngt/,
+      fr: /d\u00e9pend d\u2019une variable de d\u00e9cision/
     }
   };
   Object.keys(markerExpect).forEach(function (marker) {

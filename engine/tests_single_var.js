@@ -351,4 +351,72 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
+// ---- Formula-valued limits ---------------------------------------------
+// On the web the grid caches every formula as 0, so a limit cell holding a
+// formula must be evaluated against the decision variables, never read from the
+// cached value. A finite constant is accepted; a variable-dependent formula or
+// text/empty is refused.
+
+// Limit =100 must give x=100, never x=0.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=100', v: 0 }],
+  ];
+  const r = run(grid);
+  check('formula limit =100 resolves to 100 (not the cached 0)',
+    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 100) < 1e-9 &&
+    Math.abs(r.out.values[0] - 100) < 1e-9, r.error || JSON.stringify(r.out));
+}
+
+// Limit =G2 where G2 holds 100 must give x=100.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit', 'Const'],
+    ['A', '0', '', '', '', '', 100],
+    ['', '', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=G2', v: 0 }, ''],
+  ];
+  const r = run(grid);
+  check('formula limit =G2 (G2=100) resolves to 100',
+    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 100) < 1e-9,
+    r.error || JSON.stringify(r.out));
+}
+
+// Limit ="" (formula returning text) reads as a missing limit, even if a number
+// sits further right.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=""', v: 0 }],
+  ];
+  const r = run(grid);
+  check('formula limit ="" -> CONSTRAINT_MISSING_LIMIT',
+    !!r.error && /^detect:/.test(r.error) && /CONSTRAINT_MISSING_LIMIT/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+// Limit =2*B2 depends on a decision variable: it is not a fixed right-hand side
+// and must be refused, not frozen at the current value.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', { f: '=2*B2', v: 0 }],
+  ];
+  const r = run(grid);
+  check('formula limit =2*B2 -> LIMIT_DEPENDS_ON_VARIABLE',
+    !!r.error && /^detect:/.test(r.error) && /LIMIT_DEPENDS_ON_VARIABLE/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
 report();

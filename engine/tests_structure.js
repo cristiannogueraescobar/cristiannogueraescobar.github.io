@@ -303,7 +303,15 @@ PAGES.forEach(function (p) {
     // text to grab an unrelated number. Pin the shape in both engines.
     ok(name + ': limit scan skips blanks and stops on first real content',
        /value === '' \|\| value === null \|\| value === undefined\) continue/.test(src) &&
-       /if \(typeof value === 'number'\) \{ limit = value; \}/.test(src));
+       /typeof value === 'number'\) \{ limit = value/.test(src));
+    // A FORMULA limit must be examined via entry.formula and evaluated against
+    // the decision variables — never read from the cached value (0 on the web).
+    // Pin that the scan inspects the formula and that a variable-dependent limit
+    // is refused.
+    ok(name + ': limit scan inspects entry.formula, not only the value',
+       /entry\.formula/.test(src) && /limitFormula/.test(src));
+    ok(name + ': refuses a limit that depends on a decision variable',
+       /LIMIT_DEPENDS_ON_VARIABLE/.test(src) && /limitDependsOnVariable/.test(src));
   });
 })();
 

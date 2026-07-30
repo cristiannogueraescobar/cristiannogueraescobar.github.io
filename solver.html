@@ -189,6 +189,7 @@ label.toggle{display:flex;align-items:center;gap:7px;font-size:14px;color:var(--
 svg.plot{width:100%;height:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px}
 svg.plot .ax{stroke:var(--ink);stroke-width:1}
 svg.plot .region{fill:rgba(181,130,46,.16);stroke:var(--brass);stroke-width:1.5}
+svg.plot .region.open{fill:rgba(181,130,46,.10);stroke:var(--brass);stroke-width:1.5;stroke-dasharray:6 4}
 svg.plot .cline{stroke:var(--line);stroke-width:1;stroke-dasharray:3 3}
 svg.plot .cline.bind{stroke:var(--true);stroke-width:1.5;stroke-dasharray:none}
 svg.plot .opt{fill:var(--true);stroke:#fff;stroke-width:2}
@@ -405,7 +406,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=52"></script>
+<script src="assets/i18n.js?v=53"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -425,6 +426,7 @@ function localizeEngineError(msg){
   if (msg.indexOf('AMBIGUOUS_DECISION_CELLS') === 0) return t('ambiguousDecisionCells');
   if (msg.indexOf('NO_OBJECTIVE_CELL') === 0) return t('noObjectiveCell');
   if (msg.indexOf('CONSTRAINT_MISSING_LIMIT') === 0) return t('constraintMissingLimit');
+  if (msg.indexOf('LIMIT_DEPENDS_ON_VARIABLE') === 0) return t('limitDependsOnVariable');
   return msg;
 }
 // Column index (1-based) to spreadsheet letter (1->A, 27->AA). Top-level so both
@@ -2057,6 +2059,7 @@ function detectModel_(sheet) {
         const role = readConstraint_(grid, output);
         if (role.isObjective) hasObjective = true;
         else if (role.isCompleteConstraint) hasConstraint = true;
+        else if (role.hasRelation && role.limitFormula) hasConstraint = true;
       });
       if (hasObjective && hasConstraint) eligibleSingles.push(cell);
     });
@@ -2132,10 +2135,20 @@ function detectModel_(sheet) {
     });
   });
 
-  // No genuine objective (every dependent output is a complete constraint) must
-  // refuse rather than let pickObjective_ invent one from a constraint.
+  // Classify dependent outputs by role. Pass the decision variables so a
+  // FORMULA limit (=100) resolves to its constant instead of reading as
+  // incomplete from the web's cached 0. Refuse a variable-dependent limit, an
+  // incomplete constraint, or a sheet with no genuine objective.
+  const variableList = expandRange_(grid, variables);
+  const roles = dependent.map(function (cell) { return readConstraint_(grid, cell, variableList); });
+  if (roles.some(function (r) { return r.limitDependsOnVariable; })) {
+    throw new Error('LIMIT_DEPENDS_ON_VARIABLE');
+  }
+  if (roles.some(function (r) { return r.isIncompleteConstraint; })) {
+    throw new Error('CONSTRAINT_MISSING_LIMIT');
+  }
   const objectiveCandidates = dependent.filter(function (cell) {
-    return readConstraint_(grid, cell).isObjective;
+    return readConstraint_(grid, cell, variableList).isObjective;
   });
   if (!objectiveCandidates.length) {
     throw new Error('NO_OBJECTIVE_CELL');
@@ -2147,7 +2160,10 @@ function detectModel_(sheet) {
   const constraints = [];
   dependent.forEach(function (cell) {
     if (cell === objectiveCell) return;
-    constraints.push(readConstraint_(grid, cell));
+    const parsed = readConstraint_(grid, cell, variableList);
+    if (parsed.limitDependsOnVariable) { throw new Error('LIMIT_DEPENDS_ON_VARIABLE'); }
+    if (parsed.isIncompleteConstraint) { throw new Error('CONSTRAINT_MISSING_LIMIT'); }
+    constraints.push(parsed);
   });
   // Never silently drop constraints: a model with more limits than we support
   // must fail loudly, or we'd "verify" a smaller model than the user built and
@@ -2331,18 +2347,22 @@ function readLabels_(grid, rangeA1, variables) {
   });
 }
 
-function readConstraint_(grid, a1) {
+function readConstraint_(grid, a1, variables) {
   const address = parseAddress_(a1);
   const label = labelFor_(grid, a1);
   let relation = null;
   let limit = null;
+  let limitFormula = null;
+  let limitCell = null;
 
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
     // Stop at the grid's right edge: cellAt_ returns {value:0} out of bounds,
     // and reading that would turn an EMPTY limit into 0 (incomplete looking
     // complete). Only scan real cells.
     if (address.column + step - grid.firstColumn >= grid.columns) break;
-    const value = cellAt_(grid, columnLetter_(address.column + step) + address.row).value;
+    const addr = columnLetter_(address.column + step) + address.row;
+    const entry = cellAt_(grid, addr);
+    const value = entry.value;
     if (relation === null && typeof value === 'string') {
       const trimmed = value.trim();
       if (STRICT_RELATION_TOKENS[trimmed]) {
@@ -2355,11 +2375,39 @@ function readConstraint_(grid, a1) {
     }
     if (relation !== null) {
       // Limit is the FIRST real cell after the operator: skip blanks, accept the
-      // first number, and STOP on any other content so we never reach past text
-      // or a stray label to grab an unrelated number further right.
+      // first number, and STOP on any other content. A FORMULA limit must never
+      // be read from its cached value (0 on the web): record it and evaluate it
+      // against the decision variables below.
+      if (entry.formula) { limitFormula = entry.formula; limitCell = addr; break; }
       if (value === '' || value === null || value === undefined) continue;
-      if (typeof value === 'number') { limit = value; }
+      if (typeof value === 'number') { limit = value; limitCell = addr; }
       break;
+    }
+  }
+
+  // A formula limit is valid ONLY if it reduces to a finite numeric constant
+  // with no decision-variable terms (=100, =50+50, =H1). It is rejected if it
+  // depends on a variable (=2*B2) or resolves to text/empty (="").
+  let limitDependsOnVariable = false;
+  if (limitFormula !== null && variables) {
+    const context = {
+      grid: grid,
+      variables: toSet_(variables),
+      memo: {},
+      constantFallbacks: [],
+      allowCachedFormulaFallback: false,
+    };
+    try {
+      const form = linearize_(context, limitCell, 0);
+      if (form.text !== undefined) {
+        // formula resolves to text (e.g. =""): treated as a missing limit
+      } else if (!isConstant_(form)) {
+        limitDependsOnVariable = true;
+      } else if (Number.isFinite(form.constant)) {
+        limit = form.constant;
+      }
+    } catch (err) {
+      // Unparseable or cyclic: leave the limit unresolved (incomplete).
     }
   }
 
@@ -2375,6 +2423,8 @@ function readConstraint_(grid, a1) {
     isObjective: relation === null,
     isCompleteConstraint: relation !== null && limit !== null,
     isIncompleteConstraint: relation !== null && limit === null,
+    limitFormula: limitFormula,
+    limitDependsOnVariable: limitDependsOnVariable,
   };
 }
 
@@ -3651,12 +3701,29 @@ function matchesAnyHint_(label, hints) {
     var poly = geo.vertices.map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
     var lab = out.plot.variableLabels || ['x','y'];
 
-    var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="plot" role="img" aria-label="Feasible region">';
+    var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="plot" role="img" aria-label="'+
+      (geo.unbounded ? esc(t('regionUnboundedAria')) : 'Feasible region')+'">';
     // axes
     svg += '<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" class="ax"/>';
     svg += '<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-pad)+'" class="ax"/>';
-    // feasible polygon
-    svg += '<polygon points="'+poly+'" class="region"/>';
+    // feasible region: a closed polygon when bounded; when unbounded, the region
+    // continues past the drawn vertices, so we shade an OPEN band toward the
+    // recession direction instead of closing it into a misleading finite shape.
+    if (geo.unbounded && geo.recession) {
+      // Extend the two "outer" vertices along the recession direction to the
+      // plot edge, so the shaded area reads as continuing off-chart.
+      var far = Math.max(maxX, maxY) * 2;
+      var open = geo.vertices.slice();
+      var last = geo.vertices[geo.vertices.length-1];
+      var first = geo.vertices[0];
+      var ext1 = { x:last.x + geo.recession.x*far, y:last.y + geo.recession.y*far };
+      var ext0 = { x:first.x + geo.recession.x*far, y:first.y + geo.recession.y*far };
+      var pts = [ext0].concat(open).concat([ext1])
+        .map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
+      svg += '<polygon points="'+pts+'" class="region open"/>';
+    } else {
+      svg += '<polygon points="'+poly+'" class="region"/>';
+    }
     // constraint lines
     cons.forEach(function(c){
       var p = lineAcrossBox(c, maxX, maxY);
@@ -3673,7 +3740,8 @@ function matchesAnyHint_(label, hints) {
 
     var box = document.createElement('div');
     box.className = 'plotwrap';
-    box.innerHTML = '<p class="plotcap">'+t('regionCap')+'</p>' + svg;
+    var cap = geo.unbounded ? (t('regionCap')+' '+t('regionUnboundedNote')) : t('regionCap');
+    box.innerHTML = '<p class="plotcap">'+cap+'</p>' + svg;
     document.getElementById('result').appendChild(box);
 
     // Optional worked steps: the corner-point method, the way it's taught.
@@ -3748,7 +3816,32 @@ function matchesAnyHint_(label, hints) {
       var cy=verts.reduce(function(s,p){return s+p.y;},0)/verts.length;
       verts.sort(function(a,b){return Math.atan2(a.y-cy,a.x-cx)-Math.atan2(b.y-cy,b.x-cx);});
     }
-    return { vertices:verts };
+
+    // Is the feasible region unbounded? Test whether a ray can leave any vertex
+    // and travel to infinity without leaving the region. The recession cone is
+    // spanned by non-negative directions (x,y >= 0), so it suffices to probe a
+    // fan of directions in the first quadrant and see if any satisfies every
+    // constraint in the limit (a<=b as a*d <= 0, a>=b as a*d >= 0). If one does,
+    // the polygon of vertices is only PART of the region and must not be drawn
+    // as a closed shape.
+    function recedes(d){
+      return cons.every(function(c){
+        var proj = c.x*d.x + c.y*d.y;
+        if(c.op==='<=') return proj <= 1e-9;
+        if(c.op==='>=') return proj >= -1e-9;
+        return Math.abs(proj) < 1e-9;   // equality: only along the line
+      });
+    }
+    var unbounded = false, recession = null;
+    if(verts.length){
+      // Probe directions across the first quadrant (0..90 deg). A coarse fan is
+      // enough to detect an open cone; we keep the first direction that recedes.
+      for(var a=0; a<=90; a+=2){
+        var rad=a*Math.PI/180, d={x:Math.cos(rad), y:Math.sin(rad)};
+        if((d.x>1e-9||d.y>1e-9) && recedes(d)){ unbounded=true; recession=d; break; }
+      }
+    }
+    return { vertices:verts, unbounded:unbounded, recession:recession };
   }
 
   // --- Export. All client-side: the solution never leaves the browser. ---
@@ -4102,7 +4195,7 @@ function matchesAnyHint_(label, hints) {
       announce: announce, fmt: fmt, setLang: function(l){ LANG=l; },
       openDrawer: openDrawer, closeDrawer: closeDrawer,
       localizeEngineError: localizeEngineError, showTrouble: showTrouble,
-      showEngineTrouble: showEngineTrouble };
+      showEngineTrouble: showEngineTrouble, solve2D: solve2D };
   }
 })();
 </script>
