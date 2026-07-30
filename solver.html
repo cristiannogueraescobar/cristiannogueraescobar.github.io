@@ -3718,23 +3718,25 @@ function matchesAnyHint_(label, hints) {
       else if(c.op === '>='){ poly = clip(poly, -c.x, -c.y, -c.b); }
       else { poly = clip(poly, c.x, c.y, c.b); poly = clip(poly, -c.x, -c.y, -c.b); }
     });
-    // shoelace area of the clipped polygon
+    // shoelace area of the clipped polygon (math units — informational)
     var area = 0;
     for(var i=0;i<poly.length;i++){
       var A = poly[i], B = poly[(i+1)%poly.length];
       area += A.x*B.y - B.x*A.y;
     }
     area = Math.abs(area)/2;
-    // If the region collapsed to a line/ray, extract its two farthest points as
-    // a segment so the caller can draw a polyline instead of a 0-area polygon.
+    // Always expose the two farthest clipped points as a candidate segment, so
+    // the caller can draw a polyline when it decides (in SCREEN units) that the
+    // region is 1-D. Deciding here in math units is unsafe: a thin-but-real 2-D
+    // region has a tiny math-unit area yet a visible screen area.
     var segment = null;
-    if(area <= 1e-6 && poly.length >= 2){
+    if(poly.length >= 2){
       var best = null, bestD = -1;
       for(var a=0;a<poly.length;a++) for(var b=a+1;b<poly.length;b++){
         var dx = poly[a].x-poly[b].x, dy = poly[a].y-poly[b].y, d = dx*dx+dy*dy;
         if(d > bestD){ bestD = d; best = [poly[a], poly[b]]; }
       }
-      if(best && bestD > 1e-9) segment = best;
+      if(best && bestD > 1e-12) segment = best;
     }
     return { points: poly, area: area, segment: segment };
   }
@@ -3767,20 +3769,28 @@ function matchesAnyHint_(label, hints) {
     // [0,maxX] x [0,maxY]. This renders exactly the visible part of the region
     // — bounded or not — without inventing a band from a single recession
     // vector. It handles every geometry uniformly: a bounded polygon, a 2D
-    // unbounded region with one vertex (two extreme rays), and a 1D ray from an
-    // equality constraint (which clips to a zero-area sliver → drawn as a line,
-    // never an invisible degenerate polygon).
+    // unbounded region with one vertex (two extreme rays), and a 1D segment/ray
+    // from an equality constraint (drawn as a line, never a zero-area polygon).
+    //
+    // A region is 1-D iff an EQUALITY constraint pins it to a line — that is an
+    // algebraic fact, independent of the model's units and of the on-screen
+    // scale. (Deciding by area alone is unsafe: a thin-but-real 2-D region like
+    // 0<=x<=1e-7 has tiny area yet is a rectangle, while a genuine segment has
+    // an equality.) The `.open` class — dashed, "continues to infinity" —
+    // depends ONLY on geo.unbounded, so a bounded segment reads as closed.
     var clip = clipFeasibleToBox_(cons, maxX, maxY);
-    var regionClass = geo.unbounded ? 'region open' : 'region';
-    if (clip.area > 1e-6 && clip.points.length >= 3) {
+    var isOneDimensional = cons.some(function(c){ return c.op === '='; });
+    var openClass = geo.unbounded ? ' open' : '';
+    if (!isOneDimensional && clip.points.length >= 3) {
       var pts = clip.points.map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
-      svg += '<polygon points="'+pts+'" class="'+regionClass+'"/>';
+      svg += '<polygon points="'+pts+'" class="region'+openClass+'"/>';
     } else if (clip.segment) {
-      // The region is (within the view) a 1-D ray/segment: an equality collapsed
-      // it to a line. Draw a thick dashed polyline, never a zero-area polygon.
+      // A 1-D region within the view: an equality collapsed it to a line. Draw a
+      // thick polyline — dashed ONLY when the region is unbounded (a bounded
+      // segment is solid so it does not read as continuing off-chart).
       var a = clip.segment[0], b = clip.segment[1];
       svg += '<polyline points="'+sx(a.x)+','+sy(a.y)+' '+sx(b.x)+','+sy(b.y)+
-             '" class="region-ray open"/>';
+             '" class="region-ray'+openClass+'"/>';
     } else if (geo.vertices.length) {
       // Fallback: a single feasible point with no visible extent — mark it.
       var v = geo.vertices[0];
@@ -3894,7 +3904,14 @@ function matchesAnyHint_(label, hints) {
       if (mag < 1e-12) return false;            // must be a non-zero direction
       if (d.x < -1e-9 || d.y < -1e-9) return false;  // first quadrant only (x,y >= 0)
       return cons.every(function(c){
-        var proj = c.x*d.x + c.y*d.y;
+        // Normalise the projection by the constraint's coefficient magnitude so
+        // the tolerance is scale-invariant: 1e-12*x <= 5e-12 must behave like
+        // x <= 5, not read as "a*d == 0" just because the raw coefficients are
+        // tiny. d is already unit-length, so proj is then a true cosine-scale
+        // quantity comparable against a fixed tolerance.
+        var scale = Math.sqrt(c.x*c.x + c.y*c.y);
+        if (scale < 1e-15) return true;         // a degenerate 0*x+0*y row is vacuous
+        var proj = (c.x*d.x + c.y*d.y) / scale;
         if(c.op==='<=') return proj <= 1e-9;
         if(c.op==='>=') return proj >= -1e-9;
         return Math.abs(proj) < 1e-9;           // equality: only along the line

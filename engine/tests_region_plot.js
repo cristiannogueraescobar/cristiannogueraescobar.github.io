@@ -238,6 +238,65 @@ setTimeout(function () {
        !/for\s*\(\s*var\s+a\s*=\s*0\s*;\s*a\s*<=\s*90\s*;\s*a\s*\+=\s*2\s*\)/.test(solverHtml));
   }
 
+  // BOUNDED EQUALITY SEGMENT (the regression): x - y = 0, x + y <= 2 is the
+  // segment (0,0)-(1,1). It is 1-D so it draws as .region-ray, but it is BOUNDED
+  // so it must NOT be dashed (.open) and must NOT show the unbounded note — the
+  // presentation must be internally consistent with the bounded aria-label.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'Eq', coefficients: [1, -1], relation: '=', limit: 0, binding: true },
+      { label: 'Sum', coefficients: [1, 1], relation: '<=', limit: 2, binding: true },
+    ], [1, 1]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    const ray = result.querySelector('.region-ray');
+    const rayOpen = result.querySelector('.region-ray.open');
+    const note = result.querySelector('.region-unbounded-note');
+    const svg = result.querySelector('svg.plot');
+    ok('bounded segment: rendered as .region-ray', !!ray, ray ? 'ray' : 'no ray');
+    ok('bounded segment: NOT dashed (.open absent)', !rayOpen, rayOpen ? 'has .open' : '');
+    ok('bounded segment: no unbounded note', !note, note ? note.textContent : '');
+    ok('bounded segment: bounded aria-label',
+       !!svg && /Feasible region/.test(svg.getAttribute('aria-label')),
+       svg ? svg.getAttribute('aria-label') : 'no svg');
+    if (ray) {
+      const pts = ray.getAttribute('points').trim().split(/\s+/);
+      ok('bounded segment: two distinct endpoints', pts.length === 2 && pts[0] !== pts[1],
+         ray.getAttribute('points'));
+    }
+  }
+
+  // THIN 2-D RECTANGLE: 0<=x<=1e-7, 0<=y<=1 is a real rectangle with a tiny area
+  // in model units. It must render as a POLYGON, not collapse to a ray — the
+  // line/polygon choice must not depend on the model's units. (No equality is
+  // present, so it is 2-D by construction.)
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'Cx', coefficients: [1, 0], relation: '<=', limit: 1e-7, binding: true },
+      { label: 'Cy', coefficients: [0, 1], relation: '<=', limit: 1, binding: true },
+    ], [1e-7, 1]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    ok('thin rectangle: drawn as a polygon (not a ray)',
+       !!result.querySelector('polygon.region') && !result.querySelector('.region-ray'),
+       'poly=' + !!result.querySelector('polygon.region') + ' ray=' + !!result.querySelector('.region-ray'));
+  }
+
+  // SCALE INVARIANCE of unboundedness: x<=5 and 1e-12*x<=5e-12 describe the same
+  // bounded region (x<=5). Both must be classified bounded — the recession check
+  // must normalise per-constraint coefficients, not use a raw absolute
+  // tolerance that treats 1e-12 as zero.
+  {
+    const a = solve2D(obj, [ { x:1, y:0, op:'<=', b:5 }, { x:0, y:1, op:'<=', b:5 } ]);
+    const b = solve2D(obj, [ { x:1e-12, y:0, op:'<=', b:5e-12 }, { x:0, y:1, op:'<=', b:5 } ]);
+    ok('scale: x<=5 (normal coeffs) is bounded', a.unbounded === false, String(a.unbounded));
+    ok('scale: 1e-12*x<=5e-12 (tiny coeffs) is ALSO bounded', b.unbounded === false, String(b.unbounded));
+  }
+
   console.log('REGION PLOT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
   process.exit(fail > 0 ? 1 : 0);
 }, 120);
