@@ -508,5 +508,51 @@ PAGES.forEach(function (p) {
      /solveModel_\(sheet,model, d\.localeMode\)/.test(solverRaw));
 })();
 
+// ---- Strict tag-nesting balance for the generated capabilities.html --------
+// The generator writes explicit closing tags, so we can require strict, ordered
+// nesting (a missing </section> or a crossed pair fails here). A simple
+// open==close count is not enough; this checks the STACK order.
+(function () {
+  const capPath = path.join(siteDir, 'capabilities.html');
+  if (!fs.existsSync(capPath)) { ok('capabilities.html exists for balance check', false); return; }
+  const raw = fs.readFileSync(capPath, 'utf8');
+  // Only balance the <main> subtree (the generated content), where nesting is
+  // strict. The surrounding template chrome is covered by the other checks.
+  const mainStart = raw.indexOf('<main');
+  const mainEnd = raw.indexOf('</main>');
+  const region = mainStart !== -1 && mainEnd !== -1 ? raw.slice(mainStart, mainEnd + 7) : '';
+  ok('balance: capabilities.html has a <main> region', region.length > 0);
+
+  const VOID = new Set(['meta', 'img', 'br', 'hr', 'input', 'link', 'source', 'area', 'col']);
+  const TRACK = new Set(['main', 'section', 'article', 'figure', 'figcaption', 'div', 'table',
+    'thead', 'tbody', 'tr', 'th', 'td', 'ol', 'ul', 'li', 'nav', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'span', 'strong']);
+  const stack = [];
+  let balanced = true, firstError = '';
+  const tagRe = /<(\/?)([a-zA-Z0-9]+)([^>]*?)(\/?)>/g;
+  let m;
+  while ((m = tagRe.exec(region))) {
+    const closing = m[1] === '/';
+    const name = m[2].toLowerCase();
+    const selfClose = m[4] === '/';
+    if (!TRACK.has(name)) continue;
+    if (VOID.has(name) || selfClose) continue;
+    if (!closing) {
+      stack.push(name);
+    } else {
+      if (stack.length === 0) { balanced = false; firstError = 'closing </' + name + '> with empty stack'; break; }
+      const top = stack.pop();
+      if (top !== name) { balanced = false; firstError = 'expected </' + top + '> but found </' + name + '>'; break; }
+    }
+  }
+  if (balanced && stack.length > 0) { balanced = false; firstError = 'unclosed <' + stack[stack.length - 1] + '>'; }
+  ok('balance: capabilities.html tags are strictly nested', balanced, firstError);
+
+  // Specifically assert the four group sections each open and close in order.
+  const sectionOpens = (region.match(/<section\b/g) || []).length;
+  const sectionCloses = (region.match(/<\/section>/g) || []).length;
+  ok('balance: capabilities.html <section> opens == closes',
+     sectionOpens === sectionCloses, sectionOpens + ' vs ' + sectionCloses);
+})();
+
 console.log('STRUCTURE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

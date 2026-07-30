@@ -434,7 +434,8 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 .cap-groupnav{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0 0 36px;
   padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .cap-groupnav a{font-family:var(--mono,monospace);font-size:12px;text-decoration:none;
-  color:var(--brass);padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+  color:var(--brass-text);padding:8px 12px;border:1px solid var(--line);border-radius:999px;
+  min-height:32px;display:inline-flex;align-items:center}
 .cap-groupnav a:hover{background:var(--cream);border-color:var(--brass)}
 
 .cap-page-section,#models,#spreadsheet,#verification,#explanation{margin:0 0 48px}
@@ -449,14 +450,14 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   vertical-align:top;text-align:left}
 .cap-table tbody th{font-weight:600;white-space:nowrap}
 .cap-table td[colspan]{color:var(--faint)}
-.cap-example{display:inline-block;font-family:var(--mono,monospace);font-size:12px;
-  color:var(--brass);text-decoration:none;border-bottom:1px solid transparent}
+.cap-example{display:inline-flex;align-items:center;min-height:32px;font-family:var(--mono,monospace);font-size:13px;
+  color:var(--brass-text);text-decoration:none;border-bottom:1px solid transparent}
 .cap-example:hover{border-bottom-color:var(--brass)}
 .cap-notes{margin:0 0 18px}
 .cap-goodtoknow{font-size:14px;color:var(--faint);margin:8px 0;padding:10px 14px;
   background:var(--cream);border-left:3px solid var(--brass);border-radius:0 var(--radius) var(--radius) 0}
 .cap-gtk-label{font-family:var(--mono,monospace);font-size:11px;text-transform:uppercase;
-  letter-spacing:.04em;color:var(--brass);margin-right:6px}
+  letter-spacing:.04em;color:var(--brass-text);margin-right:6px}
 .cap-direction{padding:16px 0 0;border-top:1px solid var(--line)}
 .cap-direction h3{margin:0 0 6px}
 .cap-direction p{margin:0;color:var(--faint);max-width:60ch}
@@ -511,4 +512,19 @@ main > .field-deep:first-child::after{inset:18px 0 0}
     padding:6px 4px}
   .cap-table tbody th,.cap-table tbody td{border-bottom:none;white-space:normal;padding:8px 14px}
   .cap-table tbody th{font-size:17px}
+}
+
+/* Grid children must be allowed to shrink below their intrinsic (image) width */
+.cap-hero > *,.cap-verify > *,.cap-explain > *{min-width:0}
+/* Anchored sections/cards clear the fixed masthead when jumped to */
+#models,#spreadsheet,#verification,#explanation,
+[id^="cap-"]{scroll-margin-top:24px}
+
+/* Figure images link to the full-size illustration; on small screens the
+   in-page image shrinks, so the link makes the full version reachable. */
+.cap-figure-link{display:block}
+.cap-figure-link:focus-visible{outline:2px solid var(--brass-text);outline-offset:2px}
+@media(max-width:560px){
+  .cap-figure figcaption::after{content:" — tap the image to open it full size";
+    color:var(--faint)}
 }

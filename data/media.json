@@ -1,5 +1,6 @@
 {
-  "note": "Product imagery for capabilities.html, keyed by slot. gen_capabilities.js reads this, checks each file exists on disk, and requires altKey to be present in all five languages. The hero image loads eagerly (above the fold); the rest lazily.",
+  "note": "Product ILLUSTRATIONS for capabilities.html, keyed by slot. These are visual representations rendered from the Plumline visual system and real example data — NOT literal screenshots of the interactive solver. gen_capabilities.js reads this, checks each file exists, requires altKey/captionKey to be present in all five languages, and refuses to label them as screenshots. Replace with authentic solver screenshots before presenting them as such.",
+  "kind": "illustration",
   "basePath": "assets/capabilities/",
   "slots": {
     "hero-model": {
@@ -7,6 +8,7 @@
       "width": 1600,
       "height": 1000,
       "altKey": "capImgHeroModel",
+      "captionKey": null,
       "loading": "eager",
       "fetchpriority": "high"
     },
@@ -15,6 +17,7 @@
       "width": 1600,
       "height": 1100,
       "altKey": "capImgVerification",
+      "captionKey": "capFigVerification",
       "loading": "lazy",
       "fetchpriority": "auto"
     },
@@ -23,6 +26,7 @@
       "width": 1600,
       "height": 1000,
       "altKey": "capImgFeasibleRegion",
+      "captionKey": "capFigRegion",
       "loading": "lazy",
       "fetchpriority": "auto"
     }

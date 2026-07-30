@@ -93,17 +93,19 @@
         capStepExport:'Export the result',
         capStepExportDesc:'Download as CSV or Excel, or copy a plain text summary.',
         capVerifyHeading:'Every result is checked against your own formulas',
-        capImgHeroModel:'Production planning spreadsheet in Plumline with three detected continuous decision variables and a confirmed maximisation direction.',
-        capImgVerification:'Plumline verification receipt showing total profit 1,760, solved values, binding constraints and optimality proven.',
-        capImgFeasibleRegion:'Feasible region for the workshop example with the optimal point at 10 chairs and 15 tables and total profit 900.',
+        capImgHeroModel:'Illustration of a production planning model, showing decision cells and detected decision variables.',
+        capImgVerification:'Illustration of a checked result, showing the objective and constraints re-checked and the solution status.',
+        capImgFeasibleRegion:'Illustration of a two-variable feasible region with its optimal point marked.',
         capFigHero:'Plumline detecting the decision variables in a production plan',
-        capFigVerification:'Plumline checks the objective, constraints and solution status after solving.',
-        capFigRegion:'A two-variable model showing its feasible region and optimal solution.',
+        capFigVerification:'An illustration of how Plumline re-checks the objective, constraints and solution status after solving.',
+        capFigRegion:'An illustration of a two-variable feasible region and its optimal solution.',
 
         capTrustLocal:'Runs locally',
         capTrustNoAccount:'No account',
         capTrustLanguages:'Five languages',
         capTrustChecked:'Checked against your formulas',
+
+        capOpenFullImage:'Open the full-size image',
 },
       examples: {
         exCat_start:'Start here',
@@ -118,7 +120,7 @@
         exName_project:'Project selection',
         exName_delivery:'Delivery load',
         exName_supplier:'Supplier activation',
-        exDesc_production:'Maximise profit within an hours limit',
+        exDesc_production:'Maximise profit within available production hours',
         exDesc_workshop:'Two products, shown on a feasible-region chart',
         exDesc_blend:'Minimise cost while meeting nutrient minimums',
         exDesc_marketing:'Allocate spend with per-channel minimums and maximums',
@@ -278,7 +280,7 @@
         exName_project:'Project selection',
         exName_delivery:'Delivery load',
         exName_supplier:'Supplier activation',
-        exDesc_production:'Maximise profit within an hours limit',
+        exDesc_production:'Maximise profit within available production hours',
         exDesc_workshop:'Two products, shown on a feasible-region chart',
         exDesc_blend:'Minimise cost while meeting nutrient minimums',
         exDesc_marketing:'Allocate spend with per-channel minimums and maximums',
@@ -672,6 +674,8 @@
         capTrustNoAccount:'No account',
         capTrustLanguages:'Five languages',
         capTrustChecked:'Checked against your formulas',
+
+        capOpenFullImage:'Open the full-size image',
 },
       examples: {
         exCat_start:'Empieza aquí',
@@ -1240,6 +1244,8 @@
         capTrustNoAccount:'No account',
         capTrustLanguages:'Five languages',
         capTrustChecked:'Checked against your formulas',
+
+        capOpenFullImage:'Open the full-size image',
 },
       examples: {
         exCat_start:'Comece aqui',
@@ -1808,6 +1814,8 @@
         capTrustNoAccount:'No account',
         capTrustLanguages:'Five languages',
         capTrustChecked:'Checked against your formulas',
+
+        capOpenFullImage:'Open the full-size image',
 },
       examples: {
         exCat_start:'Starte hier',
@@ -2376,6 +2384,8 @@
         capTrustNoAccount:'No account',
         capTrustLanguages:'Five languages',
         capTrustChecked:'Checked against your formulas',
+
+        capOpenFullImage:'Open the full-size image',
 },
       examples: {
         exCat_start:'Commencez ici',

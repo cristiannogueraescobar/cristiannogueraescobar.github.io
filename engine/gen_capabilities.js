@@ -101,10 +101,42 @@ function image(slot) {
          '" alt="' + escAttr(alt) + '" data-i18n-alt="' + escAttr(m.altKey) + '"' +
          ' decoding="async" loading="' + escAttr(m.loading || 'lazy') + '"' + fp + '>';
 }
-// A figure with an optional visible caption.
-function figure(slot, captionKey) {
-  const cap = captionKey ? '\n      ' + t('figcaption', captionKey) : '';
-  return '<figure class="cap-figure">\n      ' + image(slot) + cap + '\n    </figure>';
+// A figure with an optional visible caption, driven by the slot's captionKey.
+// The image links to itself so that on small screens (where a 1600px-wide
+// illustration shrinks below legibility) the reader can open the full-size
+// version. The link carries a translatable label for screen readers.
+function figure(slot) {
+  const m = media.slots[slot];
+  const file = media.basePath + m.file;
+  const cap = m && m.captionKey ? '\n      ' + t('figcaption', m.captionKey) : '';
+  return '<figure class="cap-figure">\n' +
+         '      <a class="cap-figure-link" href="' + escAttr(file) + '" ' +
+         'aria-label="' + escAttr(en('capOpenFullImage')) + '" ' +
+         'data-i18n-aria="capOpenFullImage">' + image(slot) + '</a>' + cap +
+         '\n    </figure>';
+}
+
+// The <head> metadata block, built from the page copy so title/description/OG/
+// Twitter never go stale against i18n. Title and description carry data-i18n so
+// the browser can localise them too; the static values are the English source.
+function buildHead() {
+  const title = en('capPageTitle');
+  const desc = en('capPageMetaDesc');
+  const L = [];
+  L.push('<title data-i18n="capPageTitle">' + escText(title) + '</title>');
+  L.push('<meta name="description" data-i18n="capPageMetaDesc" content="' + escAttr(desc) + '">');
+  L.push('<meta property="og:title" content="' + escAttr(title) + '">');
+  L.push('<meta property="og:description" content="' + escAttr(desc) + '">');
+  L.push('<meta property="og:type" content="website">');
+  L.push('<meta property="og:url" content="https://plumline.online/capabilities.html">');
+  L.push('<meta property="og:image" content="https://plumline.online/assets/og-image.png">');
+  L.push('<meta property="og:image:width" content="1200">');
+  L.push('<meta property="og:image:height" content="630">');
+  L.push('<meta name="twitter:card" content="summary_large_image">');
+  L.push('<meta name="twitter:image" content="https://plumline.online/assets/og-image.png">');
+  L.push('<meta name="twitter:title" content="' + escAttr(title) + '">');
+  L.push('<meta name="twitter:description" content="' + escAttr(desc) + '">');
+  return L.join('\n');
 }
 
 /* ---- Per-group renderers ---------------------------------------------- */
@@ -193,7 +225,7 @@ function renderVerification() {
   L.push('    ' + t('h2', GROUP_KEY.verification, 'id="verification-title"'));
   L.push('    <div class="cap-verify">');
   L.push('      <div class="cap-verify-media">');
-  L.push('        ' + figure('verification-receipt', 'capFigVerification'));
+  L.push('        ' + figure('verification-receipt'));
   L.push('      </div>');
   L.push('      <div class="cap-verify-points">');
   L.push('        ' + t('h3', 'capVerifyHeading'));
@@ -217,7 +249,7 @@ function renderExplanation() {
   L.push('    ' + t('h2', GROUP_KEY.explanation, 'id="explanation-title"'));
   L.push('    <div class="cap-explain">');
   L.push('      <div class="cap-explain-media">');
-  L.push('        ' + figure('feasible-region', 'capFigRegion'));
+  L.push('        ' + figure('feasible-region'));
   L.push('      </div>');
   L.push('      <div class="cap-explain-list">');
   inGroup('explanation').forEach(function (c) {
@@ -241,7 +273,7 @@ function renderExplanation() {
 
 function buildContent() {
   const L = [];
-  L.push('<main>');
+  L.push('<main class="plumb">');
 
   // Hero: two columns (text + CTA on the left, real product image on the right).
   L.push('  <div class="cap-hero">');
@@ -258,7 +290,7 @@ function buildContent() {
   L.push('    </div>');
   L.push('    <div class="cap-hero-media">');
   // Hero image: no visible caption (the hero text already explains it).
-  L.push('      ' + figure('hero-model', null));
+  L.push('      ' + figure('hero-model'));
   L.push('    </div>');
   L.push('  </div>');
 
@@ -292,11 +324,15 @@ function buildContent() {
 function buildPage() {
   const templatePath = path.join(siteDir, 'engine', 'templates', 'capabilities.template.html');
   const template = fs.readFileSync(templatePath, 'utf8');
-  const marker = '<!-- CAPABILITIES_CONTENT -->';
-  if (template.indexOf(marker) === -1) {
-    throw new Error('gen_capabilities: template is missing the ' + marker + ' marker');
+  const contentMarker = '<!-- CAPABILITIES_CONTENT -->';
+  const headMarker = '<!-- CAPABILITIES_HEAD -->';
+  if (template.indexOf(contentMarker) === -1) {
+    throw new Error('gen_capabilities: template is missing the ' + contentMarker + ' marker');
   }
-  return template.replace(marker, buildContent());
+  if (template.indexOf(headMarker) === -1) {
+    throw new Error('gen_capabilities: template is missing the ' + headMarker + ' marker');
+  }
+  return template.replace(headMarker, buildHead()).replace(contentMarker, buildContent());
 }
 
 const outPath = path.join(siteDir, 'capabilities.html');

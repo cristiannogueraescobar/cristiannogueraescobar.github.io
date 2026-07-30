@@ -237,7 +237,21 @@ console.log('  coverage: ' + coverage.tested + '/' + N + ' with an executed test
 console.log('  coverage: examples — ' + coverage.covered + ' covered, ' +
             coverage.notApplicable + ' not-applicable, ' + coverage.pending + ' pending');
 console.log('  coverage: ' + coverage.docTargetValid + '/' + N + ' with a valid documentation target');
-console.log('  coverage: ' + coverage.translated + '/' + N + ' translated in all languages');
+// Whether all pending translations are cleared — only then may we say
+// "translated", as opposed to "keys present".
+const pendingPath = path.join(siteDir, 'data', 'pending-translations.json');
+let pendingTotal = 0;
+if (fs.existsSync(pendingPath)) {
+  try {
+    const pd = JSON.parse(fs.readFileSync(pendingPath, 'utf8'));
+    pendingTotal = ((pd.new_keys_placeholder_en) || []).length + ((pd.existing_keys_en_changed) || []).length;
+  } catch (e) { pendingTotal = -1; }
+}
+const translatedWord = pendingTotal === 0
+  ? coverage.translated + '/' + N + ' translated in all languages'
+  : coverage.translated + '/' + N + ' with i18n keys present in all languages (' +
+    pendingTotal + ' still awaiting real translation — see pending-translations.json)';
+console.log('  coverage: ' + translatedWord);
 console.log('  coverage: ' + coverage.publicCount + '/' + N + ' marked public (pending are excluded)');
 // Every capability must be fully tested and translated, and have a valid docs
 // target, regardless of the public flag (those are correctness guarantees, not
@@ -248,7 +262,7 @@ ok('coverage: all capabilities have an executed test', coverage.tested === N,
    coverage.tested + '/' + N);
 ok('coverage: all capabilities have a valid documentation target', coverage.docTargetValid === N,
    coverage.docTargetValid + '/' + N);
-ok('coverage: all capabilities are translated', coverage.translated === N,
+ok('coverage: all capabilities have i18n keys present in every language', coverage.translated === N,
    coverage.translated + '/' + N);
 // Every covered/not-applicable capability accounts for its example; pending
 // ones are explicitly tracked, never silently public.
@@ -376,8 +390,44 @@ ok('coverage: covered + not-applicable + pending == total',
      new RegExp('src="' + media.basePath + media.slots['hero-model'].file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
                 '"[^>]*loading="eager"').test(html));
 
+  // Illustrations, not screenshots: media.json marks these as illustrations, so
+  // the page and its alt/caption text must NOT claim to be literal screenshots
+  // of the solver. Guards against re-introducing "screenshot"/"captura" wording.
+  if (media.kind === 'illustration') {
+    const banned = /\b(screenshot|screen capture|captura de pantalla|captura real)\b/i;
+    ok('capabilities.html: illustrations are not labelled as screenshots',
+       !banned.test(html), 'found screenshot wording on an illustration page');
+    Object.keys(media.slots).forEach(function (slot) {
+      const m = media.slots[slot];
+      const alt = DICT.en.capabilities[m.altKey] || '';
+      ok('capabilities.html: alt for ' + slot + ' does not claim to be a screenshot',
+         !banned.test(alt), alt);
+    });
+  }
+
+  // SEO head is generated from the page copy and must match i18n exactly, so a
+  // no-JS crawler never gets stale metadata.
+  const EN2 = DICT.en.capabilities;
+  ok('capabilities.html: <title> equals capPageTitle',
+     html.indexOf('<title data-i18n="capPageTitle">' + EN2.capPageTitle + '</title>') !== -1);
+  ok('capabilities.html: meta description equals capPageMetaDesc',
+     html.indexOf('content="' + EN2.capPageMetaDesc.replace(/"/g, '&quot;') + '"') !== -1);
+  ok('capabilities.html: og:title matches title',
+     html.indexOf('property="og:title" content="' + EN2.capPageTitle + '"') !== -1);
+  ok('capabilities.html: og:description matches description',
+     html.indexOf('property="og:description" content="' + EN2.capPageMetaDesc + '"') !== -1);
+  ok('capabilities.html: twitter:title matches title',
+     html.indexOf('name="twitter:title" content="' + EN2.capPageTitle + '"') !== -1);
+  ok('capabilities.html: twitter:description matches description',
+     html.indexOf('name="twitter:description" content="' + EN2.capPageMetaDesc + '"') !== -1);
+  ok('capabilities.html: canonical is correct',
+     html.indexOf('rel="canonical" href="https://plumline.online/capabilities.html"') !== -1);
+  // The page uses the shared width container.
+  ok('capabilities.html: main uses the shared .plumb width container',
+     /<main class="plumb">/.test(html));
+
   // Exactly one <main> and one <h1>.
-  ok('capabilities.html: exactly one <main>', (html.match(/<main>/g) || []).length === 1);
+  ok('capabilities.html: exactly one <main>', (html.match(/<main[\s>]/g) || []).length === 1);
   ok('capabilities.html: exactly one <h1', (html.match(/<h1[\s>]/g) || []).length === 1);
   // Generated-file notice is present.
   ok('capabilities.html: carries a generated-file notice',

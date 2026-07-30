@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- GENERATED PAGE - do not edit by hand.
-     The content between the CAPABILITIES_CONTENT markers is produced by
-     engine/gen_capabilities.js from assets/product-capabilities.js. Edit the
-     inventory (and this template) instead, then run:
+     The <head> metadata between the CAPABILITIES_HEAD markers and the content
+     between the CAPABILITIES_CONTENT markers are produced by
+     engine/gen_capabilities.js from assets/product-capabilities.js and i18n.js.
+     Edit the inventory, the copy, or this template instead, then run:
        node engine/gen_capabilities.js -->
-<title data-i18n="capPageTitle">What Plumline can do</title>
-<meta name="description" data-i18n="capPageMetaDesc" content="The models Plumline solves, the checks it runs on every answer, and what it explains, each capability backed by a test and, where it applies, a runnable example.">
-<meta property="og:title" content="What Plumline can do">
-<meta property="og:description" content="The models Plumline solves, the checks it runs on every answer, and what it explains.">
+<!-- CAPABILITIES_HEAD_START -->
+<title data-i18n="capPageTitle">Plumline Capabilities | Spreadsheet Optimisation Solver</title>
+<meta name="description" data-i18n="capPageMetaDesc" content="The models Plumline solves, the checks it runs on every result, and how it explains the answer. Each capability is backed by a test and, where it applies, a runnable example.">
+<meta property="og:title" content="Plumline Capabilities | Spreadsheet Optimisation Solver">
+<meta property="og:description" content="The models Plumline solves, the checks it runs on every result, and how it explains the answer. Each capability is backed by a test and, where it applies, a runnable example.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/capabilities.html">
 <meta property="og:image" content="https://plumline.online/assets/og-image.png">
@@ -19,10 +21,11 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://plumline.online/assets/og-image.png">
-<meta name="twitter:title" content="What Plumline can do">
-<meta name="twitter:description" content="The models Plumline solves, the checks it runs, and what it explains.">
+<meta name="twitter:title" content="Plumline Capabilities | Spreadsheet Optimisation Solver">
+<meta name="twitter:description" content="The models Plumline solves, the checks it runs on every result, and how it explains the answer. Each capability is backed by a test and, where it applies, a runnable example.">
+<!-- CAPABILITIES_HEAD_END -->
 <link rel="canonical" href="https://plumline.online/capabilities.html">
-<link rel="stylesheet" href="assets/plumline.css?v=13">
+<link rel="stylesheet" href="assets/plumline.css?v=15">
 </head>
 <body data-page="capabilities">
 
@@ -56,7 +59,7 @@
 </div>
 
 <!-- CAPABILITIES_CONTENT_START -->
-<main>
+<main class="plumb">
   <div class="cap-hero">
     <div class="cap-hero-text">
       <h1 data-i18n="capPageH1">What Plumline can solve, check and explain</h1>
@@ -71,7 +74,7 @@
     </div>
     <div class="cap-hero-media">
       <figure class="cap-figure">
-      <img src="assets/capabilities/01-production-model-and-variable-settings.png" width="1600" height="1000" alt="Production planning spreadsheet in Plumline with three detected continuous decision variables and a confirmed maximisation direction." data-i18n-alt="capImgHeroModel" decoding="async" loading="eager" fetchpriority="high">
+      <a class="cap-figure-link" href="assets/capabilities/01-production-model-and-variable-settings.png" aria-label="Open the full-size image" data-i18n-aria="capOpenFullImage"><img src="assets/capabilities/01-production-model-and-variable-settings.png" width="1600" height="1000" alt="Illustration of a production planning model, showing decision cells and detected decision variables." data-i18n-alt="capImgHeroModel" decoding="async" loading="eager" fetchpriority="high"></a>
     </figure>
     </div>
   </div>
@@ -139,8 +142,8 @@
     <div class="cap-verify">
       <div class="cap-verify-media">
         <figure class="cap-figure">
-      <img src="assets/capabilities/02-production-verified-result.png" width="1600" height="1100" alt="Plumline verification receipt showing total profit 1,760, solved values, binding constraints and optimality proven." data-i18n-alt="capImgVerification" decoding="async" loading="lazy">
-      <figcaption data-i18n="capFigVerification">Plumline checks the objective, constraints and solution status after solving.</figcaption>
+      <a class="cap-figure-link" href="assets/capabilities/02-production-verified-result.png" aria-label="Open the full-size image" data-i18n-aria="capOpenFullImage"><img src="assets/capabilities/02-production-verified-result.png" width="1600" height="1100" alt="Illustration of a checked result, showing the objective and constraints re-checked and the solution status." data-i18n-alt="capImgVerification" decoding="async" loading="lazy"></a>
+      <figcaption data-i18n="capFigVerification">An illustration of how Plumline re-checks the objective, constraints and solution status after solving.</figcaption>
     </figure>
       </div>
       <div class="cap-verify-points">
@@ -165,8 +168,8 @@
     <div class="cap-explain">
       <div class="cap-explain-media">
         <figure class="cap-figure">
-      <img src="assets/capabilities/03-workshop-feasible-region.png" width="1600" height="1000" alt="Feasible region for the workshop example with the optimal point at 10 chairs and 15 tables and total profit 900." data-i18n-alt="capImgFeasibleRegion" decoding="async" loading="lazy">
-      <figcaption data-i18n="capFigRegion">A two-variable model showing its feasible region and optimal solution.</figcaption>
+      <a class="cap-figure-link" href="assets/capabilities/03-workshop-feasible-region.png" aria-label="Open the full-size image" data-i18n-aria="capOpenFullImage"><img src="assets/capabilities/03-workshop-feasible-region.png" width="1600" height="1000" alt="Illustration of a two-variable feasible region with its optimal point marked." data-i18n-alt="capImgFeasibleRegion" decoding="async" loading="lazy"></a>
+      <figcaption data-i18n="capFigRegion">An illustration of a two-variable feasible region and its optimal solution.</figcaption>
     </figure>
       </div>
       <div class="cap-explain-list">
@@ -216,7 +219,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=58"></script>
+<script src="assets/i18n.js?v=59"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>Plumline.i18n.init('capabilities');</script>
 <script src="assets/build-badge.js?v=1"></script>
