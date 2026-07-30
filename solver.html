@@ -3692,6 +3692,35 @@ function matchesAnyHint_(label, hints) {
   // (an equality ray) — the visible end-points of that segment. This draws the
   // exact visible part of ANY region (bounded, 2-D unbounded, or a ray) without
   // inventing a band from a single recession vector.
+  // Dimension of a clipped polygon, decided geometrically (not from the user's
+  // "=" symbol). scaleX/scaleY set a RELATIVE tolerance so the test is
+  // unit-invariant. Returns 2 (area: polygon), 1 (all points collinear but >=2
+  // distinct: segment/ray), or 0 (a single point: a dot).
+  function polygonDimension_(points, scaleX, scaleY){
+    if(!points || !points.length) return 0;
+    var sx = scaleX || 1, sy = scaleY || 1;
+    var tol = 1e-6;   // relative to the plot extent
+    // dedupe with a relative tolerance
+    var uniq = [];
+    points.forEach(function(p){
+      var dup = uniq.some(function(q){
+        return Math.abs(p.x-q.x) <= tol*sx && Math.abs(p.y-q.y) <= tol*sy;
+      });
+      if(!dup) uniq.push(p);
+    });
+    if(uniq.length <= 1) return 0;
+    if(uniq.length === 2) return 1;
+    // 3+ distinct points: 2-D iff some triple is non-collinear. Normalise the
+    // cross product by the plot scale so "collinear" is a relative test.
+    var a = uniq[0];
+    for(var i=1;i<uniq.length;i++) for(var j=i+1;j<uniq.length;j++){
+      var ux = (uniq[i].x-a.x)/sx, uy = (uniq[i].y-a.y)/sy;
+      var vx = (uniq[j].x-a.x)/sx, vy = (uniq[j].y-a.y)/sy;
+      if(Math.abs(ux*vy - uy*vx) > tol) return 2;
+    }
+    return 1;   // all collinear
+  }
+
   function clipFeasibleToBox_(cons, maxX, maxY){
     // half-plane: keep points with nx*x + ny*y <= c (within tolerance)
     function clip(poly, nx, ny, c){
@@ -3713,7 +3742,9 @@ function matchesAnyHint_(label, hints) {
     var poly = [ {x:0,y:0}, {x:maxX,y:0}, {x:maxX,y:maxY}, {x:0,y:maxY} ];
     poly = clip(poly, -1, 0, 0);   // x >= 0
     poly = clip(poly, 0, -1, 0);   // y >= 0
-    cons.forEach(function(c){
+    cons.map(normalizeConstraint_).filter(function(c){ return !c.degenerate; }).forEach(function(c){
+      // Normalised rows: EPS in clip() is now a real distance, so a tiny-coeff
+      // limit like 1e-12*x <= 5e-12 clips at x = 5, not somewhere off-chart.
       if(c.op === '<='){ poly = clip(poly, c.x, c.y, c.b); }
       else if(c.op === '>='){ poly = clip(poly, -c.x, -c.y, -c.b); }
       else { poly = clip(poly, c.x, c.y, c.b); poly = clip(poly, -c.x, -c.y, -c.b); }
@@ -3751,8 +3782,12 @@ function matchesAnyHint_(label, hints) {
     if (!geo.vertices.length) return;
 
     var xs = geo.vertices.map(function(p){return p.x;}), ys = geo.vertices.map(function(p){return p.y;});
-    var maxX = Math.max.apply(null, xs.concat([out.values[0]])) * 1.15 + 1;
-    var maxY = Math.max.apply(null, ys.concat([out.values[1]])) * 1.15 + 1;
+    // Relative padding, not "* 1.15 + 1": adding an absolute unit shrinks a
+    // small-unit region (e.g. x-max 1e-7) to a sub-pixel sliver hugging the
+    // axis. Scale by the data extent so the region fills the plot at any unit.
+    function plotMaximum_(v){ return v > 0 ? v * 1.15 : 1; }
+    var maxX = plotMaximum_(Math.max.apply(null, xs.concat([out.values[0]])));
+    var maxY = plotMaximum_(Math.max.apply(null, ys.concat([out.values[1]])));
     var W=440, H=340, pad=34;
     function sx(x){ return pad + x/maxX*(W-2*pad); }
     function sy(y){ return H-pad - y/maxY*(H-2*pad); }
@@ -3778,22 +3813,27 @@ function matchesAnyHint_(label, hints) {
     // 0<=x<=1e-7 has tiny area yet is a rectangle, while a genuine segment has
     // an equality.) The `.open` class — dashed, "continues to infinity" —
     // depends ONLY on geo.unbounded, so a bounded segment reads as closed.
+    // Decide the region's DIMENSION from the clipped geometry, not from whether
+    // the user typed "=". Dedupe points (relative tolerance), then: >=3
+    // non-collinear points => 2-D (polygon); all collinear with >=2 distinct
+    // points => 1-D (segment/ray); one point => 0-D (a dot). This correctly
+    // handles a redundant 0=0 equality (still 2-D), two opposite inequalities
+    // that pin x=y with no "=" (1-D), and x<=0 forcing x=0 (1-D).
     var clip = clipFeasibleToBox_(cons, maxX, maxY);
-    var isOneDimensional = cons.some(function(c){ return c.op === '='; });
+    var dim = polygonDimension_(clip.points, maxX, maxY);
     var openClass = geo.unbounded ? ' open' : '';
-    if (!isOneDimensional && clip.points.length >= 3) {
+    if (dim === 2) {
       var pts = clip.points.map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
       svg += '<polygon points="'+pts+'" class="region'+openClass+'"/>';
-    } else if (clip.segment) {
-      // A 1-D region within the view: an equality collapsed it to a line. Draw a
-      // thick polyline — dashed ONLY when the region is unbounded (a bounded
-      // segment is solid so it does not read as continuing off-chart).
+    } else if (dim === 1 && clip.segment) {
+      // 1-D region: draw a thick polyline — dashed ONLY when unbounded, so a
+      // bounded segment reads as closed rather than continuing off-chart.
       var a = clip.segment[0], b = clip.segment[1];
       svg += '<polyline points="'+sx(a.x)+','+sy(a.y)+' '+sx(b.x)+','+sy(b.y)+
              '" class="region-ray'+openClass+'"/>';
-    } else if (geo.vertices.length) {
-      // Fallback: a single feasible point with no visible extent — mark it.
-      var v = geo.vertices[0];
+    } else if (clip.points.length || geo.vertices.length) {
+      // 0-D: a single feasible point — mark it with a dot.
+      var v = clip.points.length ? clip.points[0] : geo.vertices[0];
       svg += '<circle cx="'+sx(v.x)+'" cy="'+sy(v.y)+'" r="4" class="region"/>';
     }
     // constraint lines
@@ -3847,7 +3887,9 @@ function matchesAnyHint_(label, hints) {
   }
 
   // Clip a constraint line a*x + b*y = c to the visible box for drawing.
-  function lineAcrossBox(c, maxX, maxY){
+  function lineAcrossBox(cRaw, maxX, maxY){
+    var c = normalizeConstraint_(cRaw);
+    if (c.degenerate) return null;   // 0*x+0*y is not a line
     var pts = [];
     if (Math.abs(c.y) > 1e-9) { // y at x=0 and x=maxX
       pts.push({ x:0, y:(c.b - c.x*0)/c.y });
@@ -3863,17 +3905,34 @@ function matchesAnyHint_(label, hints) {
   }
 
   // 2-variable vertex geometry (verified separately).
-  function solve2D(obj, cons){
+  // Normalise a constraint row so its coefficient vector is unit length (and b
+  // scaled to match). After this, a*p and b are on the same scale for every
+  // row, so the absolute tolerances used across the geometry pipeline
+  // (intersect/feasible/clip/lineAcrossBox/recedes) are meaningful regardless
+  // of the model's units: 1e-12*x <= 5e-12 becomes x <= 5 and behaves like it.
+  // A genuinely zero row (0*x+0*y) is flagged degenerate so callers can ignore
+  // it instead of treating it as a real (and possibly dimension-reducing) line.
+  function normalizeConstraint_(c){
+    var norm = Math.hypot(c.x, c.y);
+    if (norm === 0) return { x:0, y:0, op:c.op, b:c.b, binding:c.binding, label:c.label, degenerate:true };
+    return { x:c.x/norm, y:c.y/norm, op:c.op, b:c.b/norm, binding:c.binding, label:c.label, degenerate:false };
+  }
+
+  function solve2D(objRaw, consRaw){
+    // Work entirely in normalised coordinates; drop degenerate 0*x+0*y rows,
+    // which constrain nothing and must not reduce the region's dimension.
+    var cons = consRaw.map(normalizeConstraint_).filter(function(c){ return !c.degenerate; });
+    var obj = objRaw;
     var lines = cons.slice();
     lines.push({ x:1, y:0, op:'>=', b:0 });
     lines.push({ x:0, y:1, op:'>=', b:0 });
     function intersect(L1,L2){
-      var det=L1.x*L2.y-L2.x*L1.y; if(Math.abs(det)<1e-12) return null;
+      var det=L1.x*L2.y-L2.x*L1.y; if(Math.abs(det)<1e-9) return null;
       return { x:(L1.b*L2.y-L2.b*L1.y)/det, y:(L1.x*L2.b-L2.x*L1.b)/det };
     }
     function feasible(p){
       return cons.every(function(c){
-        var v=c.x*p.x+c.y*p.y;
+        var v=c.x*p.x+c.y*p.y;   // c is unit-norm, so 1e-6 is a real distance
         if(c.op==='<=') return v<=c.b+1e-6;
         if(c.op==='>=') return v>=c.b-1e-6;
         return Math.abs(v-c.b)<1e-6;
@@ -3904,14 +3963,9 @@ function matchesAnyHint_(label, hints) {
       if (mag < 1e-12) return false;            // must be a non-zero direction
       if (d.x < -1e-9 || d.y < -1e-9) return false;  // first quadrant only (x,y >= 0)
       return cons.every(function(c){
-        // Normalise the projection by the constraint's coefficient magnitude so
-        // the tolerance is scale-invariant: 1e-12*x <= 5e-12 must behave like
-        // x <= 5, not read as "a*d == 0" just because the raw coefficients are
-        // tiny. d is already unit-length, so proj is then a true cosine-scale
-        // quantity comparable against a fixed tolerance.
-        var scale = Math.sqrt(c.x*c.x + c.y*c.y);
-        if (scale < 1e-15) return true;         // a degenerate 0*x+0*y row is vacuous
-        var proj = (c.x*d.x + c.y*d.y) / scale;
+        // cons rows are already unit-norm (see normalizeConstraint_), so proj is
+        // a true signed distance-rate and a fixed tolerance is scale-invariant.
+        var proj = c.x*d.x + c.y*d.y;
         if(c.op==='<=') return proj <= 1e-9;
         if(c.op==='>=') return proj >= -1e-9;
         return Math.abs(proj) < 1e-9;           // equality: only along the line
@@ -3926,11 +3980,9 @@ function matchesAnyHint_(label, hints) {
         candidates.push({ x: -c.y, y: c.x });
       });
       for(var i=0;i<candidates.length;i++){
-        // Normalise so the returned recession direction has unit-ish scale for
-        // drawing, and so tiny magnitudes don't slip past the checks.
         var d = candidates[i];
-        var norm = Math.sqrt(d.x*d.x + d.y*d.y);
-        if(norm < 1e-12) continue;
+        var norm = Math.hypot(d.x, d.y);
+        if(norm === 0) continue;                // only a truly zero vector is skipped
         var unit = { x:d.x/norm, y:d.y/norm };
         if(recedes(unit)){ unbounded=true; recession=unit; break; }
       }
@@ -4290,7 +4342,8 @@ function matchesAnyHint_(label, hints) {
       openDrawer: openDrawer, closeDrawer: closeDrawer,
       localizeEngineError: localizeEngineError, showTrouble: showTrouble,
       showEngineTrouble: showEngineTrouble, solve2D: solve2D,
-      drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_ };
+      drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_,
+      polygonDimension_: polygonDimension_, normalizeConstraint_: normalizeConstraint_ };
   }
 })();
 </script>

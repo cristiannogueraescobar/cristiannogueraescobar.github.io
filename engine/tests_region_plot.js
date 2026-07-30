@@ -236,6 +236,16 @@ setTimeout(function () {
     ok('source: draws a .region-ray for 1-D regions', /region-ray/.test(solverHtml));
     ok('source: no angular mesh (a += 2 degree sampling) remains',
        !/for\s*\(\s*var\s+a\s*=\s*0\s*;\s*a\s*<=\s*90\s*;\s*a\s*\+=\s*2\s*\)/.test(solverHtml));
+    // Every constraint must be normalised before use in the geometry pipeline,
+    // and the line/polygon choice must be geometric (polygonDimension_), not the
+    // user's "=" symbol.
+    ok('source: defines normalizeConstraint_', /function normalizeConstraint_/.test(solverHtml));
+    ok('source: solve2D normalises its constraints',
+       /consRaw\.map\(normalizeConstraint_\)/.test(solverHtml));
+    ok('source: clip normalises its constraints',
+       /cons\.map\(normalizeConstraint_\)/.test(solverHtml));
+    ok('source: dimension decided by polygonDimension_, not the "=" symbol',
+       /function polygonDimension_/.test(solverHtml) && /polygonDimension_\(clip\.points/.test(solverHtml));
   }
 
   // BOUNDED EQUALITY SEGMENT (the regression): x - y = 0, x + y <= 2 is the
@@ -295,6 +305,96 @@ setTimeout(function () {
     const b = solve2D(obj, [ { x:1e-12, y:0, op:'<=', b:5e-12 }, { x:0, y:1, op:'<=', b:5 } ]);
     ok('scale: x<=5 (normal coeffs) is bounded', a.unbounded === false, String(a.unbounded));
     ok('scale: 1e-12*x<=5e-12 (tiny coeffs) is ALSO bounded', b.unbounded === false, String(b.unbounded));
+  }
+
+  // ---- Geometric dimension & scale-invariant geometry ------------------
+
+  // FALSE REGION guard: 1e-12*x <= 5e-12 (== x<=5), x<=100, y<=5. The visible
+  // region must stop at x=5, not extend to x=100 — every geometry function must
+  // treat the tiny-coefficient row on the same scale as the others.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'Tiny', coefficients: [1e-12, 0], relation: '<=', limit: 5e-12, binding: true },
+      { label: 'Big', coefficients: [1, 0], relation: '<=', limit: 100, binding: false },
+      { label: 'Cy', coefficients: [0, 1], relation: '<=', limit: 5, binding: true },
+    ], [5, 5]);
+    api.drawFeasibleRegion(out);
+    const poly = document.getElementById('result').querySelector('polygon.region');
+    ok('false-region guard: polygon exists', !!poly, poly ? 'ok' : 'no poly');
+    if (poly) {
+      const pts = poly.getAttribute('points').trim().split(/\s+/).map(function (p) { return p.split(',').map(Number); });
+      // convert screen x back is unnecessary — just check the clip stopped at x=5
+      const clip = api.clipFeasibleToBox_(out.constraints.map(function (c) {
+        return { x: c.coefficients[0], y: c.coefficients[1], op: c.relation, b: c.limit };
+      }), 100 * 1.15, 5 * 1.15);
+      const maxCx = Math.max.apply(null, clip.points.map(function (p) { return p.x; }));
+      ok('false-region guard: region stops at x=5 (not 100)', maxCx <= 5 + 1e-6, 'maxX=' + maxCx);
+    }
+  }
+
+  // polygonDimension_ classifies geometry, not the user's "=" symbol.
+  {
+    const pd = api.polygonDimension_;
+    ok('dimension: square is 2-D',
+       pd([{x:0,y:0},{x:5,y:0},{x:5,y:5},{x:0,y:5}], 5, 5) === 2);
+    ok('dimension: collinear points are 1-D',
+       pd([{x:0,y:0},{x:1,y:1},{x:2,y:2}], 2, 2) === 1);
+    ok('dimension: single point is 0-D', pd([{x:1,y:1}], 5, 5) === 0);
+    ok('dimension: thin-but-real rectangle is 2-D (relative tolerance)',
+       pd([{x:0,y:0},{x:1e-7,y:0},{x:1e-7,y:1},{x:0,y:1}], 1e-7, 1) === 2);
+  }
+
+  // REDUNDANT 0=0 equality must NOT force a 1-D render: the region is a square.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'X', coefficients: [1, 0], relation: '<=', limit: 5, binding: true },
+      { label: 'Y', coefficients: [0, 1], relation: '<=', limit: 5, binding: true },
+      { label: 'Zero', coefficients: [0, 0], relation: '=', limit: 0, binding: false },
+    ], [5, 5]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    ok('redundant 0=0: drawn as polygon (not a diagonal ray)',
+       !!result.querySelector('polygon.region') && !result.querySelector('.region-ray'),
+       'poly=' + !!result.querySelector('polygon.region') + ' ray=' + !!result.querySelector('.region-ray'));
+  }
+
+  // 1-D region WITHOUT an "=" symbol: two opposite inequalities pin x=y.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'A', coefficients: [1, -1], relation: '<=', limit: 0, binding: true },
+      { label: 'B', coefficients: [1, -1], relation: '>=', limit: 0, binding: true },
+      { label: 'C', coefficients: [1, 1], relation: '<=', limit: 2, binding: true },
+    ], [1, 1]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    ok('opposite inequalities (x=y, no "="): drawn as a ray/segment',
+       !!result.querySelector('.region-ray') && !result.querySelector('polygon.region'),
+       'ray=' + !!result.querySelector('.region-ray') + ' poly=' + !!result.querySelector('polygon.region'));
+  }
+
+  // Thin-but-real rectangle must be VISIBLE, not a sub-pixel sliver: with
+  // relative padding the polygon must span a meaningful screen width.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'X', coefficients: [1, 0], relation: '<=', limit: 1e-7, binding: true },
+      { label: 'Y', coefficients: [0, 1], relation: '<=', limit: 1, binding: true },
+    ], [1e-7, 1]);
+    api.drawFeasibleRegion(out);
+    const poly = document.getElementById('result').querySelector('polygon.region');
+    ok('thin rectangle: rendered as a polygon', !!poly, poly ? 'ok' : 'no poly');
+    if (poly) {
+      const xsArr = poly.getAttribute('points').trim().split(/\s+/).map(function (p) { return Number(p.split(',')[0]); });
+      const width = Math.max.apply(null, xsArr) - Math.min.apply(null, xsArr);
+      ok('thin rectangle: visible screen width > 1px (relative padding)', width > 1, 'width=' + width);
+    }
   }
 
   console.log('REGION PLOT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
