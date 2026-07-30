@@ -3769,7 +3769,15 @@ function matchesAnyHint_(label, hints) {
         var dx = poly[a].x-poly[b].x, dy = poly[a].y-poly[b].y, d = dx*dx+dy*dy;
         if(d > bestD){ bestD = d; best = [poly[a], poly[b]]; }
       }
-      if(best && bestD > 1e-12) segment = best;
+      // Reject only a TRULY coincident pair, using a per-axis NORMALISED length
+      // so a small-but-real segment (e.g. (0,0)-(1e-7,1e-7)) is kept: in math
+      // units its length^2 is 2e-14, which a fixed 1e-12 threshold would drop,
+      // reintroducing the unit-dependence polygonDimension_ removed.
+      if(best){
+        var ndx = (best[0].x-best[1].x) / Math.max(maxX, Number.MIN_VALUE);
+        var ndy = (best[0].y-best[1].y) / Math.max(maxY, Number.MIN_VALUE);
+        if(ndx*ndx + ndy*ndy > 1e-12) segment = best;
+      }
     }
     return { points: poly, area: area, segment: segment };
   }
@@ -3869,9 +3877,17 @@ function matchesAnyHint_(label, hints) {
   function addWorkedSteps(out, geo, obj){
     if (!geo.vertices.length) return;
     var lab = out.plot.variableLabels || ['x','y'];
+    // Identify the optimum by OBJECTIVE VALUE, not by coordinate proximity: with
+    // a fixed 1e-6 per-axis test, every corner of a tiny model (x,y <= 1e-7)
+    // sits within 1e-6 of the optimum and all get marked "best". Comparing z
+    // against the best z (scale-aware) marks only genuine optima — and correctly
+    // marks several when the objective is constant along an optimal edge.
+    var bestZ = obj.x*out.values[0] + obj.y*out.values[1];
+    var zMag = geo.vertices.reduce(function(m,v){ return Math.max(m, Math.abs(obj.x*v.x + obj.y*v.y)); }, Math.abs(bestZ));
+    var zEps = 128 * Number.EPSILON * Math.max(1, zMag) * 64;   // a little slack for round-off
     var rows = geo.vertices.map(function(v){
       var z = obj.x*v.x + obj.y*v.y;
-      var isOpt = Math.abs(v.x-out.values[0])<1e-6 && Math.abs(v.y-out.values[1])<1e-6;
+      var isOpt = Math.abs(z - bestZ) <= zEps;
       return '<tr'+(isOpt?' class="win"':'')+'><td>('+fmt(v.x)+', '+fmt(v.y)+')</td><td>'+
         fmt(obj.x)+'·'+fmt(v.x)+' + '+fmt(obj.y)+'·'+fmt(v.y)+'</td><td>'+fmt(z)+
         (isOpt?' &larr; '+t('best'):'')+'</td></tr>';
@@ -3903,16 +3919,18 @@ function matchesAnyHint_(label, hints) {
       pts.push({ x:(c.b - c.y*0)/c.x, y:0 });
       pts.push({ x:(c.b - c.y*maxY)/c.x, y:maxY });
     }
-    var edge = geometryEpsilon_(1, 1, 0, maxX, maxY);
-    var inb = pts.filter(function(p){ return p.x>=-edge && p.x<=maxX+edge && p.y>=-edge && p.y<=maxY+edge; });
+    var edgeX = 128 * Number.EPSILON * Math.max(1e-300, maxX);
+    var edgeY = 128 * Number.EPSILON * Math.max(1e-300, maxY);
+    var inb = pts.filter(function(p){ return p.x>=-edgeX && p.x<=maxX+edgeX && p.y>=-edgeY && p.y<=maxY+edgeY; });
     if (inb.length < 2) return null;
     // A line can hit two box edges at the SAME corner (e.g. y=2x through (0,0)),
-    // producing duplicate points. Dedupe, then take the two FARTHEST apart, so
-    // the drawn segment is never zero-length and the boundary stays visible.
+    // producing duplicate points. Dedupe with PER-AXIS tolerances (a shared one
+    // lets a huge maxY swallow a tiny maxX gap, dropping a real horizontal line),
+    // then take the two FARTHEST apart so the drawn segment is never zero-length.
     var uniq = [];
     inb.forEach(function(p){
       var dup = uniq.some(function(q){
-        return Math.abs(p.x-q.x) <= edge && Math.abs(p.y-q.y) <= edge;
+        return Math.abs(p.x-q.x) <= edgeX && Math.abs(p.y-q.y) <= edgeY;
       });
       if(!dup) uniq.push(p);
     });
@@ -3979,14 +3997,23 @@ function matchesAnyHint_(label, hints) {
         if(c.op==='<=') return v<=c.b+eps;
         if(c.op==='>=') return v>=c.b-eps;
         return Math.abs(v-c.b)<eps;
-      }) && p.x>=-1e-6 && p.y>=-1e-6;
+      }) &&
+      // Non-negativity with the SAME scaled tolerance, not a fixed 1e-6, so a
+      // near-axis intersection like (-5e-7, 1) is correctly rejected instead of
+      // entering the corner list and the Show-working table as an impossible x<0.
+      p.x >= -geometryEpsilon_(1, 0, 0, Math.abs(p.x), 0) &&
+      p.y >= -geometryEpsilon_(0, 1, 0, 0, Math.abs(p.y));
     }
+    // Per-axis dedup tolerances: a single combined epsilon lets a huge y inflate
+    // the x tolerance, merging the two top corners of a 0<=x<=1e-7, 0<=y<=2e9
+    // rectangle. Scale x and y independently from the two points being compared.
     var verts=[];
     for(var i=0;i<lines.length;i++)for(var j=i+1;j<lines.length;j++){
       var p=intersect(lines[i],lines[j]);
       if(p && feasible(p) && !verts.some(function(q){
-          var eps = 128*Number.EPSILON*Math.max(1, Math.abs(q.x), Math.abs(p.x), Math.abs(q.y), Math.abs(p.y));
-          return Math.abs(q.x-p.x)<eps && Math.abs(q.y-p.y)<eps;
+          var ex = 128*Number.EPSILON*Math.max(1e-300, Math.abs(q.x), Math.abs(p.x));
+          var ey = 128*Number.EPSILON*Math.max(1e-300, Math.abs(q.y), Math.abs(p.y));
+          return Math.abs(q.x-p.x)<ex && Math.abs(q.y-p.y)<ey;
         }))
         verts.push(p);
     }
@@ -4396,7 +4423,8 @@ function matchesAnyHint_(label, hints) {
       showEngineTrouble: showEngineTrouble, solve2D: solve2D,
       drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_,
       polygonDimension_: polygonDimension_, normalizeConstraint_: normalizeConstraint_,
-      lineAcrossBox: lineAcrossBox, geometryEpsilon_: geometryEpsilon_ };
+      lineAcrossBox: lineAcrossBox, geometryEpsilon_: geometryEpsilon_,
+      addWorkedSteps: addWorkedSteps };
   }
 })();
 </script>

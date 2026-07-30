@@ -258,6 +258,18 @@ setTimeout(function () {
        /var EPS = geometryEpsilon_/.test(solverHtml));
     ok('source: lineAcrossBox dedupes and takes the farthest pair',
        /lineAcrossBox/.test(solverHtml) && /bestD/.test(solverHtml));
+    // Per-axis tolerances everywhere coordinate deltas are compared, scaled
+    // non-negativity in feasible(), objective-based optimum in the steps table,
+    // and a normalised (not absolute) segment-length test in the clip.
+    ok('source: non-negativity uses scaled tolerance, not fixed 1e-6',
+       /p\.x >= -geometryEpsilon_\(1, 0, 0/.test(solverHtml) &&
+       /p\.y >= -geometryEpsilon_\(0, 1, 0/.test(solverHtml));
+    ok('source: lineAcrossBox uses per-axis edgeX/edgeY',
+       /var edgeX =/.test(solverHtml) && /var edgeY =/.test(solverHtml));
+    ok('source: steps table marks optimum by objective value (bestZ)',
+       /Math\.abs\(z - bestZ\) <= zEps/.test(solverHtml));
+    ok('source: clip segment kept by NORMALISED length, not absolute 1e-12',
+       /Math\.max\(maxX, Number\.MIN_VALUE\)/.test(solverHtml));
   }
 
   // BOUNDED EQUALITY SEGMENT (the regression): x - y = 0, x + y <= 2 is the
@@ -453,6 +465,96 @@ setTimeout(function () {
       ok('line through corner: two distinct endpoints (non-zero length)', len > 1,
          'len=' + len.toFixed(3));
     }
+  }
+
+  // ---- Per-axis tolerances & objective-based optimum -------------------
+
+  // SMALL SEGMENT must stay a segment, not collapse to a dot: x=y, x+y<=2e-7 is
+  // the segment (0,0)-(1e-7,1e-7). Its squared length in math units is 2e-14; a
+  // fixed 1e-12 segment threshold dropped it, so it rendered as a circle.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'Eq', coefficients: [1, -1], relation: '=', limit: 0, binding: true },
+      { label: 'Sum', coefficients: [1, 1], relation: '<=', limit: 2e-7, binding: true },
+    ], [1e-7, 1e-7]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    ok('small segment: drawn as .region-ray (not a dot)',
+       !!result.querySelector('.region-ray') && !result.querySelector('circle.region'),
+       'ray=' + !!result.querySelector('.region-ray') + ' circle=' + !!result.querySelector('circle.region'));
+    const ray = result.querySelector('.region-ray');
+    if (ray) {
+      const pts = ray.getAttribute('points').trim().split(/\s+/);
+      ok('small segment: two distinct endpoints', pts.length === 2 && pts[0] !== pts[1], ray.getAttribute('points'));
+    }
+  }
+
+  // NEGATIVE CORNER must be rejected: y<=1, x+y<=0.9999995 intersect at
+  // (-5e-7, 1). A fixed -1e-6 non-negativity tolerance admitted it into the
+  // corner list (and the Show-working table) as an impossible x<0.
+  {
+    const geo = solve2D(obj, [
+      { x: 0, y: 1, op: '<=', b: 1 },
+      { x: 1, y: 1, op: '<=', b: 0.9999995 },
+    ]);
+    const minVx = geo.vertices.length ? Math.min.apply(null, geo.vertices.map(function (p) { return p.x; })) : 0;
+    ok('negative corner: no vertex has x<0', minVx >= -1e-12, 'x-min=' + minVx);
+  }
+
+  // ANISOTROPIC rectangle: 0<=x<=1e-7, 0<=y<=2e9. A single combined dedup
+  // epsilon let the huge y inflate the x tolerance and merge the two top
+  // corners; per-axis tolerances must keep all four.
+  {
+    const geo = solve2D(obj, [
+      { x: 1, y: 0, op: '<=', b: 1e-7 },
+      { x: 0, y: 1, op: '<=', b: 2e9 },
+    ]);
+    ok('anisotropic rectangle: keeps 4 corners', geo.vertices.length === 4, 'nverts=' + geo.vertices.length);
+  }
+
+  // ANISOTROPIC horizontal line y=1e9 in a 1e-7 x 2e9 box must have two distinct
+  // endpoints spanning the tiny x-width, not vanish as "duplicate".
+  {
+    const L = api.lineAcrossBox({ x: 0, y: 1, op: '<=', b: 1e9 }, 1e-7, 2e9);
+    ok('anisotropic line y=1e9: returns a segment', !!L, L ? 'ok' : 'null');
+    if (L) ok('anisotropic line y=1e9: endpoints differ in x',
+              Math.abs(L.x1 - L.x2) > 0, 'x1=' + L.x1 + ' x2=' + L.x2);
+  }
+
+  // OBJECTIVE-BASED optimum: for Max x+y over x,y<=1e-7 only the true optimum
+  // corner (1e-7,1e-7) is "best"; a fixed 1e-6 per-axis test marked every corner
+  // (all within 1e-6 of each other) as best.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const geo = { vertices: [ {x:0,y:0}, {x:1e-7,y:0}, {x:1e-7,y:1e-7}, {x:0,y:1e-7} ] };
+    api.addWorkedSteps({ plot: { objective: [1, 1], variableLabels: ['x','y'] }, values: [1e-7, 1e-7], objectiveLabel: 'Z' }, geo, { x:1, y:1 });
+    const wins = document.getElementById('result').querySelectorAll('tr.win');
+    ok('tiny model: exactly one corner marked best', wins.length === 1, '#best=' + wins.length);
+    // Verify it is the true optimum: the winning row must be the (1e-7,1e-7)
+    // corner, i.e. the last-but-one vertex. Check by matching its position in
+    // the table against the max-objective corner.
+    if (wins.length === 1) {
+      const allRows = Array.prototype.slice.call(document.getElementById('result').querySelectorAll('tbody tr'));
+      const winIdx = allRows.indexOf(wins[0]);
+      const zVals = geo.vertices.map(function (v) { return v.x + v.y; });
+      const maxIdx = zVals.indexOf(Math.max.apply(null, zVals));
+      ok('tiny model: the marked corner is the max-objective corner', winIdx === maxIdx,
+         'winIdx=' + winIdx + ' maxIdx=' + maxIdx);
+    }
+  }
+
+  // EDGE OPTIMA: Max x over the square [0,5]^2 — both (5,0) and (5,5) are optimal
+  // (objective constant along that edge). Marking several here is correct.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const geo = { vertices: [ {x:0,y:0}, {x:5,y:0}, {x:5,y:5}, {x:0,y:5} ] };
+    api.addWorkedSteps({ plot: { objective: [1, 0], variableLabels: ['x','y'] }, values: [5, 0], objectiveLabel: 'Z' }, geo, { x:1, y:0 });
+    const wins = document.getElementById('result').querySelectorAll('tr.win');
+    ok('edge optima: both optimal corners marked best', wins.length === 2, '#best=' + wins.length);
   }
 
   console.log('REGION PLOT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
