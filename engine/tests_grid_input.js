@@ -211,5 +211,49 @@ ok('classify: empty is not a formula', isF('') === false);
      !r.error && approx(r.out.objective, 5), r.error || ('obj=' + (r.out && r.out.objective)));
 }
 
+/* ---- Layer 5: whitespace-only cells are EMPTY, not 0 ----------------- */
+// Number('   ') and Number('\t') are both 0, so a whitespace-only cell would
+// silently become a numeric 0 — building a false "<= 0" limit from a blank the
+// user left after an operator. It must classify as EMPTY.
+{
+  ok('whitespace cell: "   " is empty (not 0)', Engine.classifyGridCell_('   ').value === '',
+     JSON.stringify(Engine.classifyGridCell_('   ')));
+  ok('whitespace cell: "\\t" is empty (not 0)', Engine.classifyGridCell_('\t').value === '',
+     JSON.stringify(Engine.classifyGridCell_('\t')));
+  ok('whitespace cell: "\\n " is empty (not 0)', Engine.classifyGridCell_('\n ').value === '',
+     JSON.stringify(Engine.classifyGridCell_('\n ')));
+  // A number with surrounding spaces still converts (Number ignores them).
+  ok('whitespace cell: " 3.0 " converts to 3', Engine.classifyGridCell_(' 3.0 ').value === 3,
+     JSON.stringify(Engine.classifyGridCell_(' 3.0 ')));
+}
+
+// Permanent assertions for the numeric forms the converter must handle, so a
+// future change to the value branch can't silently alter them.
+{
+  ok('numeric form: "01" -> 1', Engine.classifyGridCell_('01').value === 1);
+  ok('numeric form: "+3" -> 3', Engine.classifyGridCell_('+3').value === 3);
+  ok('numeric form: "3.0" -> 3', Engine.classifyGridCell_('3.0').value === 3);
+  ok('numeric form: "1e3" -> 1000', Engine.classifyGridCell_('1e3').value === 1000);
+  ok('numeric form: "-2.5" -> -2.5', Engine.classifyGridCell_('-2.5').value === -2.5);
+  // A non-numeric string stays text.
+  ok('numeric form: "abc" stays text', Engine.classifyGridCell_('abc').value === 'abc');
+}
+
+// End-to-end: a whitespace-only limit after an operator must report a MISSING
+// LIMIT, never silently solve as "<= 0".
+{
+  const grid = [
+    ['Item', 'x', 'Total', 'Rel', 'Limit'],
+    ['A', '0', '', '', ''],
+    ['', '', '', '', ''],
+    ['Obj', '', '=B2', '', ''],
+    ['Con', '', '=B2', '<=', '   '],
+  ];
+  const r = run(grid);
+  ok('e2e: "=B2 <= [spaces]" reports a missing limit (not a false <= 0)',
+     !!r.error && /CONSTRAINT_MISSING_LIMIT/.test(r.error),
+     r.error || ('SOLVED obj=' + (r.out && r.out.objective)));
+}
+
 console.log('GRID INPUT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 process.exit(fail > 0 ? 1 : 0);

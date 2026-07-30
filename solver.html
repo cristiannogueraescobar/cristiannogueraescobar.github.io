@@ -1102,7 +1102,12 @@ function classifyGridCell_(raw) {
   if (raw == null) return { formula: '', value: '' };
   var text = String(raw);
   if (isFormulaInput_(text)) return { formula: formulaCellText_(text), value: 0 };
-  if (text === '') return { formula: '', value: '' };
+  // A whitespace-only cell is EMPTY, not 0: Number('   ') and Number('\t') are
+  // both 0, which would silently build a false "<= 0" limit from a blank the
+  // user left after an operator. Trim before the emptiness test so spaces/tabs
+  // become '' — but keep Number() on the untrimmed text so "01"/"+3"/"3.0"
+  // still convert (Number ignores surrounding whitespace anyway).
+  if (text.trim() === '') return { formula: '', value: '' };
   var n = Number(text);
   return { formula: '', value: (!isNaN(n)) ? n : text };
 }
