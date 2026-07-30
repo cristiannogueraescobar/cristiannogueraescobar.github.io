@@ -12,7 +12,7 @@ const SUITES = [
   'tests_direction', 'tests_structure', 'tests_worker_parity', 'tests_nav_menu',
   'tests_solve_announce', 'tests_ex_drawer', 'tests_grid_a11y', 'tests_contrast',
   'tests_error_i18n', 'tests_region_plot', 'tests_locale', 'tests_grid_input',
-  'tests_capabilities'
+  'tests_capabilities', 'tests_home_capabilities'
 ];
 
 module.exports = SUITES;

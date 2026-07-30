@@ -24,7 +24,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need to install anything?","acceptedAnswer":{"@type":"Answer","text":"For the online solver, no. It runs in your browser at plumline.online. A Google Sheets add-on is on the way and will be a free, one-time install from the Workspace Marketplace once it's approved."}},{"@type":"Question","name":"How do I write the model?","acceptedAnswer":{"@type":"Answer","text":"With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax."}},{"@type":"Question","name":"What kinds of problems does it solve?","acceptedAnswer":{"@type":"Answer","text":"Continuous, integer, binary and mixed-integer linear problems: production mix, purchasing, blending, staffing, transport, budget splits, project selection and knapsack-style loading. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one."}},{"@type":"Question","name":"Can I make a variable whole, yes/no, or set limits?","acceptedAnswer":{"@type":"Answer","text":"Yes. In Variable settings you can mark a variable as integer or binary (0 or 1) and give it a minimum and maximum. Plumline verifies those limits hold in the final answer and shows the check."}},{"@type":"Question","name":"Are my numbers safe?","acceptedAnswer":{"@type":"Answer","text":"Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google's infrastructure under your own account. There is no Plumline account to create and no tracking."}},{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"The online solver is free. The Google Sheets add-on is planned to be free once it becomes available."}}]}
 </script>
-<link rel="stylesheet" href="assets/plumline.css?v=17">
+<link rel="stylesheet" href="assets/plumline.css?v=18">
 </head>
 <body data-page="home">
 
@@ -219,13 +219,47 @@
       <h2 data-i18n="capsTitle">What Plumline can solve now.</h2>
       <p class="lead" style="max-width:62ch;margin-top:14px" data-i18n="capsLead">Plumline solves linear models where the goal and every limit are weighted sums of your decisions. It supports three variable types, continuous, integer and binary, and mixed-integer models that combine them, and it checks the answer against your own numbers whichever you use.</p>
     </div>
+    <!-- HOME_CAPABILITIES_START -->
     <div class="grid-2" style="gap:20px">
-      <div class="card"><h3 data-i18n="capsContH">Continuous</h3><p class="muted" style="font-size:14.5px" data-i18n="capsContP">Quantities that can take any value from zero up: litres, hours, kilograms, currency. The default for every decision.</p></div>
-      <div class="card"><h3 data-i18n="capsIntH">Integer</h3><p class="muted" style="font-size:14.5px" data-i18n="capsIntP">Whole-number quantities, for things you cannot split: people, vehicles, batches. Mark a decision as integer in Variable settings.</p></div>
-      <div class="card"><h3 data-i18n="capsBinH">Binary</h3><p class="muted" style="font-size:14.5px" data-i18n="capsBinP">Yes or no choices fixed to 0 or 1: pick a project, open a site, take an order. Ideal for selection and knapsack-style problems.</p></div>
-      <div class="card"><h3 data-i18n="capsMixH">Mixed-integer models</h3><p class="muted" style="font-size:14.5px" data-i18n="capsMixP">Continuous, integer and binary decisions in one model, for example a yes/no to use a supplier plus how much to buy from it.</p></div>
+      <div class="card">
+        <h3 data-i18n="capGroupModels">Models you can solve</h3>
+        <ul class="home-cap-list">
+          <li><span data-i18n="capModelContinuousName">Continuous models</span></li>
+          <li><span data-i18n="capModelIntegerName">Integer models</span></li>
+          <li><span data-i18n="capModelBinaryName">Binary decisions</span></li>
+          <li><span data-i18n="capModelMixedName">Mixed-integer models</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-i18n="capGroupSpreadsheet">Works with your spreadsheet</h3>
+        <ul class="home-cap-list">
+          <li><span data-i18n="capSheetFormulaLimitsName">Number or formula limits</span></li>
+          <li><span data-i18n="capSheetPasteName">Paste from Excel or Google Sheets</span></li>
+          <li><span data-i18n="capSheetExportName">Export the result</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-i18n="capGroupVerification">Checks built into every result</h3>
+        <ul class="home-cap-list">
+          <li><span data-i18n="capVerifyObjectiveName">Objective checked again</span></li>
+          <li><span data-i18n="capVerifyConstraintsName">Constraints checked again</span></li>
+          <li><span data-i18n="capRunLocalName">Solved in your browser</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 data-i18n="capGroupExplanation">Understand the answer</h3>
+        <ul class="home-cap-list">
+          <li><span data-i18n="capExplainDetectionName">See what Plumline understood</span></li>
+          <li><span data-i18n="capExplainMarginalName">Marginal impact</span></li>
+          <li><span data-i18n="capExplainRegionChartName">Feasible region chart</span></li>
+          <li><span data-i18n="capExplainMultilingualName">Five interface languages</span></li>
+        </ul>
+      </div>
     </div>
-    <p class="muted" style="font-size:14px;margin-top:18px;max-width:70ch" data-i18n="capsFoot">You can give any decision its own minimum and maximum. Plumline handles up to twenty limit rows per model and solves in your browser. It does not solve genuinely non-linear models, such as one quantity multiplied by another, and it tells you when it meets one instead of guessing.</p>
+    <p class="home-cap-more">
+      <a href="capabilities.html" data-i18n="capsSeeAll">See everything Plumline can do</a>
+    </p>
+    <!-- HOME_CAPABILITIES_END -->
   </section>
 
   <section class="section" id="faq">
@@ -272,7 +306,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=62"></script>
+<script src="assets/i18n.js?v=64"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
   var LANG = Plumline.i18n.init('home');

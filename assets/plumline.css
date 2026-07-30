@@ -562,3 +562,15 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   .cap-lightbox{padding:12px}
   .cap-lightbox-close{top:4px;right:4px}
 }
+
+/* Home capability summary (generated from the inventory by
+   gen_home_capabilities.js). A compact list per group, linking to the full
+   capabilities page. */
+.home-cap-list{list-style:none;margin:10px 0 0;padding:0}
+.home-cap-list li{padding:6px 0;border-top:1px solid var(--line-fine,var(--line));
+  font-size:14.5px;color:var(--ink)}
+.home-cap-list li:first-child{border-top:none}
+.home-cap-more{margin-top:18px}
+.home-cap-more a{font-family:var(--mono,monospace);font-size:13px;color:var(--brass-text);
+  text-decoration:none;border-bottom:1px solid transparent}
+.home-cap-more a:hover{border-bottom-color:var(--brass-text)}

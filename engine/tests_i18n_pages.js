@@ -39,12 +39,17 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
 
 // Direct presence: defined in this language's page table OR common table.
 // No English fallback — a key present only in EN counts as MISSING for others.
+// The Home page embeds a capability summary generated from the inventory, so it
+// legitimately references keys from the `capabilities` table too; allow those
+// for index.html.
 function has(lang, page, key) {
   const L = DICT[lang];
   if (!L) return false;
   const inPage = L[page] && Object.prototype.hasOwnProperty.call(L[page], key);
   const inCommon = L.common && Object.prototype.hasOwnProperty.call(L.common, key);
-  return !!(inPage || inCommon);
+  const inCaps = page === 'home' && L.capabilities &&
+                 Object.prototype.hasOwnProperty.call(L.capabilities, key);
+  return !!(inPage || inCommon || inCaps);
 }
 
 Object.keys(PAGE_OF).forEach(function (file) {
