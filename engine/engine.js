@@ -1583,15 +1583,6 @@ function detectModel_(sheet) {
       'them looks like a final total. Pick the objective yourself.');
   }
 
-  // An output with a relation operator but no limit is an INCOMPLETE constraint
-  // (e.g. "=B2 <=" with an empty limit cell). It must never be silently treated
-  // as a complete constraint (limit 0) or promoted to the objective; refuse so
-  // the user fills in the limit. Checked up front so the specific marker wins
-  // over the generic "no obvious variables" message.
-  if (outputs.some(function (cell) { return readConstraint_(grid, cell).isIncompleteConstraint; })) {
-    throw new Error('CONSTRAINT_MISSING_LIMIT');
-  }
-
   // Constant cells reachable from each output, grouped into contiguous blocks.
   const blockReach = {};
   const blockCells = {};
@@ -1682,6 +1673,34 @@ function detectModel_(sheet) {
   // else: keep whatever weak block we had, or fall through to the error below.
 
   if (!variables) {
+    // Before giving the generic "pick them yourself" message, check whether a
+    // plausible single decision cell was blocked only because a constraint on it
+    // is INCOMPLETE (relation, no limit). That is a specific, fixable problem —
+    // report it with its own marker instead of the vague fallback. Scoped to
+    // cells actually reached by an objective, so an unrelated incomplete
+    // calculation elsewhere on the sheet does not trigger it.
+    const cellReach2 = {};
+    outputs.forEach(function (output) {
+      reachableConstants_(grid, output, {}).forEach(function (cell) {
+        cellReach2[cell] = (cellReach2[cell] || 0) + 1;
+      });
+    });
+    const blockedByIncomplete = Object.keys(cellReach2).some(function (cell) {
+      if (cellReach2[cell] < 2) return false;
+      const reached = outputs.filter(function (output) {
+        return reachableConstants_(grid, output, {}).indexOf(cell) !== -1;
+      });
+      let sawObjective = false, sawIncomplete = false;
+      reached.forEach(function (output) {
+        const role = readConstraint_(grid, output);
+        if (role.isObjective) sawObjective = true;
+        else if (role.isIncompleteConstraint) sawIncomplete = true;
+      });
+      return sawObjective && sawIncomplete;
+    });
+    if (blockedByIncomplete) {
+      throw new Error('CONSTRAINT_MISSING_LIMIT');
+    }
     throw new Error('No block of input cells feeds several totals, so the ' +
       'quantities to decide are not obvious. Select them yourself.');
   }
@@ -1927,7 +1946,16 @@ function readConstraint_(grid, a1) {
       const token = RELATION_TOKENS[trimmed];
       if (token) { relation = token; continue; }
     }
-    if (relation !== null && typeof value === 'number') { limit = value; break; }
+    if (relation !== null) {
+      // The limit is the FIRST real cell after the operator. Blank cells between
+      // the operator and the limit are allowed and skipped, but any non-blank,
+      // non-numeric content (text, a stray label, a formula) stops the scan with
+      // no limit — so the constraint reads as incomplete rather than silently
+      // reaching past that content to grab an unrelated number further right.
+      if (value === '' || value === null || value === undefined) continue;
+      if (typeof value === 'number') { limit = value; }
+      break;
+    }
   }
 
   const current = cellAt_(grid, a1).value;

@@ -431,8 +431,13 @@ setTimeout(function () {
       ok('localizes ' + marker + ' in ' + lang, markerExpect[marker][lang].test(out), out.slice(0, 40));
       ok(lang + ': ' + marker + ' drops the raw marker', out.indexOf(marker) === -1, out.slice(0, 40));
       api.showEngineTrouble('tRead', new Error(marker));
-      const shown = document.getElementById('result').textContent;
-      ok(lang + ': showEngineTrouble renders ' + marker, markerExpect[marker][lang].test(shown), shown.slice(0, 60));
+      let shown = document.getElementById('result').textContent;
+      ok(lang + ': showEngineTrouble(Error) renders ' + marker, markerExpect[marker][lang].test(shown), shown.slice(0, 60));
+      // Also exercise the raw-string path the Worker uses (e.data.error is a
+      // string, not an Error), to the same depth as STRICT_INEQUALITY.
+      api.showEngineTrouble('tRead', marker);
+      shown = document.getElementById('result').textContent;
+      ok(lang + ': showEngineTrouble(string) renders ' + marker, markerExpect[marker][lang].test(shown), shown.slice(0, 60));
     });
   });
 

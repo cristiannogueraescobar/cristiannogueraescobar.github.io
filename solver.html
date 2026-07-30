@@ -405,7 +405,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=51"></script>
+<script src="assets/i18n.js?v=52"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -2011,12 +2011,6 @@ function detectModel_(sheet) {
       'them looks like a final total. Pick the objective yourself.');
   }
 
-  // An output with a relation but no limit is an INCOMPLETE constraint; refuse
-  // rather than treat it as complete (limit 0) or promote it to the objective.
-  if (outputs.some(function (cell) { return readConstraint_(grid, cell).isIncompleteConstraint; })) {
-    throw new Error('CONSTRAINT_MISSING_LIMIT');
-  }
-
   // Constant cells reachable from each output, grouped into contiguous blocks.
   const blockReach = {};
   const blockCells = {};
@@ -2098,6 +2092,32 @@ function detectModel_(sheet) {
   }
 
   if (!variables) {
+    // A plausible single decision cell blocked only by an INCOMPLETE constraint
+    // on it gets the specific marker, not the vague fallback. Scoped to cells
+    // reached by an objective so an unrelated incomplete calc elsewhere on the
+    // sheet does not trigger it.
+    const cellReach2 = {};
+    outputs.forEach(function (output) {
+      reachableConstants_(grid, output, {}).forEach(function (cell) {
+        cellReach2[cell] = (cellReach2[cell] || 0) + 1;
+      });
+    });
+    const blockedByIncomplete = Object.keys(cellReach2).some(function (cell) {
+      if (cellReach2[cell] < 2) return false;
+      const reached = outputs.filter(function (output) {
+        return reachableConstants_(grid, output, {}).indexOf(cell) !== -1;
+      });
+      let sawObjective = false, sawIncomplete = false;
+      reached.forEach(function (output) {
+        const role = readConstraint_(grid, output);
+        if (role.isObjective) sawObjective = true;
+        else if (role.isIncompleteConstraint) sawIncomplete = true;
+      });
+      return sawObjective && sawIncomplete;
+    });
+    if (blockedByIncomplete) {
+      throw new Error('CONSTRAINT_MISSING_LIMIT');
+    }
     throw new Error('No block of input cells feeds several totals, so the ' +
       'quantities to decide are not obvious. Select them yourself.');
   }
@@ -2333,7 +2353,14 @@ function readConstraint_(grid, a1) {
       const token = RELATION_TOKENS[trimmed];
       if (token) { relation = token; continue; }
     }
-    if (relation !== null && typeof value === 'number') { limit = value; break; }
+    if (relation !== null) {
+      // Limit is the FIRST real cell after the operator: skip blanks, accept the
+      // first number, and STOP on any other content so we never reach past text
+      // or a stray label to grab an unrelated number further right.
+      if (value === '' || value === null || value === undefined) continue;
+      if (typeof value === 'number') { limit = value; }
+      break;
+    }
   }
 
   const current = cellAt_(grid, a1).value;

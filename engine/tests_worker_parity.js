@@ -340,5 +340,43 @@ function strictGrid(rel) {
      wErr && wErr.indexOf(fx.marker) !== -1, wErr);
 });
 
+// Cell-skip: text between operator and a later number must not be crossed.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit', 'Notes', 'Cap'],
+    ['A', '0', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', '', '', ''],
+    ['Cap', '', '', '=B2', '<=', '', 'Notes', '100'],
+  ];
+  let mErr = null, wErr = null;
+  try { mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline cell-skip: main-thread CONSTRAINT_MISSING_LIMIT',
+     mErr && mErr.indexOf('CONSTRAINT_MISSING_LIMIT') !== -1, mErr);
+  ok('inline cell-skip: worker CONSTRAINT_MISSING_LIMIT',
+     wErr && wErr.indexOf('CONSTRAINT_MISSING_LIMIT') !== -1, wErr);
+}
+
+// A valid model must resolve on both paths even with an unrelated incomplete
+// calculation elsewhere on the sheet (scoped check, not whole-sheet).
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', '5'],
+    ['Aside', '', '', '=99', '>=', ''],
+  ];
+  let mErr = null, wErr = null, mOut = null, wOut = null;
+  try { mOut = mainThreadSolve(grid, false, 'max'); } catch (e) { mErr = String(e.message || e); }
+  try { wOut = workerSolve(grid, false, 'max', null); } catch (e) { wErr = String(e.message || e); }
+  ok('inline scoped check: main-thread resolves obj 5',
+     !mErr && mOut && Math.abs(mOut.objective - 5) < 1e-9, mErr || JSON.stringify(mOut));
+  ok('inline scoped check: worker resolves obj 5',
+     !wErr && wOut && Math.abs(wOut.objective - 5) < 1e-9, wErr || JSON.stringify(wOut));
+}
+
 console.log('WORKER PARITY TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

@@ -299,4 +299,56 @@ function oneVar(rel, limit, opts) {
     r.error || JSON.stringify(r.out));
 }
 
+// The limit is the FIRST real cell after the operator. A blank cell between the
+// operator and a later number must NOT be crossed to grab that number if there
+// is intervening text — that would build "B2 <= 100" from "<= | blank | Notes |
+// 100" and solve a model the user never wrote.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit', 'Notes', 'Cap'],
+    ['A', '0', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', '', '', ''],
+    ['Cap', '', '', '=B2', '<=', '', 'Notes', '100'],
+  ];
+  const r = run(grid);
+  check('negative: text between operator and a later number -> CONSTRAINT_MISSING_LIMIT',
+    !!r.error && /^detect:/.test(r.error) && /CONSTRAINT_MISSING_LIMIT/.test(r.error),
+    r.error || JSON.stringify(r.out));
+}
+
+// A blank cell between the operator and the limit IS allowed — the first real
+// cell is the number, so this resolves normally to a limit of 100.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit', 'Cap'],
+    ['A', '0', '', '', '', '', ''],
+    ['', '', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', '', ''],
+    ['Cap', '', '', '=B2', '<=', '', '100'],
+  ];
+  const r = run(grid);
+  check('blank cell between operator and limit is allowed (limit 100)',
+    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 100) < 1e-9,
+    r.error || JSON.stringify(r.out));
+}
+
+// A valid, complete model must still resolve even if an UNRELATED calculation
+// elsewhere on the sheet has an operator but no limit. The incomplete-constraint
+// check must be scoped to the chosen model, not the whole sheet.
+{
+  const grid = [
+    ['Item', 'x', '', 'Result', 'Rel', 'Limit'],
+    ['A', '0', '', '', '', ''],
+    ['', '', '', '', '', ''],
+    ['Total', '', '', '=1*B2', '', ''],
+    ['Cap', '', '', '=B2', '<=', '5'],
+    ['Aside', '', '', '=99', '>=', ''],
+  ];
+  const r = run(grid);
+  check('unrelated incomplete calc does not block a valid model (obj 5)',
+    !r.error && r.out.status === 'optimal' && Math.abs(r.out.objective - 5) < 1e-9,
+    r.error || JSON.stringify(r.out));
+}
+
 report();

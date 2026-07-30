@@ -264,13 +264,15 @@ PAGES.forEach(function (p) {
        (src.match(/parseCriterionOperand_\(/g) || []).length >= 3);
     // Single-variable detection fallback must be present in both engines and
     // must use the CORRECTED logic: a one-cell candidate needs objective AND
-    // constraint evidence (classified per role via readConstraint_().guessed),
-    // a weak objective-only block must not out-rank it (bestReach gate), and two
-    // eligible cells must be refused as ambiguous. Pinning these strings catches
-    // a divergence back to the bare cellReach>=2 count.
-    ok(name + ': single-variable fallback uses per-role evidence',
+    // complete-constraint evidence, classified per role by the PRECISE signals
+    // (role.isObjective / role.isCompleteConstraint) — NOT the coarse `guessed`
+    // flag, which lumps a real objective together with an incomplete constraint.
+    // Two eligible cells must be refused as ambiguous. These strings catch a
+    // divergence back to the bare cellReach>=2 count or the guessed-based test.
+    ok(name + ': single-variable fallback uses precise per-role evidence',
        /eligibleSingles/.test(src) &&
-       /readConstraint_\([^)]*\)\.guessed/.test(src) && /hasObjective && hasConstraint/.test(src));
+       /role\.isObjective/.test(src) && /role\.isCompleteConstraint/.test(src) &&
+       /hasObjective && hasConstraint/.test(src));
     ok(name + ': single-variable fallback refuses ambiguous multiple cells',
        /AMBIGUOUS_DECISION_CELLS/.test(src));
     // The linearity-aware decision must be present in both engines: a linear
@@ -296,6 +298,12 @@ PAGES.forEach(function (p) {
        /NO_OBJECTIVE_CELL/.test(src) && /objectiveCandidates/.test(src));
     ok(name + ': constraint scan stops at the grid edge',
        /grid\.firstColumn >= grid\.columns\) break/.test(src));
+    // The limit scan must take the FIRST real cell after the operator: skip
+    // blanks (continue) but break on any other content, so it can't reach past
+    // text to grab an unrelated number. Pin the shape in both engines.
+    ok(name + ': limit scan skips blanks and stops on first real content',
+       /value === '' \|\| value === null \|\| value === undefined\) continue/.test(src) &&
+       /if \(typeof value === 'number'\) \{ limit = value; \}/.test(src));
   });
 })();
 
