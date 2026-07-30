@@ -3722,11 +3722,13 @@ function matchesAnyHint_(label, hints) {
   }
 
   function clipFeasibleToBox_(cons, maxX, maxY){
-    // half-plane: keep points with nx*x + ny*y <= c (within tolerance)
+    // half-plane: keep points with nx*x + ny*y <= c (within a scale-aware
+    // tolerance — a fixed 1e-9 would admit points ~15% past a tiny limit like
+    // x <= 1e-12, or reject real ones at large coordinates).
     function clip(poly, nx, ny, c){
       if(!poly.length) return poly;
       var out = [];
-      var EPS = 1e-9;
+      var EPS = geometryEpsilon_(nx, ny, c, maxX, maxY);
       for(var i=0;i<poly.length;i++){
         var A = poly[i], B = poly[(i+1)%poly.length];
         var da = nx*A.x + ny*A.y - c, db = nx*B.x + ny*B.y - c;
@@ -3890,18 +3892,53 @@ function matchesAnyHint_(label, hints) {
   function lineAcrossBox(cRaw, maxX, maxY){
     var c = normalizeConstraint_(cRaw);
     if (c.degenerate) return null;   // 0*x+0*y is not a line
+    // c is unit-norm, so ANGULAR_EPS is the right "is this coefficient zero"
+    // test for choosing which box edges the line crosses.
     var pts = [];
-    if (Math.abs(c.y) > 1e-9) { // y at x=0 and x=maxX
+    if (Math.abs(c.y) > ANGULAR_EPS) { // y at x=0 and x=maxX
       pts.push({ x:0, y:(c.b - c.x*0)/c.y });
       pts.push({ x:maxX, y:(c.b - c.x*maxX)/c.y });
     }
-    if (Math.abs(c.x) > 1e-9) { // x at y=0 and y=maxY
+    if (Math.abs(c.x) > ANGULAR_EPS) { // x at y=0 and y=maxY
       pts.push({ x:(c.b - c.y*0)/c.x, y:0 });
       pts.push({ x:(c.b - c.y*maxY)/c.x, y:maxY });
     }
-    var inb = pts.filter(function(p){ return p.x>=-1e-6 && p.x<=maxX+1e-6 && p.y>=-1e-6 && p.y<=maxY+1e-6; });
+    var edge = geometryEpsilon_(1, 1, 0, maxX, maxY);
+    var inb = pts.filter(function(p){ return p.x>=-edge && p.x<=maxX+edge && p.y>=-edge && p.y<=maxY+edge; });
     if (inb.length < 2) return null;
-    return { x1:inb[0].x, y1:inb[0].y, x2:inb[1].x, y2:inb[1].y };
+    // A line can hit two box edges at the SAME corner (e.g. y=2x through (0,0)),
+    // producing duplicate points. Dedupe, then take the two FARTHEST apart, so
+    // the drawn segment is never zero-length and the boundary stays visible.
+    var uniq = [];
+    inb.forEach(function(p){
+      var dup = uniq.some(function(q){
+        return Math.abs(p.x-q.x) <= edge && Math.abs(p.y-q.y) <= edge;
+      });
+      if(!dup) uniq.push(p);
+    });
+    if (uniq.length < 2) return null;
+    var a = uniq[0], b = uniq[1], bestD = -1;
+    for(var i=0;i<uniq.length;i++) for(var j=i+1;j<uniq.length;j++){
+      var dx = uniq[i].x-uniq[j].x, dy = uniq[i].y-uniq[j].y, d = dx*dx+dy*dy;
+      if(d > bestD){ bestD = d; a = uniq[i]; b = uniq[j]; }
+    }
+    return { x1:a.x, y1:a.y, x2:b.x, y2:b.y };
+  }
+
+  // Two scale-aware tolerances replace the old fixed absolutes.
+  //  - ANGULAR_EPS: for NORMALISED coefficient rows (unit norm). Used where the
+  //    quantity is a direction cosine or a unit-row determinant — parallelism
+  //    and recession. A near-machine tolerance is correct there because the
+  //    inputs are already O(1); 1e-9 was far too coarse and let an extremely
+  //    skewed but bounded region (x + 5e-10*y <= 1) read as unbounded.
+  //  - geometryEpsilon_: for COORDINATE-space residuals, which can be huge
+  //    (y up to 2e9) or tiny (x up to 1e-12). The tolerance scales with the
+  //    magnitudes involved so clipping/feasibility never admit a point ~15% past
+  //    a tiny limit, nor reject a real vertex at large coordinates.
+  var ANGULAR_EPS = 128 * Number.EPSILON;
+  function geometryEpsilon_(nx, ny, c, maxX, maxY){
+    var scale = Math.max(1, Math.abs(c), Math.abs(nx)*maxX + Math.abs(ny)*maxY);
+    return 128 * Number.EPSILON * scale;
   }
 
   // 2-variable vertex geometry (verified separately).
@@ -3927,21 +3964,30 @@ function matchesAnyHint_(label, hints) {
     lines.push({ x:1, y:0, op:'>=', b:0 });
     lines.push({ x:0, y:1, op:'>=', b:0 });
     function intersect(L1,L2){
-      var det=L1.x*L2.y-L2.x*L1.y; if(Math.abs(det)<1e-9) return null;
+      // L1,L2 are unit-norm rows, so |det| is |sin(angle between them)|:
+      // ANGULAR_EPS (near machine precision) is the correct parallelism test,
+      // not 1e-9 which discards genuine near-axis intersections at large coords.
+      var det=L1.x*L2.y-L2.x*L1.y; if(Math.abs(det)<ANGULAR_EPS) return null;
       return { x:(L1.b*L2.y-L2.b*L1.y)/det, y:(L1.x*L2.b-L2.x*L1.b)/det };
     }
     function feasible(p){
       return cons.every(function(c){
-        var v=c.x*p.x+c.y*p.y;   // c is unit-norm, so 1e-6 is a real distance
-        if(c.op==='<=') return v<=c.b+1e-6;
-        if(c.op==='>=') return v>=c.b-1e-6;
-        return Math.abs(v-c.b)<1e-6;
+        var v=c.x*p.x+c.y*p.y;   // c is unit-norm
+        // Coordinate-scaled tolerance: the residual v-c.b lives in coordinate
+        // space, which may be up to ~2e9, so a fixed 1e-6 is meaningless there.
+        var eps = geometryEpsilon_(c.x, c.y, c.b, Math.abs(p.x), Math.abs(p.y));
+        if(c.op==='<=') return v<=c.b+eps;
+        if(c.op==='>=') return v>=c.b-eps;
+        return Math.abs(v-c.b)<eps;
       }) && p.x>=-1e-6 && p.y>=-1e-6;
     }
     var verts=[];
     for(var i=0;i<lines.length;i++)for(var j=i+1;j<lines.length;j++){
       var p=intersect(lines[i],lines[j]);
-      if(p && feasible(p) && !verts.some(function(q){return Math.abs(q.x-p.x)<1e-6&&Math.abs(q.y-p.y)<1e-6;}))
+      if(p && feasible(p) && !verts.some(function(q){
+          var eps = 128*Number.EPSILON*Math.max(1, Math.abs(q.x), Math.abs(p.x), Math.abs(q.y), Math.abs(p.y));
+          return Math.abs(q.x-p.x)<eps && Math.abs(q.y-p.y)<eps;
+        }))
         verts.push(p);
     }
     if(verts.length){
@@ -3961,14 +4007,20 @@ function matchesAnyHint_(label, hints) {
     function recedes(d){
       var mag = Math.abs(d.x) + Math.abs(d.y);
       if (mag < 1e-12) return false;            // must be a non-zero direction
-      if (d.x < -1e-9 || d.y < -1e-9) return false;  // first quadrant only (x,y >= 0)
+      // Must stay in the first quadrant: x,y >= 0 are real constraints, so a
+      // direction with ANY negative component leaves the region. d is unit-norm,
+      // so ANGULAR_EPS is the right threshold — 1e-9 was loose enough to accept
+      // a direction like (-5e-10, 1) (float noise from a near-vertical boundary)
+      // as if it were straight up, spuriously flagging a bounded region.
+      if (d.x < -ANGULAR_EPS || d.y < -ANGULAR_EPS) return false;
       return cons.every(function(c){
-        // cons rows are already unit-norm (see normalizeConstraint_), so proj is
-        // a true signed distance-rate and a fixed tolerance is scale-invariant.
+        // cons rows are already unit-norm, so proj is a true signed distance-
+        // rate. Use a near-machine tolerance: 1e-9 was coarse enough to let a
+        // near-axis but bounded constraint (x + 5e-10*y <= 1) look recessive.
         var proj = c.x*d.x + c.y*d.y;
-        if(c.op==='<=') return proj <= 1e-9;
-        if(c.op==='>=') return proj >= -1e-9;
-        return Math.abs(proj) < 1e-9;           // equality: only along the line
+        if(c.op==='<=') return proj <= ANGULAR_EPS;
+        if(c.op==='>=') return proj >= -ANGULAR_EPS;
+        return Math.abs(proj) < ANGULAR_EPS;    // equality: only along the line
       });
     }
     var unbounded = false, recession = null;
@@ -4343,7 +4395,8 @@ function matchesAnyHint_(label, hints) {
       localizeEngineError: localizeEngineError, showTrouble: showTrouble,
       showEngineTrouble: showEngineTrouble, solve2D: solve2D,
       drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_,
-      polygonDimension_: polygonDimension_, normalizeConstraint_: normalizeConstraint_ };
+      polygonDimension_: polygonDimension_, normalizeConstraint_: normalizeConstraint_,
+      lineAcrossBox: lineAcrossBox, geometryEpsilon_: geometryEpsilon_ };
   }
 })();
 </script>

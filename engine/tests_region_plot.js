@@ -246,6 +246,18 @@ setTimeout(function () {
        /cons\.map\(normalizeConstraint_\)/.test(solverHtml));
     ok('source: dimension decided by polygonDimension_, not the "=" symbol',
        /function polygonDimension_/.test(solverHtml) && /polygonDimension_\(clip\.points/.test(solverHtml));
+    // Scale-aware tolerances must be used, not fixed absolutes: a near-machine
+    // ANGULAR_EPS for normalised rows and a coordinate-scaled geometryEpsilon_
+    // for residuals. Pin their definitions and that solve2D/clip use them.
+    ok('source: defines ANGULAR_EPS and geometryEpsilon_',
+       /ANGULAR_EPS\s*=\s*128\s*\*\s*Number\.EPSILON/.test(solverHtml) &&
+       /function geometryEpsilon_/.test(solverHtml));
+    ok('source: recession/parallelism use ANGULAR_EPS (not 1e-9)',
+       /Math\.abs\(det\)<ANGULAR_EPS/.test(solverHtml) && /proj <= ANGULAR_EPS/.test(solverHtml));
+    ok('source: clip uses geometryEpsilon_ (not a fixed 1e-9)',
+       /var EPS = geometryEpsilon_/.test(solverHtml));
+    ok('source: lineAcrossBox dedupes and takes the farthest pair',
+       /lineAcrossBox/.test(solverHtml) && /bestD/.test(solverHtml));
   }
 
   // BOUNDED EQUALITY SEGMENT (the regression): x - y = 0, x + y <= 2 is the
@@ -394,6 +406,52 @@ setTimeout(function () {
       const xsArr = poly.getAttribute('points').trim().split(/\s+/).map(function (p) { return Number(p.split(',')[0]); });
       const width = Math.max.apply(null, xsArr) - Math.min.apply(null, xsArr);
       ok('thin rectangle: visible screen width > 1px (relative padding)', width > 1, 'width=' + width);
+    }
+  }
+
+  // ---- Scale-aware tolerances ------------------------------------------
+
+  // TINY LIMIT clip precision: x <= 1e-12, y <= 1. With relative padding the box
+  // edge sits at ~1.15e-12; a fixed 1e-9 clip tolerance would admit points ~15%
+  // past the limit. The clipped polygon's max x must be ~1e-12, not 1.15e-12.
+  {
+    const clip = api.clipFeasibleToBox_(
+      [{ x: 1, y: 0, op: '<=', b: 1e-12 }, { x: 0, y: 1, op: '<=', b: 1 }],
+      1.15e-12, 1.15);
+    const maxCx = Math.max.apply(null, clip.points.map(function (p) { return p.x; }));
+    ok('tiny-limit clip: max x is ~1e-12, not 1.15e-12', maxCx <= 1.01e-12, 'maxX=' + maxCx);
+  }
+
+  // EXTREME COEFFICIENT RATIO (bounded, not unbounded): x + 5e-10*y <= 1 is a
+  // very long but BOUNDED triangle (0<=x<=1, 0<=y<=2e9). It must classify as
+  // bounded AND keep a vertex near (0, 2e9) — a 1e-9 tolerance dropped both.
+  {
+    const geo = solve2D(obj, [{ x: 1, y: 5e-10, op: '<=', b: 1 }]);
+    ok('extreme ratio: classified bounded', geo.unbounded === false, String(geo.unbounded));
+    const maxVy = geo.vertices.length ? Math.max.apply(null, geo.vertices.map(function (p) { return p.y; })) : 0;
+    ok('extreme ratio: keeps a vertex near (0, 2e9)', maxVy > 1e9, 'y-max=' + maxVy.toExponential(2));
+  }
+
+  // SCALE INVARIANCE both ways: 1e-16*x<=5e-16 and 1e16*x<=5e16 both == x<=5.
+  {
+    const small = solve2D(obj, [{ x: 1e-16, y: 0, op: '<=', b: 5e-16 }, { x: 0, y: 1, op: '<=', b: 5 }]);
+    const big = solve2D(obj, [{ x: 1e16, y: 0, op: '<=', b: 5e16 }, { x: 0, y: 1, op: '<=', b: 5 }]);
+    ok('scale: 1e-16*x<=5e-16 is bounded', small.unbounded === false, String(small.unbounded));
+    ok('scale: 1e16*x<=5e16 is bounded', big.unbounded === false, String(big.unbounded));
+    const bigMaxX = big.vertices.length ? Math.max.apply(null, big.vertices.map(function (p) { return p.x; })) : 0;
+    ok('scale: 1e16*x<=5e16 clips at x=5', Math.abs(bigMaxX - 5) < 1e-6, 'x-max=' + bigMaxX);
+  }
+
+  // LINE THROUGH A CORNER must not be zero-length: 2x - y = 0 across [0,5]^2
+  // hits the box at (0,0) via two edges plus (2.5,5). Deduped + farthest-pair,
+  // the drawn segment is (0,0)-(2.5,5), length ~5.59, never a point.
+  {
+    const L = api.lineAcrossBox({ x: 2, y: -1, op: '=', b: 0 }, 5, 5);
+    ok('line through corner: returns a segment', !!L, L ? JSON.stringify(L) : 'null');
+    if (L) {
+      const len = Math.hypot(L.x2 - L.x1, L.y2 - L.y1);
+      ok('line through corner: two distinct endpoints (non-zero length)', len > 1,
+         'len=' + len.toFixed(3));
     }
   }
 

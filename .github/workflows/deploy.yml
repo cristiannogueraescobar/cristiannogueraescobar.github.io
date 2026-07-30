@@ -312,7 +312,7 @@ jobs:
           # change that drops it), and must carry this round's engine markers.
           if ! grep -q '^[0-9a-f]\{64\}  ./solver.html$' /tmp/prod/assets/hashes.txt; then
             echo "  solver.html missing from hashes.txt manifest"; FAILED=1; fi
-          for marker in 'function parseCriterionOperand_' 'function showEngineTrouble' 'limitDependsOnVariable' 'function clipFeasibleToBox_' 'function normalizeConstraint_' 'class="region-ray'; do
+          for marker in 'function parseCriterionOperand_' 'function showEngineTrouble' 'limitDependsOnVariable' 'function clipFeasibleToBox_' 'function normalizeConstraint_' 'function geometryEpsilon_' 'class="region-ray'; do
             if ! grep -q "$marker" /tmp/prod/solver.html; then
               echo "  served solver.html is missing marker: $marker"; FAILED=1; fi
           done
