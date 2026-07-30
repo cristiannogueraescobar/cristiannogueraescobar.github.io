@@ -7,6 +7,11 @@
  *
  * Run: node engine/tests_strict.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: verify-reject-unsafe
+
 const { run, check, report } = require('./harness.js');
 
 function isStrictError(r) {

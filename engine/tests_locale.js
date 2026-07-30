@@ -12,6 +12,12 @@
  *
  * Run: node engine/tests_locale.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: sheet-locale-us
+//   CAPABILITY: sheet-locale-eu
+
 const Engine = require('./engine.js');
 const { run } = require('./harness.js');
 

@@ -1,0 +1,318 @@
+{
+  "generatedFrom": "assets/product-capabilities.js",
+  "note": "DERIVED FILE — do not edit by hand. Run engine/gen_claims.js to regenerate.",
+  "claims": [
+    {
+      "id": "model-continuous",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelContinuousName",
+      "descriptionKey": "capModelContinuousDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: model-continuous"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "model-integer",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelIntegerName",
+      "descriptionKey": "capModelIntegerDesc",
+      "proof": {
+        "testFile": "tests_bounds.js",
+        "testMarker": "CAPABILITY: model-integer"
+      },
+      "example": "workforce",
+      "public": true
+    },
+    {
+      "id": "model-binary",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelBinaryName",
+      "descriptionKey": "capModelBinaryDesc",
+      "proof": {
+        "testFile": "tests_panel.js",
+        "testMarker": "CAPABILITY: model-binary"
+      },
+      "example": "project",
+      "public": true
+    },
+    {
+      "id": "model-mixed",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelMixedName",
+      "descriptionKey": "capModelMixedDesc",
+      "proof": {
+        "testFile": "tests_bounds.js",
+        "testMarker": "CAPABILITY: model-mixed"
+      },
+      "example": "supplier",
+      "public": true
+    },
+    {
+      "id": "model-direction",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelDirectionName",
+      "descriptionKey": "capModelDirectionDesc",
+      "proof": {
+        "testFile": "tests_direction.js",
+        "testMarker": "CAPABILITY: model-direction"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "model-single-variable",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelSingleVariableName",
+      "descriptionKey": "capModelSingleVariableDesc",
+      "proof": {
+        "testFile": "tests_single_var.js",
+        "testMarker": "CAPABILITY: model-single-variable"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "model-per-variable-bounds",
+      "group": "models",
+      "status": "available",
+      "nameKey": "capModelPerVariableBoundsName",
+      "descriptionKey": "capModelPerVariableBoundsDesc",
+      "proof": {
+        "testFile": "tests_bounds.js",
+        "testMarker": "CAPABILITY: model-per-variable-bounds"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "sheet-formula-limits",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetFormulaLimitsName",
+      "descriptionKey": "capSheetFormulaLimitsDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: sheet-formula-limits"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "sheet-sumif",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetSumifName",
+      "descriptionKey": "capSheetSumifDesc",
+      "proof": {
+        "testFile": "tests_sumif_criteria.js",
+        "testMarker": "CAPABILITY: sheet-sumif"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "sheet-locale-us",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetLocaleUsName",
+      "descriptionKey": "capSheetLocaleUsDesc",
+      "proof": {
+        "testFile": "tests_locale.js",
+        "testMarker": "CAPABILITY: sheet-locale-us"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "sheet-locale-eu",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetLocaleEuName",
+      "descriptionKey": "capSheetLocaleEuDesc",
+      "proof": {
+        "testFile": "tests_locale.js",
+        "testMarker": "CAPABILITY: sheet-locale-eu"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "sheet-paste",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetPasteName",
+      "descriptionKey": "capSheetPasteDesc",
+      "proof": {
+        "testFile": "tests_grid_input.js",
+        "testMarker": "CAPABILITY: sheet-paste"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "sheet-export",
+      "group": "spreadsheet",
+      "status": "available",
+      "nameKey": "capSheetExportName",
+      "descriptionKey": "capSheetExportDesc",
+      "proof": {
+        "testFile": "tests_worker_parity.js",
+        "testMarker": "CAPABILITY: sheet-export"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "verify-objective",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyObjectiveName",
+      "descriptionKey": "capVerifyObjectiveDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: verify-objective"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "verify-constraints",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyConstraintsName",
+      "descriptionKey": "capVerifyConstraintsDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: verify-constraints"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "verify-statuses",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyStatusesName",
+      "descriptionKey": "capVerifyStatusesDesc",
+      "proof": {
+        "testFile": "tests_states.js",
+        "testMarker": "CAPABILITY: verify-statuses"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "verify-reject-unsafe",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capVerifyRejectUnsafeName",
+      "descriptionKey": "capVerifyRejectUnsafeDesc",
+      "proof": {
+        "testFile": "tests_strict.js",
+        "testMarker": "CAPABILITY: verify-reject-unsafe"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "run-local",
+      "group": "verification",
+      "status": "available",
+      "nameKey": "capRunLocalName",
+      "descriptionKey": "capRunLocalDesc",
+      "proof": {
+        "testFile": "tests_worker_parity.js",
+        "testMarker": "CAPABILITY: run-local"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "explain-detection",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainDetectionName",
+      "descriptionKey": "capExplainDetectionDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: explain-detection"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "explain-solve-details",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainSolveDetailsName",
+      "descriptionKey": "capExplainSolveDetailsDesc",
+      "proof": {
+        "testFile": "tests_states.js",
+        "testMarker": "CAPABILITY: explain-solve-details"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "explain-marginal",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainMarginalName",
+      "descriptionKey": "capExplainMarginalDesc",
+      "proof": {
+        "testFile": "tests.js",
+        "testMarker": "CAPABILITY: explain-marginal"
+      },
+      "example": "production",
+      "public": true
+    },
+    {
+      "id": "explain-region-chart",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainRegionChartName",
+      "descriptionKey": "capExplainRegionChartDesc",
+      "proof": {
+        "testFile": "tests_region_plot.js",
+        "testMarker": "CAPABILITY: explain-region-chart"
+      },
+      "example": "workshop",
+      "public": true
+    },
+    {
+      "id": "explain-multilingual",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainMultilingualName",
+      "descriptionKey": "capExplainMultilingualDesc",
+      "proof": {
+        "testFile": "tests_i18n_pages.js",
+        "testMarker": "CAPABILITY: explain-multilingual"
+      },
+      "example": null,
+      "public": true
+    },
+    {
+      "id": "explain-error-localisation",
+      "group": "explanation",
+      "status": "available",
+      "nameKey": "capExplainErrorLocalisationName",
+      "descriptionKey": "capExplainErrorLocalisationDesc",
+      "proof": {
+        "testFile": "tests_error_i18n.js",
+        "testMarker": "CAPABILITY: explain-error-localisation"
+      },
+      "example": null,
+      "public": true
+    }
+  ]
+}

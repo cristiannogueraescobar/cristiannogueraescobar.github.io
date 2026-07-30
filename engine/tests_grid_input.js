@@ -13,6 +13,11 @@
  *
  * Run: node engine/tests_grid_input.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: sheet-paste
+
 const Engine = require('./engine.js');
 const { run } = require('./harness.js');
 

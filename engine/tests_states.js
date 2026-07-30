@@ -8,6 +8,12 @@
  * low MAX_ITERATIONS, feed it a model that provably HAS a solution, and assert
  * the engine does NOT claim 'infeasible'.
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: verify-statuses
+//   CAPABILITY: explain-solve-details
+
 const fs = require('fs');
 const path = require('path');
 

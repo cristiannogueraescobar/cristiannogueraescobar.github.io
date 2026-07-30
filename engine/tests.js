@@ -10,6 +10,16 @@
  * Detection is heuristic, so some shapes may not be detected the way we expect;
  * that itself is useful signal.
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: model-continuous
+//   CAPABILITY: sheet-formula-limits
+//   CAPABILITY: verify-objective
+//   CAPABILITY: verify-constraints
+//   CAPABILITY: explain-detection
+//   CAPABILITY: explain-marginal
+
 const { run, check, approx, report } = require('./harness.js');
 
 /* Helper: a "max c·x s.t. rows" builder using an explicit-coefficient layout

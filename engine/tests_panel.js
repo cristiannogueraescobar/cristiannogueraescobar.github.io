@@ -12,6 +12,11 @@
  *
  * Run: node engine/tests_panel.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: model-binary
+
 const fs = require('fs');
 const path = require('path');
 

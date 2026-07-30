@@ -10,6 +10,11 @@
  *
  * Run: node engine/tests_i18n_pages.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: explain-multilingual
+
 const fs = require('fs');
 const path = require('path');
 

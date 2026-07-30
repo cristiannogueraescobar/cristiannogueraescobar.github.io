@@ -11,6 +11,11 @@
  *
  * Run: node engine/tests_region_plot.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: explain-region-chart
+
 const fs = require('fs');
 const path = require('path');
 

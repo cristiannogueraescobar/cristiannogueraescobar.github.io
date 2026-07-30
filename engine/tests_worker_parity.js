@@ -27,6 +27,12 @@
  *
  * Run: node engine/tests_worker_parity.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: sheet-export
+//   CAPABILITY: run-local
+
 const fs = require('fs');
 const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8');

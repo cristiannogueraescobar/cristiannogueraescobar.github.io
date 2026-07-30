@@ -15,6 +15,13 @@
  *
  * Run: node engine/tests_bounds.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: model-integer
+//   CAPABILITY: model-mixed
+//   CAPABILITY: model-per-variable-bounds
+
 const path = require('path');
 // Load a fresh copy of the engine (UMD exposes optimise_).
 const ENG = require('./engine.js');

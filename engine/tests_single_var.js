@@ -10,6 +10,11 @@
  *
  * Run: node engine/tests_single_var.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: model-single-variable
+
 const { run, check, report } = require('./harness.js');
 
 // A single variable B2 that feeds the objective (Total = B2) AND a constraint.

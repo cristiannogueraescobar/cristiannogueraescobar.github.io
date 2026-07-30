@@ -9,6 +9,11 @@
  *
  * Run: node engine/tests_sumif_criteria.js
  */
+// Public product capabilities demonstrated by the cases in this file
+// (anchors validated by tests_capabilities.js — do not remove without
+// updating assets/product-capabilities.js):
+//   CAPABILITY: sheet-sumif
+
 const { run, check, report } = require('./harness.js');
 
 // Data cells H2=2, H3=20 (constant, not decision variables).
