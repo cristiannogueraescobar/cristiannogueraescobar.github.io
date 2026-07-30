@@ -630,11 +630,21 @@ function pivot_(tableau, row, column) {
 /* Grid — the whole sheet read in one call                             */
 /* ================================================================== */
 
-function loadGrid_(sheet) {
+function loadGrid_(sheet, localeMode) {
   const range = sheet.getDataRange();
-  const formulas = range.getFormulas();
-  const values = range.getValues();
-  const columns = formulas.length ? formulas[0].length : 0;
+  const rawFormulas = range.getFormulas();
+  const rawValues = range.getValues();
+  const columns = rawFormulas.length ? rawFormulas[0].length : 0;
+  // Detect the sheet locale once, then normalise every formula and value into
+  // canonical (US) form so the tokenizer and Number() see '.' decimals and ','
+  // separators regardless of what the user typed. localeMode may force 'eu'/'us'.
+  const locale = detectLocale_(rawFormulas, rawValues, localeMode || 'auto');
+  const formulas = rawFormulas.map(function (row) {
+    return row.map(function (f) { return normalizeFormula_(f, locale); });
+  });
+  const values = rawValues.map(function (row) {
+    return row.map(function (v) { return normalizeValue_(v, locale); });
+  });
   return {
     firstRow: range.getRow(),
     firstColumn: range.getColumn(),
@@ -643,6 +653,7 @@ function loadGrid_(sheet) {
     cellCount: formulas.length * columns,
     formulas: formulas,
     values: values,
+    locale: locale,
   };
 }
 
@@ -909,6 +920,81 @@ function linearize_(context, a1, depth) {
 
   context.memo[cell] = form;
   return form;
+}
+
+/* ================================================================== */
+/* Locale (decimal comma / semicolon separator) normalisation          */
+/* ================================================================== */
+
+// A European-locale sheet writes 1,5 for 1.5 and SUM(A;B) for SUM(A,B). The
+// tokenizer and Number() both expect the canonical (US) form: '.' decimal, ','
+// argument separator. We detect the sheet's locale ONCE and normalise every
+// formula and value into canonical form before parsing. Only two locales are
+// supported (European and US); thousands separators are out of scope.
+
+// Is a raw string a European decimal number like "7,5" or "-12,0"? (No
+// thousands grouping — a bare integer-comma-fraction only.)
+function isEuropeanDecimal_(raw) {
+  return typeof raw === 'string' && /^-?\d+,\d+$/.test(raw.trim());
+}
+
+// Detect the sheet locale from its formulas and values. European if any formula
+// uses ';' as a separator (outside strings) or any value is a decimal-comma
+// number. 'mode' can force it: 'eu' | 'us' | 'auto' (default).
+function detectLocale_(formulas, values, mode) {
+  if (mode === 'eu') return 'eu';
+  if (mode === 'us') return 'us';
+  var rows = formulas || [];
+  for (var r = 0; r < rows.length; r++) {
+    var frow = rows[r] || [];
+    for (var c = 0; c < frow.length; c++) {
+      var f = frow[c];
+      if (!f || typeof f !== 'string') continue;
+      var inStr = false;
+      for (var i = 0; i < f.length; i++) {
+        var ch = f.charAt(i);
+        if (ch === '"') inStr = !inStr;
+        else if (ch === ';' && !inStr) return 'eu';
+      }
+    }
+  }
+  rows = values || [];
+  for (var vr = 0; vr < rows.length; vr++) {
+    var vrow = rows[vr] || [];
+    for (var vc = 0; vc < vrow.length; vc++) {
+      if (isEuropeanDecimal_(vrow[vc])) return 'eu';
+    }
+  }
+  return 'us';
+}
+
+// Normalise a European formula string to canonical form: outside string
+// literals, ';' becomes ',' (argument separator) and ',' becomes '.' (decimal).
+// US formulas (and any formula on a US-locale sheet) pass through untouched.
+function normalizeFormula_(formula, locale) {
+  if (locale !== 'eu' || typeof formula !== 'string' ||
+      (formula.indexOf(',') === -1 && formula.indexOf(';') === -1)) {
+    return formula;
+  }
+  var out = '', inStr = false;
+  for (var i = 0; i < formula.length; i++) {
+    var ch = formula.charAt(i);
+    if (ch === '"') { inStr = !inStr; out += ch; }
+    else if (inStr) { out += ch; }
+    else if (ch === ';') { out += ','; }
+    else if (ch === ',') { out += '.'; }
+    else { out += ch; }
+  }
+  return out;
+}
+
+// Normalise a raw cell value to a canonical number when it is a European
+// decimal string ("7,5" -> 7.5). Anything else is returned unchanged.
+function normalizeValue_(raw, locale) {
+  if (locale === 'eu' && isEuropeanDecimal_(raw)) {
+    return Number(raw.trim().replace(',', '.'));
+  }
+  return raw;
 }
 
 /* ================================================================== */
@@ -1292,9 +1378,9 @@ const APP = {
 
 
 
-function solveModel_(sheet, model) {
+function solveModel_(sheet, model, localeMode) {
   const started = Date.now();
-  const grid = loadGrid_(sheet);
+  const grid = loadGrid_(sheet, localeMode);
   const variables = expandRange_(grid, model.variables);
   const context = newContext_(grid, variables);
 
@@ -1560,8 +1646,8 @@ function capitalise_(text) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function detectModel_(sheet) {
-  const grid = loadGrid_(sheet);
+function detectModel_(sheet, localeMode) {
+  const grid = loadGrid_(sheet, localeMode);
   const formulaCells = listFormulaCells_(grid);
   if (!formulaCells.length) {
     throw new Error('This sheet has no formulas, so there is no model to read. ' +
@@ -1875,8 +1961,8 @@ function labelFor_(grid, a1) {
   return a1;
 }
 
-function describeModel_(sheet, model) {
-  const grid = loadGrid_(sheet);
+function describeModel_(sheet, model, localeMode) {
+  const grid = loadGrid_(sheet, localeMode);
   const variables = expandRange_(grid, model.variables);
   const context = newContext_(grid, variables);
 
@@ -2110,6 +2196,9 @@ function matchesAnyHint_(label, hints) {
     ENGINE: ENGINE,
     detectModel_: detectModel_,
     solveModel_: solveModel_,
+    detectLocale_: detectLocale_,
+    normalizeFormula_: normalizeFormula_,
+    normalizeValue_: normalizeValue_,
     optimise_: optimise_,
     classifyModel_: classifyModel_,
     buildVariableDomains_: buildVariableDomains_,

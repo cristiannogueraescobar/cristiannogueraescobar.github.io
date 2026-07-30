@@ -346,6 +346,13 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
       <p class="sense-hint" id="senseHint" style="width:100%;margin:0"></p>
       <label class="toggle"><input type="checkbox" id="whole"> <span data-i18n="wholeNumbers">Whole numbers only</span></label>
       <p class="paste-tip" data-i18n="wholeHelp" style="width:100%;margin:0">Use this for quantities that cannot be fractional, such as people, vehicles or projects.</p>
+      <label class="toggle" for="localeSel"><span data-i18n="numberFormat">Number format</span>
+        <select id="localeSel" style="margin-left:6px">
+          <option value="auto" data-i18n="localeAuto">Auto-detect</option>
+          <option value="us" data-i18n="localeUS">1.5 and SUM(A,B)</option>
+          <option value="eu" data-i18n="localeEU">1,5 and SUM(A;B)</option>
+        </select></label>
+      <p class="paste-tip" data-i18n="localeHelp" style="width:100%;margin:0">Auto-detect reads commas and semicolons from your sheet. Set this if a decimal comma is misread.</p>
       <button class="ghost" id="clear" data-i18n="clearGrid">Clear grid</button>
     </div>
 
@@ -408,7 +415,7 @@ footer a{color:rgba(245,242,235,.85);font-family:var(--mono);font-size:12px;text
 </aside>
 
 <script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=54"></script>
+<script src="assets/i18n.js?v=55"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
 /* === Languages. Static text carries data-i18n; the solver's dynamic result
@@ -1058,11 +1065,75 @@ function pivot_(tableau, row, column) {
 /* Grid — the whole sheet read in one call                             */
 /* ================================================================== */
 
-function loadGrid_(sheet) {
+// Locale (decimal comma / semicolon separator) normalisation. A European sheet
+// writes 1,5 and SUM(A;B); the tokenizer and Number() expect '.' decimals and
+// ',' separators, so we detect the sheet locale once and normalise formulas and
+// values into canonical form. Only European and US are supported (no thousands
+// grouping). localeMode may force 'eu'/'us'; default is 'auto'.
+function isEuropeanDecimal_(raw) {
+  return typeof raw === 'string' && /^-?\d+,\d+$/.test(raw.trim());
+}
+function detectLocale_(formulas, values, mode) {
+  if (mode === 'eu') return 'eu';
+  if (mode === 'us') return 'us';
+  var rows = formulas || [];
+  for (var r = 0; r < rows.length; r++) {
+    var frow = rows[r] || [];
+    for (var c = 0; c < frow.length; c++) {
+      var f = frow[c];
+      if (!f || typeof f !== 'string') continue;
+      var inStr = false;
+      for (var i = 0; i < f.length; i++) {
+        var ch = f.charAt(i);
+        if (ch === '"') inStr = !inStr;
+        else if (ch === ';' && !inStr) return 'eu';
+      }
+    }
+  }
+  rows = values || [];
+  for (var vr = 0; vr < rows.length; vr++) {
+    var vrow = rows[vr] || [];
+    for (var vc = 0; vc < vrow.length; vc++) {
+      if (isEuropeanDecimal_(vrow[vc])) return 'eu';
+    }
+  }
+  return 'us';
+}
+function normalizeFormula_(formula, locale) {
+  if (locale !== 'eu' || typeof formula !== 'string' ||
+      (formula.indexOf(',') === -1 && formula.indexOf(';') === -1)) {
+    return formula;
+  }
+  var out = '', inStr = false;
+  for (var i = 0; i < formula.length; i++) {
+    var ch = formula.charAt(i);
+    if (ch === '"') { inStr = !inStr; out += ch; }
+    else if (inStr) { out += ch; }
+    else if (ch === ';') { out += ','; }
+    else if (ch === ',') { out += '.'; }
+    else { out += ch; }
+  }
+  return out;
+}
+function normalizeValue_(raw, locale) {
+  if (locale === 'eu' && isEuropeanDecimal_(raw)) {
+    return Number(raw.trim().replace(',', '.'));
+  }
+  return raw;
+}
+
+function loadGrid_(sheet, localeMode) {
   const range = sheet.getDataRange();
-  const formulas = range.getFormulas();
-  const values = range.getValues();
-  const columns = formulas.length ? formulas[0].length : 0;
+  const rawFormulas = range.getFormulas();
+  const rawValues = range.getValues();
+  const columns = rawFormulas.length ? rawFormulas[0].length : 0;
+  const locale = detectLocale_(rawFormulas, rawValues, localeMode || 'auto');
+  const formulas = rawFormulas.map(function (row) {
+    return row.map(function (f) { return normalizeFormula_(f, locale); });
+  });
+  const values = rawValues.map(function (row) {
+    return row.map(function (v) { return normalizeValue_(v, locale); });
+  });
   return {
     firstRow: range.getRow(),
     firstColumn: range.getColumn(),
@@ -1071,6 +1142,7 @@ function loadGrid_(sheet) {
     cellCount: formulas.length * columns,
     formulas: formulas,
     values: values,
+    locale: locale,
   };
 }
 
@@ -1717,9 +1789,9 @@ const APP = {
 
 
 
-function solveModel_(sheet, model) {
+function solveModel_(sheet, model, localeMode) {
   const started = Date.now();
-  const grid = loadGrid_(sheet);
+  const grid = loadGrid_(sheet, localeMode);
   const variables = expandRange_(grid, model.variables);
   const context = newContext_(grid, variables);
 
@@ -1992,8 +2064,8 @@ function capitalise_(text) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-function detectModel_(sheet) {
-  const grid = loadGrid_(sheet);
+function detectModel_(sheet, localeMode) {
+  const grid = loadGrid_(sheet, localeMode);
   const formulaCells = listFormulaCells_(grid);
   if (!formulaCells.length) {
     throw new Error('This sheet has no formulas, so there is no model to read. ' +
@@ -2280,8 +2352,8 @@ function labelFor_(grid, a1) {
   return a1;
 }
 
-function describeModel_(sheet, model) {
-  const grid = loadGrid_(sheet);
+function describeModel_(sheet, model, localeMode) {
+  const grid = loadGrid_(sheet, localeMode);
   const variables = expandRange_(grid, model.variables);
   const context = newContext_(grid, variables);
 
@@ -2833,6 +2905,7 @@ function matchesAnyHint_(label, hints) {
 
   function snapshot(){
     var sel=document.getElementById('senseSel');
+    var loc=document.getElementById('localeSel');
     return {
       data:data.map(function(row){return row.slice();}), ROWS:ROWS, COLS:COLS,
       // Deep-copy the panel state so undo restores variable types/bounds too.
@@ -2842,6 +2915,7 @@ function matchesAnyHint_(label, hints) {
       // Capture the objective-direction confirmation, so undo doesn't force a
       // re-confirm of a direction the user had already set.
       senseValue:sel?sel.value:'auto',
+      localeValue:loc?loc.value:'auto',
       confirmedObjectiveSig:confirmedObjectiveSig?JSON.parse(JSON.stringify(confirmedObjectiveSig)):null
     };
   }
@@ -2854,6 +2928,7 @@ function matchesAnyHint_(label, hints) {
     if(typeof snap.panelStale==='boolean'){ panelStale=snap.panelStale; }
     // Restore the objective-direction confirmation.
     if('senseValue' in snap){ var sel=document.getElementById('senseSel'); if(sel) sel.value=snap.senseValue; }
+    if('localeValue' in snap){ var loc=document.getElementById('localeSel'); if(loc) loc.value=snap.localeValue; }
     if('confirmedObjectiveSig' in snap){ confirmedObjectiveSig=snap.confirmedObjectiveSig; }
     render();
     // Reflect the restored panel state in the UI.
@@ -3057,12 +3132,12 @@ function matchesAnyHint_(label, hints) {
         '  try{',
         '    var sheet=mkSheet(d.formulas,d.values);',
         '    var model;',
-        '    try{ model=detectModel_(sheet); }',
+        '    try{ model=detectModel_(sheet, d.localeMode); }',
         '    catch(rerr){ rerr.__phase="read"; throw rerr; }',
         '    model.wholeNumbers=d.wholeNumbers===true;',
         '    if(d.domains) model.domains=d.domains;',
         '    if(d.sense==="max"||d.sense==="min") model.objective.sense=d.sense;',
-        '    var out=solveModel_(sheet,model);',
+        '    var out=solveModel_(sheet,model, d.localeMode);',
         '    self.postMessage({token:d.token,ok:true,out:out,wholeNumbers:model.wholeNumbers});',
         '  }catch(err){',
         '    self.postMessage({token:d.token,ok:false,phase:(err&&err.__phase)||"solve",error:String(err&&err.message||err)});',
@@ -3422,6 +3497,7 @@ function matchesAnyHint_(label, hints) {
     payload.wholeNumbers=wholeNumbers;
     payload.domains=domains;
     payload.sense=(document.getElementById('senseSel')||{}).value;
+    payload.localeMode=currentLocaleMode();
     payload.token=myToken;
     w.postMessage(payload);
   }
@@ -3499,22 +3575,32 @@ function matchesAnyHint_(label, hints) {
 
   function runSolve(){
     var sheet=sheetFromGrid();
+    var lm=currentLocaleMode();
     var model;
-    try{ model=detectModel_(sheet); }
+    try{ model=detectModel_(sheet, lm); }
     catch(err){ return showEngineTrouble('tRead', err); }
     model.wholeNumbers=document.getElementById('whole').checked;
     var senseSel=(document.getElementById('senseSel')||{}).value;
     if(senseSel==='max'||senseSel==='min') model.objective.sense=senseSel;
     try{
-      var cells=expandRange_(loadGrid_(sheet), model.variables);
+      var cells=expandRange_(loadGrid_(sheet, lm), model.variables);
       model.domains=variableDomains(cells, model.wholeNumbers);
     }catch(e){ model.domains=null; }
 
     var out;
-    try{ out=solveModel_(sheet,model); }
+    try{ out=solveModel_(sheet,model, lm); }
     catch(err){ return showEngineTrouble('tSolve', err); }
 
     presentResult(out, model);
+  }
+
+  // The locale mode drives decimal-comma / semicolon handling. 'auto' detects
+  // from the sheet; the selector lets the user force 'eu'/'us' if detection is
+  // wrong (e.g. a lone "=1,5*B2" with no other European signal).
+  function currentLocaleMode(){
+    var sel=document.getElementById('localeSel');
+    var v=sel&&sel.value;
+    return (v==='eu'||v==='us')?v:'auto';
   }
 
   // Present a solve result (used by both the worker path and the fallback).
@@ -3953,6 +4039,14 @@ function matchesAnyHint_(label, hints) {
   //    (y up to 2e9) or tiny (x up to 1e-12). The tolerance scales with the
   //    magnitudes involved so clipping/feasibility never admit a point ~15% past
   //    a tiny limit, nor reject a real vertex at large coordinates.
+  //
+  // SUPPORTED RANGE: the Math.max(1, ...) floor means the tolerance stops being
+  // strictly proportional below ~1e-14 (its minimum is 128*EPSILON ~= 2.84e-14).
+  // The visualisation is designed for practical magnitudes — coordinates from
+  // ~1e-12 to ~2e9, verified by the suite. Models whose coordinates or objective
+  // values fall below ~1e-14 are outside this range and not a target: such
+  // values never arise in a real optimisation sheet, and the solver's numeric
+  // result is unaffected regardless — only the drawn region could be imprecise.
   var ANGULAR_EPS = 128 * Number.EPSILON;
   function geometryEpsilon_(nx, ny, c, maxX, maxY){
     var scale = Math.max(1, Math.abs(c), Math.abs(nx)*maxX + Math.abs(ny)*maxY);

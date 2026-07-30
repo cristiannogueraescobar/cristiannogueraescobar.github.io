@@ -42,9 +42,10 @@ function mkSheet(grid) {
 /* Detect + solve in one step, returning {model, out} or {error}. */
 function run(grid, opts) {
   const sheet = mkSheet(grid);
+  const localeMode = opts && opts.locale ? opts.locale : undefined;
   let model;
   try {
-    model = Engine.detectModel_(sheet);
+    model = Engine.detectModel_(sheet, localeMode);
   } catch (e) {
     return { error: 'detect: ' + (e.message || e) };
   }
@@ -57,7 +58,7 @@ function run(grid, opts) {
   if (opts && typeof opts.mutate === 'function') opts.mutate(model);
   let out;
   try {
-    out = Engine.solveModel_(sheet, model);
+    out = Engine.solveModel_(sheet, model, localeMode);
   } catch (e) {
     return { error: 'solve: ' + (e.message || e), model };
   }
