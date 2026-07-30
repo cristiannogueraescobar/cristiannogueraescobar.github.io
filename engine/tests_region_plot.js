@@ -153,6 +153,91 @@ setTimeout(function () {
        svg ? svg.getAttribute('aria-label') : 'no svg');
   }
 
+  // Shoelace area of a polygon points-string "x,y x,y ...".
+  function shoelace(pointsAttr) {
+    const pts = String(pointsAttr).trim().split(/\s+/).map(function (p) {
+      return p.split(',').map(Number);
+    });
+    let a = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const j = (i + 1) % pts.length;
+      a += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+    }
+    return Math.abs(a) / 2;
+  }
+  function distinctCount(pointsAttr) {
+    const seen = {};
+    String(pointsAttr).trim().split(/\s+/).forEach(function (p) { seen[p] = 1; });
+    return Object.keys(seen).length;
+  }
+
+  // EQUALITY RAY (the regression): x - y = 0, x + y >= 2 has ONE vertex (1,1)
+  // and recedes along (1,1). It must render as a .region-ray polyline, NEVER a
+  // zero-area [far, vertex, far] polygon.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([
+      { label: 'Eq', coefficients: [1, -1], relation: '=', limit: 0, binding: true },
+      { label: 'Sum', coefficients: [1, 1], relation: '>=', limit: 2, binding: true },
+    ], [1, 1]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    const ray = result.querySelector('.region-ray.open');
+    const poly = result.querySelector('polygon.region');
+    ok('equality ray: rendered as .region-ray.open polyline', !!ray, ray ? 'ray present' : 'no ray');
+    ok('equality ray: NOT a polygon', !poly, poly ? poly.getAttribute('points') : '');
+    ok('equality ray: aria-label mentions unbounded',
+       /unbounded/i.test(result.querySelector('svg.plot').getAttribute('aria-label')));
+    if (ray) {
+      const pts = ray.getAttribute('points').trim().split(/\s+/);
+      ok('equality ray: polyline has two distinct endpoints',
+         pts.length === 2 && pts[0] !== pts[1], ray.getAttribute('points'));
+    }
+  }
+
+  // 2-D UNBOUNDED region with a single vertex: x + y >= 0 (redundant with the
+  // axes) leaves the whole first quadrant feasible. The visible region must be
+  // an area spanning both axes, NOT a single line.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([{ label: 'S', coefficients: [1, 1], relation: '>=', limit: 0, binding: false }], [0, 0]);
+    api.drawFeasibleRegion(out);
+    const result = document.getElementById('result');
+    const poly = result.querySelector('polygon.region.open');
+    ok('first-quadrant region: drawn as an open polygon', !!poly, poly ? 'poly present' : 'no poly');
+    ok('first-quadrant region: polygon area is positive (not a line)',
+       !!poly && shoelace(poly.getAttribute('points')) > 1, poly ? String(shoelace(poly.getAttribute('points'))) : '-');
+  }
+
+  // Every .region.open polygon that IS drawn must enclose positive area — this
+  // is the direct guard against the [far, vertex, far] degeneracy. Re-check the
+  // x<=5 case with shoelace.
+  {
+    window.__plumline.setLang('en');
+    clearResult();
+    const out = mkOut([{ label: 'CapX', coefficients: [1, 0], relation: '<=', limit: 5, binding: true }], [5, 6]);
+    api.drawFeasibleRegion(out);
+    const poly = document.getElementById('result').querySelector('polygon.region.open');
+    ok('x<=5 open polygon: positive shoelace area',
+       !!poly && shoelace(poly.getAttribute('points')) > 1, poly ? String(shoelace(poly.getAttribute('points'))) : '-');
+    ok('x<=5 open polygon: at least 3 distinct points',
+       !!poly && distinctCount(poly.getAttribute('points')) >= 3,
+       poly ? poly.getAttribute('points') : '-');
+  }
+
+  // Structural guard: the recession detection must be the EXACT algebraic
+  // cone check, not the old angular mesh, and the render must clip to the box.
+  // (Reads the source so a silent reversion to sampling angles is caught even
+  // if some behavioural case happened to still pass.)
+  {
+    ok('source: uses clipFeasibleToBox_ for rendering', /function clipFeasibleToBox_/.test(solverHtml));
+    ok('source: draws a .region-ray for 1-D regions', /region-ray/.test(solverHtml));
+    ok('source: no angular mesh (a += 2 degree sampling) remains',
+       !/for\s*\(\s*var\s+a\s*=\s*0\s*;\s*a\s*<=\s*90\s*;\s*a\s*\+=\s*2\s*\)/.test(solverHtml));
+  }
+
   console.log('REGION PLOT TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
   process.exit(fail > 0 ? 1 : 0);
 }, 120);

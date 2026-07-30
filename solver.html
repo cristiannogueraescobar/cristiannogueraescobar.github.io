@@ -190,6 +190,8 @@ svg.plot{width:100%;height:auto;background:var(--panel);border:1px solid var(--l
 svg.plot .ax{stroke:var(--ink);stroke-width:1}
 svg.plot .region{fill:rgba(181,130,46,.16);stroke:var(--brass);stroke-width:1.5}
 svg.plot .region.open{fill:rgba(181,130,46,.10);stroke:var(--brass);stroke-width:1.5;stroke-dasharray:6 4}
+svg.plot .region-ray{fill:none;stroke:var(--brass);stroke-width:3}
+svg.plot .region-ray.open{stroke-dasharray:6 4}
 svg.plot .cline{stroke:var(--line);stroke-width:1;stroke-dasharray:3 3}
 svg.plot .cline.bind{stroke:var(--true);stroke-width:1.5;stroke-dasharray:none}
 svg.plot .opt{fill:var(--true);stroke:#fff;stroke-width:2}
@@ -3682,6 +3684,61 @@ function matchesAnyHint_(label, hints) {
     return verificationPassed;
   }
 
+  // Clip the feasible region to the visible rectangle [0,maxX] x [0,maxY] using
+  // Sutherland–Hodgman half-plane clipping. Start with the box, clip by each
+  // constraint half-plane (a<=b keeps a*p <= b; a>=b keeps a*p >= b; a=b clips
+  // by BOTH, collapsing the region to that line) and by x>=0, y>=0. Returns the
+  // clipped polygon, its area, and — when the region collapses to a 1-D sliver
+  // (an equality ray) — the visible end-points of that segment. This draws the
+  // exact visible part of ANY region (bounded, 2-D unbounded, or a ray) without
+  // inventing a band from a single recession vector.
+  function clipFeasibleToBox_(cons, maxX, maxY){
+    // half-plane: keep points with nx*x + ny*y <= c (within tolerance)
+    function clip(poly, nx, ny, c){
+      if(!poly.length) return poly;
+      var out = [];
+      var EPS = 1e-9;
+      for(var i=0;i<poly.length;i++){
+        var A = poly[i], B = poly[(i+1)%poly.length];
+        var da = nx*A.x + ny*A.y - c, db = nx*B.x + ny*B.y - c;
+        var aIn = da <= EPS, bIn = db <= EPS;
+        if(aIn) out.push(A);
+        if(aIn !== bIn){
+          var t = da/(da-db);
+          out.push({ x: A.x + t*(B.x-A.x), y: A.y + t*(B.y-A.y) });
+        }
+      }
+      return out;
+    }
+    var poly = [ {x:0,y:0}, {x:maxX,y:0}, {x:maxX,y:maxY}, {x:0,y:maxY} ];
+    poly = clip(poly, -1, 0, 0);   // x >= 0
+    poly = clip(poly, 0, -1, 0);   // y >= 0
+    cons.forEach(function(c){
+      if(c.op === '<='){ poly = clip(poly, c.x, c.y, c.b); }
+      else if(c.op === '>='){ poly = clip(poly, -c.x, -c.y, -c.b); }
+      else { poly = clip(poly, c.x, c.y, c.b); poly = clip(poly, -c.x, -c.y, -c.b); }
+    });
+    // shoelace area of the clipped polygon
+    var area = 0;
+    for(var i=0;i<poly.length;i++){
+      var A = poly[i], B = poly[(i+1)%poly.length];
+      area += A.x*B.y - B.x*A.y;
+    }
+    area = Math.abs(area)/2;
+    // If the region collapsed to a line/ray, extract its two farthest points as
+    // a segment so the caller can draw a polyline instead of a 0-area polygon.
+    var segment = null;
+    if(area <= 1e-6 && poly.length >= 2){
+      var best = null, bestD = -1;
+      for(var a=0;a<poly.length;a++) for(var b=a+1;b<poly.length;b++){
+        var dx = poly[a].x-poly[b].x, dy = poly[a].y-poly[b].y, d = dx*dx+dy*dy;
+        if(d > bestD){ bestD = d; best = [poly[a], poly[b]]; }
+      }
+      if(best && bestD > 1e-9) segment = best;
+    }
+    return { points: poly, area: area, segment: segment };
+  }
+
   function drawFeasibleRegion(out){
     var cons = (out.constraints||[]).filter(function(c){ return c.coefficients && c.coefficients.length===2; })
       .map(function(c){ return { x:c.coefficients[0], y:c.coefficients[1], op:c.relation, b:c.limit - (c.constant||0), label:c.label, binding:c.binding }; });
@@ -3698,7 +3755,6 @@ function matchesAnyHint_(label, hints) {
     function sx(x){ return pad + x/maxX*(W-2*pad); }
     function sy(y){ return H-pad - y/maxY*(H-2*pad); }
 
-    var poly = geo.vertices.map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
     var lab = out.plot.variableLabels || ['x','y'];
 
     var svg = '<svg viewBox="0 0 '+W+' '+H+'" class="plot" role="img" aria-label="'+
@@ -3706,23 +3762,29 @@ function matchesAnyHint_(label, hints) {
     // axes
     svg += '<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" class="ax"/>';
     svg += '<line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-pad)+'" class="ax"/>';
-    // feasible region: a closed polygon when bounded; when unbounded, the region
-    // continues past the drawn vertices, so we shade an OPEN band toward the
-    // recession direction instead of closing it into a misleading finite shape.
-    if (geo.unbounded && geo.recession) {
-      // Extend the two "outer" vertices along the recession direction to the
-      // plot edge, so the shaded area reads as continuing off-chart.
-      var far = Math.max(maxX, maxY) * 2;
-      var open = geo.vertices.slice();
-      var last = geo.vertices[geo.vertices.length-1];
-      var first = geo.vertices[0];
-      var ext1 = { x:last.x + geo.recession.x*far, y:last.y + geo.recession.y*far };
-      var ext0 = { x:first.x + geo.recession.x*far, y:first.y + geo.recession.y*far };
-      var pts = [ext0].concat(open).concat([ext1])
-        .map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
-      svg += '<polygon points="'+pts+'" class="region open"/>';
-    } else {
-      svg += '<polygon points="'+poly+'" class="region"/>';
+
+    // Draw the feasible region by CLIPPING it against the visible rectangle
+    // [0,maxX] x [0,maxY]. This renders exactly the visible part of the region
+    // — bounded or not — without inventing a band from a single recession
+    // vector. It handles every geometry uniformly: a bounded polygon, a 2D
+    // unbounded region with one vertex (two extreme rays), and a 1D ray from an
+    // equality constraint (which clips to a zero-area sliver → drawn as a line,
+    // never an invisible degenerate polygon).
+    var clip = clipFeasibleToBox_(cons, maxX, maxY);
+    var regionClass = geo.unbounded ? 'region open' : 'region';
+    if (clip.area > 1e-6 && clip.points.length >= 3) {
+      var pts = clip.points.map(function(p){ return sx(p.x)+','+sy(p.y); }).join(' ');
+      svg += '<polygon points="'+pts+'" class="'+regionClass+'"/>';
+    } else if (clip.segment) {
+      // The region is (within the view) a 1-D ray/segment: an equality collapsed
+      // it to a line. Draw a thick dashed polyline, never a zero-area polygon.
+      var a = clip.segment[0], b = clip.segment[1];
+      svg += '<polyline points="'+sx(a.x)+','+sy(a.y)+' '+sx(b.x)+','+sy(b.y)+
+             '" class="region-ray open"/>';
+    } else if (geo.vertices.length) {
+      // Fallback: a single feasible point with no visible extent — mark it.
+      var v = geo.vertices[0];
+      svg += '<circle cx="'+sx(v.x)+'" cy="'+sy(v.y)+'" r="4" class="region"/>';
     }
     // constraint lines
     cons.forEach(function(c){
@@ -4211,7 +4273,7 @@ function matchesAnyHint_(label, hints) {
       openDrawer: openDrawer, closeDrawer: closeDrawer,
       localizeEngineError: localizeEngineError, showTrouble: showTrouble,
       showEngineTrouble: showEngineTrouble, solve2D: solve2D,
-      drawFeasibleRegion: drawFeasibleRegion };
+      drawFeasibleRegion: drawFeasibleRegion, clipFeasibleToBox_: clipFeasibleToBox_ };
   }
 })();
 </script>
