@@ -48,6 +48,10 @@ jobs:
         id: tests
         env:
           CI: "true"
+          # Production build: the pending-translations guard in
+          # tests_capabilities.js only bites when this is set, so a deploy with
+          # untranslated capability copy fails here instead of shipping.
+          PLUMLINE_PUBLIC_BUILD: "1"
         run: |
           OUT=$(node engine/run_all.js)
           echo "$OUT"
@@ -209,7 +213,7 @@ jobs:
           # analyse the files on disk (so every check sees the same bytes, from
           # the same CDN response — never a mix of fresh and stale resources).
           mkdir -p /tmp/prod
-          for rel in build-info.json index.html solver.html guide.html about.html privacy.html terms.html examples.html assets/i18n.js assets/hashes.txt; do
+          for rel in build-info.json index.html solver.html guide.html about.html privacy.html terms.html examples.html capabilities.html assets/i18n.js assets/hashes.txt; do
             mkdir -p "/tmp/prod/$(dirname "$rel")"
             $FETCH "$BASE/$rel?cb=$CB" -o "/tmp/prod/$rel"
           done
@@ -224,6 +228,9 @@ jobs:
           # Content markers that must exist in the current build.
           grep -q 'id="capabilities"' /tmp/prod/index.html || { echo "index.html missing #capabilities"; exit 1; }
           grep -q 'gDirH' /tmp/prod/assets/i18n.js || { echo "i18n.js missing gDirH"; exit 1; }
+          # The generated capabilities page must be live and carry a public
+          # capability anchor (proves the per-group page actually deployed).
+          grep -q 'id="cap-model-continuous"' /tmp/prod/capabilities.html || { echo "capabilities.html missing #cap-model-continuous"; exit 1; }
 
           # JSON-LD on production must actually PARSE (not merely be present).
           echo "Parsing production JSON-LD ..."
@@ -254,7 +261,7 @@ jobs:
           echo "Crawling internal links for 404s ..."
           node -e '
             const fs=require("fs");
-            const pages=["index.html","solver.html","guide.html","about.html","privacy.html","terms.html","examples.html"];
+            const pages=["index.html","solver.html","guide.html","about.html","privacy.html","terms.html","examples.html","capabilities.html"];
             const base="'"$BASE"'";
             const cb="'"$CB"'";
             const targets=new Set();

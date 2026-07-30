@@ -86,8 +86,8 @@
       exampleCtaKey: 'capCtaContinuous',
       limitationsKey: 'capLimitContinuous',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-model-continuous',
       limits: 'Linear relationships only; non-linear formulas are rejected, not approximated.'
     },
     {
@@ -104,8 +104,8 @@
       exampleCtaKey: 'capCtaInteger',
       limitationsKey: 'capLimitInteger',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-model-integer',
       limits: 'Whole-number variables; larger integer models take longer to prove optimal.'
     },
     {
@@ -121,8 +121,8 @@
       exampleStatus: 'covered',
       exampleCtaKey: 'capCtaBinary',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-model-binary',
       limits: 'Each binary decision is 0 or 1 (yes/no).'
     },
     {
@@ -138,8 +138,8 @@
       exampleStatus: 'covered',
       exampleCtaKey: 'capCtaMixed',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-model-mixed',
       limits: 'Mixes continuous and integer/binary variables in one model.'
     },
     {
@@ -154,8 +154,8 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-model-direction',
       limits: 'Maximise or minimise; the detected direction can be confirmed manually.'
     },
     {
@@ -202,8 +202,8 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-sheet-formula-limits',
       limits: 'A constraint limit can be a number or a formula; a limit that depends on a decision variable is rejected.'
     },
     {
@@ -266,8 +266,8 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-sheet-paste',
       exampleNotApplicable: 'Input capability — demonstrated across every example, not a specific model',
       limits: 'Paste a spreadsheet-shaped range from Excel or Google Sheets, or type into the grid.'
     },
@@ -283,8 +283,8 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-sheet-export',
       exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
       limits: 'Export results as CSV or Excel, or copy a plain-text summary.'
     },
@@ -300,8 +300,8 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-verify-objective',
       limits: 'The reported objective is recomputed from your formulas at the solution.'
     },
     {
@@ -316,8 +316,8 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-verify-constraints',
       limits: 'Every constraint is re-checked against the solved values.'
     },
     {
@@ -364,8 +364,8 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-run-local',
       exampleNotApplicable: 'Infrastructure capability — applies to every solved model',
       limits: 'Solving runs in your browser (a background worker, with a synchronous fallback); the model is not uploaded to a server.'
     },
@@ -381,8 +381,8 @@
       exampleId: 'production',
       exampleStatus: 'covered',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-explain-detection',
       limits: 'Reads the objective, decision cells and constraints from the sheet and shows what it understood before solving.'
     },
     {
@@ -414,8 +414,8 @@
       exampleStatus: 'covered',
       limitationsKey: 'capLimitMarginal',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-explain-marginal',
       limits: 'For eligible binding constraints in continuous models, estimates how much the objective could improve if the limit increased by one unit.'
     },
     {
@@ -432,8 +432,8 @@
       exampleCtaKey: 'capCtaRegion',
       limitationsKey: 'capLimitRegionChart',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-explain-region-chart',
       limits: 'Draws the feasible region for two-variable models, bounded or unbounded, within a practical numeric range.'
     },
     {
@@ -448,8 +448,8 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'limits',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-explain-multilingual',
       exampleNotApplicable: 'Infrastructure capability — applies across the whole interface',
       limits: 'Interface and explanations in English, Spanish, Portuguese, German and French.'
     },
@@ -465,8 +465,8 @@
       exampleId: null,
       exampleStatus: 'not-applicable',
       public: true,
-      docsPath: 'guide.html',
-      docsAnchor: 'status',
+      docsPath: 'capabilities.html',
+      docsAnchor: 'cap-explain-error-localisation',
       exampleNotApplicable: 'Infrastructure capability — applies to every engine message',
       limits: 'Engine errors are shown in the active language on every display path.'
     }

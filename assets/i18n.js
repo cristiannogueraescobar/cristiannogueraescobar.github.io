@@ -113,6 +113,8 @@
         capNavChecks:'Checks',
         capNavExplanation:'Explanation',
         capWhenAppears:'When this appears',
+
+        capCloseImage:'Close image',
 },
       examples: {
         exCat_start:'Start here',
@@ -690,6 +692,8 @@
         capNavChecks:'Comprobaciones',
         capNavExplanation:'Explicación',
         capWhenAppears:'Cuándo aparece',
+
+        capCloseImage:'Cerrar imagen',
 },
       examples: {
         exCat_start:'Empieza aquí',
@@ -1267,6 +1271,8 @@
         capNavChecks:'Conferências',
         capNavExplanation:'Explicação',
         capWhenAppears:'Quando aparece',
+
+        capCloseImage:'Fechar imagem',
 },
       examples: {
         exCat_start:'Comece aqui',
@@ -1844,6 +1850,8 @@
         capNavChecks:'Prüfungen',
         capNavExplanation:'Erklärung',
         capWhenAppears:'Wann das erscheint',
+
+        capCloseImage:'Bild schließen',
 },
       examples: {
         exCat_start:'Starte hier',
@@ -2421,6 +2429,8 @@
         capNavChecks:'Vérifications',
         capNavExplanation:'Explication',
         capWhenAppears:'Quand cela apparaît',
+
+        capCloseImage:'Fermer l\'image',
 },
       examples: {
         exCat_start:'Commencez ici',

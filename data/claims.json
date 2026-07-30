@@ -16,8 +16,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-explain-detection"
       }
     },
     {
@@ -34,8 +34,8 @@
       "example": null,
       "exampleNotApplicable": "Infrastructure capability — applies to every engine message",
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-explain-error-localisation"
       }
     },
     {
@@ -52,8 +52,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-explain-marginal"
       }
     },
     {
@@ -70,8 +70,8 @@
       "example": null,
       "exampleNotApplicable": "Infrastructure capability — applies across the whole interface",
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-explain-multilingual"
       }
     },
     {
@@ -88,8 +88,8 @@
       "example": "workshop",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-explain-region-chart"
       }
     },
     {
@@ -106,8 +106,8 @@
       "example": "project",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-model-binary"
       }
     },
     {
@@ -124,8 +124,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-model-continuous"
       }
     },
     {
@@ -142,8 +142,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-model-direction"
       }
     },
     {
@@ -160,8 +160,8 @@
       "example": "workforce",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-model-integer"
       }
     },
     {
@@ -178,8 +178,8 @@
       "example": "supplier",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-model-mixed"
       }
     },
     {
@@ -196,8 +196,8 @@
       "example": null,
       "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-run-local"
       }
     },
     {
@@ -214,8 +214,8 @@
       "example": null,
       "exampleNotApplicable": "Infrastructure capability — applies to every solved model",
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-sheet-export"
       }
     },
     {
@@ -232,8 +232,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-sheet-formula-limits"
       }
     },
     {
@@ -250,8 +250,8 @@
       "example": null,
       "exampleNotApplicable": "Input capability — demonstrated across every example, not a specific model",
       "docs": {
-        "path": "guide.html",
-        "anchor": "limits"
+        "path": "capabilities.html",
+        "anchor": "cap-sheet-paste"
       }
     },
     {
@@ -268,8 +268,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-verify-constraints"
       }
     },
     {
@@ -286,8 +286,8 @@
       "example": "production",
       "exampleNotApplicable": null,
       "docs": {
-        "path": "guide.html",
-        "anchor": "status"
+        "path": "capabilities.html",
+        "anchor": "cap-verify-objective"
       }
     }
   ]

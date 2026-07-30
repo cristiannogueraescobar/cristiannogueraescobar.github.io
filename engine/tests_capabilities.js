@@ -237,6 +237,21 @@ console.log('  coverage: ' + coverage.tested + '/' + N + ' with an executed test
 console.log('  coverage: examples — ' + coverage.covered + ' covered, ' +
             coverage.notApplicable + ' not-applicable, ' + coverage.pending + ' pending');
 console.log('  coverage: ' + coverage.docTargetValid + '/' + N + ' with a valid documentation target');
+// Public capabilities now each have their own section on capabilities.html
+// (docsPath capabilities.html, anchor cap-<id>): they are documented
+// individually, not just pointed at a generic guide section. Pending/internal
+// capabilities keep a generic guide.html target until they get their own home.
+(function () {
+  const pub = caps.CAPABILITIES.filter(c =>
+    c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
+  const individually = pub.filter(c =>
+    c.docsPath === 'capabilities.html' && c.docsAnchor === 'cap-' + c.id &&
+    anchorExists(c.docsPath, c.docsAnchor));
+  console.log('  coverage: ' + individually.length + '/' + pub.length +
+              ' public capabilities documented individually on capabilities.html');
+  const internal = caps.CAPABILITIES.length - pub.length;
+  console.log('  coverage: ' + internal + ' internal/pending capabilities not yet published');
+})();
 // Whether all pending translations are cleared — only then may we say
 // "translated", as opposed to "keys present".
 const pendingPath = path.join(siteDir, 'data', 'pending-translations.json');
@@ -262,6 +277,17 @@ ok('coverage: all capabilities have an executed test', coverage.tested === N,
    coverage.tested + '/' + N);
 ok('coverage: all capabilities have a valid documentation target', coverage.docTargetValid === N,
    coverage.docTargetValid + '/' + N);
+// Every public capability must be documented on its OWN capabilities.html
+// section (not a generic guide anchor) now that the page exists.
+(function () {
+  const pub = caps.CAPABILITIES.filter(c =>
+    c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
+  const notIndividual = pub.filter(c =>
+    !(c.docsPath === 'capabilities.html' && c.docsAnchor === 'cap-' + c.id &&
+      anchorExists(c.docsPath, c.docsAnchor)));
+  ok('coverage: every public capability is documented individually on capabilities.html',
+     notIndividual.length === 0, notIndividual.map(c => c.id).join(', '));
+})();
 ok('coverage: all capabilities have i18n keys present in every language', coverage.translated === N,
    coverage.translated + '/' + N);
 // Every covered/not-applicable capability accounts for its example; pending
