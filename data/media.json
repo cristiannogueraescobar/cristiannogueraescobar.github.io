@@ -1,0 +1,30 @@
+{
+  "note": "Product imagery for capabilities.html, keyed by slot. gen_capabilities.js reads this, checks each file exists on disk, and requires altKey to be present in all five languages. The hero image loads eagerly (above the fold); the rest lazily.",
+  "basePath": "assets/capabilities/",
+  "slots": {
+    "hero-model": {
+      "file": "01-production-model-and-variable-settings.png",
+      "width": 1600,
+      "height": 1000,
+      "altKey": "capImgHeroModel",
+      "loading": "eager",
+      "fetchpriority": "high"
+    },
+    "verification-receipt": {
+      "file": "02-production-verified-result.png",
+      "width": 1600,
+      "height": 1100,
+      "altKey": "capImgVerification",
+      "loading": "lazy",
+      "fetchpriority": "auto"
+    },
+    "feasible-region": {
+      "file": "03-workshop-feasible-region.png",
+      "width": 1600,
+      "height": 1000,
+      "altKey": "capImgFeasibleRegion",
+      "loading": "lazy",
+      "fetchpriority": "auto"
+    }
+  }
+}

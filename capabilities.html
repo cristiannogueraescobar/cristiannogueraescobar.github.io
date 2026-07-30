@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="What Plumline can do">
 <meta name="twitter:description" content="The models Plumline solves, the checks it runs, and what it explains.">
 <link rel="canonical" href="https://plumline.online/capabilities.html">
-<link rel="stylesheet" href="assets/plumline.css?v=12">
+<link rel="stylesheet" href="assets/plumline.css?v=13">
 </head>
 <body data-page="capabilities">
 
@@ -57,110 +57,148 @@
 
 <!-- CAPABILITIES_CONTENT_START -->
 <main>
-  <div class="capabilities-hero">
-    <h1 data-i18n="capPageH1">What Plumline can do</h1>
-    <p data-i18n="capPageIntro">Plumline turns a spreadsheet-shaped model into an optimised decision, then checks the result against your own formulas. Here is what it can model, how it verifies each answer, and what it explains — with a runnable example wherever one applies.</p>
+  <div class="cap-hero">
+    <div class="cap-hero-text">
+      <h1 data-i18n="capPageH1">What Plumline can solve, check and explain</h1>
+      <p data-i18n="capPageIntro">Plumline reads a linear optimisation model from a spreadsheet-style grid and solves it directly in your browser. See which decisions it can model, what it checks after solving, and how it helps you understand the result.</p>
+      <a class="btn" href="solver.html" data-i18n="capPageCtaButton">Open the solver</a>
+      <ul class="cap-trust">
+        <li data-i18n="capTrustLocal">Runs locally</li>
+        <li data-i18n="capTrustNoAccount">No account</li>
+        <li data-i18n="capTrustLanguages">Five languages</li>
+        <li data-i18n="capTrustChecked">Checked against your formulas</li>
+      </ul>
+    </div>
+    <div class="cap-hero-media">
+      <figure class="cap-figure">
+      <img src="assets/capabilities/01-production-model-and-variable-settings.png" width="1600" height="1000" alt="Production planning spreadsheet in Plumline with three detected continuous decision variables and a confirmed maximisation direction." data-i18n-alt="capImgHeroModel" decoding="async" loading="eager" fetchpriority="high">
+    </figure>
+    </div>
   </div>
-  <nav aria-label="Capability groups" data-i18n-aria="capGroupsNavLabel">
-    <a href="#models">Models</a>
-    <a href="#spreadsheet">Spreadsheet support</a>
-    <a href="#verification">Verification</a>
-    <a href="#explanation">Explanation &amp; visualisation</a>
+  <nav class="cap-groupnav" aria-label="Capability groups" data-i18n-aria="capGroupsNavLabel">
+    <a href="#models" data-i18n="capGroupModels">Models you can solve</a>
+    <a href="#spreadsheet" data-i18n="capGroupSpreadsheet">Works with your spreadsheet</a>
+    <a href="#verification" data-i18n="capGroupVerification">Checks built into every result</a>
+    <a href="#explanation" data-i18n="capGroupExplanation">Understand the answer</a>
   </nav>
   <section id="models" aria-labelledby="models-title">
-    <h2 data-i18n="capGroupModels" id="models-title">Models</h2>
-    <article id="cap-model-continuous">
-      <h3 data-i18n="capModelContinuousName">Continuous models</h3>
-      <p data-i18n="capModelContinuousDesc">Split resources in any proportion to hit the best objective.</p>
-      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitContinuous">Linear relationships only — non-linear formulas are rejected, not approximated.</span></p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-model-integer">
-      <h3 data-i18n="capModelIntegerName">Integer models</h3>
-      <p data-i18n="capModelIntegerDesc">Whole-number decisions, like units produced or people assigned.</p>
-      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitInteger">Larger integer models take longer to prove optimal.</span></p>
-      <a class="capability-example" href="solver.html?ex=workforce-scheduling" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-model-binary">
-      <h3 data-i18n="capModelBinaryName">Binary decisions</h3>
-      <p data-i18n="capModelBinaryDesc">Yes/no choices: pick a project, open a site, ship an order.</p>
-      <a class="capability-example" href="solver.html?ex=project-selection" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-model-mixed">
-      <h3 data-i18n="capModelMixedName">Mixed-integer models</h3>
-      <p data-i18n="capModelMixedDesc">Combine continuous and whole-number decisions in one model.</p>
-      <a class="capability-example" href="solver.html?ex=supplier-activation" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-model-direction">
+    <h2 data-i18n="capGroupModels" id="models-title">Models you can solve</h2>
+    <table class="cap-table">
+      <thead><tr><th scope="col" data-i18n="capModelsTableType">Model type</th><th scope="col" data-i18n="capModelsTableWhen">Use it when</th><th scope="col" data-i18n="capModelsTableExample">Example</th></tr></thead>
+      <tbody>
+        <tr id="cap-model-continuous">
+          <th scope="row" data-i18n="capModelContinuousName">Continuous models</th>
+          <td data-i18n="capModelContinuousDesc">Use decimal values when a decision can be divided, such as hours, weight, distance or budget.</td>
+          <td><a class="cap-example" href="solver.html?ex=production-plan" data-i18n="capCtaContinuous">Try a production plan</a></td>
+        </tr>
+        <tr id="cap-model-integer">
+          <th scope="row" data-i18n="capModelIntegerName">Integer models</th>
+          <td data-i18n="capModelIntegerDesc">Use whole numbers for decisions such as people, vehicles, batches or units produced.</td>
+          <td><a class="cap-example" href="solver.html?ex=workforce-scheduling" data-i18n="capCtaInteger">Open workforce scheduling</a></td>
+        </tr>
+        <tr id="cap-model-binary">
+          <th scope="row" data-i18n="capModelBinaryName">Binary decisions</th>
+          <td data-i18n="capModelBinaryDesc">Use 0 or 1 for choices such as selecting a project, opening a site or accepting an order.</td>
+          <td><a class="cap-example" href="solver.html?ex=project-selection" data-i18n="capCtaBinary">Try project selection</a></td>
+        </tr>
+        <tr id="cap-model-mixed">
+          <th scope="row" data-i18n="capModelMixedName">Mixed-integer models</th>
+          <td data-i18n="capModelMixedDesc">Combine decimal values, whole numbers and binary choices in the same model.</td>
+          <td><a class="cap-example" href="solver.html?ex=supplier-activation" data-i18n="capCtaMixed">Try supplier activation</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="cap-notes">
+      <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">Good to know</span> <strong data-i18n="capModelContinuousName">Continuous models</strong>: <span data-i18n="capLimitContinuous">Plumline accepts linear relationships only. It stops and identifies formulas that are genuinely nonlinear.</span></p>
+      <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">Good to know</span> <strong data-i18n="capModelIntegerName">Integer models</strong>: <span data-i18n="capLimitInteger">Proving the best result can take longer as an integer model grows.</span></p>
+    </div>
+    <div class="cap-direction" id="cap-model-direction">
       <h3 data-i18n="capModelDirectionName">Maximise or minimise</h3>
-      <p data-i18n="capModelDirectionDesc">Aim for the most profit or the least cost; confirm the direction yourself.</p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
+      <p data-i18n="capModelDirectionDesc">Choose whether Plumline should find the highest value or the lowest cost, time, distance or waste.</p>
+    </div>
   </section>
   <section id="spreadsheet" aria-labelledby="spreadsheet-title">
-    <h2 data-i18n="capGroupSpreadsheet" id="spreadsheet-title">Spreadsheet support</h2>
-    <article id="cap-sheet-formula-limits">
-      <h3 data-i18n="capSheetFormulaLimitsName">Number or formula limits</h3>
-      <p data-i18n="capSheetFormulaLimitsDesc">A constraint limit can be a number or a formula from your sheet.</p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-sheet-paste">
-      <h3 data-i18n="capSheetPasteName">Paste from a spreadsheet</h3>
-      <p data-i18n="capSheetPasteDesc">Paste a range from Excel or Google Sheets, or type into the grid.</p>
-    </article>
-    <article id="cap-sheet-export">
-      <h3 data-i18n="capSheetExportName">Export results</h3>
-      <p data-i18n="capSheetExportDesc">Download results as CSV or Excel, or copy a plain-text summary.</p>
-    </article>
+    <h2 data-i18n="capGroupSpreadsheet" id="spreadsheet-title">Works with your spreadsheet</h2>
+    <ol class="cap-steps">
+      <li class="cap-step" id="cap-sheet-paste">
+        <h3 data-i18n="capStepPaste">Paste your model</h3>
+        <p data-i18n="capStepPasteDesc">Copy a range from Excel or Google Sheets and paste it into the grid.</p>
+      </li>
+      <li class="cap-step" id="cap-sheet-formula-limits">
+        <h3 data-i18n="capStepAdjust">Adjust it</h3>
+        <p data-i18n="capStepAdjustDesc">Set limits as fixed numbers or formulas, and confirm the direction.</p>
+      </li>
+      <li class="cap-step" id="cap-sheet-export">
+        <h3 data-i18n="capStepExport">Export the result</h3>
+        <p data-i18n="capStepExportDesc">Download as CSV or Excel, or copy a plain text summary.</p>
+      </li>
+    </ol>
   </section>
   <section id="verification" aria-labelledby="verification-title">
-    <h2 data-i18n="capGroupVerification" id="verification-title">Verification</h2>
-    <article id="cap-verify-objective">
-      <h3 data-i18n="capVerifyObjectiveName">Objective re-checked</h3>
-      <p data-i18n="capVerifyObjectiveDesc">The reported objective is recomputed from your formulas at the solution.</p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-verify-constraints">
-      <h3 data-i18n="capVerifyConstraintsName">Constraints re-checked</h3>
-      <p data-i18n="capVerifyConstraintsDesc">Every constraint is re-checked against the solved values.</p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-run-local">
-      <h3 data-i18n="capRunLocalName">Runs in your browser</h3>
-      <p data-i18n="capRunLocalDesc">Solving happens in your browser; the model is not uploaded to a server.</p>
-    </article>
+    <h2 data-i18n="capGroupVerification" id="verification-title">Checks built into every result</h2>
+    <div class="cap-verify">
+      <div class="cap-verify-media">
+        <figure class="cap-figure">
+      <img src="assets/capabilities/02-production-verified-result.png" width="1600" height="1100" alt="Plumline verification receipt showing total profit 1,760, solved values, binding constraints and optimality proven." data-i18n-alt="capImgVerification" decoding="async" loading="lazy">
+      <figcaption data-i18n="capFigVerification">Plumline checks the objective, constraints and solution status after solving.</figcaption>
+    </figure>
+      </div>
+      <div class="cap-verify-points">
+        <h3 data-i18n="capVerifyHeading">Every result is checked against your own formulas</h3>
+        <div class="cap-check" id="cap-verify-objective">
+          <h4 data-i18n="capVerifyObjectiveName">Objective checked again</h4>
+          <p data-i18n="capVerifyObjectiveDesc">After solving, Plumline recalculates the objective from your formulas and compares it with the reported value.</p>
+        </div>
+        <div class="cap-check" id="cap-verify-constraints">
+          <h4 data-i18n="capVerifyConstraintsName">Constraints checked again</h4>
+          <p data-i18n="capVerifyConstraintsDesc">Plumline substitutes the solved values into every constraint and shows whether each one is satisfied.</p>
+        </div>
+        <div class="cap-check" id="cap-run-local">
+          <h4 data-i18n="capRunLocalName">Solved in your browser</h4>
+          <p data-i18n="capRunLocalDesc">Your model is processed in the browser. Plumline does not upload it to a server.</p>
+        </div>
+      </div>
+    </div>
   </section>
   <section id="explanation" aria-labelledby="explanation-title">
-    <h2 data-i18n="capGroupExplanation" id="explanation-title">Explanation &amp; visualisation</h2>
-    <article id="cap-explain-detection">
-      <h3 data-i18n="capExplainDetectionName">Shows what it understood</h3>
-      <p data-i18n="capExplainDetectionDesc">Reads the objective, decisions and constraints and shows them before solving.</p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-explain-marginal">
-      <h3 data-i18n="capExplainMarginalName">Marginal impact</h3>
-      <p data-i18n="capExplainMarginalDesc">Estimates how much a binding limit would improve the objective if relaxed by one unit.</p>
-      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitMarginal">Estimated only for eligible binding constraints in continuous models.</span></p>
-      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-explain-region-chart">
-      <h3 data-i18n="capExplainRegionChartName">Feasible-region chart</h3>
-      <p data-i18n="capExplainRegionChartDesc">Draws the feasible region for two-variable models, bounded or unbounded.</p>
-      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitRegionChart">Available for two-variable models, within a practical numeric range.</span></p>
-      <a class="capability-example" href="solver.html?ex=workshop-chart" data-i18n="capOpenExample">Open this example in the solver</a>
-    </article>
-    <article id="cap-explain-multilingual">
-      <h3 data-i18n="capExplainMultilingualName">Five languages</h3>
-      <p data-i18n="capExplainMultilingualDesc">Interface and explanations in English, Spanish, Portuguese, German and French.</p>
-    </article>
-    <article id="cap-explain-error-localisation">
-      <h3 data-i18n="capExplainErrorLocalisationName">Errors in your language</h3>
-      <p data-i18n="capExplainErrorLocalisationDesc">Engine messages appear in the active language on every screen.</p>
-    </article>
+    <h2 data-i18n="capGroupExplanation" id="explanation-title">Understand the answer</h2>
+    <div class="cap-explain">
+      <div class="cap-explain-media">
+        <figure class="cap-figure">
+      <img src="assets/capabilities/03-workshop-feasible-region.png" width="1600" height="1000" alt="Feasible region for the workshop example with the optimal point at 10 chairs and 15 tables and total profit 900." data-i18n-alt="capImgFeasibleRegion" decoding="async" loading="lazy">
+      <figcaption data-i18n="capFigRegion">A two-variable model showing its feasible region and optimal solution.</figcaption>
+    </figure>
+      </div>
+      <div class="cap-explain-list">
+        <article class="cap-explainer" id="cap-explain-detection">
+          <h3 data-i18n="capExplainDetectionName">See what Plumline understood</h3>
+          <p data-i18n="capExplainDetectionDesc">Before solving, Plumline shows the objective, decision cells and constraints it detected. You can correct anything that does not match your model.</p>
+        </article>
+        <article class="cap-explainer" id="cap-explain-marginal">
+          <h3 data-i18n="capExplainMarginalName">Marginal impact</h3>
+          <p data-i18n="capExplainMarginalDesc">For eligible continuous models, Plumline estimates how the objective may change when a binding constraint is loosened by one unit.</p>
+          <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">Good to know</span> <span data-i18n="capLimitMarginal">This estimate is shown only for eligible binding constraints in continuous models.</span></p>
+        </article>
+        <article class="cap-explainer" id="cap-explain-region-chart">
+          <h3 data-i18n="capExplainRegionChartName">Feasible region chart</h3>
+          <p data-i18n="capExplainRegionChartDesc">For models with two decision variables, Plumline can draw the feasible region and show whether it is bounded or extends without a finite limit.</p>
+          <p class="cap-goodtoknow"><span class="cap-gtk-label" data-i18n="capLimitLabel">Good to know</span> <span data-i18n="capLimitRegionChart">The chart appears only when the model can be represented reliably within the supported display range.</span></p>
+          <a class="cap-example" href="solver.html?ex=workshop-chart" data-i18n="capCtaRegion">View the feasible region</a>
+        </article>
+        <article class="cap-explainer" id="cap-explain-multilingual">
+          <h3 data-i18n="capExplainMultilingualName">Five interface languages</h3>
+          <p data-i18n="capExplainMultilingualDesc">Use Plumline in English, Spanish, Portuguese, German or French.</p>
+        </article>
+        <article class="cap-explainer" id="cap-explain-error-localisation">
+          <h3 data-i18n="capExplainErrorLocalisationName">Messages in the selected language</h3>
+          <p data-i18n="capExplainErrorLocalisationDesc">Solver and engine messages follow the language selected in Plumline.</p>
+        </article>
+      </div>
+    </div>
   </section>
-  <section class="capabilities-cta" aria-labelledby="cap-cta-title">
-    <h2 data-i18n="capPageCtaTitle" id="cap-cta-title">Try it on a real model</h2>
-    <p data-i18n="capPageCtaBody">Open an example in the solver, or paste your own spreadsheet model and see it interpreted, solved and checked.</p>
+  <section class="cap-cta" aria-labelledby="cap-cta-title">
+    <h2 data-i18n="capPageCtaTitle" id="cap-cta-title">Try Plumline with a real model</h2>
+    <p data-i18n="capPageCtaBody">Open one of the examples above or paste your own spreadsheet model into the solver. Plumline will show what it understood before solving and check the result afterwards.</p>
     <a class="btn" href="solver.html" data-i18n="capPageCtaButton">Open the solver</a>
   </section>
 </main>
@@ -178,7 +216,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=57"></script>
+<script src="assets/i18n.js?v=58"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>Plumline.i18n.init('capabilities');</script>
 <script src="assets/build-badge.js?v=1"></script>

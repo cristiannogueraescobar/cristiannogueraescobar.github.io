@@ -298,26 +298,83 @@ ok('coverage: covered + not-applicable + pending == total',
   const dupe = ids.filter((v, i) => ids.indexOf(v) !== i);
   ok('capabilities.html: no duplicate HTML ids', dupe.length === 0, dupe.join(', '));
 
-  // No-JavaScript mode: the English name and description text is present inline
-  // for every shown capability (so the page is meaningful and indexable
-  // without JS).
+  // No-JavaScript mode: meaningful English text is present inline for every
+  // shown capability. Most render with their own nameKey/descriptionKey; the
+  // three spreadsheet capabilities render inside the step flow, so their
+  // meaningful text comes from the step keys instead. The guarantee is the
+  // same — the page says something real about the capability without JS — but
+  // the source key differs by composition.
   const EN = DICT.en.capabilities;
+  const STEP_TEXT = {
+    'sheet-paste': ['capStepPaste', 'capStepPasteDesc'],
+    'sheet-formula-limits': ['capStepAdjust', 'capStepAdjustDesc'],
+    'sheet-export': ['capStepExport', 'capStepExportDesc']
+  };
   shown.forEach(function (c) {
-    ok('capabilities.html: no-JS name text for ' + c.id,
-       html.indexOf('>' + EN[c.nameKey] + '<') !== -1 || html.indexOf(EN[c.nameKey]) !== -1, c.nameKey);
-    ok('capabilities.html: no-JS description text for ' + c.id,
-       html.indexOf(EN[c.descriptionKey]) !== -1, c.descriptionKey);
+    // Anchor must be present regardless of composition.
+    ok('capabilities.html: no-JS anchor for ' + c.id,
+       html.indexOf('id="cap-' + c.id + '"') !== -1, c.id);
+    if (STEP_TEXT[c.id]) {
+      STEP_TEXT[c.id].forEach(function (k) {
+        ok('capabilities.html: no-JS step text ' + k + ' for ' + c.id,
+           html.indexOf(EN[k]) !== -1, k);
+      });
+    } else {
+      ok('capabilities.html: no-JS name text for ' + c.id,
+         html.indexOf(EN[c.nameKey]) !== -1, c.nameKey);
+      ok('capabilities.html: no-JS description text for ' + c.id,
+         html.indexOf(EN[c.descriptionKey]) !== -1, c.descriptionKey);
+    }
   });
 
-  // Every example link resolves to a real, solver-recognised URL (?ex=<slug>).
+  // A solver example link is emitted only for capabilities with an
+  // exampleCtaKey (the small set that link to the solver). Those must resolve to
+  // a real, solver-recognised URL and appear on the page. Also: the CTA text is
+  // unique (no two capabilities show the same link label) and there is no
+  // generic repeated "Open this example" link.
   const { buildExampleSolverUrl } = require(path.join(siteDir, 'assets', 'examples-data.js'));
-  shown.filter(c => c.exampleStatus === 'covered').forEach(function (c) {
+  const ctaCaps = shown.filter(c => c.exampleCtaKey);
+  const seenCtaKeys = new Set();
+  ctaCaps.forEach(function (c) {
+    ok('capabilities.html: ' + c.id + ' has exampleStatus covered for its CTA',
+       c.exampleStatus === 'covered', c.exampleStatus);
+    ok('capabilities.html: ' + c.id + ' exampleCtaKey is unique',
+       !seenCtaKeys.has(c.exampleCtaKey), c.exampleCtaKey);
+    seenCtaKeys.add(c.exampleCtaKey);
     const url = buildExampleSolverUrl(c.exampleId);
     ok('capabilities.html: ' + c.id + ' example URL is well-formed',
        typeof url === 'string' && /^solver\.html\?ex=[a-z0-9-]+$/.test(url), String(url));
-    ok('capabilities.html: ' + c.id + ' example URL appears in the page',
+    ok('capabilities.html: ' + c.id + ' example link appears in the page',
        url && html.indexOf('href="' + url + '"') !== -1, String(url));
   });
+  // Exactly five solver example links (decision B, option C).
+  const solverLinks = (html.match(/href="solver\.html\?ex=/g) || []).length;
+  ok('capabilities.html: exactly five solver example links', solverLinks === 5, 'found ' + solverLinks);
+  // The generic "Open this example" label is not repeated across the page.
+  const genericLabel = DICT.en.capabilities.capOpenExample;
+  ok('capabilities.html: no repeated generic example label',
+     (html.split(genericLabel).length - 1) <= 1);
+
+  // Product imagery from data/media.json: every slot's file exists, is embedded,
+  // and its alt text is present in all five languages.
+  const media = require(path.join(siteDir, 'data', 'media.json'));
+  Object.keys(media.slots).forEach(function (slot) {
+    const m = media.slots[slot];
+    const rel = media.basePath + m.file;
+    ok('capabilities.html: media file exists for ' + slot,
+       fs.existsSync(path.join(siteDir, rel)), rel);
+    ok('capabilities.html: media image embedded for ' + slot,
+       html.indexOf('src="' + rel + '"') !== -1, rel);
+    LANGS.forEach(function (lang) {
+      ok('capabilities.html: alt ' + m.altKey + ' present in ' + lang,
+         DICT[lang].capabilities && Object.prototype.hasOwnProperty.call(DICT[lang].capabilities, m.altKey),
+         m.altKey);
+    });
+  });
+  // The hero image loads eagerly; the others lazily.
+  ok('capabilities.html: hero image loads eagerly',
+     new RegExp('src="' + media.basePath + media.slots['hero-model'].file.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+                '"[^>]*loading="eager"').test(html));
 
   // Exactly one <main> and one <h1>.
   ok('capabilities.html: exactly one <main>', (html.match(/<main>/g) || []).length === 1);
@@ -325,6 +382,29 @@ ok('coverage: covered + not-applicable + pending == total',
   // Generated-file notice is present.
   ok('capabilities.html: carries a generated-file notice',
      /GENERATED PAGE/.test(html));
+})();
+
+// ---- Production guard: no pending translations before public deploy ----
+// Development builds tolerate data/pending-translations.json carrying keys still
+// awaiting es/pt/de/fr. A public build must NOT: set PLUMLINE_PUBLIC_BUILD=1 (or
+// run under CI with that flag) and this fails while any key remains pending.
+(function () {
+  const p = path.join(siteDir, 'data', 'pending-translations.json');
+  if (!fs.existsSync(p)) { ok('translations: pending file absent is fine', true); return; }
+  let doc; try { doc = JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { doc = null; }
+  const pendingCount =
+    ((doc && doc.new_keys_placeholder_en) || []).length +
+    ((doc && doc.existing_keys_en_changed) || []).length;
+  const isPublicBuild = process.env.PLUMLINE_PUBLIC_BUILD === '1';
+  if (isPublicBuild) {
+    ok('translations: no pending translations in a public build',
+       pendingCount === 0, pendingCount + ' keys still pending — translate before public deploy');
+  } else {
+    // Dev build: just report, do not fail.
+    console.log('  translations: ' + pendingCount + ' keys pending (dev build tolerates; ' +
+                'public build with PLUMLINE_PUBLIC_BUILD=1 will fail until translated)');
+    ok('translations: pending count is tracked', typeof pendingCount === 'number');
+  }
 })();
 
 console.log('CAPABILITIES TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

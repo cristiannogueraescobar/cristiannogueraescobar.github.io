@@ -412,3 +412,103 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 .status-list li{padding:12px 0;border-bottom:1px solid var(--line-fine);font-size:15px;line-height:1.6}
 .status-list strong{color:var(--ink)}
 .status-list span{color:var(--soft)}
+
+/* ===== Capabilities page ================================================ */
+/* Composition-first: a split hero, a models table, a three-step flow, a
+   verification receipt with checks, and a two-column explanation. All built
+   from the shared palette; responsive down to a single column on small screens. */
+
+.cap-hero{display:grid;grid-template-columns:1fr 1.1fr;gap:32px;align-items:center;
+  margin:8px 0 40px}
+.cap-hero-text h1{margin:0 0 12px}
+.cap-hero-text p{color:var(--faint);margin:0 0 20px;max-width:46ch}
+.cap-hero-text .btn{margin-bottom:20px}
+.cap-trust{list-style:none;display:flex;flex-wrap:wrap;gap:8px 18px;padding:0;margin:0;
+  font-family:var(--mono,monospace);font-size:12px;color:var(--faint)}
+.cap-trust li{position:relative;padding-left:18px}
+.cap-trust li::before{content:"";position:absolute;left:4px;top:50%;width:6px;height:6px;
+  margin-top:-3px;border-radius:50%;background:var(--true)}
+.cap-hero-media img,.cap-figure img{display:block;width:100%;height:auto;
+  border:1px solid var(--line);border-radius:var(--radius)}
+
+.cap-groupnav{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0 0 36px;
+  padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cap-groupnav a{font-family:var(--mono,monospace);font-size:12px;text-decoration:none;
+  color:var(--brass);padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+.cap-groupnav a:hover{background:var(--cream);border-color:var(--brass)}
+
+.cap-page-section,#models,#spreadsheet,#verification,#explanation{margin:0 0 48px}
+#models h2,#spreadsheet h2,#verification h2,#explanation h2{margin:0 0 20px}
+
+/* Models table */
+.cap-table{width:100%;border-collapse:collapse;margin:0 0 18px;font-size:15px}
+.cap-table thead th{text-align:left;font-family:var(--mono,monospace);font-size:11px;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--faint);
+  padding:10px 14px;border-bottom:1px solid var(--line)}
+.cap-table tbody th,.cap-table tbody td{padding:14px;border-bottom:1px solid var(--line-fine,var(--line));
+  vertical-align:top;text-align:left}
+.cap-table tbody th{font-weight:600;white-space:nowrap}
+.cap-table td[colspan]{color:var(--faint)}
+.cap-example{display:inline-block;font-family:var(--mono,monospace);font-size:12px;
+  color:var(--brass);text-decoration:none;border-bottom:1px solid transparent}
+.cap-example:hover{border-bottom-color:var(--brass)}
+.cap-notes{margin:0 0 18px}
+.cap-goodtoknow{font-size:14px;color:var(--faint);margin:8px 0;padding:10px 14px;
+  background:var(--cream);border-left:3px solid var(--brass);border-radius:0 var(--radius) var(--radius) 0}
+.cap-gtk-label{font-family:var(--mono,monospace);font-size:11px;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--brass);margin-right:6px}
+.cap-direction{padding:16px 0 0;border-top:1px solid var(--line)}
+.cap-direction h3{margin:0 0 6px}
+.cap-direction p{margin:0;color:var(--faint);max-width:60ch}
+
+/* Spreadsheet three-step flow */
+.cap-steps{list-style:none;counter-reset:step;display:grid;
+  grid-template-columns:repeat(3,1fr);gap:16px;padding:0;margin:0}
+.cap-step{position:relative;padding:20px 18px;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);counter-increment:step}
+.cap-step::before{content:counter(step);display:inline-flex;align-items:center;
+  justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--deep);
+  color:var(--cream);font-family:var(--mono,monospace);font-size:13px;margin-bottom:10px}
+.cap-step h3{margin:0 0 6px;font-size:17px}
+.cap-step p{margin:0;color:var(--faint);font-size:14px}
+.cap-step .cap-example{margin-top:10px}
+
+/* Verification receipt + checks */
+.cap-verify{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;align-items:start}
+.cap-verify-points h3{margin:0 0 16px}
+.cap-check{padding:14px 0;border-top:1px solid var(--line)}
+.cap-check:first-of-type{border-top:none;padding-top:0}
+.cap-check h4{margin:0 0 4px;font-size:16px}
+.cap-check p{margin:0;color:var(--faint);font-size:14px}
+
+/* Explanation two columns */
+.cap-explain{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+.cap-explainer{padding:14px 0;border-top:1px solid var(--line)}
+.cap-explainer:first-of-type{border-top:none;padding-top:0}
+.cap-explainer h3{margin:0 0 4px;font-size:17px}
+.cap-explainer p{margin:0;color:var(--faint);font-size:14px}
+
+.cap-figure{margin:0}
+.cap-figure figcaption{margin-top:8px;font-size:13px;color:var(--faint);font-style:italic}
+
+/* Final CTA */
+.cap-cta{padding:28px;background:var(--deep);color:var(--cream);border-radius:var(--radius);
+  text-align:center}
+.cap-cta h2{margin:0 0 8px;color:var(--cream)}
+.cap-cta p{margin:0 auto 16px;max-width:52ch;color:var(--cream);opacity:.85}
+
+@media(max-width:900px){
+  .cap-hero{grid-template-columns:1fr;gap:20px}
+  .cap-verify,.cap-explain{grid-template-columns:1fr;gap:20px}
+  .cap-steps{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  /* Models table -> stacked cards on small screens */
+  .cap-table,.cap-table thead,.cap-table tbody,.cap-table tr,.cap-table th,.cap-table td{
+    display:block;width:auto}
+  .cap-table thead{position:absolute;left:-9999px}
+  .cap-table tbody tr{margin:0 0 14px;border:1px solid var(--line);border-radius:var(--radius);
+    padding:6px 4px}
+  .cap-table tbody th,.cap-table tbody td{border-bottom:none;white-space:normal;padding:8px 14px}
+  .cap-table tbody th{font-size:17px}
+}

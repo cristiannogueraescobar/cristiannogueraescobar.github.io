@@ -28,6 +28,11 @@
  *                  longer covers it, nor one that exists on disk but never runs.
  *   - exampleId    an example key in examples-data.js that demonstrates it, or
  *                  null.
+ *   - exampleCtaKey  OPTIONAL i18n key for a contextual "open this example" link
+ *                  text (e.g. "Try a production plan"). Present only on the small
+ *                  set of capabilities that link to the solver, so the page does
+ *                  not repeat one generic link that all points at the same
+ *                  example. When absent, the capability shows no solver link.
  *   - exampleStatus  'covered' | 'not-applicable' | 'pending':
  *                    covered        -> requires a real exampleId.
  *                    not-applicable -> requires exampleNotApplicable and forbids
@@ -78,6 +83,7 @@
       testMarker: 'CAPABILITY: model-continuous',
       exampleId: 'production',
       exampleStatus: 'covered',
+      exampleCtaKey: 'capCtaContinuous',
       limitationsKey: 'capLimitContinuous',
       public: true,
       docsPath: 'guide.html',
@@ -95,6 +101,7 @@
       testMarker: 'CAPABILITY: model-integer',
       exampleId: 'workforce',
       exampleStatus: 'covered',
+      exampleCtaKey: 'capCtaInteger',
       limitationsKey: 'capLimitInteger',
       public: true,
       docsPath: 'guide.html',
@@ -112,6 +119,7 @@
       testMarker: 'CAPABILITY: model-binary',
       exampleId: 'project',
       exampleStatus: 'covered',
+      exampleCtaKey: 'capCtaBinary',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -128,6 +136,7 @@
       testMarker: 'CAPABILITY: model-mixed',
       exampleId: 'supplier',
       exampleStatus: 'covered',
+      exampleCtaKey: 'capCtaMixed',
       public: true,
       docsPath: 'guide.html',
       docsAnchor: 'limits',
@@ -420,6 +429,7 @@
       testMarker: 'CAPABILITY: explain-region-chart',
       exampleId: 'workshop',
       exampleStatus: 'covered',
+      exampleCtaKey: 'capCtaRegion',
       limitationsKey: 'capLimitRegionChart',
       public: true,
       docsPath: 'guide.html',
