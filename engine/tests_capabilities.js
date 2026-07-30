@@ -255,5 +255,77 @@ ok('coverage: all capabilities are translated', coverage.translated === N,
 ok('coverage: covered + not-applicable + pending == total',
    coverage.covered + coverage.notApplicable + coverage.pending === N);
 
+// ---- The generated capabilities.html page ------------------------------
+// The page is generated from this inventory by engine/gen_capabilities.js.
+// Assert it is up to date and that it faithfully shows exactly the public
+// capabilities and nothing else — a public claim never silently drops off the
+// page, and a non-public one never silently appears.
+(function () {
+  const { execFileSync } = require('child_process');
+  try {
+    execFileSync('node', [path.join(siteDir, 'engine', 'gen_capabilities.js'), '--check'], { stdio: 'pipe' });
+    ok('capabilities.html: is up to date with the inventory', true);
+  } catch (e) {
+    ok('capabilities.html: is up to date with the inventory', false,
+       'run: node engine/gen_capabilities.js');
+  }
+
+  const pagePath = path.join(siteDir, 'capabilities.html');
+  if (!fs.existsSync(pagePath)) {
+    ok('capabilities.html: exists', false);
+    return;
+  }
+  const html = fs.readFileSync(pagePath, 'utf8');
+
+  const shown = caps.CAPABILITIES.filter(c =>
+    c.public === true && c.status === 'available' && c.exampleStatus !== 'pending');
+  const hidden = caps.CAPABILITIES.filter(c => !shown.includes(c));
+
+  // Each public capability appears exactly once, by its anchor id.
+  shown.forEach(function (c) {
+    const anchor = 'id="cap-' + c.id + '"';
+    const n = (html.match(new RegExp(anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+    ok('capabilities.html: public ' + c.id + ' appears exactly once', n === 1, 'found ' + n);
+  });
+  // No hidden (pending / non-public / non-available) capability appears at all.
+  hidden.forEach(function (c) {
+    ok('capabilities.html: hidden ' + c.id + ' does not appear',
+       html.indexOf('cap-' + c.id + '"') === -1);
+  });
+
+  // No duplicate HTML ids anywhere on the page.
+  const ids = [...html.matchAll(/id="([^"]+)"/g)].map(m => m[1]);
+  const dupe = ids.filter((v, i) => ids.indexOf(v) !== i);
+  ok('capabilities.html: no duplicate HTML ids', dupe.length === 0, dupe.join(', '));
+
+  // No-JavaScript mode: the English name and description text is present inline
+  // for every shown capability (so the page is meaningful and indexable
+  // without JS).
+  const EN = DICT.en.capabilities;
+  shown.forEach(function (c) {
+    ok('capabilities.html: no-JS name text for ' + c.id,
+       html.indexOf('>' + EN[c.nameKey] + '<') !== -1 || html.indexOf(EN[c.nameKey]) !== -1, c.nameKey);
+    ok('capabilities.html: no-JS description text for ' + c.id,
+       html.indexOf(EN[c.descriptionKey]) !== -1, c.descriptionKey);
+  });
+
+  // Every example link resolves to a real, solver-recognised URL (?ex=<slug>).
+  const { buildExampleSolverUrl } = require(path.join(siteDir, 'assets', 'examples-data.js'));
+  shown.filter(c => c.exampleStatus === 'covered').forEach(function (c) {
+    const url = buildExampleSolverUrl(c.exampleId);
+    ok('capabilities.html: ' + c.id + ' example URL is well-formed',
+       typeof url === 'string' && /^solver\.html\?ex=[a-z0-9-]+$/.test(url), String(url));
+    ok('capabilities.html: ' + c.id + ' example URL appears in the page',
+       url && html.indexOf('href="' + url + '"') !== -1, String(url));
+  });
+
+  // Exactly one <main> and one <h1>.
+  ok('capabilities.html: exactly one <main>', (html.match(/<main>/g) || []).length === 1);
+  ok('capabilities.html: exactly one <h1', (html.match(/<h1[\s>]/g) || []).length === 1);
+  // Generated-file notice is present.
+  ok('capabilities.html: carries a generated-file notice',
+     /GENERATED PAGE/.test(html));
+})();
+
 console.log('CAPABILITIES TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 process.exit(fail > 0 ? 1 : 0);

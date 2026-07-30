@@ -30,6 +30,7 @@ const DICT = g.Plumline.i18n.dict;
 const PAGE_OF = {
   'index.html': 'home', 'solver.html': 'solver', 'guide.html': 'guide',
   'about.html': 'about', 'examples.html': 'examples',
+  'capabilities.html': 'capabilities',
   'privacy.html': 'legal', 'terms.html': 'legal'
 };
 

@@ -22,9 +22,22 @@
   ];
   var CATEGORY_ORDER = ['start', 'business', 'binary'];
 
+  // Canonical solver URL for an example, keyed by the example's internal `key`.
+  // The solver's loader reads ?ex=<slug> (EXAMPLE_BY_SLUG), so the URL must use
+  // the SLUG, not the key. Shared by examples.html and capabilities.html so the
+  // parameter can never drift from what the solver actually recognises. Returns
+  // null for an unknown key, so callers never emit an undefined/empty URL.
+  function buildExampleSolverUrl(exampleKey) {
+    for (var i = 0; i < META.length; i++) {
+      if (META[i].key === exampleKey) return 'solver.html?ex=' + META[i].slug;
+    }
+    return null;
+  }
+
   root.PL_EXAMPLE_META = META;
   root.PL_CATEGORY_ORDER = CATEGORY_ORDER;
+  root.PL_buildExampleSolverUrl = buildExampleSolverUrl;
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { META: META, CATEGORY_ORDER: CATEGORY_ORDER };
+    module.exports = { META: META, CATEGORY_ORDER: CATEGORY_ORDER, buildExampleSolverUrl: buildExampleSolverUrl };
   }
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));

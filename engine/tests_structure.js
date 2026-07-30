@@ -14,7 +14,7 @@ const path = require('path');
 
 const siteDir = path.join(__dirname, '..');
 const PAGES = ['index.html', 'solver.html', 'guide.html', 'about.html',
-               'privacy.html', 'terms.html', 'examples.html'];
+               'privacy.html', 'terms.html', 'examples.html', 'capabilities.html'];
 const existing = new Set(PAGES);
 
 let pass = 0, fail = 0;
@@ -380,7 +380,8 @@ const CANONICALS = {
   'examples.html': 'https://plumline.online/examples.html',
   'about.html': 'https://plumline.online/about.html',
   'privacy.html': 'https://plumline.online/privacy.html',
-  'terms.html': 'https://plumline.online/terms.html'
+  'terms.html': 'https://plumline.online/terms.html',
+  'capabilities.html': 'https://plumline.online/capabilities.html'
 };
 PAGES.forEach(function (p) {
   const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');

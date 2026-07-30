@@ -65,7 +65,7 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
 //    <p class="fine"> line — never stranded in body content.
 (function () {
   const pages = ['index.html', 'solver.html', 'guide.html', 'about.html',
-                 'privacy.html', 'terms.html', 'examples.html'];
+                 'privacy.html', 'terms.html', 'examples.html', 'capabilities.html'];
   pages.forEach(function (page) {
     const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
     const footerMatch = html.match(/<footer\b[\s\S]*?<\/footer>/i);

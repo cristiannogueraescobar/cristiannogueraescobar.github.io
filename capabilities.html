@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- GENERATED PAGE - do not edit by hand.
+     The content between the CAPABILITIES_CONTENT markers is produced by
+     engine/gen_capabilities.js from assets/product-capabilities.js. Edit the
+     inventory (and this template) instead, then run:
+       node engine/gen_capabilities.js -->
+<title data-i18n="capPageTitle">What Plumline can do</title>
+<meta name="description" data-i18n="capPageMetaDesc" content="The models Plumline solves, the checks it runs on every answer, and what it explains, each capability backed by a test and, where it applies, a runnable example.">
+<meta property="og:title" content="What Plumline can do">
+<meta property="og:description" content="The models Plumline solves, the checks it runs on every answer, and what it explains.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://plumline.online/capabilities.html">
+<meta property="og:image" content="https://plumline.online/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://plumline.online/assets/og-image.png">
+<meta name="twitter:title" content="What Plumline can do">
+<meta name="twitter:description" content="The models Plumline solves, the checks it runs, and what it explains.">
+<link rel="canonical" href="https://plumline.online/capabilities.html">
+<link rel="stylesheet" href="assets/plumline.css?v=12">
+</head>
+<body data-page="capabilities">
+
+<div class="field-deep">
+  <div class="plumb">
+    <header class="mast">
+      <a href="index.html" class="lockup" aria-label="Plumline home">
+        <svg width="24" height="38" viewBox="0 0 24 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="12" y1="0" x2="12" y2="10" stroke="#D8A94A" stroke-width="1.5"/>
+          <path d="M12 10 L20 17 L20 21 L12 33 L4 21 L4 17 Z" fill="#D8A94A"/>
+          <line x1="2" y1="36.5" x2="22" y2="36.5" stroke="#2FA06E" stroke-width="2"/>
+        </svg>
+        <span class="wm">Plumline</span>
+      </a>
+            <div class="header-actions">
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu" data-i18n="menuLabel">Menu</button>
+        <nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">
+        <a href="solver.html" class="hide-sm" data-i18n="navSolver">Solver</a>
+        <a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>
+        <a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>
+        <a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>
+        <a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>
+      </nav>
+       <select class="lang" id="lang" aria-label="Language" data-i18n-aria="ariaLanguage">
+          <option value="en">EN</option><option value="es">ES</option>
+          <option value="pt">PT</option><option value="de">DE</option><option value="fr">FR</option>
+        </select>
+      </div>
+    </header>
+  </div>
+</div>
+
+<!-- CAPABILITIES_CONTENT_START -->
+<main>
+  <div class="capabilities-hero">
+    <h1 data-i18n="capPageH1">What Plumline can do</h1>
+    <p data-i18n="capPageIntro">Plumline turns a spreadsheet-shaped model into an optimised decision, then checks the result against your own formulas. Here is what it can model, how it verifies each answer, and what it explains — with a runnable example wherever one applies.</p>
+  </div>
+  <nav aria-label="Capability groups" data-i18n-aria="capGroupsNavLabel">
+    <a href="#models">Models</a>
+    <a href="#spreadsheet">Spreadsheet support</a>
+    <a href="#verification">Verification</a>
+    <a href="#explanation">Explanation &amp; visualisation</a>
+  </nav>
+  <section id="models" aria-labelledby="models-title">
+    <h2 data-i18n="capGroupModels" id="models-title">Models</h2>
+    <article id="cap-model-continuous">
+      <h3 data-i18n="capModelContinuousName">Continuous models</h3>
+      <p data-i18n="capModelContinuousDesc">Split resources in any proportion to hit the best objective.</p>
+      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitContinuous">Linear relationships only — non-linear formulas are rejected, not approximated.</span></p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-model-integer">
+      <h3 data-i18n="capModelIntegerName">Integer models</h3>
+      <p data-i18n="capModelIntegerDesc">Whole-number decisions, like units produced or people assigned.</p>
+      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitInteger">Larger integer models take longer to prove optimal.</span></p>
+      <a class="capability-example" href="solver.html?ex=workforce-scheduling" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-model-binary">
+      <h3 data-i18n="capModelBinaryName">Binary decisions</h3>
+      <p data-i18n="capModelBinaryDesc">Yes/no choices: pick a project, open a site, ship an order.</p>
+      <a class="capability-example" href="solver.html?ex=project-selection" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-model-mixed">
+      <h3 data-i18n="capModelMixedName">Mixed-integer models</h3>
+      <p data-i18n="capModelMixedDesc">Combine continuous and whole-number decisions in one model.</p>
+      <a class="capability-example" href="solver.html?ex=supplier-activation" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-model-direction">
+      <h3 data-i18n="capModelDirectionName">Maximise or minimise</h3>
+      <p data-i18n="capModelDirectionDesc">Aim for the most profit or the least cost; confirm the direction yourself.</p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+  </section>
+  <section id="spreadsheet" aria-labelledby="spreadsheet-title">
+    <h2 data-i18n="capGroupSpreadsheet" id="spreadsheet-title">Spreadsheet support</h2>
+    <article id="cap-sheet-formula-limits">
+      <h3 data-i18n="capSheetFormulaLimitsName">Number or formula limits</h3>
+      <p data-i18n="capSheetFormulaLimitsDesc">A constraint limit can be a number or a formula from your sheet.</p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-sheet-paste">
+      <h3 data-i18n="capSheetPasteName">Paste from a spreadsheet</h3>
+      <p data-i18n="capSheetPasteDesc">Paste a range from Excel or Google Sheets, or type into the grid.</p>
+    </article>
+    <article id="cap-sheet-export">
+      <h3 data-i18n="capSheetExportName">Export results</h3>
+      <p data-i18n="capSheetExportDesc">Download results as CSV or Excel, or copy a plain-text summary.</p>
+    </article>
+  </section>
+  <section id="verification" aria-labelledby="verification-title">
+    <h2 data-i18n="capGroupVerification" id="verification-title">Verification</h2>
+    <article id="cap-verify-objective">
+      <h3 data-i18n="capVerifyObjectiveName">Objective re-checked</h3>
+      <p data-i18n="capVerifyObjectiveDesc">The reported objective is recomputed from your formulas at the solution.</p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-verify-constraints">
+      <h3 data-i18n="capVerifyConstraintsName">Constraints re-checked</h3>
+      <p data-i18n="capVerifyConstraintsDesc">Every constraint is re-checked against the solved values.</p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-run-local">
+      <h3 data-i18n="capRunLocalName">Runs in your browser</h3>
+      <p data-i18n="capRunLocalDesc">Solving happens in your browser; the model is not uploaded to a server.</p>
+    </article>
+  </section>
+  <section id="explanation" aria-labelledby="explanation-title">
+    <h2 data-i18n="capGroupExplanation" id="explanation-title">Explanation &amp; visualisation</h2>
+    <article id="cap-explain-detection">
+      <h3 data-i18n="capExplainDetectionName">Shows what it understood</h3>
+      <p data-i18n="capExplainDetectionDesc">Reads the objective, decisions and constraints and shows them before solving.</p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-explain-marginal">
+      <h3 data-i18n="capExplainMarginalName">Marginal impact</h3>
+      <p data-i18n="capExplainMarginalDesc">Estimates how much a binding limit would improve the objective if relaxed by one unit.</p>
+      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitMarginal">Estimated only for eligible binding constraints in continuous models.</span></p>
+      <a class="capability-example" href="solver.html?ex=production-plan" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-explain-region-chart">
+      <h3 data-i18n="capExplainRegionChartName">Feasible-region chart</h3>
+      <p data-i18n="capExplainRegionChartDesc">Draws the feasible region for two-variable models, bounded or unbounded.</p>
+      <p class="capability-limit"><span class="capability-limit-label" data-i18n="capLimitLabel">Limit</span>: <span data-i18n="capLimitRegionChart">Available for two-variable models, within a practical numeric range.</span></p>
+      <a class="capability-example" href="solver.html?ex=workshop-chart" data-i18n="capOpenExample">Open this example in the solver</a>
+    </article>
+    <article id="cap-explain-multilingual">
+      <h3 data-i18n="capExplainMultilingualName">Five languages</h3>
+      <p data-i18n="capExplainMultilingualDesc">Interface and explanations in English, Spanish, Portuguese, German and French.</p>
+    </article>
+    <article id="cap-explain-error-localisation">
+      <h3 data-i18n="capExplainErrorLocalisationName">Errors in your language</h3>
+      <p data-i18n="capExplainErrorLocalisationDesc">Engine messages appear in the active language on every screen.</p>
+    </article>
+  </section>
+  <section class="capabilities-cta" aria-labelledby="cap-cta-title">
+    <h2 data-i18n="capPageCtaTitle" id="cap-cta-title">Try it on a real model</h2>
+    <p data-i18n="capPageCtaBody">Open an example in the solver, or paste your own spreadsheet model and see it interpreted, solved and checked.</p>
+    <a class="btn" href="solver.html" data-i18n="capPageCtaButton">Open the solver</a>
+  </section>
+</main>
+<!-- CAPABILITIES_CONTENT_END -->
+
+<footer class="foot">
+  <div class="plumb"><div class="in">
+    <div class="cols">
+      <div class="col"><h4 data-i18n="navUse">Use it</h4><a href="solver.html" data-i18n="footSolver">Online solver</a><a href="index.html#addon" data-i18n="footAddon">Sheets add-on</a></div>
+      <div class="col"><h4 data-i18n="navLearn">Learn</h4><a href="guide.html" data-i18n="footGuide">Guide</a><a href="examples.html" data-i18n="navExamples">Examples</a><a href="capabilities.html" data-i18n="navCapabilities">Capabilities</a></div>
+      <div class="col"><h4 data-i18n="navAbout">About</h4><a href="about.html" data-i18n="navAbout">About</a><a href="mailto:cristiannogueraescobar@gmail.com" data-i18n="footContact">Contact</a></div>
+      <div class="col"><h4 data-i18n="footLegal">Legal</h4><a href="privacy.html" data-i18n="footPrivacy">Privacy</a><a href="terms.html" data-i18n="footTerms">Terms</a></div>
+    </div>
+    <p class="fine"><span data-i18n="footBuilt">Plumline is built and maintained by one developer.</span> <span data-i18n="footFine">Plumline is an independent tool and is not affiliated with or endorsed by Google. Google Sheets™ and Google Workspace™ are trademarks of Google LLC.</span> <span id="buildBadge" class="build-badge" style="font-family:var(--mono,monospace);font-size:11px"></span></p>
+  </div></div>
+</footer>
+
+<script src="assets/i18n.js?v=57"></script>
+  <script src="assets/nav-menu.js?v=5" defer></script>
+<script>Plumline.i18n.init('capabilities');</script>
+<script src="assets/build-badge.js?v=1"></script>
+</body>
+</html>
