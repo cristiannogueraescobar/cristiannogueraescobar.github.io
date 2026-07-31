@@ -73,10 +73,11 @@ if (accM) {
 }
 
 // 5. The FAQ generator output is current (no uncommitted drift).
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 try {
-  execSync('node ' + path.join(siteDir, 'engine', 'gen_home_faq.js') + ' --check',
-           { cwd: siteDir, stdio: 'pipe' });
+  execFileSync(process.execPath,
+               [path.join(siteDir, 'engine', 'gen_home_faq.js'), '--check'],
+               { cwd: siteDir, stdio: 'pipe' });
   ok('home faq: generator output is up to date', true);
 } catch (e) {
   ok('home faq: generator output is up to date', false, 'run gen_home_faq.js');
