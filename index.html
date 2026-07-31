@@ -70,7 +70,7 @@
       <div>
         <p class="eyebrow" data-i18n="heroEyebrow">Optimisation you can verify</p>
         <h1 style="max-width:14ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
-        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Paste a model from Excel or Google Sheets, or build one in the grid. Plumline finds the best allocation it can prove, and checks it against your own formulas.</p>
+        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Paste a model from Excel or Google Sheets, or build one in the grid. Plumline searches for the best allocation, checks it against your formulas, and tells you whether optimality was proven.</p>
         <div class="row hero-ctas">
           <a class="btn big" href="solver.html?ex=production-plan" data-i18n="heroCtaExample">Try a real business example</a>
           <a class="btn big ghost" href="solver.html" data-i18n="heroCtaPaste">Paste your spreadsheet model</a>
@@ -115,7 +115,7 @@
     <div class="grid-4 how-steps">
       <div class="how-step"><span class="how-n" aria-hidden="true">1</span><h3 data-i18n="howPasteH">Paste</h3><p class="muted" style="font-size:14.5px" data-i18n="howPasteP">Paste your table or build it in the grid.</p></div>
       <div class="how-step"><span class="how-n" aria-hidden="true">2</span><h3 data-i18n="howConfirmH">Confirm</h3><p class="muted" style="font-size:14.5px" data-i18n="howConfirmP">Plumline shows the objective, decisions and limits it read.</p></div>
-      <div class="how-step"><span class="how-n" aria-hidden="true">3</span><h3 data-i18n="howSolveH">Solve</h3><p class="muted" style="font-size:14.5px" data-i18n="howSolveP">It finds the best allocation it can prove.</p></div>
+      <div class="how-step"><span class="how-n" aria-hidden="true">3</span><h3 data-i18n="howSolveH">Solve</h3><p class="muted" style="font-size:14.5px" data-i18n="howSolveP">It searches for the best allocation.</p></div>
       <div class="how-step"><span class="how-n" aria-hidden="true">4</span><h3 data-i18n="howCheckH">Check</h3><p class="muted" style="font-size:14.5px" data-i18n="howCheckP">It recalculates the result against your formulas.</p></div>
     </div>
   </section>
@@ -147,7 +147,7 @@
         <div class="vp"><h3 data-i18n="verUnderstoodH">What Plumline understood</h3><p class="muted" style="font-size:14.5px" data-i18n="verUnderstoodP">Before solving, it shows the objective, decisions and constraints it read from your sheet, so a misread cell surfaces early.</p></div>
         <div class="vp"><h3 data-i18n="verObjectiveH">Objective checked again</h3><p class="muted" style="font-size:14.5px" data-i18n="verObjectiveP">It substitutes the solution back into your objective formula and confirms the value it reports.</p></div>
         <div class="vp"><h3 data-i18n="verConstraintsH">Constraints checked again</h3><p class="muted" style="font-size:14.5px" data-i18n="verConstraintsP">It recalculates every constraint from your formulas and confirms the result stays within them.</p></div>
-        <div class="vp"><h3 data-i18n="verStatusH">A proven status</h3><p class="muted" style="font-size:14.5px" data-i18n="verStatusP">It reports whether the answer is optimal, feasible, incomplete, infeasible or unbounded, in plain words.</p></div>
+        <div class="vp"><h3 data-i18n="verStatusH">A clear solve status</h3><p class="muted" style="font-size:14.5px" data-i18n="verStatusP">It reports whether the answer is optimal, feasible, incomplete, infeasible or unbounded, in plain words.</p></div>
         <p class="muted" style="font-size:14.5px"><em data-i18n="f3P">For eligible continuous models, Plumline estimates how the result may change when a binding constraint is relaxed by one unit. This sensitivity insight is often called a shadow price.</em></p>
         <p class="doc-crosslink"><a href="guide.html#explanation" data-i18n="verSeeMore">See how verification works</a></p>
       </div>
@@ -252,7 +252,7 @@
     <div class="grid-3">
       <div class="benefit"><h3 data-i18n="limSolvesH">It solves linear models</h3><p class="muted" style="font-size:14.5px" data-i18n="limSolvesP">Continuous, integer, binary and mixed models where the objective and constraints are linear.</p></div>
       <div class="benefit"><h3 data-i18n="limSizesH">It fits spreadsheet-sized problems</h3><p class="muted" style="font-size:14.5px" data-i18n="limSizesP">It is built for the models you keep in a sheet, not for very large industrial instances.</p></div>
-      <div class="benefit"><h3 data-i18n="limUnsupportedH">It separates proven from feasible or incomplete</h3><p class="muted" style="font-size:14.5px" data-i18n="limUnsupportedP">It reports whether a result is proven optimal, only feasible, or incomplete, and rejects non-linear terms and strict inequalities rather than guessing.</p></div>
+      <div class="benefit"><h3 data-i18n="limUnsupportedH">It distinguishes optimal, feasible and incomplete results</h3><p class="muted" style="font-size:14.5px" data-i18n="limUnsupportedP">It reports whether a result is proven optimal, only feasible, or incomplete, and rejects non-linear terms and strict inequalities rather than guessing.</p></div>
     </div>
   </section>
 
@@ -320,7 +320,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=79"></script>
+<script src="assets/i18n.js?v=80"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
   var LANG = Plumline.i18n.init('home', ['capabilities']);

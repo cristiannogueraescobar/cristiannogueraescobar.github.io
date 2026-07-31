@@ -222,5 +222,41 @@ ok('home seo: twitter:image points at the Home OG image',
 ok('home seo: has twitter:image:alt', /<meta name="twitter:image:alt" content="[^"]{20,}"/.test(html));
 ok('home seo: no stale og-image.png reference', html.indexOf('assets/og-image.png') === -1);
 
+// ---- Proof language guard --------------------------------------------
+// "Proof" must stay precise: the Home distinguishes verification (recomputing the
+// objective and constraints) from proof of optimality (the algorithm showing no
+// better solution exists). These old absolute phrasings must never come back, and
+// the corrected copy must be present in the HTML and in all five languages.
+const FORBIDDEN_PROOF = [
+  'comes with its proof',              // old verTitle
+  'refuses what it cannot prove',      // old limUnsupportedH
+  'the best allocation it can prove',  // old heroLead2 / howSolveP
+  'A proven status',                   // old verStatusH
+  'separates proven from feasible'     // interim limUnsupportedH
+];
+FORBIDDEN_PROOF.forEach(function (phrase) {
+  ok('home seo: Home HTML no longer says "' + phrase + '"', html.indexOf(phrase) === -1, phrase);
+  ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+    const hit = Object.keys(DICT[lang].home).some(function (k) {
+      const v = DICT[lang].home[k];
+      return typeof v === 'string' && v.indexOf(phrase) !== -1;
+    });
+    ok('home seo: dict[' + lang + '] no longer says "' + phrase + '"', !hit, phrase);
+  });
+});
+// The corrected English copy must be present (both dict and inline).
+const REQUIRED_PROOF = {
+  heroLead2: 'tells you whether optimality was proven',
+  howSolveP: 'It searches for the best allocation.',
+  verStatusH: 'A clear solve status',
+  limUnsupportedH: 'It distinguishes optimal, feasible and incomplete results'
+};
+Object.keys(REQUIRED_PROOF).forEach(function (key) {
+  const needle = REQUIRED_PROOF[key];
+  ok('home seo: dict.en.home.' + key + ' carries the corrected copy',
+     (DICT.en.home[key] || '').indexOf(needle) !== -1, key);
+  ok('home seo: inline HTML carries the corrected ' + key, html.indexOf(needle) !== -1, key);
+});
+
 console.log('HOME SEO TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (typeof module !== 'undefined') module.exports = { pass, fail };
