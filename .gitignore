@@ -2,9 +2,13 @@
 node_modules/
 .DS_Store
 _site/
+dist/
 *.log
 
 # NOTE: engine/ is intentionally NOT ignored. The tests must be in the repo
 # so CI can run them. They are kept OUT of the *served* site by the deploy
-# workflow (.github/workflows/deploy.yml excludes engine/ from _site), not by
-# gitignore. Do not add "engine/" here.
+# workflow (.github/workflows/deploy.yml publishes dist/, which never contains
+# engine/), not by gitignore. Do not add "engine/" here.
+
+# Review artifacts generated for Checkpoint A.1 review — NOT for commit.
+review-artifacts/

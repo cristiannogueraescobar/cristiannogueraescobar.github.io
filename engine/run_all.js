@@ -3,7 +3,7 @@
  * Intended to run before deploy (e.g. in a git pre-push hook or CI step):
  *   node engine/run_all.js
  */
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const path = require('path');
 
 const suites = require('./suites.js');
@@ -11,7 +11,7 @@ const suites = require('./suites.js');
 let totalPass = 0, anyFail = false, anySkip = false;
 suites.forEach(function (s) {
   try {
-    const out = execSync('node ' + path.join(__dirname, s + '.js'), { encoding: 'utf8' });
+    const out = execFileSync(process.execPath, [path.join(__dirname, s + '.js')], { encoding: 'utf8' });
     if (/SKIPPED/.test(out)) {
       anySkip = true;
       console.log('  ' + s.padEnd(20) + ' SKIPPED');
