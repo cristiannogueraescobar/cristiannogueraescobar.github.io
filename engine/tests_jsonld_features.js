@@ -41,8 +41,8 @@ function softwareBlocks(file) {
 }
 
 const CASES = [
-  { file: 'index.html', expected: homeFeatures, url: 'https://plumline.online/' },
-  { file: 'capabilities.html', expected: publicFeatures, url: 'https://plumline.online/capabilities.html' }
+  { file: 'index.html', expected: homeFeatures, mainEntity: 'https://plumline.online/' },
+  { file: 'capabilities.html', expected: publicFeatures, mainEntity: 'https://plumline.online/capabilities.html' }
 ];
 
 CASES.forEach(function (c) {
@@ -55,7 +55,12 @@ CASES.forEach(function (c) {
   ok(c.file + ': name is Plumline', app.name === 'Plumline', app.name);
   ok(c.file + ': @id identifies the same application',
      app['@id'] === 'https://plumline.online/#software', app['@id']);
-  ok(c.file + ': url is the expected canonical', app.url === c.url, app.url);
+  // One canonical url for the application on BOTH pages (same @id, same url);
+  // mainEntityOfPage distinguishes which page documents it.
+  ok(c.file + ': url is the single canonical application url',
+     app.url === 'https://plumline.online/', app.url);
+  ok(c.file + ': mainEntityOfPage points at this page',
+     app.mainEntityOfPage === c.mainEntity, app.mainEntityOfPage);
   ok(c.file + ': has a featureList array', Array.isArray(app.featureList));
   if (Array.isArray(app.featureList)) {
     ok(c.file + ': featureList matches the inventory subset (order + content)',
@@ -71,10 +76,29 @@ CASES.forEach(function (c) {
   }
 });
 
-// The Home structured data must not advertise more than the Home shows: its
-// featureList count equals the visible summary count.
-ok('index.html: featureList count equals the visible Home summary count',
-   homeFeatures.length === caps.featuredOnHome().length);
+// The Home structured data must not advertise more than the Home shows. Rather
+// than compare two values from the same function (tautological), count the
+// actual capability names rendered in the visible Home summary and require the
+// JSON-LD featureList to match that count.
+(function () {
+  const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+  const s = html.indexOf('<!-- HOME_CAPABILITIES_START -->');
+  const e = html.indexOf('<!-- HOME_CAPABILITIES_END -->');
+  ok('index.html: Home summary markers present', s !== -1 && e !== -1 && e > s);
+  if (s === -1 || e === -1) return;
+  const summary = html.slice(s, e);
+  const visibleNames = [...summary.matchAll(/<li><span data-i18n="(cap[A-Za-z]+Name)"/g)].map(m => m[1]);
+  const r = softwareBlocks('index.html');
+  if (r.apps && r.apps.length === 1) {
+    ok('index.html: JSON-LD feature count equals the visible <li> count',
+       r.apps[0].featureList.length === visibleNames.length,
+       r.apps[0].featureList.length + ' features vs ' + visibleNames.length + ' visible <li>');
+    // And the feature TEXTS are exactly the EN names of those visible items.
+    const expectedTexts = visibleNames.map(k => EN[k]);
+    ok('index.html: JSON-LD features are exactly the visible summary names',
+       JSON.stringify(r.apps[0].featureList) === JSON.stringify(expectedTexts));
+  }
+})();
 
 // gen_jsonld --check: the Home block is in sync with the inventory.
 (function () {

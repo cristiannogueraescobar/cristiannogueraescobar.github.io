@@ -50,6 +50,7 @@ function softwareBlock() {
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: 'https://plumline.online/',
+    mainEntityOfPage: 'https://plumline.online/',
     description: 'A free online optimisation solver for continuous, integer, binary and mixed-integer models. It finds the best way to split limited resources and verifies the result against your own numbers. Build a model in a spreadsheet-style grid or paste one from Excel or Google Sheets.',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     inLanguage: caps.ALL_LANGS,

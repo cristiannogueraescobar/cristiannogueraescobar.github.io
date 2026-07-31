@@ -3028,11 +3028,20 @@
   global.Plumline = global.Plumline || {};
   global.Plumline.i18n = {
     dict: DICT,
-    t: function (lang, page, key) {
+    t: function (lang, page, key, extra) {
       lang = DICT[lang] ? lang : 'en';
-      return (DICT[lang][page] && DICT[lang][page][key]) ||
-             (DICT[lang].common && DICT[lang].common[key]) ||
-             (DICT.en[page] && DICT.en[page][key]) || key;
+      var order = [page, 'common'].concat(extra || []);
+      for (var i = 0; i < order.length; i++) {
+        if (DICT[lang][order[i]] && DICT[lang][order[i]][key]) {
+          return DICT[lang][order[i]][key];
+        }
+      }
+      for (var j = 0; j < order.length; j++) {
+        if (DICT.en[order[j]] && DICT.en[order[j]][key]) {
+          return DICT.en[order[j]][key];
+        }
+      }
+      return key;
     },
     init: function (page, extra) {
       var lang = pick();

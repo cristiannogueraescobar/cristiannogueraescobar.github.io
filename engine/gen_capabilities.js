@@ -149,7 +149,10 @@ function buildHead() {
     name: 'Plumline',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
-    url: 'https://plumline.online/capabilities.html',
+    // One canonical url for the application (same @id, same url on both pages);
+    // mainEntityOfPage says THIS page documents it.
+    url: 'https://plumline.online/',
+    mainEntityOfPage: 'https://plumline.online/capabilities.html',
     description: desc,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     inLanguage: caps.ALL_LANGS,

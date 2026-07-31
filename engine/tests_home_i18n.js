@@ -50,11 +50,22 @@ function bootHome() {
   const { window } = dom;
   // Provide a stable storage shim (i18n remembers language in localStorage).
   window.eval(i18n);
-  // The Home wires init('home', ['capabilities']) in an inline <script>; run the
-  // same call here in the jsdom realm.
-  window.eval("Plumline.i18n.init('home', ['capabilities']);");
+  // Execute the Home's OWN inline init script, extracted from index.html, so
+  // this test exercises the real wiring. If someone changes the real call to
+  // init('home') and drops the namespace, the summary will stay English here and
+  // the assertions below fail — which is the whole point.
+  const inlineInit = extractHomeInit(html);
+  if (!inlineInit) throw new Error('could not find the Home init() call in index.html');
+  window.eval(inlineInit);
   window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
   return dom;
+}
+
+// Pull the actual "Plumline.i18n.init('home', ...)" statement out of index.html
+// so the test runs the real call, not a hand-written copy of it.
+function extractHomeInit(src) {
+  const m = src.match(/Plumline\.i18n\.init\('home'[^)]*\)\s*;?/);
+  return m ? m[0] : null;
 }
 
 // Read the rendered text for a data-i18n key from the summary.
@@ -64,6 +75,12 @@ function renderedText(doc, key) {
 }
 
 (function () {
+  // Static guard: index.html must wire the capabilities namespace. This catches
+  // a regression to init('home') even before the behavioural check runs.
+  ok('home i18n: index.html initialises the capabilities namespace',
+     html.includes("Plumline.i18n.init('home', ['capabilities'])"),
+     'expected init(\'home\', [\'capabilities\']) in index.html');
+
   const dom = bootHome();
   const doc = dom.window.document;
   const sel = doc.getElementById('lang');
@@ -109,6 +126,16 @@ function renderedText(doc, key) {
          el.textContent.trim() === DICT.de.home[homeKey]);
     }
   }
+
+  // The t() API must also resolve extra namespaces, so both entry points behave
+  // the same. Without the extra arg it cannot see a capabilities key from home.
+  const T = dom.window.Plumline.i18n.t;
+  ok('home i18n: t() resolves a capabilities key from home with the extra namespace',
+     T('es', 'home', 'capGroupModels', ['capabilities']) === DICT.es.capabilities.capGroupModels);
+  ok('home i18n: t() without the extra namespace does not reach capabilities',
+     T('es', 'home', 'capGroupModels') === 'capGroupModels');
+  ok('home i18n: t() still resolves ordinary home keys',
+     !homeKey || T('de', 'home', homeKey) === DICT.de.home[homeKey]);
   done();
 })();
 

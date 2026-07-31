@@ -4,12 +4,13 @@
  * change to a marker that made one generator clobber the other's region would
  * fail here.
  *
- * The test works on a COPY of index.html in a temp dir, so it never mutates the
- * real file.
+ * The generators resolve their own paths from __dirname/.. and write to the real
+ * index.html, so this test snapshots the real file's bytes up front, drives the
+ * generators against it, compares the results, and ALWAYS restores the original
+ * bytes in a finally block. It never leaves index.html modified, even on failure.
  */
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 const { execFileSync } = require('child_process');
 
 const siteDir = path.join(__dirname, '..');
@@ -18,10 +19,8 @@ function ok(name, cond, detail) {
   if (cond) { pass++; } else { fail++; console.log('  FAIL: ' + name + (detail ? '  ' + detail : '')); }
 }
 
-// Run a generator against a specific working copy by pointing it at a temp
-// siteDir. The generators resolve paths from __dirname/.., so we build a minimal
-// mirror: a temp dir with engine/ (symlinked scripts), assets/, data/, and the
-// index.html copy. Simpler: run in place but snapshot/restore the real file.
+// Snapshot the real index.html up front; every run below works against it and
+// the finally block restores these exact bytes.
 const idxPath = path.join(siteDir, 'index.html');
 const original = fs.readFileSync(idxPath, 'utf8');
 
