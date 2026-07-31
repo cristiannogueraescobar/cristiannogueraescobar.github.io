@@ -193,7 +193,7 @@ ok('home seo: Home has no personal/unapproved mailto (enforced in public build)'
 // Home HTML, its inline JS, and the generated FAQ regions, in every language via
 // the dictionary. These strings must not reappear.
 const remnants = ['addonWaitlist', 'addonEmailSubject', 'addonEmailBody',
-                  'Get notified', 'Leave your email', 'mailto:', 'gmail.com'];
+                  'Get notified', 'Leave your email', 'gmail.com'];
 remnants.forEach(function (needle) {
   ok('home seo: Home HTML has no "' + needle + '"', html.indexOf(needle) === -1, needle);
 });

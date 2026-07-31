@@ -20,11 +20,13 @@ const PAGES = ['index.html', 'solver.html', 'guide.html', 'capabilities.html',
 // Strings that must not appear in any page's HTML.
 const FORBIDDEN_HTML = [
   'assets/og-image.png',            // retired social image
-  'mailto:',                         // no direct mailto until a domain address exists
   'gmail.com',                       // no personal address
   'getAddon', 'addonWaitlist',       // renamed / removed keys
   'Get notified', 'Leave your email' // waitlist copy
 ];
+// The only contact address allowed to appear anywhere.
+const APPROVED_DOMAINS = ['plumline.online'];
+const PERSONAL_PROVIDERS = /@(gmail|googlemail|yahoo|hotmail|outlook|proton|protonmail|icloud|me)\.com$/i;
 
 PAGES.forEach(function (page) {
   const p = path.join(siteDir, page);
@@ -33,15 +35,22 @@ PAGES.forEach(function (page) {
   FORBIDDEN_HTML.forEach(function (needle) {
     ok('site hygiene: ' + page + ' has no "' + needle + '"', html.indexOf(needle) === -1, needle);
   });
-  // Footer Contact link resolves to the interim About anchor.
+  // Every mailto on the page must use the approved domain and not a personal one.
+  [...html.matchAll(/mailto:([^"'?&\s]+@[^"'?&\s]+)/g)].forEach(function (m) {
+    const addr = m[1];
+    ok('site hygiene: ' + page + ' mailto ' + addr + ' is not a personal provider',
+       !PERSONAL_PROVIDERS.test(addr), addr);
+    ok('site hygiene: ' + page + ' mailto ' + addr + ' uses an approved domain',
+       APPROVED_DOMAINS.indexOf(addr.split('@')[1]) !== -1, addr);
+  });
+  // Footer Contact link resolves to the approved contact address or the About anchor.
   if (html.indexOf('data-i18n="footContact"') !== -1) {
-    ok('site hygiene: ' + page + ' footer Contact points at about.html#contact',
-       /href="about\.html#contact"[^>]*data-i18n="footContact"|data-i18n="footContact"[^>]*href="about\.html#contact"/.test(html) ||
-       html.indexOf('about.html#contact') !== -1, page);
+    ok('site hygiene: ' + page + ' footer Contact points at the approved contact',
+       html.indexOf('mailto:contact@plumline.online') !== -1 || html.indexOf('about.html#contact') !== -1, page);
   }
 });
 
-// about.html#contact anchor must exist (the target of every footer Contact link).
+// about.html#contact anchor must exist (the About page contact section).
 const about = fs.readFileSync(path.join(siteDir, 'about.html'), 'utf8');
 ok('site hygiene: about.html has an #contact anchor', /id="contact"/.test(about));
 

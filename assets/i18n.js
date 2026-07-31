@@ -578,7 +578,7 @@
         pvControlP:'You can revoke Plumline\'s access at any time at',
         pvControlEnd:', or by uninstalling the add-on. Because no data leaves your spreadsheet, there is nothing to request or delete from us.',
         pvChangesH:'Changes and contact',
-        pvChangesP:'If this policy changes, the date at the top changes with it, and prior versions remain in this site\'s public history. Contact details for privacy questions will be published on the About page once available.',
+        pvChangesP:'If this policy changes, the date at the top changes with it, and prior versions remain in this site\'s public history. Questions about privacy can be sent to',
         tmTitle:'Terms of service',
         tmAgreeH:'Agreement',
         tmAgreeP:'By using Plumline, the free online solver at plumline.online or the Google Sheets add-on, you agree to these terms. If you don\'t agree with them, don\'t use it. Plumline is free.',
@@ -602,7 +602,7 @@
         tmTrademarkH:'Trademarks',
         tmTrademarkP:'Plumline is independent and is not affiliated with, sponsored by or endorsed by Google. Google Sheets™, Google Workspace™ and Google Apps Script™ are trademarks of Google LLC.',
         tmContactH:'Contact',
-        tmContactP:'Contact details for questions about these terms will be published on the About page once available.'
+        tmContactP:'Questions about these terms can be sent to'
       },
       about: {
         aboutEyebrow:'About',
@@ -617,7 +617,7 @@
         aboutPrivacyH:'On your data',
         aboutPrivacyP:'The online solver runs entirely in your browser and uploads nothing. The Google Sheets add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google\'s infrastructure under your own account. There is no Plumline account and no tracking. The full detail is in the privacy policy.',
         aboutContactH:'Contact',
-        aboutContactP:'Plumline\'s contact channel is currently being prepared. Professional contact details will be published here once available.',
+        aboutContactP:'Questions, bug reports and feature requests are welcome by email:',
         aboutCta:'Try the online solver'
       }
     },
@@ -1191,7 +1191,7 @@
         pvControlP:'Puedes revocar el acceso de Plumline en cualquier momento en',
         pvControlEnd:', o desinstalando el complemento. Como ningún dato sale de tu hoja de cálculo, no hay nada que solicitarnos ni que borrar de nuestra parte.',
         pvChangesH:'Cambios y contacto',
-        pvChangesP:'Si esta política cambia, la fecha de arriba cambia con ella, y las versiones anteriores permanecen en el historial público de este sitio. Los datos de contacto para consultas de privacidad se publicarán en la página About cuando estén disponibles.',
+        pvChangesP:'Si esta política cambia, la fecha de arriba cambia con ella, y las versiones anteriores permanecen en el historial público de este sitio. Las preguntas sobre privacidad se pueden enviar a',
         tmTitle:'Términos del servicio',
         tmAgreeH:'Aceptación',
         tmAgreeP:'Al usar Plumline, el solver online gratuito en plumline.online o el complemento de Google Sheets, aceptas estos términos. Si no estás de acuerdo con ellos, no lo uses. Plumline es gratuito.',
@@ -1215,7 +1215,7 @@
         tmTrademarkH:'Marcas registradas',
         tmTrademarkP:'Plumline es independiente y no está afiliada, patrocinada ni respaldada por Google. Google Sheets™, Google Workspace™ y Google Apps Script™ son marcas de Google LLC.',
         tmContactH:'Contacto',
-        tmContactP:'Los datos de contacto para consultas sobre estos términos se publicarán en la página About cuando estén disponibles.'
+        tmContactP:'Las preguntas sobre estos términos se pueden enviar a'
       },
       about: {
         aboutEyebrow:'Sobre',
@@ -1230,7 +1230,7 @@
         aboutPrivacyH:'Sobre tus datos',
         aboutPrivacyP:'El solver online funciona entero en tu navegador y no sube nada. El complemento de Google Sheets no envía datos de tu hoja a Plumline ni a terceros; su procesamiento ocurre dentro de la infraestructura de Google, bajo tu propia cuenta. No hay cuenta de Plumline ni seguimiento. El detalle completo está en la política de privacidad.',
         aboutContactH:'Contacto',
-        aboutContactP:'El canal de contacto de Plumline está en preparación. Los datos de contacto profesionales se publicarán aquí cuando estén disponibles.',
+        aboutContactP:'Las preguntas, informes de errores y solicitudes de funciones son bienvenidas por correo:',
         aboutCta:'Prueba el solver online'
       }
     },
@@ -1804,7 +1804,7 @@
         pvControlP:'Podes revogar o acesso do Plumline a qualquer momento em',
         pvControlEnd:', ou desinstalando o complemento. Como nenhum dado sai da sua folha de cálculo, não há nada para nos pedir nem para apagar do nosso lado.',
         pvChangesH:'Alterações e contacto',
-        pvChangesP:'Se esta política mudar, a data no topo muda com ela, e as versões anteriores permanecem no histórico público deste site. Os dados de contacto para questões de privacidade serão publicados na página About quando estiverem disponíveis.',
+        pvChangesP:'Se esta política mudar, a data no topo muda com ela, e as versões anteriores permanecem no histórico público deste site. As perguntas sobre privacidade podem ser enviadas para',
         tmTitle:'Termos de serviço',
         tmAgreeH:'Acordo',
         tmAgreeP:'Ao usar o Plumline, o solver online gratuito em plumline.online ou o complemento do Google Sheets, concordas com estes termos. Se não concordar com eles, não o use. O Plumline é gratuito.',
@@ -1828,7 +1828,7 @@
         tmTrademarkH:'Marcas registadas',
         tmTrademarkP:'O Plumline é independente e não é afiliado, patrocinado nem endossado pela Google. Google Sheets™, Google Workspace™ e Google Apps Script™ são marcas da Google LLC.',
         tmContactH:'Contacto',
-        tmContactP:'Os dados de contacto para questões sobre estes termos serão publicados na página About quando estiverem disponíveis.'
+        tmContactP:'As perguntas sobre estes termos podem ser enviadas para'
       },
       about: {
         aboutEyebrow:'Sobre',
@@ -1843,7 +1843,7 @@
         aboutPrivacyH:'Sobre os seus dados',
         aboutPrivacyP:'O solver online roda inteiramente no seu navegador e não envia nada. O complemento do Google Sheets não envia dados da sua folha de cálculo ao Plumline nem a terceiros; o processamento ocorre dentro da infraestrutura da Google, sob a sua própria conta. Não há conta do Plumline nem rastreamento. O detalhe completo está na política de privacidade.',
         aboutContactH:'Contacto',
-        aboutContactP:'O canal de contacto do Plumline está em preparação. Os dados de contacto profissionais serão publicados aqui quando estiverem disponíveis.',
+        aboutContactP:'Perguntas, relatórios de erros e pedidos de funcionalidades são bem-vindos por correio eletrónico:',
         aboutCta:'Experimente o solver online'
       }
     },
@@ -2417,7 +2417,7 @@
         pvControlP:'Du kannst den Zugriff von Plumline jederzeit widerrufen unter',
         pvControlEnd:', oder indem du das Add-on deinstallierst. Da keine Daten deine Tabelle verlassen, gibt es nichts, was du bei uns anfordern oder löschen lassen könntest.',
         pvChangesH:'Änderungen und Kontakt',
-        pvChangesP:'Wenn sich diese Richtlinie ändert, ändert sich das Datum oben mit, und frühere Versionen bleiben im öffentlichen Verlauf dieser Website. Kontaktdaten für Datenschutzfragen werden auf der About-Seite veröffentlicht, sobald sie verfügbar sind.',
+        pvChangesP:'Wenn sich diese Richtlinie ändert, ändert sich das Datum oben mit, und frühere Versionen bleiben im öffentlichen Verlauf dieser Website. Fragen zum Datenschutz können gesendet werden an',
         tmTitle:'Nutzungsbedingungen',
         tmAgreeH:'Zustimmung',
         tmAgreeP:'Durch die Nutzung von Plumline, dem kostenlosen Online-Solver auf plumline.online oder dem Google-Sheets-Add-on, stimmst du diesen Bedingungen zu. Wenn du ihnen nicht zustimmst, nutze es nicht. Plumline ist kostenlos.',
@@ -2441,7 +2441,7 @@
         tmTrademarkH:'Marken',
         tmTrademarkP:'Plumline ist unabhängig und steht in keiner Verbindung zu Google, wird von Google weder gesponsert noch unterstützt. Google Sheets™, Google Workspace™ und Google Apps Script™ sind Marken von Google LLC.',
         tmContactH:'Kontakt',
-        tmContactP:'Kontaktdaten für Fragen zu diesen Bedingungen werden auf der About-Seite veröffentlicht, sobald sie verfügbar sind.'
+        tmContactP:'Fragen zu diesen Bedingungen können gesendet werden an'
       },
       about: {
         aboutEyebrow:'Über',
@@ -2456,7 +2456,7 @@
         aboutPrivacyH:'Zu deinen Daten',
         aboutPrivacyP:'Der Online-Solver läuft vollständig im Browser und lädt nichts hoch. Das Google-Sheets-Add-on sendet keine Tabellendaten an Plumline oder Dritte; seine Verarbeitung findet innerhalb der Google-Infrastruktur unter deinem eigenen Konto statt. Es gibt kein Plumline-Konto und kein Tracking. Alle Details stehen in der Datenschutzerklärung.',
         aboutContactH:'Kontakt',
-        aboutContactP:'Der Kontaktkanal von Plumline wird gerade vorbereitet. Professionelle Kontaktdaten werden hier veröffentlicht, sobald sie verfügbar sind.',
+        aboutContactP:'Fragen, Fehlerberichte und Funktionswünsche sind per E-Mail willkommen:',
         aboutCta:'Online-Solver ausprobieren'
       }
     },
@@ -3030,7 +3030,7 @@
         pvControlP:'Vous pouvez révoquer l’accès de Plumline à tout moment sur',
         pvControlEnd:', ou en désinstallant le module. Comme aucune donnée ne quitte votre feuille, il n’y a rien à nous demander ni à supprimer de notre côté.',
         pvChangesH:'Modifications et contact',
-        pvChangesP:'Si cette politique change, la date en haut change avec elle, et les versions antérieures restent dans l\'historique public de ce site. Les coordonnées pour les questions de confidentialité seront publiées sur la page About dès qu\'elles seront disponibles.',
+        pvChangesP:'Si cette politique change, la date en haut change avec elle, et les versions antérieures restent dans l\'historique public de ce site. Les questions sur la confidentialité peuvent être envoyées à',
         tmTitle:'Conditions d’utilisation',
         tmAgreeH:'Accord',
         tmAgreeP:'En utilisant Plumline, le solveur en ligne gratuit sur plumline.online ou le module Google Sheets, vous acceptez ces conditions. Si vous ne les acceptez pas, ne l\'utilisez pas. Plumline est gratuit.',
@@ -3054,7 +3054,7 @@
         tmTrademarkH:'Marques',
         tmTrademarkP:'Plumline est indépendant et n’est ni affilié à Google, ni parrainé ni approuvé par Google. Google Sheets™, Google Workspace™ et Google Apps Script™ sont des marques de Google LLC.',
         tmContactH:'Contact',
-        tmContactP:'Les coordonnées pour les questions concernant ces conditions seront publiées sur la page About dès qu\'elles seront disponibles.'
+        tmContactP:'Les questions concernant ces conditions peuvent être envoyées à'
       },
       about: {
         aboutEyebrow:'À propos',
@@ -3069,7 +3069,7 @@
         aboutPrivacyH:'À propos de vos données',
         aboutPrivacyP:'Le solveur en ligne fonctionne entièrement dans votre navigateur et n\'envoie rien. Le module Google Sheets n\'envoie aucune donnée de feuille à Plumline ni à des tiers ; son traitement a lieu au sein de l\'infrastructure de Google, sous votre propre compte. Il n\'y a pas de compte Plumline ni de suivi. Le détail complet est dans la politique de confidentialité.',
         aboutContactH:'Contact',
-        aboutContactP:'Le canal de contact de Plumline est en cours de préparation. Les coordonnées professionnelles seront publiées ici dès qu\'elles seront disponibles.',
+        aboutContactP:'Les questions, rapports de bugs et demandes de fonctionnalités sont les bienvenus par e-mail :',
         aboutCta:'Essayer le solveur en ligne'
       }
     }
