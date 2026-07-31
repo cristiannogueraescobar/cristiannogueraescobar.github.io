@@ -197,7 +197,7 @@
         f2H:'It verifies the answer',
         f2P:'The online solver recalculates your objective and constraints from your own formulas and shows whether every limit holds. The Sheets add-on writes the solution back and lets Sheets recalculate. Either way, you see the numbers agree before you rely on them.',
         f3H:'It shows what relaxing a limit is worth',
-        f3P:'For eligible binding limits in continuous models, the estimated improvement from relaxing the limit by one unit, often called a shadow price. A sensitivity-style insight, explained in plain language.',
+        f3P:'For eligible continuous models, Plumline estimates how the result may change when a binding constraint is relaxed by one unit. This sensitivity insight is often called a shadow price.',
         provenH:'It tells you what is proven',
         provenP:'Plumline distinguishes an optimal solution from a valid one whose optimality could not be proven within the solving limits. If the search is incomplete, it says so instead of calling the model impossible.',
         ctaTitle:'Put a number in front of your next decision.',
@@ -244,12 +244,8 @@
         faq6Q:'Can I set variable types and limits?',
         faq6A:'Yes. Variable settings lets you mark each decision as continuous, integer or binary (0 or 1) and give it a minimum and maximum. Plumline verifies those limits hold in the final answer and shows the check.'
       ,
-        addonWaitlist:'Get notified when the add-on launches',
         addonSoon:'Coming soon to Google Sheets',
-        addonSoonP:'The Google Sheets add-on is in review. It reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free. Leave your email and you\'ll hear the moment it\'s live.',
-        addonEmailSubject:'Notify me when the Plumline add-on launches',
-        addonEmailBody:'Hi, please let me know when the Plumline Google Sheets add-on is available.'
-      ,
+        addonSoonP:'It reads the model straight from the sheet you already built, solves it, and writes the answer back so Sheets can check it. Free.',
         heroLead2:'Plumline finds the best way to split limited resources: how much to make, buy, ship or staff. It solves continuous, integer, binary and mixed-integer models, then verifies the result against your own numbers. Free, in your browser.',
         chipBrowser:'Runs locally in your browser',
         chipNoAccount:'No Plumline account needed',
@@ -261,8 +257,9 @@
         exGridHint:'The highlighted cells (chairs, tables) start at zero. Plumline fills them in.',
         exArrow:'solves to'
       ,
-        exDisclaimer:'Plumline verifies that the solution satisfies the model you provided. It cannot verify that the model accurately represents your real-world problem.'
-      },
+        exDisclaimer:'Plumline verifies that the solution satisfies the model you provided. It cannot verify that the model accurately represents your real-world problem.',
+        addonInReview:'The Google Sheets add-on is currently in review.'
+},
       solver: {
         navAddon:'The add-on',
         navHow:'How to use',
@@ -795,7 +792,7 @@
         f2H:'Verifica la respuesta',
         f2P:'El solver online recalcula tu objetivo y tus restricciones a partir de tus propias fórmulas y muestra si se cumple cada límite. El complemento de Sheets escribe la solución y deja que Sheets recalcule. En cualquier caso, ves que los números coinciden antes de confiar en ellos.',
         f3H:'Muestra cuánto vale relajar un límite',
-        f3P:'Para los límites vinculantes elegibles en modelos continuos, la mejora estimada al relajar el límite en una unidad, a menudo llamada precio sombra. Una idea tipo sensibilidad, explicada en lenguaje sencillo.',
+        f3P:'Para modelos continuos elegibles, Plumline estima cómo puede cambiar el resultado cuando una restricción activa se relaja en una unidad. Esta información de sensibilidad se conoce a menudo como precio sombra.',
         provenH:'Te dice qué está demostrado',
         provenP:'Plumline distingue una solución óptima de una válida cuya optimalidad no se pudo demostrar dentro de los límites de cálculo. Si la búsqueda es incompleta, lo dice, en vez de declarar imposible el modelo.',
         ctaTitle:'Pon un n\u00famero delante de tu pr\u00f3xima decisi\u00f3n.',
@@ -842,12 +839,8 @@
         faq6Q:'¿Puedo definir tipos de variable y límites?',
         faq6A:'Sí. Ajustes de variables permite marcar cada decisión como continua, entera o binaria (0 o 1) y darle un mínimo y un máximo. Plumline verifica que esos límites se cumplan en la respuesta final y muestra la comprobación.'
       ,
-        addonWaitlist:'Avísame cuando salga el complemento',
         addonSoon:'Pronto en Google Sheets',
-        addonSoonP:'El complemento de Google Sheets está en revisión. Lee el modelo directamente de la hoja que ya construiste, lo resuelve y escribe la respuesta para que Sheets pueda comprobarla. Gratis. Deja tu correo y te aviso en cuanto esté disponible.',
-        addonEmailSubject:'Avísame cuando salga el complemento de Plumline',
-        addonEmailBody:'Hola, avísame cuando el complemento de Plumline para Google Sheets esté disponible.'
-      ,
+        addonSoonP:'Lee el modelo directamente de la hoja que ya construiste, lo resuelve y escribe la respuesta para que Sheets pueda comprobarla. Gratis.',
         heroLead2:'Plumline encuentra la mejor forma de repartir recursos limitados: cuánto fabricar, comprar, enviar o dotar de personal. Resuelve modelos continuos, enteros, binarios y enteros mixtos, y verifica el resultado con tus propios números. Gratis, en tu navegador.',
         chipBrowser:'Se ejecuta localmente en tu navegador',
         chipNoAccount:'Sin cuenta de Plumline',
@@ -859,8 +852,9 @@
         exGridHint:'Las celdas resaltadas (sillas, mesas) empiezan en cero. Plumline las rellena.',
         exArrow:'se resuelve a'
       ,
-        exDisclaimer:'Plumline verifica que la solución cumple el modelo que le diste. No puede verificar que el modelo represente con precisión tu problema real.'
-      },
+        exDisclaimer:'Plumline verifica que la solución cumple el modelo que le diste. No puede verificar que el modelo represente con precisión tu problema real.',
+        addonInReview:'El complemento de Google Sheets está actualmente en revisión.'
+},
       solver: {
         navAddon:'El complemento',
         navHow:'Cómo se usa',
@@ -1393,7 +1387,7 @@
         f2H:'Ele verifica a resposta',
         f2P:'O solver online recalcula seu objetivo e restrições a partir das suas próprias fórmulas e mostra se cada limite é atendido. O complemento do Sheets escreve a solução e deixa o Sheets recalcular. De qualquer forma, você vê os números concordarem antes de confiar neles.',
         f3H:'Mostra quanto vale relaxar um limite',
-        f3P:'Para os limites vinculativos elegíveis em modelos contínuos, a melhoria estimada ao relaxar o limite em uma unidade, muitas vezes chamada de preço sombra. Uma perceção do tipo sensibilidade, explicada em linguagem simples.',
+        f3P:'Para modelos contínuos elegíveis, o Plumline estima como o resultado pode mudar quando uma restrição ativa é relaxada em uma unidade. Essa informação de sensibilidade é frequentemente chamada de preço sombra.',
         provenH:'Diz o que está provado',
         provenP:'O Plumline distingue uma solução ótima de uma válida cuja otimalidade não pôde ser provada dentro dos limites de cálculo. Se a busca for incompleta, ele diz isso, em vez de declarar o modelo impossível.',
         ctaTitle:'Coloque um n\u00famero diante da sua pr\u00f3xima decis\u00e3o.',
@@ -1440,12 +1434,8 @@
         faq6Q:'Posso definir tipos de variável e limites?',
         faq6A:'Sim. Definições de variáveis permite marcar cada decisão como contínua, inteira ou binária (0 ou 1) e dar-lhe um mínimo e um máximo. O Plumline verifica que esses limites se cumprem na resposta final e mostra a verificação.'
       ,
-        addonWaitlist:'Avise-me quando o complemento sair',
         addonSoon:'Em breve no Google Sheets',
-        addonSoonP:'O complemento do Google Sheets está em revisão. Ele lê o modelo direto da planilha que você já construiu, resolve e escreve a resposta para o Sheets conferir. Grátis. Deixe o seu e-mail e aviso assim que estiver disponível.',
-        addonEmailSubject:'Avise-me quando o complemento do Plumline sair',
-        addonEmailBody:'Olá, avise-me quando o complemento do Plumline para Google Sheets estiver disponível.'
-      ,
+        addonSoonP:'Ele lê o modelo diretamente da planilha que você já construiu, resolve e escreve a resposta de volta para que o Sheets possa verificá-la. Gratuito.',
         heroLead2:'O Plumline encontra a melhor forma de distribuir recursos limitados: quanto fabricar, comprar, enviar ou alocar pessoal. Resolve modelos contínuos, inteiros, binários e inteiros mistos, e verifica o resultado com os seus próprios números. Grátis, no seu navegador.',
         chipBrowser:'Roda localmente no seu navegador',
         chipNoAccount:'Sem conta do Plumline',
@@ -1457,8 +1447,9 @@
         exGridHint:'As células destacadas (cadeiras, mesas) começam em zero. O Plumline as preenche.',
         exArrow:'resolve para'
       ,
-        exDisclaimer:'O Plumline verifica que a solução satisfaz o modelo que você forneceu. Ele não pode verificar que o modelo representa com precisão o seu problema real.'
-      },
+        exDisclaimer:'O Plumline verifica que a solução satisfaz o modelo que você forneceu. Ele não pode verificar que o modelo representa com precisão o seu problema real.',
+        addonInReview:'O complemento do Google Sheets está atualmente em análise.'
+},
       solver: {
         navAddon:'O complemento',
         navHow:'Como usar',
@@ -1991,7 +1982,7 @@
         f2H:'Es prüft die Antwort',
         f2P:'Der Online-Solver berechnet Ziel und Einschränkungen aus deinen eigenen Formeln neu und zeigt, ob jede Grenze hält. Das Sheets-Add-on schreibt die Lösung zurück und lässt Sheets neu rechnen. So oder so siehst du, dass die Zahlen übereinstimmen, bevor du dich darauf verlässt.',
         f3H:'Es zeigt, was das Lockern einer Grenze wert ist',
-        f3P:'Für geeignete bindende Grenzen in kontinuierlichen Modellen die geschätzte Verbesserung durch Lockern der Grenze um eine Einheit, oft Schattenpreis genannt. Eine sensitivitätsartige Erkenntnis, in einfacher Sprache erklärt.',
+        f3P:'Für geeignete kontinuierliche Modelle schätzt Plumline, wie sich das Ergebnis ändern kann, wenn eine aktive Nebenbedingung um eine Einheit gelockert wird. Diese Sensitivitätsinformation wird oft Schattenpreis genannt.',
         provenH:'Es sagt dir, was bewiesen ist',
         provenP:'Plumline unterscheidet eine optimale Lösung von einer gültigen, deren Optimalität innerhalb der Rechengrenzen nicht bewiesen werden konnte. Ist die Suche unvollständig, sagt es das, statt das Modell für unmöglich zu erklären.',
         ctaTitle:'Stell deiner n\u00e4chsten Entscheidung eine Zahl voran.',
@@ -2038,12 +2029,8 @@
         faq6Q:'Kann ich Variablentypen und Grenzen festlegen?',
         faq6A:'Ja. In den Variableneinstellungen kannst du jede Entscheidung als kontinuierlich, ganzzahlig oder binär (0 oder 1) markieren und ihr ein Minimum und Maximum geben. Plumline prüft, dass diese Grenzen in der endgültigen Antwort gelten, und zeigt die Prüfung.'
       ,
-        addonWaitlist:'Benachrichtige mich zum Start des Add-ons',
         addonSoon:'Bald für Google Sheets',
-        addonSoonP:'Das Google-Sheets-Add-on ist in Prüfung. Es liest das Modell direkt aus der Tabelle, die du schon gebaut hast, löst es und schreibt die Antwort zurück, damit Sheets sie prüfen kann. Kostenlos. Hinterlass deine E-Mail und du hörst es, sobald es live ist.',
-        addonEmailSubject:'Benachrichtige mich zum Start des Plumline-Add-ons',
-        addonEmailBody:'Hallo, bitte sag mir Bescheid, sobald das Plumline-Add-on für Google Sheets verfügbar ist.'
-      ,
+        addonSoonP:'Es liest das Modell direkt aus der Tabelle, die du bereits erstellt hast, löst es und schreibt die Antwort zurück, damit Sheets sie prüfen kann. Kostenlos.',
         heroLead2:'Plumline findet den besten Weg, begrenzte Ressourcen aufzuteilen: wie viel herstellen, kaufen, versenden oder einplanen. Es löst kontinuierliche, ganzzahlige, binäre und gemischt-ganzzahlige Modelle und prüft das Ergebnis mit deinen eigenen Zahlen. Kostenlos, im Browser.',
         chipBrowser:'Läuft lokal in deinem Browser',
         chipNoAccount:'Kein Plumline-Konto nötig',
@@ -2055,8 +2042,9 @@
         exGridHint:'Die markierten Zellen (Stühle, Tische) beginnen bei null. Plumline füllt sie aus.',
         exArrow:'löst zu'
       ,
-        exDisclaimer:'Plumline prüft, dass die Lösung das von dir angegebene Modell erfüllt. Es kann nicht prüfen, ob das Modell dein reales Problem korrekt abbildet.'
-      },
+        exDisclaimer:'Plumline prüft, dass die Lösung das von dir angegebene Modell erfüllt. Es kann nicht prüfen, ob das Modell dein reales Problem korrekt abbildet.',
+        addonInReview:'Das Google-Sheets-Add-on wird derzeit geprüft.'
+},
       solver: {
         navAddon:'Das Add-on',
         navHow:'So geht’s',
@@ -2589,7 +2577,7 @@
         f2H:'Il vérifie la réponse',
         f2P:'Le solveur en ligne recalcule votre objectif et vos contraintes à partir de vos propres formules et indique si chaque limite est respectée. Le module Sheets réécrit la solution et laisse Sheets recalculer. Dans les deux cas, vous voyez les chiffres concorder avant de vous y fier.',
         f3H:'Il montre ce que vaut le relâchement d\'une limite',
-        f3P:'Pour les limites contraignantes éligibles dans les modèles continus, l\'amélioration estimée en relâchant la contrainte d\'une unité, souvent appelée prix indicatif. Un aperçu de type sensibilité, expliqué simplement.',
+        f3P:'Pour les modèles continus admissibles, Plumline estime comment le résultat peut changer lorsqu\'une contrainte active est relâchée d\'une unité. Cette information de sensibilité est souvent appelée prix indicatif.',
         provenH:'Il vous dit ce qui est prouvé',
         provenP:'Plumline distingue une solution optimale d\'une solution valide dont l\'optimalité n\'a pas pu être prouvée dans les limites de calcul. Si la recherche est incomplète, il le dit, au lieu de déclarer le modèle impossible.',
         ctaTitle:'Mettez un chiffre devant votre prochaine d\u00e9cision.',
@@ -2636,12 +2624,8 @@
         faq6Q:'Puis-je définir des types de variables et des limites ?',
         faq6A:'Oui. Les paramètres de variables permettent de marquer chaque décision comme continue, entière ou binaire (0 ou 1) et de lui donner un minimum et un maximum. Plumline vérifie que ces limites tiennent dans la réponse finale et montre le contrôle.'
       ,
-        addonWaitlist:'Prévenez-moi au lancement du module',
         addonSoon:'Bientôt sur Google Sheets',
-        addonSoonP:'Le module Google Sheets est en cours de validation. Il lit le modèle directement dans la feuille que vous avez déjà construite, le résout et réécrit la réponse pour que Sheets la vérifie. Gratuit. Laissez votre e-mail et vous serez prévenu dès sa mise en ligne.',
-        addonEmailSubject:'Prévenez-moi au lancement du module Plumline',
-        addonEmailBody:'Bonjour, merci de me prévenir quand le module Plumline pour Google Sheets sera disponible.'
-      ,
+        addonSoonP:'Il lit le modèle directement depuis la feuille que vous avez déjà construite, le résout et réécrit la réponse pour que Sheets puisse la vérifier. Gratuit.',
         heroLead2:'Plumline trouve la meilleure façon de répartir des ressources limitées : combien produire, acheter, expédier ou affecter en personnel. Il résout des modèles continus, entiers, binaires et mixtes en nombres entiers, puis vérifie le résultat avec vos propres chiffres. Gratuit, dans votre navigateur.',
         chipBrowser:'S\'exécute localement dans votre navigateur',
         chipNoAccount:'Aucun compte Plumline requis',
@@ -2653,8 +2637,9 @@
         exGridHint:'Les cellules surlignées (chaises, tables) partent de zéro. Plumline les remplit.',
         exArrow:'se résout en'
       ,
-        exDisclaimer:'Plumline vérifie que la solution satisfait le modèle que vous avez fourni. Il ne peut pas vérifier que le modèle représente fidèlement votre problème réel.'
-      },
+        exDisclaimer:'Plumline vérifie que la solution satisfait le modèle que vous avez fourni. Il ne peut pas vérifier que le modèle représente fidèlement votre problème réel.',
+        addonInReview:'Le module Google Sheets est actuellement en cours d\'examen.'
+},
       solver: {
         navAddon:'Le module',
         navHow:'Comment ça marche',
