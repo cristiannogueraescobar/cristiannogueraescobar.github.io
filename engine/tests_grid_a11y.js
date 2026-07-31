@@ -139,7 +139,7 @@ setTimeout(function () {
   first.value = 'test value';
   first.focus();
   const cases = { de: 'Zelle A1', en: 'Cell A1', pt: 'Célula A1', fr: 'Cellule A1', es: 'Celda A1' };
-  const gridLabels = { de: 'Modellraster', en: 'Spreadsheet model grid', pt: 'Grade do modelo', fr: 'Grille du modèle', es: 'Cuadrícula del modelo' };
+  const gridLabels = { de: 'Modellraster', en: 'Spreadsheet model grid', pt: 'Grelha do modelo', fr: 'Grille du modèle', es: 'Cuadrícula del modelo' };
   Object.keys(cases).forEach(function (lang) {
     sel.value = lang;
     sel.dispatchEvent(new window.Event('change', { bubbles: true }));

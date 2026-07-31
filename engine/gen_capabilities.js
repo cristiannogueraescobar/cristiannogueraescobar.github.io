@@ -132,11 +132,12 @@ function buildHead() {
   L.push('<meta property="og:description" content="' + escAttr(desc) + '">');
   L.push('<meta property="og:type" content="website">');
   L.push('<meta property="og:url" content="https://plumline.online/capabilities.html">');
-  L.push('<meta property="og:image" content="https://plumline.online/assets/og-image.png">');
+  L.push('<meta property="og:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">');
+  L.push('<meta property="og:image:type" content="image/png">');
   L.push('<meta property="og:image:width" content="1200">');
   L.push('<meta property="og:image:height" content="630">');
   L.push('<meta name="twitter:card" content="summary_large_image">');
-  L.push('<meta name="twitter:image" content="https://plumline.online/assets/og-image.png">');
+  L.push('<meta name="twitter:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">');
   L.push('<meta name="twitter:title" content="' + escAttr(title) + '">');
   L.push('<meta name="twitter:description" content="' + escAttr(desc) + '">');
   // Structured data: a SoftwareApplication whose featureList is DERIVED from the
