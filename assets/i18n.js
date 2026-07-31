@@ -513,8 +513,7 @@
         explainH:'How Plumline explains a result',
         explainIntro:'A number on its own is hard to trust, so Plumline shows its working around every answer. Before solving, it reflects back the model it read: the objective, each decision and every limit, so you can confirm it understood your sheet. After solving, it reports the outcome in plain terms and, where the model allows, draws it.',
         explainDetection:'It restates the objective, decisions and limits it detected, so a misread cell shows up before you rely on the answer.',
-        explainStatus:'It reports the result status in words. The result status section covers what optimal, feasible, incomplete, infeasible and unbounded each mean.',
-        explainStatusLink:'result status section',
+        explainStatusLink:'The result status section',
         explainMarginal:'For eligible binding constraints in continuous models, it estimates how much the objective would improve if you relaxed that constraint by one unit.',
         explainRegion:'For a model with two decisions, it can draw the feasible region and mark where the best answer sits.',
         explainLang:'It shows these explanations, and any messages, in the interface language you have selected.',
@@ -526,6 +525,9 @@
         guideSeeFallback:'See what Plumline supports',
 
         gVarsToDirection:'Learn how to choose maximise or minimise',
+
+        explainStatusBefore:'Plumline reports the result status in words.',
+        explainStatusAfter:'explains optimal, feasible, incomplete, infeasible and unbounded results.',
 },
       legal: {
         pvTitle:'Privacy policy',
@@ -1109,8 +1111,7 @@
         explainH:'Cómo explica Plumline un resultado',
         explainIntro:'Un número por sí solo es difícil de confiar, así que Plumline muestra su razonamiento en torno a cada respuesta. Antes de resolver, te devuelve el modelo que leyó: el objetivo, cada decisión y cada límite, para que confirmes que entendió tu hoja. Después de resolver, informa del resultado en términos claros y, cuando el modelo lo permite, lo dibuja.',
         explainDetection:'Repite el objetivo, las decisiones y los límites que detectó, para que una celda mal leída se vea antes de que confíes en la respuesta.',
-        explainStatus:'Informa del estado del resultado en palabras. La sección de estado del resultado cubre qué significan óptimo, viable, incompleto, inviable y no acotado.',
-        explainStatusLink:'sección de estado del resultado',
+        explainStatusLink:'La sección de estado del resultado',
         explainMarginal:'Para restricciones vinculantes elegibles en modelos continuos, estima cuánto mejoraría el objetivo si relajaras esa restricción en una unidad.',
         explainRegion:'Para un modelo con dos decisiones, puede dibujar la región factible y marcar dónde está la mejor respuesta.',
         explainLang:'Muestra estas explicaciones, y cualquier mensaje, en el idioma de interfaz que hayas seleccionado.',
@@ -1122,6 +1123,9 @@
         guideSeeFallback:'Consulta lo que admite Plumline',
 
         gVarsToDirection:'Aprende a elegir maximizar o minimizar',
+
+        explainStatusBefore:'Plumline informa del estado del resultado en palabras.',
+        explainStatusAfter:'explica los resultados óptimo, viable, incompleto, inviable y no acotado.',
 },
       legal: {
         pvTitle:'Política de privacidad',
@@ -1705,8 +1709,7 @@
         explainH:'Como o Plumline explica um resultado',
         explainIntro:'Um número por si só é difícil de confiar, então o Plumline mostra seu raciocínio em torno de cada resposta. Antes de resolver, ele devolve o modelo que leu: o objetivo, cada decisão e cada limite, para você confirmar que entendeu sua planilha. Depois de resolver, ele relata o resultado em termos claros e, quando o modelo permite, o desenha.',
         explainDetection:'Ele repete o objetivo, as decisões e os limites que detectou, para que uma célula lida incorretamente apareça antes de você confiar na resposta.',
-        explainStatus:'Ele relata o status do resultado em palavras. A seção de status do resultado cobre o que significam ótimo, viável, incompleto, inviável e ilimitado.',
-        explainStatusLink:'seção de status do resultado',
+        explainStatusLink:'A seção de status do resultado',
         explainMarginal:'Para restrições vinculantes elegíveis em modelos contínuos, ele estima quanto o objetivo melhoraria se você afrouxasse essa restrição em uma unidade.',
         explainRegion:'Para um modelo com duas decisões, ele pode desenhar a região factível e marcar onde está a melhor resposta.',
         explainLang:'Ele mostra essas explicações, e qualquer mensagem, no idioma de interface que você selecionou.',
@@ -1718,6 +1721,9 @@
         guideSeeFallback:'Veja o que o Plumline admite',
 
         gVarsToDirection:'Aprenda a escolher maximizar ou minimizar',
+
+        explainStatusBefore:'O Plumline relata o status do resultado em palavras.',
+        explainStatusAfter:'explica os resultados ótimo, viável, incompleto, inviável e ilimitado.',
 },
       legal: {
         pvTitle:'Política de privacidade',
@@ -2301,8 +2307,7 @@
         explainH:'Wie Plumline ein Ergebnis erklärt',
         explainIntro:'Einer Zahl allein ist schwer zu vertrauen, deshalb zeigt Plumline seinen Rechenweg rund um jede Antwort. Vor dem Lösen spiegelt es das gelesene Modell zurück: die Zielsetzung, jede Entscheidung und jede Nebenbedingung, damit du bestätigen kannst, dass es deine Tabelle verstanden hat. Nach dem Lösen berichtet es das Ergebnis in klaren Worten und zeichnet es, wo das Modell es zulässt.',
         explainDetection:'Es gibt die erkannte Zielsetzung, die Entscheidungen und die Grenzen wieder, damit eine falsch gelesene Zelle auffällt, bevor du dich auf die Antwort verlässt.',
-        explainStatus:'Es meldet den Ergebnisstatus in Worten. Der Abschnitt zum Ergebnisstatus erklärt, was optimal, zulässig, unvollständig, unlösbar und unbeschränkt jeweils bedeuten.',
-        explainStatusLink:'Abschnitt zum Ergebnisstatus',
+        explainStatusLink:'Der Abschnitt zum Ergebnisstatus',
         explainMarginal:'Für geeignete bindende Nebenbedingungen in kontinuierlichen Modellen schätzt es, wie stark sich die Zielsetzung verbessern würde, wenn du diese Nebenbedingung um eine Einheit lockerst.',
         explainRegion:'Für ein Modell mit zwei Entscheidungen kann es den zulässigen Bereich zeichnen und markieren, wo die beste Antwort liegt.',
         explainLang:'Es zeigt diese Erklärungen und alle Meldungen in der von dir gewählten Oberflächensprache an.',
@@ -2314,6 +2319,9 @@
         guideSeeFallback:'Sieh, was Plumline unterstützt',
 
         gVarsToDirection:'Lerne, wie du Maximieren oder Minimieren wählst',
+
+        explainStatusBefore:'Plumline meldet den Ergebnisstatus in Worten.',
+        explainStatusAfter:'erklärt die Ergebnisse optimal, zulässig, unvollständig, unlösbar und unbeschränkt.',
 },
       legal: {
         pvTitle:'Datenschutzerklärung',
@@ -2897,8 +2905,7 @@
         explainH:'Comment Plumline explique un résultat',
         explainIntro:'Un nombre seul est difficile à croire, alors Plumline montre son raisonnement autour de chaque réponse. Avant de résoudre, il vous renvoie le modèle qu\'il a lu : l\'objectif, chaque décision et chaque contrainte, pour que vous confirmiez qu\'il a compris votre feuille. Après avoir résolu, il rapporte le résultat en termes clairs et, lorsque le modèle le permet, le dessine.',
         explainDetection:'Il répète l\'objectif, les décisions et les limites qu\'il a détectés, pour qu\'une cellule mal lue apparaisse avant que vous ne vous fiiez à la réponse.',
-        explainStatus:'Il rapporte le statut du résultat en mots. La section sur le statut du résultat explique ce que signifient optimal, réalisable, incomplet, infaisable et non borné.',
-        explainStatusLink:'section sur le statut du résultat',
+        explainStatusLink:'La section sur le statut du résultat',
         explainMarginal:'Pour les contraintes actives admissibles dans les modèles continus, il estime de combien l\'objectif s\'améliorerait si vous relâchiez cette contrainte d\'une unité.',
         explainRegion:'Pour un modèle à deux décisions, il peut dessiner la région réalisable et marquer où se trouve la meilleure réponse.',
         explainLang:'Il affiche ces explications, et tout message, dans la langue d\'interface que vous avez sélectionnée.',
@@ -2910,6 +2917,9 @@
         guideSeeFallback:'Voir ce que Plumline prend en charge',
 
         gVarsToDirection:'Apprenez à choisir maximiser ou minimiser',
+
+        explainStatusBefore:'Plumline rapporte le statut du résultat en mots.',
+        explainStatusAfter:'explique les résultats optimal, réalisable, incomplet, infaisable et non borné.',
 },
       legal: {
         pvTitle:'Politique de confidentialité',

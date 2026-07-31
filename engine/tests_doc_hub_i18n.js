@@ -122,6 +122,20 @@ function linkByKey(doc, key) {
   const unb = doc.querySelector('[data-i18n="statusUnboundedLabel"]');
   ok('guide [es]: unbounded status present and translated',
      unb && unb.textContent.trim() === DICT.es.guide.statusUnboundedLabel, unb && unb.textContent.trim());
+
+  // CRITICAL: the internal #status link inside #explanation must SURVIVE i18n.
+  // apply() sets innerHTML on data-i18n nodes, so a link nested inside a
+  // translated parent would be destroyed. The link lives in its own <a> with
+  // its own key, so it must still be in the DOM after init AND after switching
+  // language, with its href intact.
+  const statusLink = doc.querySelector('#explanation a[href="#status"]');
+  ok('guide [es]: #status link survives i18n', !!statusLink);
+  ok('guide [es]: #status link href unchanged',
+     statusLink && statusLink.getAttribute('href') === '#status',
+     statusLink && statusLink.getAttribute('href'));
+  ok('guide [es]: #status link text translated',
+     statusLink && statusLink.textContent.trim() === DICT.es.guide.explainStatusLink,
+     statusLink && statusLink.textContent.trim());
 })();
 
 console.log('DOC HUB I18N TESTS  PASSED: ' + pass + '   FAILED: ' + fail);

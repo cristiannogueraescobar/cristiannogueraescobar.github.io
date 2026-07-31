@@ -99,6 +99,16 @@
     </div>
   </section>
 
+  <section class="section" style="padding-top:0" id="variables">
+    <div class="sec-head">
+      <h2 data-i18n="gVarsH">Set variable types and limits</h2>
+      <p class="muted" data-i18n="gVarsP">By default every decision can take any value from zero upward. After building your model, open Variable settings to change that. Each decision can be continuous (any amount), integer (whole numbers only, like people or vehicles), or binary (a decision that can only be 0 or 1). You can also give a decision its own minimum and maximum, for example a crew of at least 3 and at most 8. Binary decisions are fixed to 0 or 1 automatically. Plumline currently supports non-negative variables only, so minimums cannot be below zero.</p>
+      <p class="muted" data-i18n="gVarsExample">For example: an "open this site" decision as Binary, a "workers" decision as Integer from 0 to 20, and a "budget share" decision as Continuous from 0 to 100. The receipt then lists every variable with a customised type or limit, and confirms the result stays within them.</p>
+      <p class="doc-crosslink"><a href="#direction" data-i18n="gVarsToDirection">Learn how to choose maximise or minimise</a></p>
+      <p class="doc-crosslink"><a href="capabilities.html#cap-model-continuous" data-i18n="guideSeeModelCapabilities">See the models Plumline supports</a></p>
+    </div>
+  </section>
+
   <section class="section" style="padding-top:0" id="direction">
     <div class="sec-head">
       <h2 data-i18n="gDirH">Confirm the direction: maximise or minimise</h2>
@@ -106,31 +116,21 @@
     </div>
   </section>
 
-  <section class="section" style="padding-top:0" id="variables">
-    <div class="sec-head">
-      <h2 data-i18n="gVarsH">Set variable types and limits</h2>
-      <p class="muted" data-i18n="gVarsP">By default every decision can take any value from zero upward. After building your model, open Variable settings to change that. Each decision can be continuous (any amount), integer (whole numbers only, like people or vehicles), or binary (a yes/no choice, 0 or 1). You can also give a decision its own minimum and maximum, for example a crew of at least 3 and at most 8. Binary decisions are fixed to 0 or 1 automatically. Plumline currently supports non-negative variables only, so minimums cannot be below zero.</p>
-      <p class="muted" data-i18n="gVarsExample">For example: an "open this site" decision as Binary, a "workers" decision as Integer from 0 to 20, and a "budget share" decision as Continuous from 0 to 100. The receipt then lists every variable with a customised type or limit, and confirms the result stays within them.</p>
-      <p class="doc-crosslink"><a href="#direction" data-i18n="gVarsToDirection">Learn how to choose maximise or minimise</a></p>
-      <p class="doc-crosslink"><a href="capabilities.html#cap-model-continuous" data-i18n="guideSeeModelCapabilities">See the models Plumline supports</a></p>
-    </div>
-  </section>
-
   <section class="section" style="padding-top:0">
     <div class="sec-head">
       <h2 data-i18n="gWhyH">Why verify the answer</h2>
-      <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. The online solver recalculates the objective and constraints from your formulas. The Google Sheets add-on writes the solution back and lets Sheets recalculate. In both cases, Plumline shows whether the result satisfies the model before you rely on it. For eligible binding limits in continuous models, it also estimates the improvement from relaxing the limit by one unit.</p>
+      <p class="muted" data-i18n="gWhyP">A solver's output is a number you could not work out yourself, which is exactly why it is hard to trust. The online solver recalculates the objective and constraints from your formulas. The Google Sheets add-on writes the solution back and lets Sheets recalculate. In both cases, Plumline shows whether the result satisfies the model before you rely on it. For eligible binding constraints in continuous models, it also estimates the improvement from relaxing the constraint by one unit.</p>
     </div>
   </section>
 
   <section class="section" style="padding-top:0" id="status">
     <div class="sec-head"><h2 data-i18n="statusH">Understanding the result status</h2></div>
     <ul class="status-list">
-      <li><strong data-i18n="statusOptimalLabel">Optimal solution proven</strong> — <span data-i18n="statusOptimalDesc">the search completed and no better answer exists.</span></li>
-      <li><strong data-i18n="statusFeasibleLabel">Feasible solution</strong> — <span data-i18n="statusFeasibleDesc">it satisfies every constraint, but a better one might exist and could not be proven within the limits.</span></li>
-      <li><strong data-i18n="statusIncompleteLabel">Search incomplete</strong> — <span data-i18n="statusIncompleteDesc">Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.</span></li>
-      <li><strong data-i18n="statusInfeasibleLabel">No feasible solution</strong> — <span data-i18n="statusInfeasibleDesc">the constraints have been proven to contradict each other.</span></li>
-      <li><strong data-i18n="statusUnboundedLabel">Unbounded model</strong> — <span data-i18n="statusUnboundedDesc">the objective can keep improving because the model has no finite limit in that direction.</span></li>
+      <li><strong data-i18n="statusOptimalLabel">Optimal solution proven</strong>: <span data-i18n="statusOptimalDesc">the search completed and no better answer exists.</span></li>
+      <li><strong data-i18n="statusFeasibleLabel">Feasible solution</strong>: <span data-i18n="statusFeasibleDesc">it satisfies every constraint, but a better one might exist and could not be proven within the limits.</span></li>
+      <li><strong data-i18n="statusIncompleteLabel">Search incomplete</strong>: <span data-i18n="statusIncompleteDesc">Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.</span></li>
+      <li><strong data-i18n="statusInfeasibleLabel">No feasible solution</strong>: <span data-i18n="statusInfeasibleDesc">the constraints have been proven to contradict each other.</span></li>
+      <li><strong data-i18n="statusUnboundedLabel">Unbounded model</strong>: <span data-i18n="statusUnboundedDesc">the objective can keep improving because the model has no finite limit in that direction.</span></li>
     </ul>
     <p class="doc-crosslink"><a href="capabilities.html#cap-verify-objective" data-i18n="guideSeeVerificationCapabilities">See every check Plumline performs</a></p>
   </section>
@@ -140,8 +140,8 @@
     <p class="muted" data-i18n="explainIntro">A number on its own is hard to trust, so Plumline shows its working around every answer. Before solving, it reflects back the model it read: the objective, each decision and every limit, so you can confirm it understood your sheet. After solving, it reports the outcome in plain terms and, where the model allows, draws it.</p>
     <ul class="explain-list">
       <li data-i18n="explainDetection">It restates the objective, decisions and limits it detected, so a misread cell shows up before you rely on the answer.</li>
-      <li data-i18n="explainStatus">It reports the result status in words. The <a href="#status" data-i18n="explainStatusLink">result status section</a> covers what optimal, feasible, incomplete, infeasible and unbounded each mean.</li>
-      <li data-i18n="explainMarginal">For eligible binding limits in continuous models, it estimates how much the objective would improve if you relaxed that limit by one unit.</li>
+      <li><span data-i18n="explainStatusBefore">Plumline reports the result status in words.</span> <a href="#status" data-i18n="explainStatusLink">The result status section</a> <span data-i18n="explainStatusAfter">explains optimal, feasible, incomplete, infeasible and unbounded results.</span></li>
+      <li data-i18n="explainMarginal">For eligible binding constraints in continuous models, it estimates how much the objective would improve if you relaxed that constraint by one unit.</li>
       <li data-i18n="explainRegion">For a model with two decisions, it can draw the feasible region and mark where the best answer sits.</li>
       <li data-i18n="explainLang">It shows these explanations, and any messages, in the interface language you have selected.</li>
     </ul>
@@ -184,7 +184,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=69"></script>
+<script src="assets/i18n.js?v=70"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>Plumline.i18n.init('guide');</script>
 <script src="assets/build-badge.js?v=1"></script>

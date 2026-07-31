@@ -106,5 +106,25 @@ caps.GROUP_ORDER.forEach(function (grp) {
   });
 });
 
+// ---- Guide's inline English text matches the EN dictionary ------------
+// The static HTML is the no-JS render and the first paint, so the inline text
+// for keys whose wording was normalised (0-or-1, binding constraints) must
+// equal the corrected dictionary value, not the old wording.
+(function () {
+  const EN = DICT.en.guide;
+  [['gVarsP', 'p'], ['gWhyP', 'p'], ['explainMarginal', 'li']].forEach(function (pair) {
+    const key = pair[0], tag = pair[1];
+    const re = new RegExp('data-i18n="' + key + '">([\\s\\S]*?)</' + tag + '>');
+    const m = guide.match(re);
+    ok('doc hub: guide.html inline ' + key + ' equals the EN dictionary',
+       m && m[1] === EN[key], key);
+  });
+  // And the old terminology is gone from the static HTML entirely.
+  ['a yes/no choice', 'eligible binding limits', 'relaxing the limit'].forEach(function (bad) {
+    ok('doc hub: guide.html inline no longer contains "' + bad + '"',
+       guide.indexOf(bad) === -1, bad);
+  });
+})();
+
 console.log('DOC HUB TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (typeof module !== 'undefined') module.exports = { pass, fail };
