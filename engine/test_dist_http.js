@@ -45,6 +45,31 @@ function get(url) {
   });
 }
 
+/* Binary-safe fetch adapter for manifest verification.
+ * Uses Node's http client with no Agent and `Connection: close`, so the Windows
+ * test process has no undici/keep-alive handles left after the local server
+ * closes. */
+function fetchLocal(url) {
+  return new Promise((resolve, reject) => {
+    const req = http.get(url, {
+      agent: false,
+      headers: { Connection: 'close' },
+    }, (res) => {
+      const chunks = [];
+      res.on('data', chunk => chunks.push(Buffer.from(chunk)));
+      res.on('end', () => {
+        const body = Buffer.concat(chunks);
+        resolve({
+          status: res.statusCode,
+          arrayBuffer: async () =>
+            body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength),
+        });
+      });
+    });
+    req.on('error', reject);
+  });
+}
+
 let fail = 0;
 function ok(name, cond, detail) { if (!cond) { fail++; console.log('  FAIL:', name, detail || ''); } }
 
@@ -138,7 +163,7 @@ function ok(name, cond, detail) { if (!cond) { fail++; console.log('  FAIL:', na
     .join('\n') + '\n';
   try {
     const { checked } = await verifyManifest({
-      base: BASE, cb: String(Date.now()), fetchImpl: fetch, manifestText, requiredPaths,
+      base: BASE, cb: String(Date.now()), fetchImpl: fetchLocal, manifestText, requiredPaths,
     });
     ok('manifest: every dist file listed and served with matching SHA-256',
        checked === requiredPaths.length,
@@ -148,7 +173,22 @@ function ok(name, cond, detail) { if (!cond) { fail++; console.log('  FAIL:', na
     ok('manifest verification', false, e.message);
   }
 
-  server.close();
+  // Do not force process.exit() while libuv is still closing the HTTP server.
+  // Wait for the close callback, explicitly close idle connections where
+  // supported, then set process.exitCode and let Node exit naturally.
+  await new Promise((resolve, reject) => {
+    server.close((err) => err ? reject(err) : resolve());
+    if (typeof server.closeIdleConnections === 'function') {
+      server.closeIdleConnections();
+    }
+  });
+
   console.log(fail ? ('DIST HTTP TESTS: FAILED (' + fail + ')') : 'DIST HTTP TESTS: OK (' + seen.size + ' links crawled)');
-  process.exit(fail ? 1 : 0);
-})();
+  process.exitCode = fail ? 1 : 0;
+})().catch(async (err) => {
+  console.error(err);
+  if (server.listening) {
+    await new Promise(resolve => server.close(() => resolve()));
+  }
+  process.exitCode = 1;
+});
