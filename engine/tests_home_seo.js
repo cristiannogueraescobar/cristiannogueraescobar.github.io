@@ -142,26 +142,50 @@ const ogDim = imgSize(ogRef);
 ok('home seo: OG image is exactly 1200x630', ogDim && ogDim.w === 1200 && ogDim.h === 630,
    ogDim ? ogDim.w + 'x' + ogDim.h : 'missing');
 
-// 4. Every informative <img> under assets/screenshots carries a translatable alt
-//    (data-i18n-alt) whose key exists in all five languages and whose inline
-//    English matches the dictionary.
-const imgTags = [...html.matchAll(/<img\b[^>]*assets\/screenshots\/[^>]*>/g)].map(m => m[0]);
-ok('home seo: found the hero and verify <img> tags', imgTags.length >= 2, imgTags.length + ' screenshot imgs');
-imgTags.forEach(function (tag) {
-  const keyM = tag.match(/data-i18n-alt="([^"]+)"/);
-  ok('home seo: screenshot img has data-i18n-alt', !!keyM, tag.slice(0, 60));
-  const altM = tag.match(/\salt="([^"]*)"/);
-  ok('home seo: screenshot img has non-empty inline alt', altM && altM[1].length >= 20);
-  if (keyM) {
-    const key = keyM[1];
+// 4. Every informative <img> under assets/screenshots is well-formed: exactly one
+//    alt attribute, whose value equals the English dictionary and whose key exists
+//    in all five languages, with no stray content leaking past the alt attribute
+//    (the malformed-alt bug). Parsed with jsdom, not a partial regex, so trailing
+//    junk after the closing quote cannot slip through.
+let JSDOM_SEO = null;
+try { ({ JSDOM: JSDOM_SEO } = require('jsdom')); }
+catch (e) {
+  if (process.env.CI) { ok('home seo: jsdom available for alt parsing (CI)', false); }
+  else { ok('home seo: alt parsing skipped (jsdom not installed locally)', true); }
+}
+if (JSDOM_SEO) {
+  const doc = new JSDOM_SEO(html).window.document;
+  const shots = [...doc.querySelectorAll('img[src*="assets/screenshots/"]')];
+  ok('home seo: found the hero and verify <img> tags', shots.length >= 2, shots.length + ' screenshot imgs');
+  shots.forEach(function (img) {
+    const key = img.getAttribute('data-i18n-alt');
+    ok('home seo: screenshot img has data-i18n-alt', !!key, img.getAttribute('src'));
+    if (!key) return;
+    // Exactly one alt attribute (getAttribute would silently take the first; count
+    // occurrences in the serialized tag to catch a duplicated alt).
+    const serialized = img.outerHTML;
+    const altCount = (serialized.match(/(?:^|\s)alt=/g) || []).length;
+    ok('home seo: ' + key + ' has exactly one alt attribute', altCount === 1, altCount + ' alt=');
+    // No junk attributes such as optimal / solution / proven leaking from a broken
+    // close-quote.
+    const junk = Array.from(img.attributes).map(a => a.name).filter(n => /^(optimal|solution|proven)$/i.test(n));
+    ok('home seo: ' + key + ' has no stray attributes from a broken alt', junk.length === 0, junk.join(','));
+    // The serialized tag must end cleanly: ..."<alt value>"> with nothing between
+    // the alt closing quote and the tag close.
+    const wellFormed = new RegExp('data-i18n-alt="' + key + '"\\s+alt="[^"]*">$').test(serialized.trim()) ||
+                       /alt="[^"]*"\s*\/?>$/.test(serialized.trim());
+    ok('home seo: ' + key + ' tag closes cleanly after alt (no loose content)', wellFormed, serialized.slice(-60));
+    // Alt value equals the English dictionary exactly.
+    ok('home seo: inline EN alt for ' + key + ' matches the dictionary',
+       img.getAttribute('alt') === DICT.en.home[key], key);
+    ok('home seo: ' + key + ' alt is non-empty', (img.getAttribute('alt') || '').length >= 20);
+    // Key exists in all five languages.
     ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
-      const v = DICT[lang].home[key];
-      ok('home seo: alt key ' + key + ' present in ' + lang, typeof v === 'string' && v.length > 0, key);
+      ok('home seo: alt key ' + key + ' present in ' + lang,
+         typeof DICT[lang].home[key] === 'string' && DICT[lang].home[key].length > 0, key);
     });
-    if (altM) ok('home seo: inline EN alt for ' + key + ' matches the dictionary',
-                 altM[1] === DICT.en.home[key], key);
-  }
-});
+  });
+}
 
 // ---- Contact address guard -------------------------------------------
 // The public build must not ship a personal address or an unconfigured domain
@@ -245,17 +269,51 @@ FORBIDDEN_PROOF.forEach(function (phrase) {
   });
 });
 // The corrected English copy must be present (both dict and inline).
-const REQUIRED_PROOF = {
-  heroLead2: 'tells you whether optimality was proven',
-  howSolveP: 'It searches for the best allocation.',
-  verStatusH: 'A clear solve status',
-  limUnsupportedH: 'It distinguishes optimal, feasible and incomplete results'
+// The corrected copy must be present in EVERY language, checked by exact equality
+// against the approved text — not just the English needle. This prevents an old
+// translation (e.g. Spanish "Un estado demostrado") from creeping back into a
+// non-English dictionary, which an English-only needle check would miss.
+const EXPECTED_PROOF_COPY = {
+  en: {
+    heroLead2: 'Paste a model from Excel or Google Sheets, or build one in the grid. Plumline searches for the best allocation, checks it against your formulas, and tells you whether optimality was proven.',
+    howSolveP: 'It searches for the best allocation.',
+    verStatusH: 'A clear solve status',
+    limUnsupportedH: 'It distinguishes optimal, feasible and incomplete results'
+  },
+  es: {
+    heroLead2: 'Pega un modelo desde Excel o Google Sheets, o constrúyelo en la cuadrícula. Plumline busca la mejor asignación, la comprueba contra tus fórmulas y te dice si se demostró la optimalidad.',
+    howSolveP: 'Busca la mejor asignación.',
+    verStatusH: 'Un estado de resolución claro',
+    limUnsupportedH: 'Distingue resultados óptimos, viables e incompletos'
+  },
+  pt: {
+    heroLead2: 'Cola um modelo do Excel ou do Google Sheets, ou constrói um na grelha. O Plumline procura a melhor alocação, verifica-a com as tuas fórmulas e diz-te se a otimalidade foi comprovada.',
+    howSolveP: 'Procura a melhor alocação.',
+    verStatusH: 'Um estado de resolução claro',
+    limUnsupportedH: 'Distingue resultados ótimos, viáveis e incompletos'
+  },
+  de: {
+    heroLead2: 'Füge ein Modell aus Excel oder Google Sheets ein oder erstelle eines im Raster. Plumline sucht die beste Zuteilung, prüft sie anhand deiner Formeln und sagt dir, ob die Optimalität bewiesen wurde.',
+    howSolveP: 'Es sucht die beste Zuteilung.',
+    verStatusH: 'Ein klarer Lösungsstatus',
+    limUnsupportedH: 'Es unterscheidet optimale, zulässige und unvollständige Ergebnisse'
+  },
+  fr: {
+    heroLead2: "Collez un modèle depuis Excel ou Google Sheets, ou construisez-en un dans la grille. Plumline cherche la meilleure répartition, la vérifie avec vos formules et vous indique si l'optimalité a été prouvée.",
+    howSolveP: 'Il cherche la meilleure répartition.',
+    verStatusH: 'Un statut de résolution clair',
+    limUnsupportedH: 'Il distingue les résultats optimaux, réalisables et incomplets'
+  }
 };
-Object.keys(REQUIRED_PROOF).forEach(function (key) {
-  const needle = REQUIRED_PROOF[key];
-  ok('home seo: dict.en.home.' + key + ' carries the corrected copy',
-     (DICT.en.home[key] || '').indexOf(needle) !== -1, key);
-  ok('home seo: inline HTML carries the corrected ' + key, html.indexOf(needle) !== -1, key);
+['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+  Object.keys(EXPECTED_PROOF_COPY[lang]).forEach(function (key) {
+    ok('home seo: dict.' + lang + '.home.' + key + ' is the approved copy',
+       DICT[lang].home[key] === EXPECTED_PROOF_COPY[lang][key], key + ' [' + lang + ']');
+  });
+});
+// And the inline English HTML carries the corrected copy (first paint / no-JS).
+['heroLead2', 'howSolveP', 'verStatusH', 'limUnsupportedH'].forEach(function (key) {
+  ok('home seo: inline HTML carries the corrected ' + key, html.indexOf(EXPECTED_PROOF_COPY.en[key]) !== -1, key);
 });
 
 console.log('HOME SEO TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
