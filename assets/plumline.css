@@ -594,8 +594,15 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 /* Hero screenshot slot. The placeholder is dev-only and must never ship (the
    public build guard rejects it). */
 .hero-shot{display:flex;align-items:center;justify-content:center}
-.hero-shot img{max-width:100%;height:auto;border:1px solid var(--line);
+/* Reserve the correct box before the image loads, so there is no layout shift
+   (CLS) when the responsive source resolves. Desktop is 4:3 (1200x900); the
+   mobile portrait shot (800x900) is served under 680px, so match its ratio
+   there. The picture/img fill the reserved box. */
+.hero-shot picture,.hero-shot img{display:block;width:100%}
+.hero-shot picture{aspect-ratio:4 / 3}
+.hero-shot img{height:100%;object-fit:contain;border:1px solid var(--line);
   border-radius:var(--radius);background:var(--panel)}
+@media(max-width:680px){.hero-shot--main picture{aspect-ratio:8 / 9}}
 .hero-shot-placeholder{width:100%;min-height:280px;display:flex;align-items:center;
   justify-content:center;border:2px dashed var(--line);border-radius:var(--radius);
   background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 10px,var(--cream) 10px,var(--cream) 20px);

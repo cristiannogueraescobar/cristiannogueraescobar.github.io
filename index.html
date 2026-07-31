@@ -10,12 +10,15 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/">
 <meta property="og:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">
+<meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Plumline solving and verifying a spreadsheet optimisation model, with an Optimal solution proven status.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Plumline: Optimization Solver for Spreadsheets">
 <meta name="twitter:description" content="Find the best allocation and verify it against your own numbers. Free online solver for continuous, integer, binary and mixed-integer models, with per-variable limits and verified results.">
 <meta name="twitter:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">
+<meta name="twitter:image:alt" content="Plumline solving and verifying a spreadsheet optimisation model, with an Optimal solution proven status.">
 <link rel="canonical" href="https://plumline.online/">
 <!-- HOME_SOFTWARE_JSONLD_START -->
 <script type="application/ld+json">
@@ -25,7 +28,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Do I need to install anything?","acceptedAnswer":{"@type":"Answer","text":"For the online solver, no. It runs in your browser at plumline.online. A Google Sheets add-on is on the way and will be a free, one-time install from the Workspace Marketplace once it's approved."}},{"@type":"Question","name":"How do I write the model?","acceptedAnswer":{"@type":"Answer","text":"With ordinary spreadsheet formulas. Put your options in rows, a cell that totals what you care about (the goal), and any limits as rows with an operator and a number. Plumline reads it from there, no special syntax."}},{"@type":"Question","name":"What kinds of problems does it solve?","acceptedAnswer":{"@type":"Answer","text":"Continuous, integer, binary and mixed-integer linear problems: production mix, purchasing, blending, staffing, transport, budget splits, project selection and knapsack-style loading. It does not solve genuinely non-linear ones, such as a quantity multiplied by another quantity, and it tells you if it meets one."}},{"@type":"Question","name":"Can I make a variable whole, yes/no, or set limits?","acceptedAnswer":{"@type":"Answer","text":"Yes. In Variable settings you can mark a variable as integer or binary (0 or 1) and give it a minimum and maximum. Plumline verifies those limits hold in the final answer and shows the check."}},{"@type":"Question","name":"Are my numbers safe?","acceptedAnswer":{"@type":"Answer","text":"Yes. The online solver runs entirely in your browser and uploads nothing. The add-on sends no spreadsheet data to Plumline or third parties; its processing takes place within Google's infrastructure under your own account. There is no Plumline account to create and no tracking."}},{"@type":"Question","name":"How much does it cost?","acceptedAnswer":{"@type":"Answer","text":"The online solver is free. The Google Sheets add-on is planned to be free once it becomes available."}}]}
 </script>
-<link rel="stylesheet" href="assets/plumline.css?v=20">
+<link rel="stylesheet" href="assets/plumline.css?v=21">
 </head>
 <body data-page="home">
 
@@ -76,12 +79,12 @@
           <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipNoAccount">No Plumline account needed</span></span>
         </div>
       </div>
-      <div class="hero-shot">
+      <div class="hero-shot hero-shot--main">
         <picture>
-          <source media="(max-width:900px)" type="image/webp" srcset="assets/screenshots/hero-production-mobile.webp">
-          <source media="(max-width:900px)" srcset="assets/screenshots/hero-production-mobile.png">
-          <source type="image/webp" srcset="assets/screenshots/hero-production-desktop.webp">
-          <img src="assets/screenshots/hero-production-desktop.png" width="1200" height="900" loading="eager" decoding="async" data-i18n-alt="heroShotAlt" alt="Plumline solving a production planning model: the detected objective and decisions, the optimal values, the objective and constraints checked, and an Optimal solution proven status.">
+          <source media="(max-width:680px)" type="image/webp" srcset="assets/screenshots/hero-production-mobile.webp" width="800" height="900">
+          <source media="(max-width:680px)" srcset="assets/screenshots/hero-production-mobile.png" width="800" height="900">
+          <source type="image/webp" srcset="assets/screenshots/hero-production-desktop.webp" width="1200" height="900">
+          <img src="assets/screenshots/hero-production-desktop.png" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async" data-i18n-alt="heroShotAlt" alt="Plumline solving a production planning model: the detected objective and decisions, the optimal values, the objective and constraints checked, and an Optimal solution proven status.">
         </picture>
       </div>
     </section>
@@ -304,7 +307,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=73"></script>
+<script src="assets/i18n.js?v=74"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>
   var LANG = Plumline.i18n.init('home', ['capabilities']);

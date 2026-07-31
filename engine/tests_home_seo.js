@@ -12,6 +12,7 @@ function ok(name, cond, detail) {
 }
 
 const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+const isPublicBuild = process.env.PLUMLINE_PUBLIC_BUILD === '1';
 
 // ---- Title ------------------------------------------------------------
 const titleM = html.match(/<title>([^<]*)<\/title>/);
@@ -63,37 +64,104 @@ ok('home seo: f3P EN is the approved sentence',
 const inlineF3 = html.match(/data-i18n="f3P">([\s\S]*?)<\/(?:p|em)>/);
 ok('home seo: inline f3P equals the EN dictionary', inlineF3 && inlineF3[1] === DICT.en.home.f3P);
 
-// ---- Hero screenshot guard -------------------------------------------
-// The hero must show an authentic screenshot before it ships. While the dev
-// placeholder is present (data-hero-placeholder="1"), the PUBLIC build fails, so
-// a placeholder can never be deployed as the final hero. Dev build only records.
+// ---- Hero screenshot guard (same assertion in both modes) ------------
+// The hero must show an authentic screenshot before it ships. The assertion runs
+// in BOTH modes for a stable count; only the condition differs: dev tolerates the
+// placeholder while building, public rejects it so a placeholder can never ship.
 const hasPlaceholder = html.indexOf('data-hero-placeholder="1"') !== -1;
-if (process.env.PLUMLINE_PUBLIC_BUILD === '1') {
-  ok('home seo (public): hero has no dev placeholder (real screenshot required)',
-     !hasPlaceholder);
-} else {
-  ok('home seo (dev): hero placeholder scan ran', true,
-     hasPlaceholder ? 'placeholder present (dev only)' : 'real screenshot present');
+ok('home seo: hero has no dev placeholder (enforced in public build)',
+   isPublicBuild ? !hasPlaceholder : true,
+   hasPlaceholder ? 'placeholder present' + (isPublicBuild ? '' : ' (dev: tolerated)') : 'real screenshot');
+
+// ---- Every referenced image file exists, and matches the manifest ----
+// Covers all <img src> AND <source srcset> (PNG and WebP), verifies each file is
+// non-empty with the exact declared dimensions in both formats, reads the OG
+// image as exactly 1200x630, and cross-checks against data/home-screenshots.json
+// so a future swap for an illustration or a wrongly sized file fails here.
+function pngSize(buf) {
+  if (buf.length < 24 || buf.slice(0, 8).toString('hex') !== '89504e470d0a1a0a') return null;
+  return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+}
+function webpSize(buf) {
+  if (buf.length < 30 || buf.slice(0, 4).toString('ascii') !== 'RIFF' ||
+      buf.slice(8, 12).toString('ascii') !== 'WEBP') return null;
+  const fmt = buf.slice(12, 16).toString('ascii');
+  if (fmt === 'VP8 ') return { w: buf.readUInt16LE(26) & 0x3fff, h: buf.readUInt16LE(28) & 0x3fff };
+  if (fmt === 'VP8L') {
+    const b = buf.slice(21, 25);
+    const bits = b[0] | (b[1] << 8) | (b[2] << 16) | (b[3] << 24);
+    return { w: (bits & 0x3fff) + 1, h: ((bits >> 14) & 0x3fff) + 1 };
+  }
+  if (fmt === 'VP8X') {
+    return { w: (buf[24] | (buf[25] << 8) | (buf[26] << 16)) + 1,
+             h: (buf[27] | (buf[28] << 8) | (buf[29] << 16)) + 1 };
+  }
+  return null;
+}
+function imgSize(rel) {
+  const p = path.join(siteDir, rel);
+  if (!fs.existsSync(p)) return null;
+  const buf = fs.readFileSync(p);
+  return rel.endsWith('.webp') ? webpSize(buf) : pngSize(buf);
 }
 
-// ---- Every referenced image file exists ------------------------------
-// A broken <img src> or <source srcset> ships a broken hero. Check that every
-// local image path referenced on the Home resolves to a real file.
+// 1. Every image the Home references (src or srcset) exists and is non-empty.
 const imgRefs = [];
-for (const m of html.matchAll(/(?:src|srcset)="(assets\/[^"]+\.(?:png|webp|jpg|jpeg|svg))"/g)) {
-  imgRefs.push(m[1]);
-}
+for (const m of html.matchAll(/(?:src|srcset)="(assets\/[^"]+\.(?:png|webp|jpg|jpeg|svg))"/g)) imgRefs.push(m[1]);
 const uniqueRefs = [...new Set(imgRefs)];
-ok('home seo: Home references at least the hero and verify screenshots',
-   uniqueRefs.length >= 4, uniqueRefs.length + ' image refs');
+ok('home seo: Home references the hero, mobile and verify screenshots (png+webp)',
+   uniqueRefs.length >= 5, uniqueRefs.length + ' image refs');
 uniqueRefs.forEach(function (ref) {
-  ok('home seo: referenced image exists on disk: ' + ref,
-     fs.existsSync(path.join(siteDir, ref)), ref);
+  const p = path.join(siteDir, ref);
+  const exists = fs.existsSync(p);
+  ok('home seo: referenced image exists: ' + ref, exists, ref);
+  if (exists) ok('home seo: referenced image is non-empty: ' + ref, fs.statSync(p).size > 0);
 });
-// The hero <img> must carry alt text (accessibility + no text-only-in-image).
-const heroImg = html.match(/<img[^>]*hero-production-desktop\.png[^>]*>/);
-ok('home seo: hero image has non-empty alt text',
-   heroImg && /alt="[^"]{20,}"/.test(heroImg[0]));
+
+// 2. Manifest: each screenshot exists in every declared format with EXACT dims.
+const manifest = JSON.parse(fs.readFileSync(path.join(siteDir, 'data', 'home-screenshots.json'), 'utf8'));
+manifest.screenshots.forEach(function (s) {
+  ok('home seo: manifest entry ' + s.id + ' is an authentic product screenshot',
+     s.kind === 'authentic-product-screenshot', s.kind);
+  s.formats.forEach(function (ext) {
+    const rel = 'assets/screenshots/' + s.file + '.' + ext;
+    const p = path.join(siteDir, rel);
+    const exists = fs.existsSync(p);
+    ok('home seo: manifest file exists: ' + rel, exists);
+    if (!exists) return;
+    ok('home seo: manifest file non-empty: ' + rel, fs.statSync(p).size > 0);
+    const dim = imgSize(rel);
+    ok('home seo: ' + rel + ' is ' + s.width + 'x' + s.height,
+       dim && dim.w === s.width && dim.h === s.height, dim ? dim.w + 'x' + dim.h : 'unreadable');
+  });
+});
+
+// 3. The OG image is referenced and is EXACTLY 1200x630 on disk.
+const ogRef = 'assets/screenshots/plumline-home-og.png';
+const ogDim = imgSize(ogRef);
+ok('home seo: OG image is exactly 1200x630', ogDim && ogDim.w === 1200 && ogDim.h === 630,
+   ogDim ? ogDim.w + 'x' + ogDim.h : 'missing');
+
+// 4. Every informative <img> under assets/screenshots carries a translatable alt
+//    (data-i18n-alt) whose key exists in all five languages and whose inline
+//    English matches the dictionary.
+const imgTags = [...html.matchAll(/<img\b[^>]*assets\/screenshots\/[^>]*>/g)].map(m => m[0]);
+ok('home seo: found the hero and verify <img> tags', imgTags.length >= 2, imgTags.length + ' screenshot imgs');
+imgTags.forEach(function (tag) {
+  const keyM = tag.match(/data-i18n-alt="([^"]+)"/);
+  ok('home seo: screenshot img has data-i18n-alt', !!keyM, tag.slice(0, 60));
+  const altM = tag.match(/\salt="([^"]*)"/);
+  ok('home seo: screenshot img has non-empty inline alt', altM && altM[1].length >= 20);
+  if (keyM) {
+    const key = keyM[1];
+    ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+      const v = DICT[lang].home[key];
+      ok('home seo: alt key ' + key + ' present in ' + lang, typeof v === 'string' && v.length > 0, key);
+    });
+    if (altM) ok('home seo: inline EN alt for ' + key + ' matches the dictionary',
+                 altM[1] === DICT.en.home[key], key);
+  }
+});
 
 // ---- Contact address guard -------------------------------------------
 // The public build must not ship a personal address or an unconfigured domain
@@ -101,21 +169,58 @@ ok('home seo: hero image has non-empty alt text',
 // development the personal Gmail may remain elsewhere, but the Home add-on CTA
 // must not carry it once the redesign lands. We scan the WHOLE Home for
 // personal-provider mailto links and fail the PUBLIC build on any hit.
+// ---- Contact address guard (same assertion count in both modes) ------
+// The Home must not ship a personal or unapproved mailto. The assertion runs in
+// BOTH dev and public so the test count is stable (build-info.json publishes it);
+// only the pass condition differs: dev tolerates a personal Gmail while building,
+// public rejects it. There are currently no mailto links on the Home, so this is
+// a single stable assertion either way.
 const APPROVED_DOMAINS = ['plumline.online'];
 const mailtos = [...html.matchAll(/mailto:([^"'?&\s]+@[^"'?&\s]+)/g)].map(m => m[1]);
 const personalProviders = /@(gmail|googlemail|yahoo|hotmail|outlook|proton|protonmail|icloud|me)\.com$/i;
-if (process.env.PLUMLINE_PUBLIC_BUILD === '1') {
-  mailtos.forEach(function (addr) {
-    ok('home seo (public): Home mailto is not a personal-provider address',
-       !personalProviders.test(addr), addr);
-    const domain = addr.split('@')[1];
-    ok('home seo (public): Home mailto uses an approved domain',
-       APPROVED_DOMAINS.indexOf(domain) !== -1, addr);
+const isPublic = isPublicBuild;
+const badMailtos = mailtos.filter(function (addr) {
+  const domain = addr.split('@')[1];
+  return personalProviders.test(addr) || APPROVED_DOMAINS.indexOf(domain) === -1;
+});
+// Public: any bad mailto fails. Dev: allowed, so this passes regardless.
+ok('home seo: Home has no personal/unapproved mailto (enforced in public build)',
+   isPublic ? badMailtos.length === 0 : true,
+   badMailtos.join(', ') + (isPublic ? '' : ' (dev: tolerated)'));
+
+// ---- No waitlist / personal-email remnants anywhere on the Home ------
+// The redesign removed the add-on waitlist. Guard against any remnant in the
+// Home HTML, its inline JS, and the generated FAQ regions, in every language via
+// the dictionary. These strings must not reappear.
+const remnants = ['addonWaitlist', 'addonEmailSubject', 'addonEmailBody',
+                  'Get notified', 'Leave your email', 'mailto:', 'gmail.com'];
+remnants.forEach(function (needle) {
+  ok('home seo: Home HTML has no "' + needle + '"', html.indexOf(needle) === -1, needle);
+});
+// And the home dictionary carries none of the removed keys, in any language.
+['addonWaitlist', 'addonEmailSubject', 'addonEmailBody'].forEach(function (key) {
+  ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+    ok('home seo: dict has no removed key ' + key + ' [' + lang + ']',
+       !(DICT[lang].home && DICT[lang].home[key]), key);
   });
-} else {
-  // Dev build: record the count, do not fail (personal Gmail allowed while building).
-  ok('home seo (dev): mailto scan ran', true, mailtos.length + ' mailto(s) on Home');
-}
+});
+
+// ---- OG / Twitter image metadata is complete -------------------------
+const OG_URL = 'https://plumline.online/assets/screenshots/plumline-home-og.png';
+[
+  ['og:image', OG_URL],
+  ['og:image:type', 'image/png'],
+  ['og:image:width', '1200'],
+  ['og:image:height', '630']
+].forEach(function (pair) {
+  const re = new RegExp('<meta property="' + pair[0].replace(/:/g, ':') + '" content="' + pair[1].replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '"');
+  ok('home seo: has ' + pair[0] + ' = ' + pair[1], re.test(html));
+});
+ok('home seo: has og:image:alt', /<meta property="og:image:alt" content="[^"]{20,}"/.test(html));
+ok('home seo: twitter:image points at the Home OG image',
+   html.indexOf('<meta name="twitter:image" content="' + OG_URL + '"') !== -1);
+ok('home seo: has twitter:image:alt', /<meta name="twitter:image:alt" content="[^"]{20,}"/.test(html));
+ok('home seo: no stale og-image.png reference', html.indexOf('assets/og-image.png') === -1);
 
 console.log('HOME SEO TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (typeof module !== 'undefined') module.exports = { pass, fail };

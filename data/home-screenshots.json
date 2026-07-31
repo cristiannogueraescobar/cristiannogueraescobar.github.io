@@ -1,0 +1,65 @@
+{
+  "_comment": "Manifest of authentic product screenshots used on the Home. The test (tests_home_seo.js) reads this to enforce that each file exists, is non-empty, has the exact declared dimensions in BOTH png and webp, and is marked as an authentic product screenshot. This prevents a future accidental swap for an illustration or a wrongly sized image.",
+  "screenshots": [
+    {
+      "id": "heroDesktop",
+      "file": "hero-production-desktop",
+      "width": 1200,
+      "height": 900,
+      "formats": ["png", "webp"],
+      "example": "production-plan",
+      "usedIn": "hero",
+      "kind": "authentic-product-screenshot"
+    },
+    {
+      "id": "heroMobile",
+      "file": "hero-production-mobile",
+      "width": 800,
+      "height": 900,
+      "formats": ["png", "webp"],
+      "example": "production-plan",
+      "usedIn": "hero",
+      "kind": "authentic-product-screenshot"
+    },
+    {
+      "id": "verifiedResult",
+      "file": "verified-result-production",
+      "width": 1200,
+      "height": 900,
+      "formats": ["png", "webp"],
+      "example": "production-plan",
+      "usedIn": "verify",
+      "kind": "authentic-product-screenshot"
+    },
+    {
+      "id": "modelDetection",
+      "file": "model-detection-production",
+      "width": 1200,
+      "height": 900,
+      "formats": ["png", "webp"],
+      "example": "production-plan",
+      "usedIn": "reserve",
+      "kind": "authentic-product-screenshot"
+    },
+    {
+      "id": "workshopRegion",
+      "file": "workshop-feasible-region",
+      "width": 1200,
+      "height": 900,
+      "formats": ["png", "webp"],
+      "example": "workshop-chart",
+      "usedIn": "reserve",
+      "kind": "authentic-product-screenshot"
+    },
+    {
+      "id": "homeOg",
+      "file": "plumline-home-og",
+      "width": 1200,
+      "height": 630,
+      "formats": ["png", "webp"],
+      "example": "production-plan",
+      "usedIn": "og",
+      "kind": "authentic-product-screenshot"
+    }
+  ]
+}

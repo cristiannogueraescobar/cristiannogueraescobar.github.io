@@ -162,6 +162,33 @@ function renderedText(doc, key) {
     delete D.en.common[KEY]; delete D.en.home[KEY]; delete D.en.capabilities[KEY];
     probe.remove();
   })();
+
+  // Image alt translation: both hero and verify screenshots translate through a
+  // real EN -> ES -> DE switch, no alt ends up empty, and an unknown key keeps
+  // the existing text rather than clearing the attribute.
+  (function () {
+    const heroImg = doc.querySelector('img[data-i18n-alt="heroShotAlt"]');
+    const verifyImg = doc.querySelector('img[data-i18n-alt="verifyShotAlt"]');
+    ok('home i18n: hero and verify images both present', !!heroImg && !!verifyImg);
+    if (!heroImg || !verifyImg) { done(); return; }
+    ['es', 'de'].forEach(function (lang) {
+      sel.value = lang;
+      sel.dispatchEvent(new dom.window.Event('change'));
+      ok('home i18n: hero alt translated to ' + lang,
+         heroImg.getAttribute('alt') === DICT[lang].home.heroShotAlt, heroImg.getAttribute('alt').slice(0, 30));
+      ok('home i18n: verify alt translated to ' + lang,
+         verifyImg.getAttribute('alt') === DICT[lang].home.verifyShotAlt, verifyImg.getAttribute('alt').slice(0, 30));
+      ok('home i18n: hero alt non-empty in ' + lang, heroImg.getAttribute('alt').length > 0);
+      ok('home i18n: verify alt non-empty in ' + lang, verifyImg.getAttribute('alt').length > 0);
+    });
+    // Unknown key keeps existing alt (apply only writes when lookup returns a value).
+    const before = heroImg.getAttribute('alt');
+    heroImg.setAttribute('data-i18n-alt', '__missingKey__');
+    sel.value = 'en'; sel.dispatchEvent(new dom.window.Event('change'));
+    ok('home i18n: unknown alt key keeps existing text (attribute not cleared)',
+       heroImg.getAttribute('alt') === before && before.length > 0, heroImg.getAttribute('alt').slice(0, 30));
+    heroImg.setAttribute('data-i18n-alt', 'heroShotAlt');
+  })();
   done();
 })();
 
