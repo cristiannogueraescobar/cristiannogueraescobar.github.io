@@ -180,6 +180,16 @@ const GROUP_NAV_KEY = {
   verification: 'capNavChecks', explanation: 'capNavExplanation'
 };
 
+// One "learn how this works" link per group, from GROUP_DOCS, pointing at the
+// matching Guide section. Text comes from the group's learnKey (translated).
+function learnLink(grp) {
+  const doc = caps.GROUP_DOCS[grp];
+  if (!doc) return '';
+  const href = doc.guidePath + '#' + doc.guideAnchor;
+  return '    <p class="doc-crosslink"><a href="' + escAttr(href) + '" data-i18n="' +
+         escAttr(doc.learnKey) + '">' + escText(en(doc.learnKey)) + '</a></p>';
+}
+
 // Models: a table of the four model types, then the Maximise/minimise note.
 function renderModels() {
   const L = [];
@@ -222,6 +232,7 @@ function renderModels() {
   L.push('      ' + t('h3', dir.nameKey));
   L.push('      ' + t('p', dir.descriptionKey));
   L.push('    </div>');
+  L.push(learnLink('models'));
   L.push('  </section>');
   return L.join('\n');
 }
@@ -248,6 +259,7 @@ function renderSpreadsheet() {
     L.push('      </li>');
   });
   L.push('    </ol>');
+  L.push(learnLink('spreadsheet'));
   L.push('  </section>');
   return L.join('\n');
 }
@@ -272,6 +284,7 @@ function renderVerification() {
   });
   L.push('      </div>');
   L.push('    </div>');
+  L.push(learnLink('verification'));
   L.push('  </section>');
   return L.join('\n');
 }
@@ -301,6 +314,7 @@ function renderExplanation() {
   });
   L.push('      </div>');
   L.push('    </div>');
+  L.push(learnLink('explanation'));
   L.push('  </section>');
   return L.join('\n');
 }

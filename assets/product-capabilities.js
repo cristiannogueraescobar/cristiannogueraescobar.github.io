@@ -495,6 +495,30 @@
   var GROUP_ORDER = ['models', 'spreadsheet', 'verification', 'explanation'];
   var STATUSES = ['available', 'experimental', 'planned'];
 
+  // Cross-links between capabilities.html (what the product supports) and
+  // guide.html (how to use and configure it). The relationship is per GROUP,
+  // not per capability, so it lives here once instead of being repeated on four
+  // or five capabilities. Each group links to a real Guide section (guideAnchor)
+  // and, in reverse, Guide links back to the group's block on capabilities.html.
+  //   guideAnchor      an id that must exist on guide.html
+  //   capabilityAnchor the group's landing anchor on capabilities.html; the
+  //                    reverse link targets the group's first featured capability
+  //                    (cap-<id>), which is a real anchor on the page
+  //   learnKey         i18n key (capabilities namespace) for the forward link
+  //                    text (Capabilities -> Guide)
+  //   reverseKey       i18n key (guide namespace) for the back link text
+  //                    (Guide -> Capabilities)
+  var GROUP_DOCS = {
+    models:       { guidePath: 'guide.html', guideAnchor: 'variables',
+                    learnKey: 'capLearnModels',       reverseKey: 'guideSeeModelCapabilities' },
+    spreadsheet:  { guidePath: 'guide.html', guideAnchor: 'limits',
+                    learnKey: 'capLearnSpreadsheet',  reverseKey: 'guideSeeSpreadsheetCapabilities' },
+    verification: { guidePath: 'guide.html', guideAnchor: 'status',
+                    learnKey: 'capLearnVerification', reverseKey: 'guideSeeVerificationCapabilities' },
+    explanation:  { guidePath: 'guide.html', guideAnchor: 'explanation',
+                    learnKey: 'capLearnExplanation',  reverseKey: 'guideSeeExplanationCapabilities' }
+  };
+
   function isPublic(c) {
     return c.public === true && c.status === 'available' && c.exampleStatus !== 'pending';
   }
@@ -521,6 +545,7 @@
     GROUP_ORDER: GROUP_ORDER,
     STATUSES: STATUSES,
     ALL_LANGS: ALL_LANGS,
+    GROUP_DOCS: GROUP_DOCS,
     isPublic: isPublic,
     featuredOnHome: featuredOnHome
   };

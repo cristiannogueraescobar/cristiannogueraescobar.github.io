@@ -18,7 +18,7 @@
 <meta name="twitter:title" content="How to Solve an Optimisation Problem, Step by Step">
 <meta name="twitter:description" content="A plain-language guide to continuous, integer, binary and mixed-integer optimisation: define the goal, decisions and limits, then solve a worked example.">
 <link rel="canonical" href="https://plumline.online/guide.html">
-<link rel="stylesheet" href="assets/plumline.css?v=18">
+<link rel="stylesheet" href="assets/plumline.css?v=19">
 </head>
 <body data-page="guide">
 
@@ -99,18 +99,19 @@
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" style="padding-top:0" id="direction">
     <div class="sec-head">
       <h2 data-i18n="gDirH">Confirm the direction: maximise or minimise</h2>
       <p class="muted" data-i18n="gDirP">For a model you enter or paste, Plumline asks whether the goal should be as large as possible (maximise, for profit or return) or as small as possible (minimise, for cost or waste). It remembers that choice while the objective cell, label and formula stay the same. Plumline's built-in examples arrive with their direction already confirmed. If you change the objective formula, its label, or the objective cell, Plumline asks you to confirm the direction again, so it always matches the model you are actually solving.</p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0">
+  <section class="section" style="padding-top:0" id="variables">
     <div class="sec-head">
       <h2 data-i18n="gVarsH">Set variable types and limits</h2>
       <p class="muted" data-i18n="gVarsP">By default every decision can take any value from zero upward. After building your model, open Variable settings to change that. Each decision can be continuous (any amount), integer (whole numbers only, like people or vehicles), or binary (a yes/no choice, 0 or 1). You can also give a decision its own minimum and maximum, for example a crew of at least 3 and at most 8. Binary decisions are fixed to 0 or 1 automatically. Plumline currently supports non-negative variables only, so minimums cannot be below zero.</p>
       <p class="muted" data-i18n="gVarsExample">For example: an "open this site" decision as Binary, a "workers" decision as Integer from 0 to 20, and a "budget share" decision as Continuous from 0 to 100. The receipt then lists every variable with a customised type or limit, and confirms the result stays within them.</p>
+      <p class="doc-crosslink"><a href="capabilities.html#cap-model-continuous" data-i18n="guideSeeModelCapabilities">See the models Plumline supports</a></p>
     </div>
   </section>
 
@@ -129,6 +130,20 @@
       <li><strong data-i18n="statusIncompleteLabel">Search incomplete</strong> — <span data-i18n="statusIncompleteDesc">Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.</span></li>
       <li><strong data-i18n="statusInfeasibleLabel">No feasible solution</strong> — <span data-i18n="statusInfeasibleDesc">the constraints have been proven to contradict each other.</span></li>
     </ul>
+    <p class="doc-crosslink"><a href="capabilities.html#cap-verify-objective" data-i18n="guideSeeVerificationCapabilities">See every check Plumline performs</a></p>
+  </section>
+
+  <section class="section" style="padding-top:0" id="explanation">
+    <div class="sec-head"><h2 data-i18n="explainH">How Plumline explains a result</h2></div>
+    <p class="muted" data-i18n="explainIntro">A number on its own is hard to trust, so Plumline shows its working around every answer. Before solving, it reflects back the model it read: the objective, each decision and every limit, so you can confirm it understood your sheet. After solving, it reports the outcome in plain terms and, where the model allows, draws it.</p>
+    <ul class="explain-list">
+      <li data-i18n="explainDetection">It restates the objective, decisions and limits it detected, so a misread cell shows up before you rely on the answer.</li>
+      <li data-i18n="explainStatus">It reports the result status in words. The <a href="#status" data-i18n="explainStatusLink">result status section</a> covers what optimal, feasible, incomplete, infeasible and unbounded each mean.</li>
+      <li data-i18n="explainMarginal">For eligible binding limits in continuous models, it estimates how much the objective would improve if you relaxed that limit by one unit.</li>
+      <li data-i18n="explainRegion">For a model with two decisions, it can draw the feasible region and mark where the best answer sits.</li>
+      <li data-i18n="explainLang">It shows these explanations, and any messages, in the interface language you have selected.</li>
+    </ul>
+    <p class="doc-crosslink"><a href="capabilities.html#cap-explain-detection" data-i18n="guideSeeExplanationCapabilities">See Plumline's explanation tools</a></p>
   </section>
 
   <section class="section" style="padding-top:0" id="limits">
@@ -138,6 +153,7 @@
       <div class="card wrong"><h3 data-i18n="limitsCant">Does not handle</h3><p class="muted" style="font-size:14px" data-i18n="limitsCantP">Genuinely non-linear relationships, such as one decision multiplied by another, or curves and diminishing returns. Plumline detects these and points at the cell rather than returning a wrong answer.</p></div>
       <div class="card"><h3 data-i18n="limitsSize">On size</h3><p class="muted" style="font-size:14px" data-i18n="limitsSizeP">The online solver uses a dynamic grid of up to 40 rows by 20 columns, and reads up to twenty limit rows per model. Add or remove rows and columns as needed, or paste a table from Excel or Google Sheets and Plumline expands the grid automatically. Very large or numerically awkward models can still be slow or hit an internal safety ceiling; for those, or for non-linear ones, a dedicated operations-research tool is the right choice, and Plumline tells you when a problem is out of its depth.</p></div>
     </div>
+    <p class="doc-crosslink"><a href="capabilities.html#cap-sheet-formula-limits" data-i18n="guideSeeSpreadsheetCapabilities">See Plumline's spreadsheet support</a></p>
   </section>
 
 </div>
@@ -166,7 +182,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=65"></script>
+<script src="assets/i18n.js?v=66"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>Plumline.i18n.init('guide');</script>
 <script src="assets/build-badge.js?v=1"></script>

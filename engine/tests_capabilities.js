@@ -227,6 +227,52 @@ caps.GROUP_ORDER.forEach(function (grp) {
      caps.CAPABILITIES.some(c => c.group === grp));
 });
 
+// ---- GROUP_DOCS cross-links are well-formed -----------------------------
+// Each group links to a real Guide section, and back from Guide to the group's
+// first featured capability on capabilities.html. Both ends must resolve, and
+// the link texts must be translated in all five languages.
+(function () {
+  const GD = caps.GROUP_DOCS;
+  ok('GROUP_DOCS: exists', GD && typeof GD === 'object');
+  if (!GD) return;
+  const guideHtml = fs.readFileSync(path.join(siteDir, 'guide.html'), 'utf8');
+  const capHtml = fs.readFileSync(path.join(siteDir, 'capabilities.html'), 'utf8');
+
+  caps.GROUP_ORDER.forEach(function (grp) {
+    const doc = GD[grp];
+    ok('GROUP_DOCS ' + grp + ': has an entry', !!doc);
+    if (!doc) return;
+    // Forward: the Guide anchor must be a real id on guide.html.
+    ok('GROUP_DOCS ' + grp + ': guideAnchor #' + doc.guideAnchor + ' exists on guide.html',
+       new RegExp('id="' + doc.guideAnchor + '"').test(guideHtml), doc.guideAnchor);
+    // The forward "learn" link is emitted on capabilities.html.
+    ok('GROUP_DOCS ' + grp + ': learn link present on capabilities.html',
+       capHtml.indexOf('data-i18n="' + doc.learnKey + '"') !== -1, doc.learnKey);
+    ok('GROUP_DOCS ' + grp + ': learn link points at the Guide anchor',
+       capHtml.indexOf('href="' + doc.guidePath + '#' + doc.guideAnchor + '"') !== -1);
+    // Reverse: the back link is emitted on guide.html and points at a real
+    // cap-<id> anchor on capabilities.html.
+    ok('GROUP_DOCS ' + grp + ': back link present on guide.html',
+       guideHtml.indexOf('data-i18n="' + doc.reverseKey + '"') !== -1, doc.reverseKey);
+    // The reverse link target: the group's first featured capability.
+    const first = caps.featuredOnHome().find(c => c.group === grp);
+    if (first) {
+      ok('GROUP_DOCS ' + grp + ': back link targets a real cap anchor',
+         guideHtml.indexOf('capabilities.html#cap-' + first.id) !== -1 &&
+         capHtml.indexOf('id="cap-' + first.id + '"') !== -1, 'cap-' + first.id);
+    }
+    // Both link texts translated in all five languages.
+    [doc.learnKey, doc.reverseKey].forEach(function (key) {
+      LANGS.forEach(function (lang) {
+        const ns = key.indexOf('capLearn') === 0 ? 'capabilities' : 'guide';
+        const val = DICT[lang] && DICT[lang][ns] && DICT[lang][ns][key];
+        ok('GROUP_DOCS: ' + key + ' translated in ' + lang,
+           typeof val === 'string' && val.trim().length > 0, key);
+      });
+    });
+  });
+})();
+
 // ---- Home summary selection is explicit and well-formed ----------------
 // homeSummaryRank makes the Home summary a deliberate choice. Rules: it appears
 // only on public/available/non-pending capabilities; within a group ranks are

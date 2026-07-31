@@ -117,6 +117,12 @@
         capCloseImage:'Close image',
 
         capsSeeAll:'See everything Plumline can do',
+
+        capLearnModels:'Learn how to set decision types',
+        capLearnSpreadsheet:'Learn how to structure your model',
+        capLearnVerification:'Understand solution statuses',
+        capLearnExplanation:'Learn how Plumline explains a result',
+        capLearnFallback:'Learn how this works in the guide',
 },
       examples: {
         exCat_start:'Start here',
@@ -501,8 +507,22 @@
         statusIncompleteLabel:'Search incomplete',
         statusIncompleteDesc:'Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.',
         statusInfeasibleLabel:'No feasible solution',
-        statusInfeasibleDesc:'the constraints have been proven to contradict each other.'
-      },
+        statusInfeasibleDesc:'the constraints have been proven to contradict each other.',
+        explainH:'How Plumline explains a result',
+        explainIntro:'A number on its own is hard to trust, so Plumline shows its working around every answer. Before solving, it reflects back the model it read: the objective, each decision and every limit, so you can confirm it understood your sheet. After solving, it reports the outcome in plain terms and, where the model allows, draws it.',
+        explainDetection:'It restates the objective, decisions and limits it detected, so a misread cell shows up before you rely on the answer.',
+        explainStatus:'It reports the result status in words. The result status section covers what optimal, feasible, incomplete, infeasible and unbounded each mean.',
+        explainStatusLink:'result status section',
+        explainMarginal:'For eligible binding limits in continuous models, it estimates how much the objective would improve if you relaxed that limit by one unit.',
+        explainRegion:'For a model with two decisions, it can draw the feasible region and mark where the best answer sits.',
+        explainLang:'It shows these explanations, and any messages, in the interface language you have selected.',
+
+        guideSeeModelCapabilities:'See the models Plumline supports',
+        guideSeeSpreadsheetCapabilities:'See Plumline\'s spreadsheet support',
+        guideSeeVerificationCapabilities:'See every check Plumline performs',
+        guideSeeExplanationCapabilities:'See Plumline\'s explanation tools',
+        guideSeeFallback:'See what Plumline supports',
+},
       legal: {
         pvTitle:'Privacy policy',
         updated:'Last updated 27 July 2026',
@@ -689,6 +709,12 @@
         capCloseImage:'Cerrar imagen',
 
         capsSeeAll:'Ver todo lo que Plumline puede hacer',
+
+        capLearnModels:'Aprende a definir los tipos de decisión',
+        capLearnSpreadsheet:'Aprende a estructurar tu modelo',
+        capLearnVerification:'Entiende los estados de la solución',
+        capLearnExplanation:'Aprende cómo Plumline explica un resultado',
+        capLearnFallback:'Aprende cómo funciona en la guía',
 },
       examples: {
         exCat_start:'Empieza aquí',
@@ -1073,8 +1099,22 @@
         statusIncompleteLabel:'Búsqueda incompleta',
         statusIncompleteDesc:'Plumline no pudo llegar a una conclusión dentro de los límites de cálculo. No afirma que el modelo sea imposible.',
         statusInfeasibleLabel:'No hay solución factible',
-        statusInfeasibleDesc:'se ha demostrado que las restricciones se contradicen entre sí.'
-      },
+        statusInfeasibleDesc:'se ha demostrado que las restricciones se contradicen entre sí.',
+        explainH:'Cómo explica Plumline un resultado',
+        explainIntro:'Un número por sí solo es difícil de confiar, así que Plumline muestra su razonamiento en torno a cada respuesta. Antes de resolver, te devuelve el modelo que leyó: el objetivo, cada decisión y cada límite, para que confirmes que entendió tu hoja. Después de resolver, informa del resultado en términos claros y, cuando el modelo lo permite, lo dibuja.',
+        explainDetection:'Repite el objetivo, las decisiones y los límites que detectó, para que una celda mal leída se vea antes de que confíes en la respuesta.',
+        explainStatus:'Informa del estado del resultado en palabras. La sección de estado del resultado cubre qué significan óptimo, viable, incompleto, inviable y no acotado.',
+        explainStatusLink:'sección de estado del resultado',
+        explainMarginal:'Para límites vinculantes elegibles en modelos continuos, estima cuánto mejoraría el objetivo si relajaras ese límite en una unidad.',
+        explainRegion:'Para un modelo con dos decisiones, puede dibujar la región factible y marcar dónde está la mejor respuesta.',
+        explainLang:'Muestra estas explicaciones, y cualquier mensaje, en el idioma de interfaz que hayas seleccionado.',
+
+        guideSeeModelCapabilities:'Consulta los modelos que admite Plumline',
+        guideSeeSpreadsheetCapabilities:'Consulta el soporte de hojas de cálculo de Plumline',
+        guideSeeVerificationCapabilities:'Consulta todas las comprobaciones que hace Plumline',
+        guideSeeExplanationCapabilities:'Consulta las herramientas de explicación de Plumline',
+        guideSeeFallback:'Consulta lo que admite Plumline',
+},
       legal: {
         pvTitle:'Política de privacidad',
         updated:'Última actualización: 27 de julio de 2026',
@@ -1261,6 +1301,12 @@
         capCloseImage:'Fechar imagem',
 
         capsSeeAll:'Veja tudo o que o Plumline pode fazer',
+
+        capLearnModels:'Aprenda a definir os tipos de decisão',
+        capLearnSpreadsheet:'Aprenda a estruturar seu modelo',
+        capLearnVerification:'Entenda os status da solução',
+        capLearnExplanation:'Aprenda como o Plumline explica um resultado',
+        capLearnFallback:'Aprenda como funciona no guia',
 },
       examples: {
         exCat_start:'Comece aqui',
@@ -1645,8 +1691,22 @@
         statusIncompleteLabel:'Busca incompleta',
         statusIncompleteDesc:'O Plumline não conseguiu chegar a uma conclusão dentro dos limites de cálculo. Ele não afirma que o modelo é impossível.',
         statusInfeasibleLabel:'Nenhuma solução viável',
-        statusInfeasibleDesc:'foi provado que as restrições se contradizem.'
-      },
+        statusInfeasibleDesc:'foi provado que as restrições se contradizem.',
+        explainH:'Como o Plumline explica um resultado',
+        explainIntro:'Um número por si só é difícil de confiar, então o Plumline mostra seu raciocínio em torno de cada resposta. Antes de resolver, ele devolve o modelo que leu: o objetivo, cada decisão e cada limite, para você confirmar que entendeu sua planilha. Depois de resolver, ele relata o resultado em termos claros e, quando o modelo permite, o desenha.',
+        explainDetection:'Ele repete o objetivo, as decisões e os limites que detectou, para que uma célula lida incorretamente apareça antes de você confiar na resposta.',
+        explainStatus:'Ele relata o status do resultado em palavras. A seção de status do resultado cobre o que significam ótimo, viável, incompleto, inviável e ilimitado.',
+        explainStatusLink:'seção de status do resultado',
+        explainMarginal:'Para limites vinculantes elegíveis em modelos contínuos, ele estima quanto o objetivo melhoraria se você afrouxasse esse limite em uma unidade.',
+        explainRegion:'Para um modelo com duas decisões, ele pode desenhar a região factível e marcar onde está a melhor resposta.',
+        explainLang:'Ele mostra essas explicações, e qualquer mensagem, no idioma de interface que você selecionou.',
+
+        guideSeeModelCapabilities:'Veja os modelos que o Plumline admite',
+        guideSeeSpreadsheetCapabilities:'Veja o suporte a planilhas do Plumline',
+        guideSeeVerificationCapabilities:'Veja todas as verificações que o Plumline faz',
+        guideSeeExplanationCapabilities:'Veja as ferramentas de explicação do Plumline',
+        guideSeeFallback:'Veja o que o Plumline admite',
+},
       legal: {
         pvTitle:'Política de privacidade',
         updated:'Última atualização: 27 de julho de 2026',
@@ -1833,6 +1893,12 @@
         capCloseImage:'Bild schließen',
 
         capsSeeAll:'Sieh dir alles an, was Plumline kann',
+
+        capLearnModels:'Lerne, wie du Entscheidungstypen festlegst',
+        capLearnSpreadsheet:'Lerne, wie du dein Modell aufbaust',
+        capLearnVerification:'Verstehe die Lösungsstatus',
+        capLearnExplanation:'Erfahre, wie Plumline ein Ergebnis erklärt',
+        capLearnFallback:'Erfahre in der Anleitung, wie das funktioniert',
 },
       examples: {
         exCat_start:'Starte hier',
@@ -2217,8 +2283,22 @@
         statusIncompleteLabel:'Suche unvollständig',
         statusIncompleteDesc:'Plumline konnte innerhalb der Rechengrenzen kein Ergebnis erreichen. Es behauptet nicht, das Modell sei unmöglich.',
         statusInfeasibleLabel:'Keine zulässige Lösung',
-        statusInfeasibleDesc:'es wurde bewiesen, dass sich die Einschränkungen widersprechen.'
-      },
+        statusInfeasibleDesc:'es wurde bewiesen, dass sich die Einschränkungen widersprechen.',
+        explainH:'Wie Plumline ein Ergebnis erklärt',
+        explainIntro:'Einer Zahl allein ist schwer zu vertrauen, deshalb zeigt Plumline seinen Rechenweg rund um jede Antwort. Vor dem Lösen spiegelt es das gelesene Modell zurück: die Zielsetzung, jede Entscheidung und jede Nebenbedingung, damit du bestätigen kannst, dass es deine Tabelle verstanden hat. Nach dem Lösen berichtet es das Ergebnis in klaren Worten und zeichnet es, wo das Modell es zulässt.',
+        explainDetection:'Es gibt die erkannte Zielsetzung, die Entscheidungen und die Grenzen wieder, damit eine falsch gelesene Zelle auffällt, bevor du dich auf die Antwort verlässt.',
+        explainStatus:'Es meldet den Ergebnisstatus in Worten. Der Abschnitt zum Ergebnisstatus erklärt, was optimal, zulässig, unvollständig, unlösbar und unbeschränkt jeweils bedeuten.',
+        explainStatusLink:'Abschnitt zum Ergebnisstatus',
+        explainMarginal:'Für geeignete bindende Grenzen in kontinuierlichen Modellen schätzt es, wie stark sich die Zielsetzung verbessern würde, wenn du diese Grenze um eine Einheit lockerst.',
+        explainRegion:'Für ein Modell mit zwei Entscheidungen kann es den zulässigen Bereich zeichnen und markieren, wo die beste Antwort liegt.',
+        explainLang:'Es zeigt diese Erklärungen und alle Meldungen in der von dir gewählten Oberflächensprache an.',
+
+        guideSeeModelCapabilities:'Sieh, welche Modelle Plumline unterstützt',
+        guideSeeSpreadsheetCapabilities:'Sieh die Tabellenunterstützung von Plumline',
+        guideSeeVerificationCapabilities:'Sieh alle Prüfungen, die Plumline durchführt',
+        guideSeeExplanationCapabilities:'Sieh die Erklärungswerkzeuge von Plumline',
+        guideSeeFallback:'Sieh, was Plumline unterstützt',
+},
       legal: {
         pvTitle:'Datenschutzerklärung',
         updated:'Zuletzt aktualisiert: 27. Juli 2026',
@@ -2405,6 +2485,12 @@
         capCloseImage:'Fermer l\'image',
 
         capsSeeAll:'Voir tout ce que Plumline peut faire',
+
+        capLearnModels:'Apprenez à définir les types de décision',
+        capLearnSpreadsheet:'Apprenez à structurer votre modèle',
+        capLearnVerification:'Comprenez les statuts de solution',
+        capLearnExplanation:'Découvrez comment Plumline explique un résultat',
+        capLearnFallback:'Découvrez comment cela fonctionne dans le guide',
 },
       examples: {
         exCat_start:'Commencez ici',
@@ -2789,8 +2875,22 @@
         statusIncompleteLabel:'Recherche incomplète',
         statusIncompleteDesc:'Plumline n\'a pas pu aboutir dans les limites de calcul. Il n\'affirme pas que le modèle est impossible.',
         statusInfeasibleLabel:'Aucune solution réalisable',
-        statusInfeasibleDesc:'il est prouvé que les contraintes se contredisent.'
-      },
+        statusInfeasibleDesc:'il est prouvé que les contraintes se contredisent.',
+        explainH:'Comment Plumline explique un résultat',
+        explainIntro:'Un nombre seul est difficile à croire, alors Plumline montre son raisonnement autour de chaque réponse. Avant de résoudre, il vous renvoie le modèle qu\'il a lu : l\'objectif, chaque décision et chaque contrainte, pour que vous confirmiez qu\'il a compris votre feuille. Après avoir résolu, il rapporte le résultat en termes clairs et, lorsque le modèle le permet, le dessine.',
+        explainDetection:'Il répète l\'objectif, les décisions et les limites qu\'il a détectés, pour qu\'une cellule mal lue apparaisse avant que vous ne vous fiiez à la réponse.',
+        explainStatus:'Il rapporte le statut du résultat en mots. La section sur le statut du résultat explique ce que signifient optimal, réalisable, incomplet, infaisable et non borné.',
+        explainStatusLink:'section sur le statut du résultat',
+        explainMarginal:'Pour les limites contraignantes admissibles dans les modèles continus, il estime de combien l\'objectif s\'améliorerait si vous relâchiez cette limite d\'une unité.',
+        explainRegion:'Pour un modèle à deux décisions, il peut dessiner la région réalisable et marquer où se trouve la meilleure réponse.',
+        explainLang:'Il affiche ces explications, et tout message, dans la langue d\'interface que vous avez sélectionnée.',
+
+        guideSeeModelCapabilities:'Voir les modèles pris en charge par Plumline',
+        guideSeeSpreadsheetCapabilities:'Voir la prise en charge des feuilles de calcul de Plumline',
+        guideSeeVerificationCapabilities:'Voir toutes les vérifications effectuées par Plumline',
+        guideSeeExplanationCapabilities:'Voir les outils d\'explication de Plumline',
+        guideSeeFallback:'Voir ce que Plumline prend en charge',
+},
       legal: {
         pvTitle:'Politique de confidentialité',
         updated:'Dernière mise à jour : 27 juillet 2026',
