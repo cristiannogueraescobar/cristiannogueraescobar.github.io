@@ -60,8 +60,40 @@ const DICT = g.Plumline.i18n.dict;
 ok('home seo: f3P EN is the approved sentence',
    DICT.en.home.f3P === 'For eligible continuous models, Plumline estimates how the result may change when a binding constraint is relaxed by one unit. This sensitivity insight is often called a shadow price.',
    DICT.en.home.f3P);
-const inlineF3 = html.match(/data-i18n="f3P">([\s\S]*?)<\/p>/);
+const inlineF3 = html.match(/data-i18n="f3P">([\s\S]*?)<\/(?:p|em)>/);
 ok('home seo: inline f3P equals the EN dictionary', inlineF3 && inlineF3[1] === DICT.en.home.f3P);
+
+// ---- Hero screenshot guard -------------------------------------------
+// The hero must show an authentic screenshot before it ships. While the dev
+// placeholder is present (data-hero-placeholder="1"), the PUBLIC build fails, so
+// a placeholder can never be deployed as the final hero. Dev build only records.
+const hasPlaceholder = html.indexOf('data-hero-placeholder="1"') !== -1;
+if (process.env.PLUMLINE_PUBLIC_BUILD === '1') {
+  ok('home seo (public): hero has no dev placeholder (real screenshot required)',
+     !hasPlaceholder);
+} else {
+  ok('home seo (dev): hero placeholder scan ran', true,
+     hasPlaceholder ? 'placeholder present (dev only)' : 'real screenshot present');
+}
+
+// ---- Every referenced image file exists ------------------------------
+// A broken <img src> or <source srcset> ships a broken hero. Check that every
+// local image path referenced on the Home resolves to a real file.
+const imgRefs = [];
+for (const m of html.matchAll(/(?:src|srcset)="(assets\/[^"]+\.(?:png|webp|jpg|jpeg|svg))"/g)) {
+  imgRefs.push(m[1]);
+}
+const uniqueRefs = [...new Set(imgRefs)];
+ok('home seo: Home references at least the hero and verify screenshots',
+   uniqueRefs.length >= 4, uniqueRefs.length + ' image refs');
+uniqueRefs.forEach(function (ref) {
+  ok('home seo: referenced image exists on disk: ' + ref,
+     fs.existsSync(path.join(siteDir, ref)), ref);
+});
+// The hero <img> must carry alt text (accessibility + no text-only-in-image).
+const heroImg = html.match(/<img[^>]*hero-production-desktop\.png[^>]*>/);
+ok('home seo: hero image has non-empty alt text',
+   heroImg && /alt="[^"]{20,}"/.test(heroImg[0]));
 
 // ---- Contact address guard -------------------------------------------
 // The public build must not ship a personal address or an unconfigured domain

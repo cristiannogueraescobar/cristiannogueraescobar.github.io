@@ -584,3 +584,51 @@ main > .field-deep:first-child::after{inset:18px 0 0}
 /* Guide's new explanation section list */
 .explain-list{margin:12px 0 0;padding-left:20px}
 .explain-list li{margin:8px 0;color:var(--muted,#5a5a5a);font-size:15px;line-height:1.5}
+
+/* Hero CTAs: two buttons; on mobile both full-width with the example first. */
+.hero-ctas{gap:12px;flex-wrap:wrap}
+@media(max-width:560px){
+  .hero-ctas{flex-direction:column}
+  .hero-ctas .btn{width:100%;text-align:center}
+}
+/* Hero screenshot slot. The placeholder is dev-only and must never ship (the
+   public build guard rejects it). */
+.hero-shot{display:flex;align-items:center;justify-content:center}
+.hero-shot img{max-width:100%;height:auto;border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--panel)}
+.hero-shot-placeholder{width:100%;min-height:280px;display:flex;align-items:center;
+  justify-content:center;border:2px dashed var(--line);border-radius:var(--radius);
+  background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 10px,var(--cream) 10px,var(--cream) 20px);
+  color:var(--muted,#5a5a5a);font-family:var(--mono,monospace);font-size:13px;text-align:center;padding:20px}
+
+/* ---- B/C Home sections ---- */
+/* Trust bar */
+.trust-bar{padding-top:8px;padding-bottom:8px}
+.trust-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:20px;
+  justify-content:center;font-size:14px;color:var(--ink)}
+.trust-list li{display:flex;align-items:center;gap:7px}
+.trust-list b{color:var(--true);font-weight:700}
+@media(max-width:560px){.trust-list{flex-direction:column;align-items:flex-start;gap:10px}}
+/* How it works: 4 steps */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.how-step{position:relative}
+.how-n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:50%;background:var(--brass);color:#fff;font-weight:700;font-size:15px;margin-bottom:10px}
+@media(max-width:820px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.grid-4{grid-template-columns:1fr}}
+/* Use-case cards (clickable) */
+.uc-card,.ex-card{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);
+  border-radius:var(--radius);padding:18px 20px;background:var(--panel);transition:border-color .15s,transform .15s}
+.uc-card:hover,.ex-card:hover{border-color:var(--brass);transform:translateY(-2px)}
+.uc-card h3,.ex-card h3{margin:0 0 6px;font-size:16px}
+.ex-card{display:flex;flex-direction:column;justify-content:space-between;min-height:96px}
+.ex-open{color:var(--brass-text,var(--brass));font-size:13px;font-weight:600;margin-top:12px}
+/* Verify points */
+.verify-points .vp{margin-bottom:18px}
+.verify-points .vp h3{font-size:16px;margin:0 0 5px}
+/* Privacy flow diagram */
+.priv-flow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.priv-node{border:1px solid var(--line);border-radius:var(--radius);padding:10px 16px;
+  background:var(--panel);font-size:14px;font-weight:600}
+.priv-arrow{color:var(--brass);font-size:18px}
+@media(max-width:560px){.priv-flow{flex-direction:column;align-items:flex-start}}
