@@ -136,6 +136,32 @@ function renderedText(doc, key) {
      T('es', 'home', 'capGroupModels') === 'capGroupModels');
   ok('home i18n: t() still resolves ordinary home keys',
      !homeKey || T('de', 'home', homeKey) === DICT.de.home[homeKey]);
+
+  // Deliberate collision: the SAME key present in common, home and capabilities
+  // with different values. apply() (via the DOM) and t() must return the SAME
+  // string — proving both use one resolution order. We inject a temp key into
+  // the live jsdom dictionary, add a node that uses it, re-apply, then compare.
+  (function () {
+    const D = dom.window.Plumline.i18n.dict;
+    const KEY = '__collisionProbe__';
+    D.en.common[KEY] = 'COMMON'; D.en.home[KEY] = 'HOME'; D.en.capabilities[KEY] = 'CAPS';
+    // A node carrying the probe key, inside the summary area.
+    const probe = doc.createElement('span');
+    probe.setAttribute('data-i18n', KEY);
+    doc.body.appendChild(probe);
+    // Re-run the real init so apply() repaints with the same namespaces.
+    dom.window.eval(extractHomeInit(html));
+    const domValue = probe.textContent.trim();
+    const tValue = T('en', 'home', KEY, ['capabilities']);
+    ok('home i18n: apply() and t() agree on a common/home/capabilities collision',
+       domValue === tValue, 'DOM=' + domValue + ' t()=' + tValue);
+    // Both must resolve to the common value (first in the shared order).
+    ok('home i18n: collision resolves to the common namespace for both',
+       domValue === 'COMMON' && tValue === 'COMMON', 'DOM=' + domValue + ' t()=' + tValue);
+    // Clean up the probe so nothing leaks between test cases.
+    delete D.en.common[KEY]; delete D.en.home[KEY]; delete D.en.capabilities[KEY];
+    probe.remove();
+  })();
   done();
 })();
 

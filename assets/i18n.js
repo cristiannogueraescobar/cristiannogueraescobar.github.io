@@ -3009,25 +3009,32 @@
     return DICT[lang] ? lang : 'en';
   }
 
+  // Single resolution used by BOTH the DOM applier and the public t() API, so
+  // they can never disagree on a key present in more than one namespace.
+  // Order: common, the page's own table, then any extra namespaces, each tried
+  // in the active language first and then English. Extra namespaces let one page
+  // reuse another's keys without duplicating them into a second source of truth.
+  function lookupTranslation(lang, page, key, extra) {
+    if (!DICT[lang]) lang = 'en';
+    var order = ['common', page].concat(extra || []);
+    for (var i = 0; i < order.length; i++) {
+      if (DICT[lang][order[i]] && DICT[lang][order[i]][key]) {
+        return DICT[lang][order[i]][key];
+      }
+    }
+    for (var j = 0; j < order.length; j++) {
+      if (DICT.en[order[j]] && DICT.en[order[j]][key]) {
+        return DICT.en[order[j]][key];
+      }
+    }
+    return null;
+  }
+
   function apply(lang, page, extra) {
     if (!DICT[lang]) lang = 'en';
     document.documentElement.lang = lang;
-    // Resolution order: common, the page's own table, then any extra namespaces
-    // (e.g. 'capabilities' for the Home summary), then the English fallback in
-    // the same order. Extra namespaces let one page reuse another's keys without
-    // duplicating them into a second source of truth.
     extra = extra || [];
-    var order = ['common', page].concat(extra);
-    var tables = [], en = [];
-    for (var t = 0; t < order.length; t++) {
-      tables.push(DICT[lang][order[t]] || {});
-      en.push(DICT.en[order[t]] || {});
-    }
-    function lookup(key) {
-      for (var a = 0; a < tables.length; a++) { if (tables[a][key]) return tables[a][key]; }
-      for (var b = 0; b < en.length; b++) { if (en[b][key]) return en[b][key]; }
-      return null;
-    }
+    function lookup(key) { return lookupTranslation(lang, page, key, extra); }
     var nodes = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
       var key = nodes[i].getAttribute('data-i18n');
@@ -3050,18 +3057,7 @@
     dict: DICT,
     t: function (lang, page, key, extra) {
       lang = DICT[lang] ? lang : 'en';
-      var order = [page, 'common'].concat(extra || []);
-      for (var i = 0; i < order.length; i++) {
-        if (DICT[lang][order[i]] && DICT[lang][order[i]][key]) {
-          return DICT[lang][order[i]][key];
-        }
-      }
-      for (var j = 0; j < order.length; j++) {
-        if (DICT.en[order[j]] && DICT.en[order[j]][key]) {
-          return DICT.en[order[j]][key];
-        }
-      }
-      return key;
+      return lookupTranslation(lang, page, key, extra) || key;
     },
     init: function (page, extra) {
       var lang = pick();
