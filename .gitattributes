@@ -1,0 +1,16 @@
+# Canonical line endings for reproducible generators and cross-platform CI.
+# Text files are always checked out with LF on Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Explicit binary assets: never perform line-ending conversion.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
