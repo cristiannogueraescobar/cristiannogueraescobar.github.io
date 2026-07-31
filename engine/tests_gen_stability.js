@@ -29,33 +29,37 @@ function run(script) {
 }
 
 try {
-  // Order A: home summary, then JSON-LD.
+  // Order A: home summary, then JSON-LD, then FAQ.
   fs.writeFileSync(idxPath, original);
   run('gen_home_capabilities.js');
   run('gen_jsonld.js');
+  run('gen_home_faq.js');
   const orderA = fs.readFileSync(idxPath, 'utf8');
 
-  // Order B: JSON-LD, then home summary.
+  // Order B: FAQ, then JSON-LD, then home summary (reversed).
   fs.writeFileSync(idxPath, original);
+  run('gen_home_faq.js');
   run('gen_jsonld.js');
   run('gen_home_capabilities.js');
   const orderB = fs.readFileSync(idxPath, 'utf8');
 
   ok('gen stability: both orders produce byte-identical index.html', orderA === orderB);
 
-  // And a second pass is a no-op (idempotent): running both again does not change bytes.
+  // And a second pass is a no-op (idempotent): running all again does not change bytes.
   run('gen_home_capabilities.js');
   run('gen_jsonld.js');
+  run('gen_home_faq.js');
   const twice = fs.readFileSync(idxPath, 'utf8');
   ok('gen stability: a second pass is idempotent', twice === orderB);
 
-  // Both --check pass on the settled file.
+  // All --check pass on the settled file.
   let checkOk = true;
   try {
     execFileSync('node', [path.join(siteDir, 'engine', 'gen_home_capabilities.js'), '--check'], { stdio: 'pipe' });
     execFileSync('node', [path.join(siteDir, 'engine', 'gen_jsonld.js'), '--check'], { stdio: 'pipe' });
+    execFileSync('node', [path.join(siteDir, 'engine', 'gen_home_faq.js'), '--check'], { stdio: 'pipe' });
   } catch (e) { checkOk = false; }
-  ok('gen stability: both --check pass on the settled file', checkOk);
+  ok('gen stability: all --check pass on the settled file', checkOk);
 } finally {
   // Always restore the real file to its committed content.
   fs.writeFileSync(idxPath, original);

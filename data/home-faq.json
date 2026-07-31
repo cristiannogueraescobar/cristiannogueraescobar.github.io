@@ -1,0 +1,11 @@
+{
+  "_comment": "Single source of truth for the Home FAQ. Each entry references the i18n key pair (question + answer) in the 'home' namespace. gen_home_faq.js renders BOTH the visible <details> accordion (translatable via data-i18n) AND the FAQPage JSON-LD (English canonical) from this one ordered list, so the two can never drift. To add, remove or reorder a question, edit this list and its i18n keys, then run gen_home_faq.js.",
+  "order": [
+    { "q": "faq1Q", "a": "faq1A" },
+    { "q": "faq2Q", "a": "faq2A" },
+    { "q": "faq3Q", "a": "faq3A" },
+    { "q": "faq6Q", "a": "faq6A" },
+    { "q": "faq4Q", "a": "faq4A" },
+    { "q": "faq5Q", "a": "faq5A" }
+  ]
+}
