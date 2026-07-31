@@ -1,0 +1,116 @@
+# PR / branch CI for Plumline.
+#
+# Runs the SAME verify gate as the deploy workflow, but NEVER deploys and never
+# requests pages/id-token permissions. Its job is to prove a change is green and
+# to publish the built dist/ as a downloadable artifact for review.
+#
+# deploy.yml stays limited to push-on-main + manual dispatch; this file covers
+# pull requests and refactor branches.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: ['refactor/**']
+  workflow_dispatch:
+
+# Read-only: CI must not be able to deploy or mint deploy tokens.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+
+      # actions/setup-node can silently fall back to the runner's preinstalled
+      # Node if the requested version fails to download. Assert the exact version.
+      - name: Assert Node version
+        run: |
+          node -e "if(process.version!=='v24.15.0'){console.error('Expected Node v24.15.0, got '+process.version);process.exit(1)}console.log('Node version verified:',process.version)"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Verify (tests + build + validate dist), once
+        env:
+          CI: "true"
+          PLUMLINE_PUBLIC_BUILD: "1"
+        run: |
+          set -o pipefail
+          npm run verify | tee verify.log
+          COUNT=$(grep -oE 'TOTAL PASSED: [0-9]+' verify.log | grep -oE '[0-9]+' | head -1)
+          if [ -z "$COUNT" ] || [ "$COUNT" -le 0 ]; then
+            echo "Could not extract a positive test count from verify.log"; exit 1
+          fi
+          echo "Test count: $COUNT"
+
+      # Publish the built site for reviewers to download. This is a plain build
+      # artifact, NOT a Pages deployment.
+      - name: Upload dist for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-review
+          path: dist
+          if-no-files-found: error
+
+      # Publish the verify log (even on failure, for diagnosis).
+      - name: Upload verify log (ubuntu)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-log-ubuntu
+          path: verify.log
+          if-no-files-found: warn
+
+  # Windows job: proves the lockfile is portable and npm ci + verify are green on
+  # Windows too, so a green Ubuntu install is not the only evidence (the dev works
+  # from Windows). Uses bash (available on Windows runners) so the same commands
+  # run everywhere.
+  verify-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.15.0'
+
+      - name: Assert Node version
+        run: |
+          node -e "if(process.version!=='v24.15.0'){console.error('Expected Node v24.15.0, got '+process.version);process.exit(1)}console.log('Node version verified:',process.version)"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Verify (tests + build + validate dist), once
+        env:
+          CI: "true"
+          PLUMLINE_PUBLIC_BUILD: "1"
+        run: |
+          set -o pipefail
+          npm run verify | tee verify.log
+          COUNT=$(grep -oE 'TOTAL PASSED: [0-9]+' verify.log | grep -oE '[0-9]+' | head -1)
+          if [ -z "$COUNT" ] || [ "$COUNT" -le 0 ]; then
+            echo "Could not extract a positive test count from verify.log"; exit 1
+          fi
+          echo "Test count: $COUNT"
+
+      # Publish the Windows verify log (even on failure, for diagnosis).
+      - name: Upload verify log (windows)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-log-windows
+          path: verify.log
+          if-no-files-found: warn
