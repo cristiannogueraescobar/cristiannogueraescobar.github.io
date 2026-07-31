@@ -111,6 +111,7 @@
       <h2 data-i18n="gVarsH">Set variable types and limits</h2>
       <p class="muted" data-i18n="gVarsP">By default every decision can take any value from zero upward. After building your model, open Variable settings to change that. Each decision can be continuous (any amount), integer (whole numbers only, like people or vehicles), or binary (a yes/no choice, 0 or 1). You can also give a decision its own minimum and maximum, for example a crew of at least 3 and at most 8. Binary decisions are fixed to 0 or 1 automatically. Plumline currently supports non-negative variables only, so minimums cannot be below zero.</p>
       <p class="muted" data-i18n="gVarsExample">For example: an "open this site" decision as Binary, a "workers" decision as Integer from 0 to 20, and a "budget share" decision as Continuous from 0 to 100. The receipt then lists every variable with a customised type or limit, and confirms the result stays within them.</p>
+      <p class="doc-crosslink"><a href="#direction" data-i18n="gVarsToDirection">Learn how to choose maximise or minimise</a></p>
       <p class="doc-crosslink"><a href="capabilities.html#cap-model-continuous" data-i18n="guideSeeModelCapabilities">See the models Plumline supports</a></p>
     </div>
   </section>
@@ -129,6 +130,7 @@
       <li><strong data-i18n="statusFeasibleLabel">Feasible solution</strong> — <span data-i18n="statusFeasibleDesc">it satisfies every constraint, but a better one might exist and could not be proven within the limits.</span></li>
       <li><strong data-i18n="statusIncompleteLabel">Search incomplete</strong> — <span data-i18n="statusIncompleteDesc">Plumline could not reach a conclusion within the solving limits. It does not claim the model is impossible.</span></li>
       <li><strong data-i18n="statusInfeasibleLabel">No feasible solution</strong> — <span data-i18n="statusInfeasibleDesc">the constraints have been proven to contradict each other.</span></li>
+      <li><strong data-i18n="statusUnboundedLabel">Unbounded model</strong> — <span data-i18n="statusUnboundedDesc">the objective can keep improving because the model has no finite limit in that direction.</span></li>
     </ul>
     <p class="doc-crosslink"><a href="capabilities.html#cap-verify-objective" data-i18n="guideSeeVerificationCapabilities">See every check Plumline performs</a></p>
   </section>
@@ -182,7 +184,7 @@
   </div></div>
 </footer>
 
-<script src="assets/i18n.js?v=67"></script>
+<script src="assets/i18n.js?v=68"></script>
   <script src="assets/nav-menu.js?v=5" defer></script>
 <script>Plumline.i18n.init('guide');</script>
 <script src="assets/build-badge.js?v=1"></script>

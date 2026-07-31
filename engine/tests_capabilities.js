@@ -250,17 +250,25 @@ caps.GROUP_ORDER.forEach(function (grp) {
        capHtml.indexOf('data-i18n="' + doc.learnKey + '"') !== -1, doc.learnKey);
     ok('GROUP_DOCS ' + grp + ': learn link points at the Guide anchor',
        capHtml.indexOf('href="' + doc.guidePath + '#' + doc.guideAnchor + '"') !== -1);
-    // Reverse: the back link is emitted on guide.html and points at a real
-    // cap-<id> anchor on capabilities.html.
+    // Reverse: the back link is emitted on guide.html and points at the
+    // EXPLICIT reverseCapabilityId (not a Home-rank-derived choice).
+    ok('GROUP_DOCS ' + grp + ': has an explicit reverseCapabilityId',
+       typeof doc.reverseCapabilityId === 'string' && doc.reverseCapabilityId.length > 0);
+    const revCap = caps.CAPABILITIES.find(c => c.id === doc.reverseCapabilityId);
+    ok('GROUP_DOCS ' + grp + ': reverseCapabilityId is a real capability',
+       !!revCap, doc.reverseCapabilityId);
+    if (revCap) {
+      ok('GROUP_DOCS ' + grp + ': reverseCapabilityId belongs to this group',
+         revCap.group === grp, revCap.group);
+      ok('GROUP_DOCS ' + grp + ': reverseCapabilityId is public with a generated anchor',
+         revCap.public === true && revCap.status === 'available' && revCap.exampleStatus !== 'pending' &&
+         capHtml.indexOf('id="cap-' + revCap.id + '"') !== -1, doc.reverseCapabilityId);
+    }
     ok('GROUP_DOCS ' + grp + ': back link present on guide.html',
        guideHtml.indexOf('data-i18n="' + doc.reverseKey + '"') !== -1, doc.reverseKey);
-    // The reverse link target: the group's first featured capability.
-    const first = caps.featuredOnHome().find(c => c.group === grp);
-    if (first) {
-      ok('GROUP_DOCS ' + grp + ': back link targets a real cap anchor',
-         guideHtml.indexOf('capabilities.html#cap-' + first.id) !== -1 &&
-         capHtml.indexOf('id="cap-' + first.id + '"') !== -1, 'cap-' + first.id);
-    }
+    ok('GROUP_DOCS ' + grp + ': back link targets the reverseCapabilityId anchor',
+       guideHtml.indexOf('capabilities.html#cap-' + doc.reverseCapabilityId) !== -1,
+       'cap-' + doc.reverseCapabilityId);
     // Both link texts translated in all five languages.
     [doc.learnKey, doc.reverseKey].forEach(function (key) {
       LANGS.forEach(function (lang) {

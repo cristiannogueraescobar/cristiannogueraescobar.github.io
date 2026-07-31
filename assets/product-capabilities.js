@@ -498,24 +498,26 @@
   // Cross-links between capabilities.html (what the product supports) and
   // guide.html (how to use and configure it). The relationship is per GROUP,
   // not per capability, so it lives here once instead of being repeated on four
-  // or five capabilities. Each group links to a real Guide section (guideAnchor)
-  // and, in reverse, Guide links back to the group's block on capabilities.html.
-  //   guideAnchor      an id that must exist on guide.html
-  //   capabilityAnchor the group's landing anchor on capabilities.html; the
-  //                    reverse link targets the group's first featured capability
-  //                    (cap-<id>), which is a real anchor on the page
-  //   learnKey         i18n key (capabilities namespace) for the forward link
-  //                    text (Capabilities -> Guide)
-  //   reverseKey       i18n key (guide namespace) for the back link text
-  //                    (Guide -> Capabilities)
+  // or five capabilities.
+  //   guideAnchor         an id that must exist on guide.html (forward target)
+  //   reverseCapabilityId the explicit capability the Guide back link points at
+  //                       (cap-<id> on capabilities.html). Explicit so the
+  //                       documentation target does NOT depend on homeSummaryRank
+  //                       (a Home editorial choice) — changing the Home summary
+  //                       must never move a doc link. Must be public with a
+  //                       generated anchor.
+  //   learnKey            i18n key (capabilities namespace) for the forward link
+  //                       text (Capabilities -> Guide)
+  //   reverseKey          i18n key (guide namespace) for the back link text
+  //                       (Guide -> Capabilities)
   var GROUP_DOCS = {
-    models:       { guidePath: 'guide.html', guideAnchor: 'variables',
+    models:       { guidePath: 'guide.html', guideAnchor: 'variables',   reverseCapabilityId: 'model-continuous',
                     learnKey: 'capLearnModels',       reverseKey: 'guideSeeModelCapabilities' },
-    spreadsheet:  { guidePath: 'guide.html', guideAnchor: 'limits',
+    spreadsheet:  { guidePath: 'guide.html', guideAnchor: 'limits',      reverseCapabilityId: 'sheet-formula-limits',
                     learnKey: 'capLearnSpreadsheet',  reverseKey: 'guideSeeSpreadsheetCapabilities' },
-    verification: { guidePath: 'guide.html', guideAnchor: 'status',
+    verification: { guidePath: 'guide.html', guideAnchor: 'status',      reverseCapabilityId: 'verify-objective',
                     learnKey: 'capLearnVerification', reverseKey: 'guideSeeVerificationCapabilities' },
-    explanation:  { guidePath: 'guide.html', guideAnchor: 'explanation',
+    explanation:  { guidePath: 'guide.html', guideAnchor: 'explanation', reverseCapabilityId: 'explain-detection',
                     learnKey: 'capLearnExplanation',  reverseKey: 'guideSeeExplanationCapabilities' }
   };
 
