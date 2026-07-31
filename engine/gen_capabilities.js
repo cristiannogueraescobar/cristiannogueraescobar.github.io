@@ -145,6 +145,7 @@ function buildHead() {
   const jsonld = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
+    '@id': 'https://plumline.online/#software',
     name: 'Plumline',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',

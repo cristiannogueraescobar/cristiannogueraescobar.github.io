@@ -495,11 +495,34 @@
   var GROUP_ORDER = ['models', 'spreadsheet', 'verification', 'explanation'];
   var STATUSES = ['available', 'experimental', 'planned'];
 
+  function isPublic(c) {
+    return c.public === true && c.status === 'available' && c.exampleStatus !== 'pending';
+  }
+  // The capabilities featured in the Home summary, in the SAME order they render:
+  // by GROUP_ORDER, then by homeSummaryRank within each group. Both the Home
+  // summary and the Home JSON-LD featureList use this, so the structured data
+  // matches exactly what the visitor sees on the Home page (Google requires
+  // structured data to reflect visible content). capabilities.html uses the full
+  // public set instead.
+  function featuredOnHome() {
+    var out = [];
+    for (var i = 0; i < GROUP_ORDER.length; i++) {
+      var grp = GROUP_ORDER[i];
+      var inG = CAPABILITIES
+        .filter(function (c) { return isPublic(c) && c.group === grp && typeof c.homeSummaryRank === 'number'; })
+        .sort(function (a, b) { return a.homeSummaryRank - b.homeSummaryRank; });
+      out = out.concat(inG);
+    }
+    return out;
+  }
+
   var api = {
     CAPABILITIES: CAPABILITIES,
     GROUP_ORDER: GROUP_ORDER,
     STATUSES: STATUSES,
-    ALL_LANGS: ALL_LANGS
+    ALL_LANGS: ALL_LANGS,
+    isPublic: isPublic,
+    featuredOnHome: featuredOnHome
   };
 
   root.PL_CAPABILITIES = CAPABILITIES;

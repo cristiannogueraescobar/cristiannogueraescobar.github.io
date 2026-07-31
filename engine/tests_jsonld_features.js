@@ -1,6 +1,9 @@
-/* tests_jsonld_features.js — the SoftwareApplication featureList on both the
- * Home and the capabilities page is derived from the inventory (public
- * capability names), parses as JSON, and stays in sync.
+/* tests_jsonld_features.js — the SoftwareApplication JSON-LD on the Home and the
+ * capabilities page is well-formed, unique, and its featureList is derived from
+ * the inventory using the subset appropriate to EACH page:
+ *   - Home lists the featured-on-home capabilities (what the summary shows),
+ *   - capabilities.html lists all public capabilities (what that page shows).
+ * This keeps structured data matching visible content on both pages.
  */
 const fs = require('fs');
 const path = require('path');
@@ -20,47 +23,67 @@ new Function('window', 'navigator', 'location', 'document', 'globalThis',
   .call(g, g, g.navigator, g.location, g.document, g);
 const EN = g.Plumline.i18n.dict.en.capabilities;
 
-// Expected featureList: public capability English names, inventory order.
-const expected = caps.CAPABILITIES
-  .filter(c => c.public === true && c.status === 'available' && c.exampleStatus !== 'pending')
-  .map(c => EN[c.nameKey]);
+// Expected featureList per page, from the inventory.
+const homeFeatures = caps.featuredOnHome().map(c => EN[c.nameKey]);
+const publicFeatures = caps.CAPABILITIES.filter(caps.isPublic).map(c => EN[c.nameKey]);
 
-// Extract the SoftwareApplication featureList from a page.
-function featureListOf(file) {
+// All SoftwareApplication blocks on a page (to assert there's exactly one).
+function softwareBlocks(file) {
   const html = fs.readFileSync(path.join(siteDir, file), 'utf8');
   const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  const apps = [];
   for (const m of blocks) {
     let parsed;
     try { parsed = JSON.parse(m[1]); } catch (e) { return { error: 'invalid JSON: ' + e.message }; }
-    if (parsed && parsed['@type'] === 'SoftwareApplication' && Array.isArray(parsed.featureList)) {
-      return { list: parsed.featureList };
-    }
+    if (parsed && parsed['@type'] === 'SoftwareApplication') apps.push(parsed);
   }
-  return { error: 'no SoftwareApplication featureList found' };
+  return { apps };
 }
 
-['index.html', 'capabilities.html'].forEach(function (file) {
-  const r = featureListOf(file);
-  ok(file + ': has a SoftwareApplication featureList', !r.error, r.error);
-  if (r.list) {
-    ok(file + ': featureList matches the inventory (order + content)',
-       JSON.stringify(r.list) === JSON.stringify(expected),
-       r.list.length + ' items vs ' + expected.length);
-    // Terminology guard: the structured data must not carry stale wording.
-    const joined = r.list.join(' | ');
-    ok(file + ': featureList uses normalised terminology',
+const CASES = [
+  { file: 'index.html', expected: homeFeatures, url: 'https://plumline.online/' },
+  { file: 'capabilities.html', expected: publicFeatures, url: 'https://plumline.online/capabilities.html' }
+];
+
+CASES.forEach(function (c) {
+  const r = softwareBlocks(c.file);
+  ok(c.file + ': JSON-LD parses', !r.error, r.error);
+  if (r.error) return;
+  ok(c.file + ': exactly one SoftwareApplication block', r.apps.length === 1, 'found ' + r.apps.length);
+  if (r.apps.length !== 1) return;
+  const app = r.apps[0];
+  ok(c.file + ': name is Plumline', app.name === 'Plumline', app.name);
+  ok(c.file + ': @id identifies the same application',
+     app['@id'] === 'https://plumline.online/#software', app['@id']);
+  ok(c.file + ': url is the expected canonical', app.url === c.url, app.url);
+  ok(c.file + ': has a featureList array', Array.isArray(app.featureList));
+  if (Array.isArray(app.featureList)) {
+    ok(c.file + ': featureList matches the inventory subset (order + content)',
+       JSON.stringify(app.featureList) === JSON.stringify(c.expected),
+       app.featureList.length + ' vs ' + c.expected.length);
+    ok(c.file + ': featureList has no duplicates',
+       new Set(app.featureList).size === app.featureList.length);
+    ok(c.file + ': every feature is a non-empty string',
+       app.featureList.every(f => typeof f === 'string' && f.trim().length > 0));
+    const joined = app.featureList.join(' | ');
+    ok(c.file + ': featureList uses normalised terminology',
        !/re-check/i.test(joined) && !/yes\/no/i.test(joined), joined);
   }
 });
 
-// Both generators are up to date (featureList not hand-edited out of sync).
+// The Home structured data must not advertise more than the Home shows: its
+// featureList count equals the visible summary count.
+ok('index.html: featureList count equals the visible Home summary count',
+   homeFeatures.length === caps.featuredOnHome().length);
+
+// gen_jsonld --check: the Home block is in sync with the inventory.
 (function () {
   const { execFileSync } = require('child_process');
   try {
     execFileSync('node', [path.join(siteDir, 'engine', 'gen_jsonld.js'), '--check'], { stdio: 'pipe' });
-    ok('jsonld: index.html featureList is up to date', true);
+    ok('jsonld: Home SoftwareApplication block is up to date', true);
   } catch (e) {
-    ok('jsonld: index.html featureList is up to date', false, 'run: node engine/gen_jsonld.js');
+    ok('jsonld: Home SoftwareApplication block is up to date', false, 'run: node engine/gen_jsonld.js');
   }
 })();
 

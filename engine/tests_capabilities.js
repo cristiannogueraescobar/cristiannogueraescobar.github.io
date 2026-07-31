@@ -104,9 +104,13 @@ caps.CAPABILITIES.forEach(function (c) {
 
   ok('capability ' + tag + ': group is known', GROUPS.has(c.group), c.group);
   ok('capability ' + tag + ': status is known', STATUSES.has(c.status), c.status);
-  // The internal `limits` field is a source of truth for the Home, Guide and
-  // JSON-LD, so it must use the same normalised terminology as the public copy:
-  // "checked again" not "re-checked", no "yes/no", no vague "practical range".
+  // The internal `limits` field is descriptive copy about a capability's
+  // boundaries. It is NOT currently rendered: the Home summary and both JSON-LD
+  // featureLists use only `nameKey`, and the page bodies use nameKey/description
+  // plus the separate limitationsKey. This guard keeps `limits` on the same
+  // normalised terminology as the public copy so that when a future generator
+  // (a Guide section, an expanded claims manifest, a docs export) does surface
+  // it, it will not reintroduce "re-checked", "yes/no" or a vague range.
   if (typeof c.limits === 'string') {
     ok('capability ' + tag + ': limits uses "checked again", not "re-checked"',
        !/re-check/i.test(c.limits), c.limits);

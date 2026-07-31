@@ -1,14 +1,16 @@
 /* gen_jsonld.js — keep the Home page's SoftwareApplication featureList in sync
- * with the product-capabilities inventory.
+ * with the inventory, using the SAME subset the Home summary shows.
  *
- * The Home JSON-LD used to carry a hand-written featureList that duplicated the
- * inventory and could drift from it. This generator regenerates the featureList
- * array in index.html from the public capabilities (English names, inventory
- * order), so the structured data search engines read always matches the
- * capabilities the site documents. capabilities.html gets the same list from
- * gen_capabilities.js (buildHead), so both pages share one source of truth.
+ * Two rules matter here:
+ *  1. The Home featureList must list exactly the capabilities VISIBLE in the
+ *     Home summary (featuredOnHome — those with homeSummaryRank), not all 16
+ *     public ones. Google requires structured data to reflect visible content;
+ *     capabilities.html lists all 16 because it shows all 16.
+ *  2. The replacement targets ONLY the Plumline SoftwareApplication block,
+ *     located by explicit HTML markers, so a future JSON-LD entity on the page
+ *     can never be clobbered by a loose regex.
  *
- * Run: node engine/gen_jsonld.js         (rewrites the featureList in index.html)
+ * Run: node engine/gen_jsonld.js         (rewrites the Home SoftwareApplication block)
  *      node engine/gen_jsonld.js --check  (exit non-zero if stale)
  */
 const fs = require('fs');
@@ -24,26 +26,46 @@ new Function('window', 'navigator', 'location', 'document', 'globalThis',
   .call(g, g, g.navigator, g.location, g.document, g);
 const EN = g.Plumline.i18n.dict.en.capabilities;
 
-function featureList() {
-  return caps.CAPABILITIES
-    .filter(c => c.public === true && c.status === 'available' && c.exampleStatus !== 'pending')
-    .map(c => {
-      if (!Object.prototype.hasOwnProperty.call(EN, c.nameKey)) {
-        throw new Error('gen_jsonld: missing English name key: ' + c.nameKey);
-      }
-      return EN[c.nameKey];
-    });
+const START = '<!-- HOME_SOFTWARE_JSONLD_START -->';
+const END = '<!-- HOME_SOFTWARE_JSONLD_END -->';
+
+// The Home featureList: names of the capabilities the Home summary shows, in the
+// same order they render.
+function homeFeatureList() {
+  return caps.featuredOnHome().map(function (c) {
+    if (!Object.prototype.hasOwnProperty.call(EN, c.nameKey)) {
+      throw new Error('gen_jsonld: missing English name key: ' + c.nameKey);
+    }
+    return EN[c.nameKey];
+  });
+}
+
+// The canonical Plumline SoftwareApplication object for the Home page.
+function softwareBlock() {
+  const obj = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    '@id': 'https://plumline.online/#software',
+    name: 'Plumline',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: 'https://plumline.online/',
+    description: 'A free online optimisation solver for continuous, integer, binary and mixed-integer models. It finds the best way to split limited resources and verifies the result against your own numbers. Build a model in a spreadsheet-style grid or paste one from Excel or Google Sheets.',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    inLanguage: caps.ALL_LANGS,
+    featureList: homeFeatureList()
+  };
+  return START + '\n<script type="application/ld+json">\n' +
+         JSON.stringify(obj) + '\n</script>\n' + END;
 }
 
 function rewrite(html) {
-  // Replace the JSON array that follows "featureList": in the Home JSON-LD.
-  // The block is minified onto one line, so match the array non-greedily.
-  const arr = JSON.stringify(featureList());
-  const re = /("featureList":)\[[^\]]*\]/;
-  if (!re.test(html)) {
-    throw new Error('gen_jsonld: no featureList array found in index.html');
+  const s = html.indexOf(START);
+  const e = html.indexOf(END);
+  if (s === -1 || e === -1 || e < s) {
+    throw new Error('gen_jsonld: index.html is missing the HOME_SOFTWARE_JSONLD markers');
   }
-  return html.replace(re, '$1' + arr);
+  return html.slice(0, s) + softwareBlock() + html.slice(e + END.length);
 }
 
 const idxPath = path.join(siteDir, 'index.html');
@@ -52,11 +74,11 @@ const updated = rewrite(current);
 
 if (process.argv.includes('--check')) {
   if (current !== updated) {
-    console.error('index.html featureList is out of date — run: node engine/gen_jsonld.js');
+    console.error('index.html SoftwareApplication JSON-LD is out of date — run: node engine/gen_jsonld.js');
     process.exit(1);
   }
-  console.log('index.html featureList is up to date with the inventory');
+  console.log('index.html SoftwareApplication JSON-LD is up to date with the inventory');
 } else {
   fs.writeFileSync(idxPath, updated);
-  console.log('synced index.html featureList (' + featureList().length + ' features)');
+  console.log('synced Home SoftwareApplication featureList (' + homeFeatureList().length + ' features)');
 }
