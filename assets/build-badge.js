@@ -11,6 +11,15 @@
   function run() {
     var el = document.getElementById('buildBadge');
     if (!el) return;
+    // Idempotency guard: a second evaluation of this module (e.g. the script
+    // included twice, or DOMContentLoaded firing after an immediate run) would
+    // otherwise issue a second fetch for the same info. In production the script
+    // loads once, so this never fires; the runtime-only data-build-badge-init
+    // attribute makes a double init a single fetch. It never appears in the
+    // source HTML or dist, and does not change content, style, endpoint, cache
+    // policy, or error handling. See tests_build_badge.js.
+    if (el.getAttribute('data-build-badge-init') === 'true') return;
+    el.setAttribute('data-build-badge-init', 'true');
     fetch('build-info.json', { cache: 'no-store' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (info) {

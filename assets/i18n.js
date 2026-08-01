@@ -3107,17 +3107,26 @@
       var sel = document.getElementById('lang');
       if (sel) {
         sel.value = lang;
-        sel.addEventListener('change', function () {
-          apply(sel.value, page, extra);
-          remember(sel.value);
-          // Preserve any other query parameters (e.g. ?ex=project-selection)
-          // and the hash (e.g. #how) instead of overwriting the whole URL.
-          try {
-            var params = new URLSearchParams(location.search);
-            params.set('lang', sel.value);
-            history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash);
-          } catch (e) {}
-        });
+        // Idempotency guard: apply() above is safe to repeat (it just repaints),
+        // but the change listener must be attached only once — a second init()
+        // (e.g. the module evaluated twice) would otherwise wire a duplicate
+        // handler that applies+remembers twice per change. In production init()
+        // runs once, so this never fires; it makes a double-init a safe no-op.
+        // See tests_shared_behavior.js.
+        if (sel.getAttribute('data-lang-init') !== 'true') {
+          sel.setAttribute('data-lang-init', 'true');
+          sel.addEventListener('change', function () {
+            apply(sel.value, page, extra);
+            remember(sel.value);
+            // Preserve any other query parameters (e.g. ?ex=project-selection)
+            // and the hash (e.g. #how) instead of overwriting the whole URL.
+            try {
+              var params = new URLSearchParams(location.search);
+              params.set('lang', sel.value);
+              history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash);
+            } catch (e) {}
+          });
+        }
       }
       return lang;
     }
