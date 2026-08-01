@@ -72,6 +72,9 @@ function replaceRegion(html, startMark, endMark, inner) {
   if (s === -1 || e === -1 || e < s) {
     throw new Error('gen_home_faq: index.html is missing markers ' + startMark + ' / ' + endMark);
   }
+  if (html.indexOf(startMark) !== html.lastIndexOf(startMark) || html.indexOf(endMark) !== html.lastIndexOf(endMark)) {
+    throw new Error('gen_home_faq: markers ' + startMark + ' / ' + endMark + ' must appear exactly once');
+  }
   return html.slice(0, s + startMark.length) + '\n' + inner + '\n      ' + html.slice(e);
 }
 
@@ -84,6 +87,10 @@ function buildPage() {
   const e = html.indexOf('<!-- HOME_FAQ_JSONLD_END -->');
   if (s === -1 || e === -1 || e < s) {
     throw new Error('gen_home_faq: index.html is missing the HOME_FAQ_JSONLD markers');
+  }
+  if (html.indexOf('<!-- HOME_FAQ_JSONLD_START -->') !== html.lastIndexOf('<!-- HOME_FAQ_JSONLD_START -->') ||
+      html.indexOf('<!-- HOME_FAQ_JSONLD_END -->') !== html.lastIndexOf('<!-- HOME_FAQ_JSONLD_END -->')) {
+    throw new Error('gen_home_faq: HOME_FAQ_JSONLD markers must appear exactly once');
   }
   html = html.slice(0, s + '<!-- HOME_FAQ_JSONLD_START -->'.length) + '\n' +
          buildJsonLd() + '\n' + html.slice(e);

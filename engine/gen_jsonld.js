@@ -66,6 +66,9 @@ function rewrite(html) {
   if (s === -1 || e === -1 || e < s) {
     throw new Error('gen_jsonld: index.html is missing the HOME_SOFTWARE_JSONLD markers');
   }
+  if (html.indexOf(START) !== html.lastIndexOf(START) || html.indexOf(END) !== html.lastIndexOf(END)) {
+    throw new Error('gen_jsonld: HOME_SOFTWARE_JSONLD markers must appear exactly once');
+  }
   return html.slice(0, s) + softwareBlock() + html.slice(e + END.length);
 }
 

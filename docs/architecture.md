@@ -13,7 +13,7 @@ backend. Vite is a dev/build tool only.
 - **Shared shell** (Checkpoint B1): header/nav/mobile controls/language
   selector/footer/build-badge, composed at build time from
   `src/shared/compose-shell.js`. See `docs/shared-components.md`.
-- **i18n**: `assets/i18n.js` holds the 5-language dictionary (en/es/pt/de/fr) and
+- **i18n**: `assets/i18n.js` holds the 5-language dictionary (en/es/de/fr/it) and
   the runtime resolver (common → page namespace → authorized extras → English
   fallback). Not restructured by B1.
 - **Assets**: `assets/` (CSS, runtime JS, screenshots) copied verbatim into dist.
@@ -29,6 +29,27 @@ backend. Vite is a dev/build tool only.
 4. CI stamps `build-info.json`, writes `assets/hashes.txt`, and the production
    smoke verifies every manifest entry by SHA-256. See
    `docs/github-pages-deployment.md`.
+
+## Generated pages (State D)
+
+Some pages are generated from canonical data, not hand-authored. capabilities.html
+(Checkpoint C4) is produced by `engine/gen_capabilities.js` from
+`engine/templates/capabilities.template.html` (chrome + two region markers), the
+capability inventory `assets/product-capabilities.js` (24 entries, 16 shown), the
+imagery in `data/media.json`, and the copy in `assets/i18n.js`. The generator is
+deterministic, has a `--check` mode (the CI gate), fills the two markers exactly
+once, validates each image file and its five-language alt text, and derives the
+JSON-LD featureList from the shown inventory. `index.html` (Checkpoint C5) also
+carries generated regions: HOME_CAPABILITIES (gen_home_capabilities.js), HOME_FAQ +
+HOME_FAQ_JSONLD (gen_home_faq.js from data/home-faq.json), and HOME_SOFTWARE_JSONLD
+(gen_jsonld.js); gen_claims.js writes data/claims.json (a data file, NOT an
+index.html region). Those three index.html generators touch disjoint regions
+(tests_gen_stability), locate their regions by `_START`/`_END` markers, and each
+requires its markers exactly once. index.html has 13 `<section>` elements: 11 are
+hand-authored (hero-split, trust-bar, how, use-cases, verify, example, privacy,
+limits, add-on, help, final CTA) and 2 host a generated region (`#capabilities`,
+`#faq`); two more generated regions sit in `<head>` and are not sections. Generated
+pages are never edited by hand — edit the source data or template and regenerate.
 
 ## Guarantees preserved across refactors
 

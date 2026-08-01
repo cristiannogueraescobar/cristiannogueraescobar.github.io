@@ -1,0 +1,92 @@
+{
+  "_note": "Independent C3 fixture for examples.html + examples-data.js, from pre-C3 approved source. Region SHA-256 + structural inventory + HTML<->data slug sync. Math models/results are protected by tests_examples.js (not duplicated here). NOT compositor-generated.",
+  "head_sha256": "c58ca54de019977e38c0c57f46973879caa25b2389753dbe15fc621d61ede0ac",
+  "head_bytes": 3715,
+  "main_sha256": "6ca0f5f39ccb618305f84b995b886e27874ae5f5a4a3a307cb26b86fcef90699",
+  "main_bytes": 2037,
+  "style_sha256": "844eb13cc416b8f46d9a811d6f9c47b75f3a4c5e5094196fc56ca483f857ba40",
+  "style_bytes": 885,
+  "jsonld_sha256": "c329a6b56fb96e4b9091264761511dfc472090a1691494d311b47bc68d9fb25e",
+  "jsonld_present": true,
+  "canonical": "https://plumline.online/examples.html",
+  "card_slugs_in_order": [
+    "production-plan",
+    "workshop-chart",
+    "cheapest-feed-blend",
+    "marketing-budget",
+    "workforce-scheduling",
+    "shipping-plan",
+    "project-selection",
+    "delivery-load",
+    "supplier-activation"
+  ],
+  "card_count": 9,
+  "solver_link_format": "solver.html?ex=<slug>",
+  "ids": [
+    "content",
+    "exCatalog"
+  ],
+  "data_i18n_keys": [
+    "examplesEyebrow",
+    "examplesPageLead",
+    "examplesPageTitle"
+  ],
+  "scripts": [
+    "assets/build-badge.js?v=2",
+    "assets/examples-data.js?v=1",
+    "assets/i18n.js?v=82",
+    "assets/nav-menu.js?v=6"
+  ],
+  "asset_versions": [
+    "assets/build-badge.js?v=2",
+    "assets/examples-data.js?v=1",
+    "assets/nav-menu.js?v=6",
+    "assets/plumline.css?v=21"
+  ],
+  "og_count": 8,
+  "twitter_count": 4,
+  "examples_data": {
+    "slugs": [
+      "production-plan",
+      "workshop-chart",
+      "cheapest-feed-blend",
+      "marketing-budget",
+      "workforce-scheduling",
+      "shipping-plan",
+      "project-selection",
+      "delivery-load",
+      "supplier-activation"
+    ],
+    "keys": [
+      "production",
+      "workshop",
+      "blend",
+      "marketing",
+      "workforce",
+      "shipping",
+      "project",
+      "delivery",
+      "supplier"
+    ],
+    "categories": [
+      "start",
+      "start",
+      "start",
+      "business",
+      "business",
+      "business",
+      "binary",
+      "binary",
+      "binary"
+    ],
+    "category_order": [
+      "start",
+      "business",
+      "binary"
+    ],
+    "count": 9,
+    "file_sha256": "651ba403f377ee1935235a01e42fd953ef4c7711659f31ed6d8cbf7e2ffabea0",
+    "file_bytes": 2644
+  },
+  "_style_note": "style_sha256/bytes are of the <style> INNER content (matching B3 shell-css-golden.json examples_style_sha256/bytes), not the wrapped block."
+}

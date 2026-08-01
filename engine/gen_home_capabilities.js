@@ -93,6 +93,11 @@ function buildPage() {
   if (s === -1 || e === -1 || e < s) {
     throw new Error('gen_home_capabilities: index.html is missing the HOME_CAPABILITIES markers');
   }
+  // Each marker must appear EXACTLY once. indexOf uses the first occurrence, so a
+  // duplicated START/END would silently drop content between the copies; fatal.
+  if (html.indexOf(start) !== html.lastIndexOf(start) || html.indexOf(end) !== html.lastIndexOf(end)) {
+    throw new Error('gen_home_capabilities: HOME_CAPABILITIES markers must appear exactly once');
+  }
   const before = html.slice(0, s + start.length);
   const after = html.slice(e);
   return before + '\n' + buildBlock() + '\n    ' + after;
