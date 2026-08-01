@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const siteDir = path.join(__dirname, '..');
+const { composedHtml } = require('./composed-html.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
@@ -56,7 +57,7 @@ function resolveForPage(lang, page, key) {
 
 // ---- 1. Coverage: each page's keys resolve in all five languages -----
 PAGES.forEach(function (page) {
-  const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+  const html = composedHtml(siteDir, page);
   const keys = new Set();
   for (const m of html.matchAll(/data-i18n[a-z-]*="([^"]+)"/g)) keys.add(m[1]);
   keys.forEach(function (key) {
@@ -101,7 +102,7 @@ let jsSrc = jsFiles.map(function (f) { return fs.readFileSync(path.join(siteDir,
 // its t('key') calls) — but only the script contents, never the surrounding
 // markup, so data-i18n attribute values don't pollute the bare-literal scan.
 PAGES.forEach(function (page) {
-  const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+  const html = composedHtml(siteDir, page);
   for (const m of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) jsSrc += '\n' + m[1];
 });
 const usedNames = new Set();
@@ -129,7 +130,7 @@ for (const m of prodSrc.matchAll(/\btt?\(\s*['"]([a-zA-Z0-9_]+)['"]\s*\+/g)) dyn
 // the set of names its HTML references; then decide reachability per namespace.key.
 const htmlNamesByPage = {};
 PAGES.forEach(function (page) {
-  const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+  const html = composedHtml(siteDir, page);
   const names = new Set();
   for (const m of html.matchAll(/data-i18n[a-z-]*="([^"]+)"/g)) names.add(m[1]);
   htmlNamesByPage[page] = names;

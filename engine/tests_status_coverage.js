@@ -9,6 +9,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
@@ -41,7 +42,7 @@ new Function('window', 'navigator', 'location', 'document', 'globalThis',
   fs.readFileSync(path.join(siteDir, 'assets', 'i18n.js'), 'utf8'))
   .call(g, g, g.navigator, g.location, g.document, g);
 const DICT = g.Plumline.i18n.dict;
-const guideHtml = fs.readFileSync(path.join(siteDir, 'guide.html'), 'utf8');
+const guideHtml = composedHtml(siteDir, 'guide.html');
 
 Object.keys(STATE_TO_KEY).forEach(function (state) {
   const key = STATE_TO_KEY[state];

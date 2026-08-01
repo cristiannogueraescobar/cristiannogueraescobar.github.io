@@ -20,6 +20,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 const siteDir = path.join(__dirname, '..');
 const caps = require(path.join(siteDir, 'assets', 'product-capabilities.js'));
@@ -235,8 +236,8 @@ caps.GROUP_ORDER.forEach(function (grp) {
   const GD = caps.GROUP_DOCS;
   ok('GROUP_DOCS: exists', GD && typeof GD === 'object');
   if (!GD) return;
-  const guideHtml = fs.readFileSync(path.join(siteDir, 'guide.html'), 'utf8');
-  const capHtml = fs.readFileSync(path.join(siteDir, 'capabilities.html'), 'utf8');
+  const guideHtml = composedHtml(siteDir, 'guide.html');
+  const capHtml = composedHtml(siteDir, 'capabilities.html');
 
   caps.GROUP_ORDER.forEach(function (grp) {
     const doc = GD[grp];

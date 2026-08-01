@@ -31,9 +31,17 @@ How plumline.online is built and published after Checkpoint A.
      link restored with the exact query string present in source, the flattened
      subfolders, the `<link>` position before inline `<style>` so the CSS cascade
      is unchanged, and strips Vite's `crossorigin`).
+   - Composes the shared shell (Checkpoint B1): source pages carry
+     `<!-- PLUMLINE:HEADER … -->` / `<!-- PLUMLINE:FOOTER … -->` markers, which are
+     replaced with the fully-rendered header/footer at BUILD time (via
+     `src/shared/compose-shell.js`, the same module the dev server uses). No
+     fragment is fetched at runtime; dist contains complete HTML with no residual
+     marker. `validate_dist.js` requires each migrated dist page to equal
+     `composeHtml(source)` exactly.
 
-Result: **the 8 built pages are byte-for-byte identical to source**, and every
-served JS/CSS is byte-for-byte identical. The engine stays inline in
+Result: **the 8 built pages are byte-for-byte identical to the approved product**
+(and, for pages carrying markers, exactly equal to `composeHtml(source)`), and
+every served JS/CSS is byte-for-byte identical. The engine stays inline in
 `solver.html` with `ENGINE_START/END` intact, so the Worker (built at runtime by
 re-reading the page's own inline script) is preserved and verified.
 

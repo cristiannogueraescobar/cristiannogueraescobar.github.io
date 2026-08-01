@@ -7,6 +7,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 const siteDir = path.join(__dirname, '..');
 const pages = fs.readdirSync(siteDir).filter(f => f.endsWith('.html'));
@@ -15,7 +16,7 @@ let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
 
 pages.forEach(function (page) {
-  const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+  const html = composedHtml(siteDir, page);
   const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]);
   blocks.forEach(function (block, i) {
     let parsed = null, err = null;

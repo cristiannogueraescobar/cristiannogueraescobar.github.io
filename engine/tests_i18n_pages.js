@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const siteDir = path.join(__dirname, '..');
+const { composedHtml } = require('./composed-html.js');
 const LANGS = ['en', 'es', 'pt', 'de', 'fr'];
 
 const g = { navigator: { language: 'en' }, location: { search: '' }, document: { documentElement: {} } };
@@ -54,7 +55,7 @@ function has(lang, page, key) {
 
 Object.keys(PAGE_OF).forEach(function (file) {
   const page = PAGE_OF[file];
-  const html = fs.readFileSync(path.join(siteDir, file), 'utf8');
+  const html = composedHtml(siteDir, file);
   const keys = new Set();
   for (const m of html.matchAll(/data-i18n(?:-aria)?="([^"]+)"/g)) keys.add(m[1]);
   keys.forEach(function (key) {

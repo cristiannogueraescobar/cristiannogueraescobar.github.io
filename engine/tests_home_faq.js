@@ -5,12 +5,13 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
 
-const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+const html = composedHtml(siteDir, 'index.html');
 const faq = JSON.parse(fs.readFileSync(path.join(siteDir, 'data', 'home-faq.json'), 'utf8'));
 const ORDER = faq.order;
 
@@ -73,6 +74,9 @@ if (accM) {
 }
 
 // 5. The FAQ generator output is current (no uncommitted drift).
+// execFileSync + argv array (NOT a concatenated shell string) so a repo path with
+// spaces (e.g. "C:\...\UNIVERSIDAD CRISTIAN\...") works on Windows. This mirrors
+// the Checkpoint A fix; do not regress it back to execSync('node ' + path).
 const { execFileSync } = require('child_process');
 try {
   execFileSync(process.execPath,

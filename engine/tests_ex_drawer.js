@@ -11,6 +11,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 let JSDOM;
 try { ({ JSDOM } = require('jsdom')); }
@@ -21,7 +22,7 @@ catch (e) {
 }
 
 const siteDir = path.join(__dirname, '..');
-const solverHtml = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+const solverHtml = composedHtml(siteDir, 'solver.html');  // DOM/drawer test -> composed shell
 const i18nSrc = fs.readFileSync(path.join(siteDir, 'assets', 'i18n.js'), 'utf8');
 const exSrc = fs.readFileSync(path.join(siteDir, 'assets', 'examples-data.js'), 'utf8');
 

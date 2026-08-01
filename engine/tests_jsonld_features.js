@@ -7,6 +7,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
@@ -29,7 +30,7 @@ const publicFeatures = caps.CAPABILITIES.filter(caps.isPublic).map(c => EN[c.nam
 
 // All SoftwareApplication blocks on a page (to assert there's exactly one).
 function softwareBlocks(file) {
-  const html = fs.readFileSync(path.join(siteDir, file), 'utf8');
+  const html = composedHtml(siteDir, file);
   const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   const apps = [];
   for (const m of blocks) {
@@ -81,7 +82,7 @@ CASES.forEach(function (c) {
 // actual capability names rendered in the visible Home summary and require the
 // JSON-LD featureList to match that count.
 (function () {
-  const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+  const html = composedHtml(siteDir, 'index.html');
   const s = html.indexOf('<!-- HOME_CAPABILITIES_START -->');
   const e = html.indexOf('<!-- HOME_CAPABILITIES_END -->');
   ok('index.html: Home summary markers present', s !== -1 && e !== -1 && e > s);

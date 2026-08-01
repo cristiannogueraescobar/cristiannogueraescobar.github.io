@@ -11,6 +11,8 @@ const suites = require('./suites.js');
 let totalPass = 0, anyFail = false, anySkip = false;
 suites.forEach(function (s) {
   try {
+    // execFileSync + argv array (NOT a concatenated shell string) so a repo path
+    // with spaces works on Windows. process.execPath is the current Node binary.
     const out = execFileSync(process.execPath, [path.join(__dirname, s + '.js')], { encoding: 'utf8' });
     if (/SKIPPED/.test(out)) {
       anySkip = true;

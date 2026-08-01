@@ -8,6 +8,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
@@ -15,8 +16,8 @@ function ok(name, cond, detail) {
   if (cond) { pass++; } else { fail++; console.log('  FAIL: ' + name + (detail ? '  ' + detail : '')); }
 }
 
-const guide = fs.readFileSync(path.join(siteDir, 'guide.html'), 'utf8');
-const cap = fs.readFileSync(path.join(siteDir, 'capabilities.html'), 'utf8');
+const guide = composedHtml(siteDir, 'guide.html');
+const cap = composedHtml(siteDir, 'capabilities.html');
 const caps = require(path.join(siteDir, 'assets', 'product-capabilities.js'));
 
 function hasId(html, id) { return new RegExp('id="' + id + '"').test(html); }

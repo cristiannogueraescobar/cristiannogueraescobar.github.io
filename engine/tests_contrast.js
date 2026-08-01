@@ -12,13 +12,14 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 const siteDir = path.join(__dirname, '..');
-const solver = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+const solver = composedHtml(siteDir, 'solver.html');  // whole-page palette/contrast -> composed
 const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
-const examples = fs.readFileSync(path.join(siteDir, 'examples.html'), 'utf8');
+const examples = composedHtml(siteDir, 'examples.html');  // whole-page inline styles -> composed
 const PAGE_NAMES = ['index.html', 'solver.html', 'guide.html', 'about.html', 'privacy.html', 'terms.html', 'examples.html'];
-const allPages = PAGE_NAMES.map(p => fs.readFileSync(path.join(siteDir, p), 'utf8')).join('\n');
+const allPages = PAGE_NAMES.map(p => composedHtml(siteDir, p)).join('\n');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
