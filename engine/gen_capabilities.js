@@ -378,12 +378,25 @@ function buildPage() {
   const template = fs.readFileSync(templatePath, 'utf8');
   const contentMarker = '<!-- CAPABILITIES_CONTENT -->';
   const headMarker = '<!-- CAPABILITIES_HEAD -->';
-  if (template.indexOf(contentMarker) === -1) {
-    throw new Error('gen_capabilities: template is missing the ' + contentMarker + ' marker');
+  // Each region marker must appear EXACTLY once. String.replace only substitutes
+  // the first occurrence, so a duplicated marker would silently leave an
+  // unfilled placeholder in the output; a missing marker means nothing is filled.
+  // Both are fatal.
+  function occurrences(hay, needle) {
+    let n = 0, i = 0;
+    while ((i = hay.indexOf(needle, i)) !== -1) { n++; i += needle.length; }
+    return n;
   }
-  if (template.indexOf(headMarker) === -1) {
-    throw new Error('gen_capabilities: template is missing the ' + headMarker + ' marker');
-  }
+  [['CAPABILITIES_CONTENT', contentMarker], ['CAPABILITIES_HEAD', headMarker]].forEach(function (pair) {
+    const count = occurrences(template, pair[1]);
+    if (count === 0) {
+      throw new Error('gen_capabilities: template is missing the ' + pair[1] + ' marker');
+    }
+    if (count > 1) {
+      throw new Error('gen_capabilities: template has the ' + pair[1] + ' marker ' + count +
+        ' times (must be exactly once)');
+    }
+  });
   return template.replace(headMarker, buildHead()).replace(contentMarker, buildContent());
 }
 
