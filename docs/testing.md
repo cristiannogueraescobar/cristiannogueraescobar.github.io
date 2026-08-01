@@ -96,6 +96,53 @@ the composer, so a composer change cannot move both the output and the expected 
 once — drift makes the suite fail. Proven to bite: mutating a fragment class turns
 the header suites red.
 
+## Shared behavior (Checkpoint B2)
+
+Four suites formalize the already-shared shell behavior (see
+`checkpoint-b2-shared-behavior.md`). They sit ALONGSIDE the pre-existing
+`tests_nav_menu.js`, which already covers the drawer's Escape, backdrop, focus
+trap, focus restoration, link clicks, and breakpoint cleanup in depth (68
+assertions across every real page). The B2 suites do NOT re-run those; they add
+what was missing:
+
+- `tests_build_badge.js` — executes `assets/build-badge.js` in jsdom with a mocked
+  fetch, COUNTING fetch calls: valid response, network error, 404, invalid JSON,
+  missing commit, DEV-LOCAL, missing testsPassed, missing element (0 fetches),
+  double init before and after DOMContentLoaded (exactly 1 fetch each), a
+  non-blocking check, no unhandled rejection, and a negative that strips the
+  idempotency guard and proves double init then makes 2 fetches.
+- `tests_shared_behavior.js` — adds the mobile-menu IDEMPOTENCY contract
+  (double-init attaches no duplicate listeners; one drawer) plus aria-expanded and
+  scroll-lock cleanup, and the language-selector/storage contracts: five
+  languages; localStorage valid, invalid code, absent, and THROWING on read and on
+  write; namespace fallback proven with a key whose Spanish and English values
+  differ (`closeMenu` → "Cerrar"/"Close"), including a negative that forces an
+  English fallback and shows the check fails; and the globals contract (nav-menu
+  and build-badge add no global, i18n adds only `Plumline`; no `data-*-init`
+  attribute in any source page).
+- `tests_shell_isolation.js` — exports `checkShellIsolation(siteDir)`, the single
+  official checker used by BOTH this suite and the negatives: the engine and
+  Worker code live only in `solver.html`; informational pages carry no solver
+  markers; the shared modules contain no engine/Worker code, fetch no HTML
+  fragment, and never rebuild the shell via innerHTML; shared scripts load on all
+  8 pages; page-specific scripts load only where they belong.
+- `tests_shared_behavior_negative.js` — real mutations proving the guards bite.
+  N1/N2 strip each idempotency guard and show double init reintroduces duplicate
+  listeners. N3-N8 run the OFFICIAL `checkShellIsolation()` against a fresh temp
+  tree carrying one mutation each (engine injected in about.html; a fragment
+  fetch, an innerHTML shell rebuild, a Worker, and a `solveModel_` reference in a
+  shared module; a solver-only script loaded by index.html), asserting `fail > 0`
+  with a message that names the mutation, and removing the tree in `finally`.
+
+Three minimal production fixes accompany these, each with the regression test
+above: a `data-nav-menu-init` guard in `assets/nav-menu.js`, a `data-lang-init`
+guard in `assets/i18n.js`, and a `data-build-badge-init` guard in
+`assets/build-badge.js`. All three are runtime-only attributes that make a double
+initialization a safe no-op (no duplicate listeners; a single fetch) without
+changing content, style, endpoint, cache policy, error handling, or any observable
+behavior — each script loads once in production, and the attributes never appear
+in the source HTML or dist.
+
 ## dist / manifest validation (Checkpoint A, preserved)
 
 `validate_dist.js` (exact root allowlist, per-page parity — now `dist ==
