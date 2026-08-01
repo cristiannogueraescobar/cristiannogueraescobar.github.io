@@ -92,5 +92,41 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
   });
 })();
 
+// Shared-asset cache-busting versions (B2): the eight pages and the capabilities
+// template must request the NEW versions (i18n?v=82, nav-menu?v=6, build-badge?v=2)
+// and never the old ones, so a cache can't serve pre-B2 assets after deploy. The
+// SAME checker is reused by tests_shared_behavior_negative.js.
+(function () {
+  const { checkAssetVersions, PAGES, ASSETS } = require('./check_asset_versions.js');
+  const result = checkAssetVersions(siteDir);
+  result.failures.forEach(function (f) { ok('asset version: ' + f, false); });
+  ok('asset versions: all pages + template on the new cache-busting versions', result.fail === 0,
+     'failures=' + result.failures.join('; '));
+
+  // Each page loads each shared asset EXACTLY once (any version), so a duplicate
+  // <script src> can't slip in alongside the version bump.
+  PAGES.forEach(function (p) {
+    const html = fs.readFileSync(path.join(siteDir, p + '.html'), 'utf8');
+    Object.keys(ASSETS).forEach(function (name) {
+      const re = new RegExp('src="assets/' + name.replace('.', '\\.') + '\\?v=\\d+"', 'g');
+      const n = (html.match(re) || []).length;
+      ok(p + '.html loads ' + name + ' exactly once', n === 1, 'found ' + n);
+    });
+  });
+
+  // The composed dist HTML must keep the new versions (build must not rewrite
+  // them). composedHtml() is what dist is built from.
+  PAGES.forEach(function (p) {
+    const composed = composedHtml(siteDir, p + '.html');
+    Object.keys(ASSETS).forEach(function (name) {
+      const spec = ASSETS[name];
+      const reNew = new RegExp('assets/' + name.replace('.', '\\.') + '\\?v=' + spec.neu + '\\b', 'g');
+      const reOld = new RegExp('assets/' + name.replace('.', '\\.') + '\\?v=' + spec.old + '\\b', 'g');
+      ok('composed ' + p + '.html keeps ' + name + '?v=' + spec.neu, (composed.match(reNew) || []).length === 1);
+      ok('composed ' + p + '.html has no ' + name + '?v=' + spec.old, (composed.match(reOld) || []).length === 0);
+    });
+  });
+})();
+
 console.log('ASSET TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail > 0) process.exit(1);

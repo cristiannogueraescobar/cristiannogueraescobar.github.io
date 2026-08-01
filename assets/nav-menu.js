@@ -110,6 +110,15 @@
       document.body.appendChild(drawer);
     }
 
+    // Idempotency guard: the drawer is built only once (the `if (!drawer)` above),
+    // but the listener wiring below would run again if this script were evaluated
+    // a second time (e.g. included twice), attaching duplicate click/keydown
+    // handlers to the SAME toggle. In production the script loads once, so this
+    // never fires; the guard makes a double-init a safe no-op rather than a
+    // source of duplicated listeners. See tests_shared_behavior.js.
+    if (drawer.getAttribute('data-nav-menu-init') === 'true') return;
+    drawer.setAttribute('data-nav-menu-init', 'true');
+
     var panelEl = drawer.querySelector('.mobile-menu-panel');
     var backdropEl = drawer.querySelector('.mobile-menu-backdrop');
     var prevOverflow = '';
