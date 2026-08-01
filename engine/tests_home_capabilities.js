@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
@@ -13,7 +14,7 @@ function ok(name, cond, detail) {
 }
 
 const caps = require(path.join(siteDir, 'assets', 'product-capabilities.js'));
-const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+const html = composedHtml(siteDir, 'index.html');
 
 // Load EN dict.
 const g = { navigator: { language: 'en' }, location: { search: '' }, document: { documentElement: {} } };

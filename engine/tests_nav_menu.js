@@ -13,6 +13,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 let JSDOM;
 try { ({ JSDOM } = require('jsdom')); }
@@ -53,7 +54,7 @@ function hasInertAncestor(el) {
 
 // --- Part 1: every REAL page builds a body-level drawer with the 5 core hrefs.
 PAGES.forEach(function (p) {
-  const html = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const html = composedHtml(siteDir, p);
   const dom = boot(html, 'https://plumline.online/' + p);
   const document = dom.window.document;
   const drawer = document.getElementById('mobile-menu');
@@ -77,7 +78,7 @@ PAGES.forEach(function (p) {
 });
 
 // --- Part 2: full keyboard/focus/modal behavior on the real solver page.
-const solverHtml = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+const solverHtml = composedHtml(siteDir, 'solver.html');  // DOM/drawer test -> composed shell
 const dom = boot(solverHtml, 'https://plumline.online/solver.html');
 const window = dom.window, document = window.document;
 const toggle = document.querySelector('.menu-toggle');
@@ -148,7 +149,7 @@ ok('backdrop click closes drawer', drawer.hasAttribute('hidden'));
 // Crossing above the mobile breakpoint while open closes the drawer.
 (function () {
   // jsdom's matchMedia is static; install a controllable stub before boot.
-  const html = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const html = composedHtml(siteDir, 'solver.html');  // DOM/drawer test -> composed shell
   const d = new JSDOM(html, { runScripts: 'outside-only', url: 'https://plumline.online/solver.html' });
   const w = d.window;
   let mqlHandler = null;
@@ -172,7 +173,7 @@ ok('backdrop click closes drawer', drawer.hasAttribute('hidden'));
 // language (deferred script runs after i18n.init). Simulate the real order.
 (function () {
   const i18n = fs.readFileSync(path.join(siteDir, 'assets', 'i18n.js'), 'utf8');
-  const html = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  const html = composedHtml(siteDir, 'solver.html');  // DOM/drawer test -> composed shell
   const d = new JSDOM(html, { runScripts: 'outside-only', url: 'https://plumline.online/solver.html?lang=es' });
   const w = d.window;
   w.eval(i18n);                                    // define Plumline.i18n

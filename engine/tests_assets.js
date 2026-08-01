@@ -10,6 +10,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const { execSync } = require('child_process');
 
 const siteDir = path.join(__dirname, '..');
@@ -75,7 +76,7 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
   const pages = ['index.html', 'solver.html', 'guide.html', 'about.html',
                  'privacy.html', 'terms.html', 'examples.html', 'capabilities.html'];
   pages.forEach(function (page) {
-    const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+    const html = composedHtml(siteDir, page);
     const footerMatch = html.match(/<footer\b[\s\S]*?<\/footer>/i);
     const footer = footerMatch ? footerMatch[0] : '';
     const totalBadges = (html.match(/id="buildBadge"/g) || []).length;

@@ -4,6 +4,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 const siteDir = path.join(__dirname, '..');
 
 let pass = 0, fail = 0;
@@ -11,7 +12,7 @@ function ok(name, cond, detail) {
   if (cond) { pass++; } else { fail++; console.log('  FAIL: ' + name + (detail ? '  ' + detail : '')); }
 }
 
-const html = fs.readFileSync(path.join(siteDir, 'index.html'), 'utf8');
+const html = composedHtml(siteDir, 'index.html');
 const isPublicBuild = process.env.PLUMLINE_PUBLIC_BUILD === '1';
 
 // ---- Title ------------------------------------------------------------

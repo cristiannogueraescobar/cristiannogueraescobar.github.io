@@ -10,6 +10,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 let JSDOM;
 try { ({ JSDOM } = require('jsdom')); }
@@ -43,7 +44,7 @@ function extractInit(html, page) {
 }
 
 function boot(file, page, url) {
-  const html = fs.readFileSync(path.join(siteDir, file), 'utf8');
+  const html = composedHtml(siteDir, file);
   const dom = new JSDOM(html, { runScripts: 'outside-only', url });
   const { window } = dom;
   window.eval(i18n);

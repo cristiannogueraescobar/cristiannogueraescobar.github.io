@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const siteDir = path.join(__dirname, '..');
+const { composedHtml } = require('./composed-html.js');
 const PAGES = ['index.html', 'solver.html', 'guide.html', 'about.html',
                'privacy.html', 'terms.html', 'examples.html', 'capabilities.html'];
 const existing = new Set(PAGES);
@@ -23,7 +24,7 @@ function stripScripts(s) { return s.replace(/<script[\s\S]*?<\/script>/g, ''); }
 function idsOf(body) { return new Set([...body.matchAll(/id="([^"]+)"/g)].map(m => m[1])); }
 
 const bodies = {}, ids = {};
-PAGES.forEach(p => { const raw = fs.readFileSync(path.join(siteDir, p), 'utf8'); bodies[p] = stripScripts(raw); ids[p] = idsOf(bodies[p]); });
+PAGES.forEach(p => { const raw = composedHtml(siteDir, p); bodies[p] = stripScripts(raw); ids[p] = idsOf(bodies[p]); });
 
 // Links and anchors.
 PAGES.forEach(function (p) {
@@ -47,7 +48,7 @@ PAGES.forEach(function (p) {
 
 // Referenced local assets exist on disk.
 PAGES.forEach(function (p) {
-  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const raw = composedHtml(siteDir, p);
   for (const m of raw.matchAll(/(?:src|href)="([^"]+\.(?:css|js|png|svg|ico))(?:\?[^"]*)?"/g)) {
     const rel = m[1];
     if (/^(https?:|\/\/|data:)/.test(rel)) continue;
@@ -64,7 +65,7 @@ PAGES.forEach(function (p) {
 
 // Exactly one main/h1/header/footer, H1 in main, header out of main.
 PAGES.forEach(function (p) {
-  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const raw = composedHtml(siteDir, p);
   ['main', 'h1', 'header', 'footer'].forEach(function (tag) {
     const n = (raw.match(new RegExp('<' + tag + '[\\s>]', 'g')) || []).length;
     ok(p + ' has exactly one <' + tag + '>', n === 1, 'found ' + n);
@@ -157,7 +158,7 @@ function validateNavigation(body, label, opts) {
 }
 
 PAGES.forEach(function (p) {
-  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const raw = composedHtml(siteDir, p);
   const body = stripScripts(raw);
   validateNavigation(body, p, { current: CURRENT_OF[p], onPage: p === 'solver.html', fullRaw: raw, inlineNavCss: p === 'solver.html' })
     .forEach(r => ok(r.name, r.cond, r.detail));
@@ -384,7 +385,7 @@ const CANONICALS = {
   'capabilities.html': 'https://plumline.online/capabilities.html'
 };
 PAGES.forEach(function (p) {
-  const raw = fs.readFileSync(path.join(siteDir, p), 'utf8');
+  const raw = composedHtml(siteDir, p);
   const canons = [...raw.matchAll(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/g)].map(m => m[1]);
   ok(p + ' has exactly one canonical', canons.length === 1, 'found ' + canons.length);
   ok(p + ' canonical is ' + CANONICALS[p], canons[0] === CANONICALS[p], canons[0]);

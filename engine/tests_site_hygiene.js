@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const siteDir = path.join(__dirname, '..');
+const { composedHtml } = require('./composed-html.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
@@ -31,7 +32,7 @@ const PERSONAL_PROVIDERS = /@(gmail|googlemail|yahoo|hotmail|outlook|proton|prot
 PAGES.forEach(function (page) {
   const p = path.join(siteDir, page);
   if (!fs.existsSync(p)) { ok('site hygiene: ' + page + ' exists', false); return; }
-  const html = fs.readFileSync(p, 'utf8');
+  const html = composedHtml(siteDir, page);
   FORBIDDEN_HTML.forEach(function (needle) {
     ok('site hygiene: ' + page + ' has no "' + needle + '"', html.indexOf(needle) === -1, needle);
   });
@@ -51,7 +52,7 @@ PAGES.forEach(function (page) {
 });
 
 // about.html#contact anchor must exist (the About page contact section).
-const about = fs.readFileSync(path.join(siteDir, 'about.html'), 'utf8');
+const about = composedHtml(siteDir, 'about.html');
 ok('site hygiene: about.html has an #contact anchor', /id="contact"/.test(about));
 
 // Dictionary: none of the removed keys survive, in any namespace or language.
