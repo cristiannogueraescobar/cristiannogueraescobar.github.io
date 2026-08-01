@@ -39,6 +39,8 @@ const RAW_SOURCE_ALLOWLIST = {
   'tests_error_i18n.js': 'reads inline solver error-string source logic',
   'tests_status_coverage.js': 'reads inline solver + guide status-key source coverage',
   'tests_engine_integrity.js': 'reads solver.html raw to hash the inline engine block (ENGINE_START..ENGINE_END), a region the composer never touches',
+  'tests_css_golden.js': 'inspects the inline <style> of solver.html and examples.html in raw source (a region the composer never touches) to freeze the CSS golden; the shell fragments come from assets/plumline.css, not the page shell',
+  'tests_css_structure.js': 'inspects each page raw for its stylesheet link and inline <style> count (CSS structure), regions independent of the composed shell',
   'tests_shell_composition_negative.js': 'case 15 deliberately reads solver.html raw to prove the raw-read guard: it runs tests_composed_reads.js against a seeded bad suite and asserts a non-zero exit naming it',
   'composed-html.js': 'the composer helper itself',
 };
@@ -88,6 +90,23 @@ for (const f of files) {
     ok(f + ' generic per-page read routes through composedHtml', false,
        'reads siteDir/<page> directly without composed-html import');
   }
+}
+
+// Explicit contract: tests_css_negative.js does NOT need a raw-source allowlist
+// entry. It builds temp trees with copyFileSync and mutates those, so it performs
+// no direct raw read of a migrated page. Confirm it is absent from the allowlist
+// AND that scanning it produced no failure above (it copies, never readFileSync's
+// a migrated page by name). Skipped when the file is not present in the scanned
+// engine dir (e.g. a minimal temp tree used by the composition-negative guard run).
+if (fs.existsSync(path.join(engineDir, 'tests_css_negative.js'))) {
+  const cssNegSrc = fs.readFileSync(path.join(engineDir, 'tests_css_negative.js'), 'utf8');
+  const inAllowlist = Object.prototype.hasOwnProperty.call(RAW_SOURCE_ALLOWLIST, 'tests_css_negative.js');
+  ok('tests_css_negative.js is NOT in the raw-source allowlist', !inAllowlist);
+  // It must not readFileSync a migrated page by name (it uses copyFileSync into a temp tree).
+  const rawReadOfMigrated = rawReadRe
+    ? cssNegSrc.split('\n').some(function (line) { rawReadRe.lastIndex = 0; return rawReadRe.test(line) && !/composedHtml/.test(line); })
+    : false;
+  ok('tests_css_negative.js performs no raw read of a migrated page (needs no permission)', !rawReadOfMigrated);
 }
 
 // Sanity: the guard actually saw the migrated set.
