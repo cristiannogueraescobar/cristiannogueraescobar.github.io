@@ -2,8 +2,12 @@ import { defineConfig } from 'vite';
 import { resolve, dirname, join, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { cpSync, existsSync, readdirSync, readFileSync, writeFileSync, rmSync, statSync } from 'fs';
+import { createRequire } from 'module';
 
 const root = dirname(fileURLToPath(import.meta.url));
+// compose-shell is CommonJS (shared with Node test scripts that use require);
+// load it here without converting the whole config to ESM-only.
+const { composeHtml } = createRequire(import.meta.url)('./src/shared/compose-shell.js');
 
 // Plumline is a multi-page STATIC site on GitHub Pages. Vite is a dev/build tool
 // only; the site is NOT a SPA and no framework is introduced.
@@ -106,16 +110,49 @@ function plumlineBuild() {
         if (existsSync(s)) cpSync(s, join(dist, f));
       }
 
-      // (d) Restore each emitted HTML to its EXACT source bytes. During
-      //     Checkpoint A the served HTML must equal source byte-for-byte, so the
-      //     authoritative restoration is simply the source file itself. This also
-      //     restores every asset URL, the CSS query string (whatever it is), the
-      //     <link> position and formatting — with nothing hard-coded.
+      // (d) Restore each emitted HTML to its source, THEN compose the shared
+      //     shell. Checkpoint A restored the exact source bytes so served HTML
+      //     equalled source byte-for-byte. Checkpoint B keeps that restoration
+      //     (it still fixes asset URLs, the CSS query string, <link> position and
+      //     formatting with nothing hard-coded) but adds one deterministic step:
+      //     if the source contains PLUMLINE: shell markers, they are replaced with
+      //     the fully-rendered header/footer at BUILD time (never fetched at
+      //     runtime). Pages without markers are written through unchanged, so
+      //     migration can proceed one page at a time. composeHtml is strict:
+      //     missing/duplicate markers, unknown pageType, or a leftover marker all
+      //     throw and fail the build.
       for (const p of PAGES) {
         const distFile = join(dist, p + '.html');
         const srcFile = join(root, p + '.html');
-        if (existsSync(srcFile)) writeFileSync(distFile, readFileSync(srcFile));
+        if (!existsSync(srcFile)) continue;
+        let html = readFileSync(srcFile, 'utf8');
+        if (/<!--\s*PLUMLINE:/.test(html)) {
+          html = composeHtml(html, p + '.html');
+        }
+        writeFileSync(distFile, html);
       }
+    },
+  };
+}
+
+// Compose the shared shell in BOTH dev and build, so `npm run dev` and
+// `npm run build` produce identical HTML. transformIndexHtml runs in both modes;
+// it replaces the PLUMLINE markers with the rendered shell. In build, closeBundle
+// re-derives the final HTML from source (authoritative) — this hook keeps the dev
+// server output identical to the built output.
+function plumlineComposeShell() {
+  return {
+    name: 'plumline-compose-shell',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html, ctx) {
+        if (!/<!--\s*PLUMLINE:/.test(html)) return html;
+        // composeHtml looks the label up in PAGE_CONTEXT by basename (e.g.
+        // "solver.html"), but ctx.filename is an absolute path — normalize it.
+        const raw = ctx && ctx.filename ? ctx.filename : 'page';
+        const label = raw.replace(/\\/g, '/').split('/').pop();
+        return composeHtml(html, label);
+      },
     },
   };
 }
@@ -138,5 +175,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [plumlineBuild()],
+  plugins: [plumlineComposeShell(), plumlineBuild()],
 });

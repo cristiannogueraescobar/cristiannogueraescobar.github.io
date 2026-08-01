@@ -54,7 +54,17 @@ const allowedMissing = DIST_ROOT_ALLOWLIST.filter(e => !rootEntries.includes(e))
 ok('dist root has all allowlisted entries', allowedMissing.length === 0,
    'missing at dist root: [' + allowedMissing.join(', ') + ']');
 
-// 3. Byte-identical parity for the 8 pages
+// 3. Parity for the 8 pages. Checkpoint B: pages MAY carry PLUMLINE: shell
+//    markers in source. The Checkpoint A rule "dist == source byte-for-byte" is
+//    REPLACED (not dropped) by an equal-or-stronger rule:
+//      - source with markers  -> dist MUST equal composeHtml(source) exactly, and
+//        the source markers must be valid (composeHtml throws otherwise), and no
+//        PLUMLINE: marker may remain in dist.
+//      - source without markers -> dist MUST equal source byte-for-byte (unchanged
+//        Checkpoint A guarantee).
+//    Either way the dist page is fully determined by the source: nothing
+//    hand-injected, no runtime fetch, no unresolved marker.
+const { composeHtml } = require('../src/shared/compose-shell.js');
 for (const p of PUBLIC_PAGES) {
   const srcPath = path.join(root, p);
   const distPath = path.join(dist, p);
@@ -62,15 +72,36 @@ for (const p of PUBLIC_PAGES) {
     ok('parity ' + p, false, 'missing source or dist file'); continue;
   }
   const srcBuf = fs.readFileSync(srcPath), distBuf = fs.readFileSync(distPath);
-  if (srcBuf.equals(distBuf)) { ok('byte-identical to source: ' + p, true); continue; }
-  const s = srcBuf.toString('utf8').split('\n'), d = distBuf.toString('utf8').split('\n');
+  const srcText = srcBuf.toString('utf8');
+  const hasMarkers = /<!--\s*PLUMLINE:/.test(srcText);
+  let expectedBuf;
+  if (hasMarkers) {
+    let composed;
+    try { composed = composeHtml(srcText, p); }
+    catch (e) { ok('composes cleanly: ' + p, false, e.message); continue; }
+    if (/<!--\s*PLUMLINE:/.test(composed)) { ok('no unresolved marker in dist: ' + p, false); continue; }
+    expectedBuf = Buffer.from(composed, 'utf8');
+    ok('composed shell resolves: ' + p, true);
+  } else {
+    expectedBuf = srcBuf;
+  }
+  if (expectedBuf.equals(distBuf)) { ok('dist matches expected (composed) source: ' + p, true); continue; }
+  const s = expectedBuf.toString('utf8').split('\n'), d = distBuf.toString('utf8').split('\n');
   let ln = -1;
   for (let i = 0; i < Math.max(s.length, d.length); i++) { if (s[i] !== d[i]) { ln = i + 1; break; } }
-  ok('byte-identical to source: ' + p, false,
+  ok('dist matches expected (composed) source: ' + p, false,
      'first diff at line ' + ln +
-     '\n      source: ' + JSON.stringify((s[ln - 1] || '').slice(0, 120)) +
-     '\n      dist:   ' + JSON.stringify((d[ln - 1] || '').slice(0, 120)) +
-     '\n      sha256 source=' + sha(srcBuf) + ' dist=' + sha(distBuf));
+     '\n      expected: ' + JSON.stringify((s[ln - 1] || '').slice(0, 120)) +
+     '\n      dist:     ' + JSON.stringify((d[ln - 1] || '').slice(0, 120)) +
+     '\n      sha256 expected=' + sha(expectedBuf) + ' dist=' + sha(distBuf));
+}
+// No dist page may contain an unresolved PLUMLINE: marker.
+for (const p of PUBLIC_PAGES) {
+  const distPath = path.join(dist, p);
+  if (fs.existsSync(distPath)) {
+    ok('no PLUMLINE marker in dist: ' + p,
+       !/<!--\s*PLUMLINE:/.test(fs.readFileSync(distPath, 'utf8')));
+  }
 }
 
 // 4. Public files present (includes the Google verification file)
