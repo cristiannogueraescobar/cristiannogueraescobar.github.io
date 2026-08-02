@@ -35,7 +35,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const html = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8');
+const { composedHtml } = require('./composed-html.js');
+const html = composedHtml(path.join(__dirname, '..'), 'solver.html');
 
 // Load the production engine (inline copy) exactly as the worker would.
 const a = html.indexOf('/* ENGINE_START */'), b = html.indexOf('/* ENGINE_END */');

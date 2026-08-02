@@ -65,6 +65,7 @@ ok('dist root has all allowlisted entries', allowedMissing.length === 0,
 //    Either way the dist page is fully determined by the source: nothing
 //    hand-injected, no runtime fetch, no unresolved marker.
 const { composeHtml } = require('../src/shared/compose-shell.js');
+const { composeSolverIfNeeded } = require('../src/shared/compose-solver.js');
 for (const p of PUBLIC_PAGES) {
   const srcPath = path.join(root, p);
   const distPath = path.join(dist, p);
@@ -73,13 +74,19 @@ for (const p of PUBLIC_PAGES) {
   }
   const srcBuf = fs.readFileSync(srcPath), distBuf = fs.readFileSync(distPath);
   const srcText = srcBuf.toString('utf8');
-  const hasMarkers = /<!--\s*PLUMLINE:/.test(srcText);
+  const hasShellMarkers = /<!--\s*PLUMLINE:/.test(srcText);
+  const hasSolverMarkers = /\/\* SOLVER_UI_/.test(srcText);
   let expectedBuf;
-  if (hasMarkers) {
-    let composed;
-    try { composed = composeHtml(srcText, p); }
+  if (hasShellMarkers || hasSolverMarkers) {
+    let composed = srcText;
+    try {
+      // Canonical order: shell (B1) first, then solver UI (D). Each step is a
+      // no-op when its markers are absent.
+      if (hasShellMarkers) composed = composeHtml(composed, p);
+      composed = composeSolverIfNeeded(composed, p, root);
+    }
     catch (e) { ok('composes cleanly: ' + p, false, e.message); continue; }
-    if (/<!--\s*PLUMLINE:/.test(composed)) { ok('no unresolved marker in dist: ' + p, false); continue; }
+    if (/<!--\s*PLUMLINE:/.test(composed) || /\/\* SOLVER_UI_/.test(composed)) { ok('no unresolved marker in dist: ' + p, false); continue; }
     expectedBuf = Buffer.from(composed, 'utf8');
     ok('composed shell resolves: ' + p, true);
   } else {
@@ -157,6 +164,20 @@ const distEngine = engineSlice(path.join(dist, 'solver.html'));
 ok('dist/solver.html has engine markers', distEngine !== null);
 ok('engine byte-identical to source (Worker parity)', srcEngine && distEngine && srcEngine === distEngine,
    srcEngine && distEngine ? ('src ' + srcEngine.length + ' vs dist ' + distEngine.length) : 'missing');
+
+// 6b. Solver publication contract: the PUBLIC dist/solver.html must carry no
+//     SOLVER_UI composition marker and no reference to the internal fragment
+//     directory, and no fragment file may be published under dist. This is the
+//     authoritative post-build home for these checks (the per-phase solver
+//     checkers validate the COMPOSED page via the canonical composer and never
+//     read dist, so their assertion count stays independent of dist state).
+{
+  const distSolverText = fs.readFileSync(path.join(dist, 'solver.html'), 'utf8');
+  ok('dist/solver.html has no SOLVER_UI marker', !/\/\* SOLVER_UI_/.test(distSolverText));
+  ok('dist/solver.html has no fragment path', distSolverText.indexOf('solver-ui/') === -1);
+  ok('no solver-ui fragment dir published under dist',
+     !fs.existsSync(path.join(dist, 'engine', 'fragments')));
+}
 
 // 7. Every asset URL each page references resolves in dist
 for (const p of PUBLIC_PAGES) {

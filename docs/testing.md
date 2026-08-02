@@ -419,3 +419,41 @@ contract: it copies the FAQ generator and its inputs into a temp dir whose path
 CONTAINS A SPACE, runs the generator via `execFileSync(process.execPath, […])`
 (succeeds), shows the old concatenated `execSync('node ' + path)` form breaks
 there, and asserts both `tests_home_faq.js` and `run_all.js` use the safe form.
+
+## Solver interface suites (Checkpoint D)
+
+Each solver-UI phase has an official checker `checkX(siteDir) => {pass, fail,
+failures}` used by BOTH its positive suite and its negatives, validating the COMPOSED
+solver.html (never a private composer copy): `tests_solver_grid` (D1),
+`tests_solver_detection` (D2), `tests_solver_execution` (D3),
+`tests_solver_visualization` (D4), and the cumulative `tests_solver_interface_final`
+(D5), which invokes the four phase checkers (each failure names its phase) and adds the
+exact global region order + bootstrap + inline-remaining contracts. Every phase has a
+matching `_negative` suite that mutates a temp tree, runs the OFFICIAL composer/checker,
+asserts a specific failure message, and cleans up in `finally`; negatives are NEVER
+allowlisted. Goldens live in `engine/fixtures/solver-ui-golden/`. Their provenance is
+deliberate, not a blanket "capture from the composer": the D1–D4 per-phase goldens are
+captured from an approved PRE-PHASE composed output independent of the checker that
+validates them, and the final `solver-interface-d5-final.json` is ASSEMBLED from three
+provenance classes (spelled out per-field in its `provenance` block): (1) INDEPENDENT
+HISTORICAL SOURCE re-compared by the anti-selfgen suite — the pre-D D0 baseline
+(head/body/engine/style/ui_script/scripts/css), the D1 phase golden (composed_total/
+inline_script/ui_pre_engine/ui_post_engine/requests/dist_public/controls), the D1–D4
+per-phase goldens (the eight earlier fragment SHAs), the D2/D4 goldens (aria_attrs,
+data_i18n_count); (2) REVIEWED D5 CAPTURE with no earlier fixture (bootstrap SHA,
+aria.tabindex/live/role_status, bootstrap_contract, inline_remaining, fragment_order);
+(3) MANUALLY-DERIVED CONTRACT (d5_contract_patterns). The final golden is NEVER
+regenerated from the composer during verify; `tests_no_selfgen_golden.js` both PINS its
+SHA-256 (accidental-change guard for classes 2 and 3) and re-compares every class-(1)
+field against the historical D0/D1/D2/D4 fixtures (independent-provenance guard:
+composed_total, inline_script, ui_pre_engine, ui_post_engine, external_scripts,
+css_version, requests, dist_public, controls, aria_attrs, data_i18n_count). Separately,
+`tests_needle_audit.js` statically parses the
+five solver negative suites and fails unless every checker-based negative asserts a
+SPECIFIC functional message: it enforces 170 expectCheckFail calls, a closed allowlist
+of exactly 12 drift/prior-fragment/golden-tamper cases that may keep a hash/bytes
+needle, and 158 functional-specific needles (no bare "bytes/sha match golden" and no
+global body/head/script hash for a functional mutation). Suites that read the composed
+solver page go through `engine/composed-html.js`; the small number that read source raw
+to feed the composer are justified single entries in `RAW_SOURCE_ALLOWLIST` (18 keys
+after D). See docs/checkpoint-d5-integration.md.

@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) {
@@ -27,7 +28,7 @@ function ok(name, cond, detail) {
 }
 
 // --- Load the pure panel functions from solver.html ----------------------
-const html = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8');
+const html = composedHtml(path.join(__dirname, '..'), 'solver.html');
 const script = html.split('<script>').filter(function (c) { return c.indexOf('variableDomains') !== -1; })[0].split('</script>')[0];
 function grab(name) {
   const m = script.search(new RegExp('\\n  function ' + name + '\\('));

@@ -27,8 +27,8 @@ const STATE_TO_KEY = {
   unbounded:  'statusUnboundedLabel'
 };
 
-// 1. The engine actually returns each of these raw states (grep solver.html).
-const solver = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+// 1. The engine actually returns each of these raw states (grep the composed solver).
+const solver = composedHtml(siteDir, 'solver.html');
 Object.keys(STATE_TO_KEY).forEach(function (state) {
   const re = new RegExp("['\"]" + state + "['\"]");
   ok('engine returns raw state "' + state + '"', re.test(solver), state);

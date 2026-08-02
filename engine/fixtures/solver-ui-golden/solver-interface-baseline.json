@@ -1,0 +1,174 @@
+{
+  "note": "Checkpoint D pre-D baseline for solver.html. Captured from approved main. Do NOT regenerate during verify. No absolute paths, no timestamps, no OS-specific data, no full engine body.",
+  "page": "solver.html",
+  "totals": {
+    "lines": 4573,
+    "chars": 215429,
+    "bytes": 215539
+  },
+  "head": {
+    "sha256": "7cad86a09a237fb0c932853c01d01241665c8fd3b52281a2fb79db3f97529df7",
+    "bytes": 20157
+  },
+  "body": {
+    "sha256": "92e55a2b901d00382527b0c1566384b68ef906fa8af0d895d574e1b99351e068",
+    "bytes": 195339
+  },
+  "inline_style": {
+    "count": 1,
+    "sha256": "7eed8cccc9361d6edd6bb05e86f814f5a4dcfa9ace06ea874685ff95aba48b97",
+    "bytes": 18061
+  },
+  "ui_script": {
+    "sha256": "b8edbe367e111a7f60500f0bcb669d4ba7b8b7b80644ef3fc69ac64e0097726d",
+    "bytes": 105082,
+    "note": "big inline script minus the engine region"
+  },
+  "engine": {
+    "start_marker": "/* ENGINE_START */",
+    "end_marker": "/* ENGINE_END */",
+    "convention": "slice(indexOf(START), indexOf(END)) — includes START text, excludes END",
+    "chars": 82657,
+    "bytes": 82697,
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "start_line": 433,
+    "end_line": 2586
+  },
+  "worker": {
+    "creation": "Blob + URL.createObjectURL + new Worker",
+    "source": "engineSource region + glue (onmessage/postMessage)",
+    "correlation": "token field per message",
+    "fallback": "solveMainThread when typeof Worker unavailable or Worker fails",
+    "parity_tests": 143,
+    "token_tests": 6
+  },
+  "dom": {
+    "id_count": 37,
+    "ids": [
+      "content",
+      "openExamples",
+      "grid",
+      "gridsize",
+      "addRow",
+      "delRow",
+      "addCol",
+      "delCol",
+      "importCsv",
+      "detectVars",
+      "undoGrid",
+      "csvFile",
+      "solve",
+      "senseSel",
+      "senseHint",
+      "whole",
+      "localeSel",
+      "clear",
+      "varSettings",
+      "varSettingsBody",
+      "solveAnnounce",
+      "result",
+      "placeholder",
+      "selfcheck-row",
+      "selftest",
+      "selftest-out",
+      "how",
+      "exDrawerBackdrop",
+      "exDrawer",
+      "exDrawerTitle",
+      "closeExamples",
+      "exDrawerBody",
+      "cancelSolve",
+      "compatSolve",
+      "exp-csv",
+      "exp-xls",
+      "exp-txt"
+    ]
+  },
+  "i18n": {
+    "data_i18n_count": 41,
+    "keys": [
+      "heroEyebrow",
+      "heroTitle",
+      "heroLead",
+      "startFrom",
+      "exProduction",
+      "exWorkforce",
+      "exProject",
+      "moreExamples",
+      "exBlank",
+      "pasteTip",
+      "gridNote",
+      "addRow",
+      "delRow",
+      "addCol",
+      "delCol",
+      "importCsv",
+      "detectVars",
+      "undoGrid",
+      "solve",
+      "objectiveLabel2",
+      "senseAuto",
+      "senseMax",
+      "senseMin",
+      "wholeNumbers",
+      "wholeHelp",
+      "numberFormat",
+      "localeAuto",
+      "localeUS",
+      "localeEU",
+      "localeHelp",
+      "clearGrid",
+      "varSettingsTitle",
+      "varSettingsIntro",
+      "placeholder",
+      "selfCheck",
+      "howTitle",
+      "howP1",
+      "howP2",
+      "solverAddonReview",
+      "examplesTitle",
+      "closeLabel"
+    ]
+  },
+  "external_scripts": [
+    "assets/examples-data.js?v=1",
+    "assets/i18n.js?v=82",
+    "assets/nav-menu.js?v=6",
+    "assets/build-badge.js?v=2"
+  ],
+  "css_version": "plumline.css?v=21",
+  "controls": {
+    "button": 22,
+    "input": 5,
+    "select": 4,
+    "details": 2,
+    "table": 3,
+    "svg": 2
+  },
+  "aria": {
+    "aria_attrs": 16,
+    "role_count": 3,
+    "aria_live": [
+      "polite",
+      "polite"
+    ],
+    "tabindex": 1
+  },
+  "code_map": {
+    "ui_functions": 101,
+    "engine_functions": 90
+  },
+  "platform_apis": {
+    "localStorage": 0,
+    "sessionStorage": 0,
+    "fetch": 0,
+    "new_worker": 1,
+    "blob": 2,
+    "createObjectURL": 3,
+    "fileReader": 1,
+    "clipboard": 2,
+    "download": 1,
+    "setTimeout": 3,
+    "addEventListener_ui": 14
+  }
+}

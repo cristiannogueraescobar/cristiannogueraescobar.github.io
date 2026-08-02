@@ -13,7 +13,7 @@ backend. Vite is a dev/build tool only.
 - **Shared shell** (Checkpoint B1): header/nav/mobile controls/language
   selector/footer/build-badge, composed at build time from
   `src/shared/compose-shell.js`. See `docs/shared-components.md`.
-- **i18n**: `assets/i18n.js` holds the 5-language dictionary (en/es/de/fr/it) and
+- **i18n**: `assets/i18n.js` holds the 5-language dictionary (en/es/pt/de/fr) and
   the runtime resolver (common → page namespace → authorized extras → English
   fallback). Not restructured by B1.
 - **Assets**: `assets/` (CSS, runtime JS, screenshots) copied verbatim into dist.
@@ -59,3 +59,20 @@ all copy and 5 translations (byte-identical visible values), and the approved
 design tokens. Checkpoint B1 changes only HOW the shell markup is stored and
 composed, not what the user receives — the 8 dist pages are byte-for-byte
 identical to the approved pre-B1 product.
+
+## Solver interface composition (Checkpoint D)
+
+`solver.html` is assembled the same way the shell is (B1): the source page carries
+nine `SOLVER_UI_*` marker blocks, and `src/shared/compose-solver.js` — the single
+composer used by Vite dev, Vite build, `engine/composed-html.js`, and
+`engine/validate_dist.js` — replaces each block with the verbatim bytes of an internal
+fragment under `engine/fragments/solver-ui/`. The composed inline script is
+byte-identical to the pre-D baseline, and `dist/solver.html` is byte-identical to the
+pre-D public artifact; the fragments are NEVER published. The nine regions, in
+canonical order, are EXAMPLES_LOADING, GRID_INTERACTION, SOLVE_WORKER_CLIENT,
+VARIABLE_SETTINGS, SOLVE_ORCHESTRATION, SOLVE_RESULTS, RECEIPT_PLOT_EXPORTS,
+EXAMPLES_DRAWER, and BOOTSTRAP_ACCESSIBILITY. The engine region
+(`/* ENGINE_START */`…`/* ENGINE_END */`, 82657 chars) and the Worker are frozen
+throughout D and are the province of Checkpoint E. Module-level i18n utilities and the
+IIFE-head example data/state remain inline by design. See
+docs/checkpoint-d5-integration.md for the full account.

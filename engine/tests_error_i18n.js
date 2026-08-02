@@ -22,9 +22,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 const siteDir = path.join(__dirname, '..');
-const solverSrc = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+const solverSrc = composedHtml(siteDir, 'solver.html');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }

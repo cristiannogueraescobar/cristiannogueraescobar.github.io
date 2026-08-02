@@ -8,6 +8,11 @@ const root = dirname(fileURLToPath(import.meta.url));
 // compose-shell is CommonJS (shared with Node test scripts that use require);
 // load it here without converting the whole config to ESM-only.
 const { composeHtml } = createRequire(import.meta.url)('./src/shared/compose-shell.js');
+// compose-solver expands the solver.html UI fragments (Checkpoint D). Same
+// canonical implementation used by the Node test helpers. Composition order is
+// fixed: shell (B1) first, then solver UI (D). Fragments live outside assets/ and
+// are never published.
+const { composeSolverIfNeeded } = createRequire(import.meta.url)('./src/shared/compose-solver.js');
 
 // Plumline is a multi-page STATIC site on GitHub Pages. Vite is a dev/build tool
 // only; the site is NOT a SPA and no framework is introduced.
@@ -129,6 +134,9 @@ function plumlineBuild() {
         if (/<!--\s*PLUMLINE:/.test(html)) {
           html = composeHtml(html, p + '.html');
         }
+        // Solver UI composition runs AFTER the shell (fixed order). No-op unless
+        // the page is solver.html and carries SOLVER_UI markers.
+        html = composeSolverIfNeeded(html, p + '.html', root);
         writeFileSync(distFile, html);
       }
     },
@@ -146,12 +154,15 @@ function plumlineComposeShell() {
     transformIndexHtml: {
       order: 'pre',
       handler(html, ctx) {
-        if (!/<!--\s*PLUMLINE:/.test(html)) return html;
         // composeHtml looks the label up in PAGE_CONTEXT by basename (e.g.
         // "solver.html"), but ctx.filename is an absolute path — normalize it.
         const raw = ctx && ctx.filename ? ctx.filename : 'page';
         const label = raw.replace(/\\/g, '/').split('/').pop();
-        return composeHtml(html, label);
+        // Fixed order: shell (B1) first, then solver UI (D). Each step is a no-op
+        // when its markers are absent, so pages without either pass through.
+        if (/<!--\s*PLUMLINE:/.test(html)) html = composeHtml(html, label);
+        html = composeSolverIfNeeded(html, label, root);
+        return html;
       },
     },
   };
