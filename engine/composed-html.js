@@ -14,10 +14,15 @@
 const fs = require('fs');
 const path = require('path');
 const { composeHtml } = require('../src/shared/compose-shell.js');
+const { composeSolverIfNeeded } = require('../src/shared/compose-solver.js');
 
+// Effective (composed) HTML of a source page, in the SAME order the build uses:
+// shell (B1) first, then solver UI (D). Each step is a no-op when its markers are
+// absent, so unmigrated pages and non-solver pages pass through unchanged.
 function composedHtml(siteDir, page) {
-  const html = fs.readFileSync(path.join(siteDir, page), 'utf8');
-  if (/<!--\s*PLUMLINE:/.test(html)) return composeHtml(html, page);
+  let html = fs.readFileSync(path.join(siteDir, page), 'utf8');
+  if (/<!--\s*PLUMLINE:/.test(html)) html = composeHtml(html, page);
+  html = composeSolverIfNeeded(html, page, siteDir);
   return html;
 }
 

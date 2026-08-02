@@ -1,0 +1,277 @@
+{
+  "note": "Checkpoint D5 FINAL cumulative golden for the COMPOSED solver.html (byte-identical to the pre-D baseline). Its fields fall into THREE provenance classes, spelled out per-field in the provenance block: (1) INDEPENDENT HISTORICAL SOURCE - compared against a pre-D or pre-phase fixture: head/body/engine/style(inner)/ui_script(engine-removed)/external_scripts/css_version (from the pre-D D0 baseline solver-interface-baseline.json); composed_total/inline_script/ui_pre_engine/ui_post_engine/requests/dist_public/controls (from the D1 phase golden, cross-checked composed_total==215539 pre-D bytes); the eight earlier fragment SHAs (from the D1-D4 per-phase goldens); aria.aria_attrs and data_i18n_count (from the D2 and D4 phase goldens). (2) REVIEWED D5 CAPTURE - captured once during D5 from the composed baseline and human-reviewed, NOT cross-checked against an earlier fixture: the bootstrap-accessibility fragment SHA; aria.tabindex/live/role_status; bootstrap_contract; inline_remaining; fragment_order. (3) MANUALLY-DERIVED CONTRACT - hand-written structural expectations, not captured: d5_contract_patterns. This fixture is NOT regenerated automatically during npm run verify; tests_no_selfgen_golden.js pins its SHA-256 (accidental-change guard) AND re-compares every class-(1) field against its historical fixture (independent-provenance guard). No abs paths/timestamps; no full engine/math body. See the provenance block.",
+  "composed_total": {
+    "chars": 215429,
+    "bytes": 215539,
+    "sha256": "232ad6c05edd19bd93d36ecefd318a2d8e8ace828348935943784350f6938666"
+  },
+  "head": {
+    "sha256": "7cad86a09a237fb0c932853c01d01241665c8fd3b52281a2fb79db3f97529df7",
+    "bytes": 20157
+  },
+  "body": {
+    "sha256": "92e55a2b901d00382527b0c1566384b68ef906fa8af0d895d574e1b99351e068",
+    "bytes": 195339
+  },
+  "style": {
+    "sha256": "7eed8cccc9361d6edd6bb05e86f814f5a4dcfa9ace06ea874685ff95aba48b97",
+    "bytes": 18061,
+    "convention": "inner of <style> (no tags), as captured pre-D in D0.inline_style"
+  },
+  "inline_script": {
+    "sha256": "b59f930fbf87acaf322ff2d9ef1d0b8c56da91b850f0e610761c4dab185431b8",
+    "bytes": 187795
+  },
+  "ui_pre_engine": {
+    "sha256": "ea23b7711207ed583b8ec982ff3efc7b1c7d4b40d49872b123fa96d114c05dd2",
+    "bytes": 2613
+  },
+  "engine": {
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes": 82697,
+    "start_marker": "/* ENGINE_START */",
+    "end_marker": "/* ENGINE_END */",
+    "convention": "slice(indexOf(START), indexOf(END))"
+  },
+  "ui_post_engine": {
+    "sha256": "b20211e5e5d91d551f7ababef156a38713263e2da18685ac59a16615377a71bc",
+    "bytes": 102469
+  },
+  "fragments": [
+    {
+      "name": "EXAMPLES_LOADING",
+      "file": "examples-loading.js",
+      "sha256": "6d236fc716c0ece7644b7eef10ce3ff8a8212377cdd345974c08fa6c4913aa15",
+      "bytes": 2948,
+      "first_fn": "loadExample",
+      "last_fn": "updateExampleUrl",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "GRID_INTERACTION",
+      "file": "grid-interaction.js",
+      "sha256": "b3869896acf8c1a91e98fee28295725a80f5f22596de6633e24c67660022ca8c",
+      "bytes": 12354,
+      "first_fn": "render",
+      "last_fn": "sheetFromGrid",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "SOLVE_WORKER_CLIENT",
+      "file": "solve-worker-client.js",
+      "sha256": "121dfb653cd89c8633f00cbfda7823b42d3cb6f38587919435e1b3d2cd239f49",
+      "bytes": 4551,
+      "first_fn": "activeLocale",
+      "last_fn": "buildWorker",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "VARIABLE_SETTINGS",
+      "file": "variable-settings.js",
+      "sha256": "c281bcc507308f4e09045554055df389c75da2d5b61d54c249bd66f9750d99ce",
+      "bytes": 12469,
+      "first_fn": "objectiveSignature",
+      "last_fn": "variableDomains",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "SOLVE_ORCHESTRATION",
+      "file": "solve-orchestration.js",
+      "sha256": "680908bcc8a54845ccaaac40336800748206f0f1a6b4a4e7eb1a52999785f1cb",
+      "bytes": 8007,
+      "first_fn": "solve",
+      "last_fn": "runSolve",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "SOLVE_RESULTS",
+      "file": "errors-results.js",
+      "sha256": "f156e8f04babbc83d25379ee729f18efebe95413403340b821873ac220c7beb3",
+      "bytes": 4773,
+      "first_fn": "presentResult",
+      "last_fn": "solveDetailsHTML",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "RECEIPT_PLOT_EXPORTS",
+      "file": "receipt-plot-exports.js",
+      "sha256": "dd963ae8ab67600b7f4b0e816109ae595c35535835d213d37efad5586641fc05",
+      "bytes": 33488,
+      "first_fn": "renderReceipt",
+      "last_fn": "flash",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "EXAMPLES_DRAWER",
+      "file": "examples-drawer.js",
+      "sha256": "fb87acb13cea0b5198f4f483fa7ac9bdc2bd5996ec78b6cf6883d61fb55a0d0c",
+      "bytes": 3486,
+      "first_fn": "renderExamplesDrawer",
+      "last_fn": "closeDrawer",
+      "provenance": "phase golden"
+    },
+    {
+      "name": "BOOTSTRAP_ACCESSIBILITY",
+      "file": "bootstrap-accessibility.js",
+      "sha256": "0a1142e8905717dd134c38c5f4c7467b90b0194877cbaa83cc3c81357cd595b3",
+      "bytes": 10805,
+      "first_fn": null,
+      "last_fn": "runSelfTest",
+      "provenance": "D5 (new bootstrap region; no earlier phase captured it)"
+    }
+  ],
+  "fragment_order": [
+    "EXAMPLES_LOADING",
+    "GRID_INTERACTION",
+    "SOLVE_WORKER_CLIENT",
+    "VARIABLE_SETTINGS",
+    "SOLVE_ORCHESTRATION",
+    "SOLVE_RESULTS",
+    "RECEIPT_PLOT_EXPORTS",
+    "EXAMPLES_DRAWER",
+    "BOOTSTRAP_ACCESSIBILITY"
+  ],
+  "inline_remaining": {
+    "module_level": [
+      "t",
+      "localizeEngineError",
+      "colLetter",
+      "applyLang"
+    ],
+    "module_var": [
+      "LANG"
+    ],
+    "iife_head": [
+      "blank",
+      "metaFor",
+      "categoryOf",
+      "slugOf",
+      "senseOf",
+      "typeOf",
+      "examplesInCategory"
+    ],
+    "iife_state": [
+      "ROWS",
+      "COLS",
+      "data",
+      "EXAMPLES",
+      "CATEGORY_ORDER",
+      "EXAMPLE_META",
+      "EXAMPLES_OK"
+    ],
+    "note": "Module-level i18n utils (t/localizeEngineError/colLetter/applyLang, LANG) live OUTSIDE the IIFE and are shared by engine + IIFE; NOT extractable without breaking scope. IIFE-head state (ROWS/COLS/data), the EXAMPLES catalog + metadata, and example helpers are shared init/data consumed by multiple regions; kept inline."
+  },
+  "bootstrap_contract": {
+    "drawer_listeners": [
+      "openExamples",
+      "closeExamples",
+      "exDrawerBackdrop"
+    ],
+    "escape_keydown": true,
+    "solve_grid_listeners": [
+      "solve",
+      "clear",
+      "addRow",
+      "delRow",
+      "addCol",
+      "delCol",
+      "undoGrid",
+      "detectVars"
+    ],
+    "vs_listeners": [
+      "whole",
+      "senseSel",
+      "localeSel"
+    ],
+    "import_listeners": [
+      "importCsv",
+      "csvFile"
+    ],
+    "grid_keyboard": true,
+    "selftest": "runSelfTest",
+    "lang_selector": "lang",
+    "ex_init": "?ex=",
+    "default_example": "production",
+    "test_hook": "window.__plumline (guarded by window.__PLUMLINE_TEST__)"
+  },
+  "external_scripts": [
+    "assets/examples-data.js?v=1",
+    "assets/i18n.js?v=82",
+    "assets/nav-menu.js?v=6",
+    "assets/build-badge.js?v=2"
+  ],
+  "css_version": "plumline.css?v=21",
+  "controls": {
+    "button": 22,
+    "input": 5,
+    "select": 4
+  },
+  "aria": {
+    "aria_attrs": 16,
+    "tabindex": 2,
+    "live": 2,
+    "role_status": 1
+  },
+  "requests": 6,
+  "dist_public": {
+    "sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
+    "bytes": 218349
+  },
+  "ui_script_no_engine": {
+    "sha256": "b8edbe367e111a7f60500f0bcb669d4ba7b8b7b80644ef3fc69ac64e0097726d",
+    "bytes": 105082,
+    "convention": "inline script with the engine region removed (ui pre + ui post), as captured pre-D in D0.ui_script"
+  },
+  "provenance": {
+    "note": "Per-field provenance in THREE classes. This fixture is ASSEMBLED, never captured wholesale from the composer it validates. Class (1) fields are re-compared against an independent historical fixture by tests_no_selfgen_golden.js; class (2) fields are reviewed D5 captures with no earlier fixture to compare against; class (3) is a manually-derived contract. note, this block, docs/checkpoint-d5-integration.md and docs/testing.md all state the same classification.",
+    "class_1_independent_historical_source": {
+      "head, body, engine, style(inner), ui_script_no_engine": "solver-interface-baseline.json (D0, pre-D independent capture)",
+      "composed_total (sha256/chars/bytes), inline_script (sha256/bytes), ui_pre_engine (sha256/bytes), ui_post_engine (sha256/bytes), requests, dist_public (sha256/bytes), controls": "solver-grid-d1.json (D1 phase golden, captured pre-D1 from an independent composed baseline); composed_total additionally cross-checked == pre-D baseline 215539 bytes",
+      "external_scripts, css_version": "solver-interface-baseline.json (D0) and equivalently the D1 phase golden",
+      "fragments[0..7] SHAs (examples-loading, grid-interaction, solve-worker-client, variable-settings, solve-orchestration, errors-results, receipt-plot-exports, examples-drawer)": "the D1-D4 per-phase goldens",
+      "aria.aria_attrs, data_i18n_count": "solver-detection-d2.json and solver-visualization-d4.json (both pin the same counts independently)"
+    },
+    "class_2_reviewed_d5_capture": {
+      "fragments[8] bootstrap-accessibility SHA": "captured once during D5 from the composed baseline; the bootstrap region is new in D5 so there is no earlier fixture to compare against; human-reviewed",
+      "aria.tabindex, aria.live, aria.role_status": "reviewed D5 captures of the cumulative accessibility counts (D2/D4 only pinned aria_attrs)",
+      "bootstrap_contract, inline_remaining, fragment_order": "reviewed D5 captures describing the D5 integration surface (bootstrap listeners inventory, still-inline utils, and the exact 9-region order)"
+    },
+    "class_3_manually_derived_contract": {
+      "d5_contract_patterns": "hand-written structural expectations (literal-substring counts) for the D5 integration mutations; NOT captured from any composed output"
+    },
+    "independent_sources": [
+      "solver-interface-baseline.json (pre-D)",
+      "solver-grid-d1.json",
+      "solver-detection-d2.json",
+      "solver-execution-d3.json",
+      "solver-visualization-d4.json"
+    ],
+    "do_not_regenerate": "This fixture must NOT be regenerated by the same composer it validates. tests_no_selfgen_golden.js both pins its sha256 (accidental-change guard) AND re-compares every class-(1) field against its historical fixture (independent-provenance guard). Class-(2) captures and the class-(3) contract are guarded only by the pinned sha256; changing them deliberately requires updating PINNED_SHA after review."
+  },
+  "data_i18n_count": 40,
+  "d5_contract_patterns": {
+    "init order _ex before loadExample": {
+      "literal": "})();\n  loadExample(EXAMPLE_BY_SLUG[_ex]",
+      "count": 1
+    },
+    "focus return openBtn.focus": {
+      "literal": "openBtn.focus()",
+      "count": 1
+    },
+    "focusable [tabindex] selector": {
+      "literal": "[tabindex]",
+      "count": 1
+    },
+    "busy disabled state": {
+      "literal": "disabled",
+      "count": 15,
+      "word": true
+    },
+    "worker glue Blob construction": {
+      "literal": "new Blob([src+'\\n'+glue]",
+      "count": 1
+    }
+  },
+  "d5_contract_patterns_note": "Exact literal-substring counts (word=word-boundary) of D5 integration contract shapes in the pre-D composed page (byte-identical baseline). A specific integration mutation trips a precise contract, independent of the fragment hash. Derived from the pre-D composed baseline, not the composer under test."
+}

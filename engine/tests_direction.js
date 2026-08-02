@@ -18,12 +18,13 @@
 
 const fs = require('fs');
 const path = require('path');
+const { composedHtml } = require('./composed-html.js');
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
 
 // Extract sameObjective from solver.html.
-const html = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8');
+const html = composedHtml(path.join(__dirname, '..'), 'solver.html');
 const m = html.match(/function sameObjective\(a,b\)\{[\s\S]*?\n  \}/);
 if (!m) { console.log('  FAIL: could not find sameObjective in solver.html'); console.log('DIRECTION TESTS  PASSED: 0   FAILED: 1'); process.exit(1); }
 eval(m[0]);

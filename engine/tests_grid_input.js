@@ -131,7 +131,8 @@ ok('classify: empty is not a formula', isF('') === false);
   }
   const fs = require('fs');
   const path = require('path');
-  const solverHtml = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8')
+const { composedHtml } = require('./composed-html.js');
+  const solverHtml = composedHtml(path.join(__dirname, '..'), 'solver.html')
     .replace(/<script src="assets\/[^"]*"[^>]*><\/script>/g, '');
   const i18nSrc = fs.readFileSync(path.join(__dirname, '..', 'assets', 'i18n.js'), 'utf8');
   const dom = new JSDOM(solverHtml, {

@@ -1,0 +1,204 @@
+{
+  "note": "Checkpoint D2 golden for the COMPOSED solver.html (byte-identical to pre-D baseline). Captured from the composer output, NOT regenerated during verify. No abs paths/timestamps; no full engine/math body.",
+  "composed_total": {
+    "chars": 215429,
+    "bytes": 215539,
+    "sha256": "232ad6c05edd19bd93d36ecefd318a2d8e8ace828348935943784350f6938666"
+  },
+  "head": {
+    "sha256": "7cad86a09a237fb0c932853c01d01241665c8fd3b52281a2fb79db3f97529df7",
+    "bytes": 20157
+  },
+  "body": {
+    "sha256": "92e55a2b901d00382527b0c1566384b68ef906fa8af0d895d574e1b99351e068",
+    "bytes": 195339
+  },
+  "inline_script": {
+    "sha256": "b59f930fbf87acaf322ff2d9ef1d0b8c56da91b850f0e610761c4dab185431b8",
+    "bytes": 187795
+  },
+  "ui_pre_engine": {
+    "sha256": "ea23b7711207ed583b8ec982ff3efc7b1c7d4b40d49872b123fa96d114c05dd2",
+    "bytes": 2613
+  },
+  "engine": {
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes": 82697,
+    "start_marker": "/* ENGINE_START */",
+    "end_marker": "/* ENGINE_END */",
+    "convention": "slice(indexOf(START), indexOf(END))"
+  },
+  "ui_post_engine": {
+    "sha256": "b20211e5e5d91d551f7ababef156a38713263e2da18685ac59a16615377a71bc",
+    "bytes": 102469
+  },
+  "fragments": [
+    {
+      "name": "GRID_INTERACTION",
+      "file": "grid-interaction.js",
+      "sha256": "b3869896acf8c1a91e98fee28295725a80f5f22596de6633e24c67660022ca8c",
+      "bytes": 12354,
+      "first_fn": "render",
+      "last_fn": "sheetFromGrid"
+    },
+    {
+      "name": "VARIABLE_SETTINGS",
+      "file": "variable-settings.js",
+      "sha256": "c281bcc507308f4e09045554055df389c75da2d5b61d54c249bd66f9750d99ce",
+      "bytes": 12469,
+      "first_fn": "objectiveSignature",
+      "last_fn": "variableDomains"
+    }
+  ],
+  "fragment_order": [
+    "GRID_INTERACTION",
+    "VARIABLE_SETTINGS"
+  ],
+  "source_markers": [
+    "/* SOLVER_UI_GRID_INTERACTION_START:grid-interaction.js */",
+    "/* SOLVER_UI_GRID_INTERACTION_END */",
+    "/* SOLVER_UI_VARIABLE_SETTINGS_START:variable-settings.js */",
+    "/* SOLVER_UI_VARIABLE_SETTINGS_END */"
+  ],
+  "d2_functions": [
+    "objectiveSignature",
+    "sameObjective",
+    "senseConfirmed",
+    "updateSenseHint",
+    "resetVarPanel",
+    "setDetectLabel",
+    "detectForPanel",
+    "settingsFor",
+    "cleanBound",
+    "varError",
+    "showVarError",
+    "anyVarError",
+    "hasCustomSettings",
+    "renderVarPanel",
+    "variableDomains"
+  ],
+  "math_functions_forbidden_in_fragments": [
+    "detectModel_",
+    "classifyModel_",
+    "linearize_",
+    "solveLinearProgram_",
+    "coefficientVector_",
+    "buildVariableDomains_",
+    "candidateIsLinear_",
+    "describeModel_",
+    "loadGrid_",
+    "labelFor_"
+  ],
+  "not_d2_functions": [
+    "solve",
+    "runSolve",
+    "presentResult",
+    "drawFeasibleRegion",
+    "renderExamplesDrawer",
+    "exportCSV",
+    "buildWorker",
+    "solveMainThread"
+  ],
+  "detection_contract": {
+    "entry": "detectForPanel",
+    "engine_entry": "detectModel_",
+    "candidate_fields": [
+      "cell",
+      "label"
+    ],
+    "state_var": "detectedVars"
+  },
+  "settings_contract": {
+    "entry": "variableDomains",
+    "returns": [
+      "integer",
+      "bounds"
+    ],
+    "bound_fields": [
+      "lower",
+      "upper"
+    ],
+    "types": [
+      "continuous",
+      "integer",
+      "binary"
+    ]
+  },
+  "variable_settings_ids": [
+    "varSettings",
+    "varSettingsBody",
+    "detectVars",
+    "whole",
+    "senseSel",
+    "senseHint"
+  ],
+  "type_options": [
+    "continuous",
+    "integer",
+    "binary"
+  ],
+  "external_scripts": [
+    "assets/examples-data.js?v=1",
+    "assets/i18n.js?v=82",
+    "assets/nav-menu.js?v=6",
+    "assets/build-badge.js?v=2"
+  ],
+  "css_version": "plumline.css?v=21",
+  "controls": {
+    "button": 22,
+    "input": 5,
+    "select": 4
+  },
+  "aria": {
+    "aria_attrs": 16,
+    "tabindex": 1
+  },
+  "dist_public": {
+    "sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
+    "bytes": 218349
+  },
+  "requests": 6,
+  "type_option_counts": {
+    "continuous": 20,
+    "integer": 14,
+    "binary": 31
+  },
+  "data_i18n_count": 40,
+  "contract_counts_note": "type_option_counts + data_i18n_count are structural counts of the pre-D composed page (byte-identical baseline); they pin option/i18n integrity so single-occurrence renames trip a specific contract, not just the global hash. Independent of the composer under test.",
+  "d2_contract_patterns": {
+    "confirmedObjectiveSig state var": {
+      "literal": "confirmedObjectiveSig",
+      "count": 12
+    },
+    "bounds order lower-first": {
+      "literal": "bounds.push({ lower:",
+      "count": 1
+    },
+    "bound lower field": {
+      "literal": "lower:lo",
+      "count": 1
+    },
+    "bound upper field": {
+      "literal": "upper:hi",
+      "count": 1
+    },
+    "candidate label field": {
+      "literal": "label:labelFor_",
+      "count": 1
+    },
+    "settings integer return": {
+      "literal": "integer: anyInteger",
+      "count": 1
+    },
+    "detector call detectModel_": {
+      "literal": "detectModel_(sheet",
+      "count": 6
+    },
+    "variable default continuous/0/inf": {
+      "literal": "{ type:'continuous', min:0, max:null }",
+      "count": 2
+    }
+  },
+  "d2_contract_patterns_note": "Exact literal-substring counts of D2 contract shapes in the pre-D composed page (byte-identical baseline). Renaming a specific identifier or reordering a struct trips a precise contract, independent of the fragment hash. Derived from the pre-D composed baseline, not the composer under test."
+}

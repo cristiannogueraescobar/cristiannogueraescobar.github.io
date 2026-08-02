@@ -196,7 +196,10 @@ PAGES.forEach(function (p) {
 // must neutralise ANIMATIONS (the solve spinner) too, not only transitions —
 // otherwise a reduced-motion user still gets a spinning indicator.
 (function () {
-  const solver = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  // Composed solver HTML: the inline <style> (with the reduced-motion @media) and
+  // the (D3-extracted) scrollBehavior()/scrollIntoView code are both present in
+  // their final served form here.
+  const solver = composedHtml(siteDir, 'solver.html');
   const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
   function reducesMotion(src, label) {
     const block = (src.match(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[\s\S]*?\n\}/) || [''])[0];
@@ -399,7 +402,9 @@ PAGES.forEach(function (p) {
 // selector — the class of bug this suite is guarding against).
 (function () {
   const engineSrc = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
-  const solverRaw = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
+  // Composed solver HTML: the engine region and the (D1-extracted) grid code are
+  // both present in their final served form, so sheetFromGrid resolves here.
+  const solverRaw = composedHtml(siteDir, 'solver.html');
   const LOCALE_FNS = ['isEuropeanDecimal_', 'detectLocale_', 'normalizeFormula_', 'normalizeValue_', 'isFormulaInput_', 'formulaCellText_', 'classifyGridCell_'];
 
   // Extract a function body by balanced braces from a source string.
