@@ -40,9 +40,13 @@ function checkShellIsolation(siteDir) {
   function read(p) { return fs.readFileSync(path.join(siteDir, p + '.html'), 'utf8'); }
   function readAsset(name) { return fs.readFileSync(path.join(siteDir, 'assets', name), 'utf8'); }
 
-  // Engine / Worker live only in solver.html.
+  // Engine / Worker live only in solver.html. E1: the engine is composed into
+  // solver.html from the internal canonical file, so check the COMPOSED solver
+  // for the engine; informational pages are still checked raw (they must never
+  // carry it, composed or not).
+  const { composedHtml } = require('./composed-html.js');
   PAGES.forEach(function (p) {
-    const html = read(p);
+    const html = p === 'solver' ? composedHtml(siteDir, 'solver.html') : read(p);
     const hasEngine = /\/\*\s*ENGINE_START\s*\*\//.test(html);
     const hasWorker = /new\s+Worker\s*\(|buildWorker|engineSource|solveModel_|detectModel_/.test(html);
     if (p === 'solver') {

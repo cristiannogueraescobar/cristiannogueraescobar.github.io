@@ -153,17 +153,36 @@ ok('no test files in dist', strayTests.length === 0, strayTests.join(', '));
 const strayPy = distRel.filter(f => f.endsWith('.py'));
 ok('no .py files in dist', strayPy.length === 0, strayPy.join(', '));
 
-// 6. Engine markers + Worker source parity
+// 6. Engine markers + Worker source parity. E1: the production engine source is
+//    the internal canonical file engine/source/plumline-engine.js (the official
+//    slice: includes ENGINE_START, excludes ENGINE_END). dist/solver.html must
+//    carry the engine bytes byte-identically to that canonical file.
 function engineSlice(file) {
   const s = fs.readFileSync(file, 'utf8');
   const a = s.indexOf('/* ENGINE_START */'), b = s.indexOf('/* ENGINE_END */');
   return (a !== -1 && b !== -1 && b > a) ? s.slice(a, b) : null;
 }
-const srcEngine = engineSlice(path.join(root, 'solver.html'));
+const canonicalEngine = fs.readFileSync(path.join(root, 'engine', 'source', 'plumline-engine.js'), 'utf8');
 const distEngine = engineSlice(path.join(dist, 'solver.html'));
 ok('dist/solver.html has engine markers', distEngine !== null);
-ok('engine byte-identical to source (Worker parity)', srcEngine && distEngine && srcEngine === distEngine,
-   srcEngine && distEngine ? ('src ' + srcEngine.length + ' vs dist ' + distEngine.length) : 'missing');
+ok('engine byte-identical to canonical source (Worker parity)',
+   distEngine !== null && canonicalEngine === distEngine,
+   distEngine !== null ? ('canonical ' + canonicalEngine.length + ' vs dist ' + distEngine.length) : 'missing');
+
+// 6a. E1 canonical-engine publication contract: engine/source is internal and
+//     must NEVER be published; no SOLVER_ENGINE_SOURCE marker and no reference
+//     to the canonical file may appear in the public dist.
+{
+  const distSolverText = fs.readFileSync(path.join(dist, 'solver.html'), 'utf8');
+  ok('dist/solver.html has no SOLVER_ENGINE_SOURCE marker', distSolverText.indexOf('SOLVER_ENGINE_SOURCE') === -1);
+  ok('dist/solver.html has no canonical engine path', distSolverText.indexOf('plumline-engine.js') === -1);
+  ok('engine/source not published under dist', !fs.existsSync(path.join(dist, 'engine', 'source')));
+  ok('canonical engine file not published under dist',
+     !fs.existsSync(path.join(dist, 'engine', 'source', 'plumline-engine.js')));
+  // structural ENGINE_START/END must remain in the public output (part of the contract)
+  ok('dist/solver.html keeps structural ENGINE_START', distSolverText.indexOf('/* ENGINE_START */') !== -1);
+  ok('dist/solver.html keeps structural ENGINE_END', distSolverText.indexOf('/* ENGINE_END */') !== -1);
+}
 
 // 6b. Solver publication contract: the PUBLIC dist/solver.html must carry no
 //     SOLVER_UI composition marker and no reference to the internal fragment

@@ -78,6 +78,28 @@ dir seeded from the real fragments; page mutations use throwaway HTML with a val
 HTTP server; LF-only.
 
 ### `tests_engine_integrity.js` (engine SHA pin)
+tests_engine_baseline.js          [E0]
+tests_engine_baseline_negative.js [E0]
+tests_canonical_engine_source.js          [E1]
+tests_canonical_engine_source_positive.js [E1]
+tests_canonical_engine_source_negative.js [E1]
+tests_e1_needle_audit.js                  [E1]
+tests_canonical_parser_frontend.js          [E2]
+tests_canonical_parser_frontend_positive.js [E2]
+tests_canonical_parser_frontend_negative.js [E2]
+tests_e2_needle_audit.js                    [E2]
+canonical-engine-harness.js                 [E2 harness]
+e2-exports.js                               [E2 authority]
+tests_canonical_model_continuous.js         [E3]
+tests_canonical_model_continuous_positive.js [E3]
+tests_canonical_model_continuous_negative.js [E3]
+tests_e3_needle_audit.js                    [E3]
+e3-exports.js                               [E3 authority]
+tests_canonical_integer_branch_and_bound.js          [E4]
+tests_canonical_integer_branch_and_bound_positive.js [E4]
+tests_canonical_integer_branch_and_bound_negative.js [E4]
+tests_e4_needle_audit.js                    [E4]
+e4-exports.js                               [E4 authority]
 
 Pins the inline solver engine by its canonical SHA-256. The canonical convention
 (the same `html.slice(indexOf(START), indexOf(END))` used by
@@ -457,3 +479,33 @@ global body/head/script hash for a functional mutation). Suites that read the co
 solver page go through `engine/composed-html.js`; the small number that read source raw
 to feed the composer are justified single entries in `RAW_SOURCE_ALLOWLIST` (18 keys
 after D). See docs/checkpoint-d5-integration.md.
+
+## Dist-determinism (E4 correction)
+
+Canonical suites are deterministic with respect to dist state: no normal suite
+changes its PASSED count depending on whether dist/ exists. Composition contracts
+(E1 markers, six requests, source-not-published) use the OFFICIAL compositor
+(composeSolverInterface) and run always. The built-artefact byte-identity contract
+(dist/solver.html == composed source) is owned solely by engine/validate_dist.js
+during npm run build; it is never asserted conditionally in a normal suite.
+engine/tests_needle_audit.js enforces this: the five positive canonical checkers
+must not read dist/solver.html nor branch on existsSync(dist...). Full-battery
+TOTAL PASSED is 11099 with and without a prior build.
+
+
+## Update: Checkpoint E5 (canonical verification, statuses and error contracts)
+
+E5 pins solution verification, final statuses, stop reasons, optimalityProven, the result adaptation and the status-vs-error separation directly against the canonical source through the harness (E5 phase). No engine/mirror/algorithm/public-output change. Verification is the COMBINATION of isSatisfied_ / feasibleAt_ / buildVariableDomains_ / isWhole_ / dotProduct_ orchestrated by solveModel_ (there is no single verifySolution_). Real statuses: optimal/feasible/infeasible/unbounded/unknown/numerical_failure/invalid_model; incomplete is UI-only, NOT an engine status. Exports: E2 24 / E3 22 / E4 8 / E5 9. Parity 3 direct + 1 observable (solveModel_, elapsedMs documented as a non-deterministic temporal field, the ONLY excluded field; all other contractual fields compared exactly). Approved divergences stay 2 (newContext_/readConstraint_). Characterised defects D-E5-1 (explainStatus_ dead branch) and D-E5-2 (limit without incumbent -> unknown, stopReason preserved) are pinned, NOT fixed. Suites: checker 70, positive 54, negative 53, auditor 116; migrated 0, split 0 (status-bearing legacy drive the mirror end-to-end -> E6). Allowlist stays 18. E5 increment +293; total 11392, identical with and without dist. See docs/checkpoint-e5-verification-statuses-errors.md.
+
+## Checkpoint E6 suites
+
+- `tests_e6_worker_mirror.js` — `checkSingleEngineWorkerAndMirror(siteDir)`: single editable source, generated mirror freshness, closed adapter (exactly two divergences), Worker/token/stale/lifecycle/fallback contracts, error routing, E2-E5 export integrity, historical-fixture policy, public-output pins.
+- `tests_e6_worker_mirror_positive.js` — positive contracts.
+- `tests_e6_worker_mirror_negative.js` — N1-N55 mutations (each mutates a temp copy, runs the real generator/checker, keys on a specific message, cleans up in finally). N54/N55 fail if a historical fixture is rewritten to adopt the E6 mirror.
+- `tests_e6_needle_audit.js` — audits the negative suite's needles.
+
+The mirror is regenerated only by `npm run generate:engine-mirror`. `npm run verify`
+checks freshness and is identical with and without dist. `RAW_SOURCE_ALLOWLIST`
+stays at 18; no E6 suite/generator/adapter/fixture/harness is allowlisted.
+`engine/harness.js` is the compatibility harness for the generated mirror, not a
+mathematical authority.

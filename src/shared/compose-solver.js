@@ -53,10 +53,147 @@ const MARK_PREFIX = 'SOLVER_UI_';
 const ENGINE_START = '/* ENGINE_START */';
 const ENGINE_END = '/* ENGINE_END */';
 
+// ---- Canonical engine source (Checkpoint E1) ----------------------------------
+// The production engine mathematics live in ONE internal file. The source
+// solver.html carries a single marker pair in place of the old inline engine:
+//
+//   /* SOLVER_ENGINE_SOURCE_START:plumline-engine.js */
+//   /* SOLVER_ENGINE_SOURCE_END */
+//
+// composeEngineSource() replaces that block with the VERBATIM bytes of the
+// canonical file (which are exactly the official slice: they START with
+// /* ENGINE_START */ and END just before /* ENGINE_END */) followed by the
+// /* ENGINE_END */ marker. The composed output therefore carries the historical
+// ENGINE_START..END region byte-identically, and engineSource() in the Worker
+// keeps finding the same slice. The canonical file lives OUTSIDE assets/ (never
+// published, never fetched, never in dist, never in the public manifest) and is
+// the ONLY editable source of the engine from E1 on.
+const ENGINE_SOURCE_DIR = path.join('engine', 'source');
+const ENGINE_SOURCE_FILE = 'plumline-engine.js';
+const ENGINE_SRC_START_RE = /\/\* SOLVER_ENGINE_SOURCE_START:([^*\s]+) \*\//g;
+const ENGINE_SRC_END_RE = /\/\* SOLVER_ENGINE_SOURCE_END \*\//g;
+
+// Resolve the canonical engine file from a CLOSED allowlist: exactly one name,
+// exactly one directory, no absolute paths, no traversal, no subdirectories.
+function resolveEngineSource(file, rootDir) {
+  if (file !== ENGINE_SOURCE_FILE) {
+    throw new Error('compose-solver: engine source must be ' + ENGINE_SOURCE_FILE +
+      ' (got ' + file + ')');
+  }
+  if (path.isAbsolute(file) || file.indexOf('/') !== -1 || file.indexOf('\\') !== -1 ||
+      file.indexOf('..') !== -1) {
+    throw new Error('compose-solver: engine source path not allowed: ' + file);
+  }
+  return path.join(rootDir, ENGINE_SOURCE_DIR, file);
+}
+
+/**
+ * composeEngineSource(html, rootDir) -> html with the engine inlined.
+ * Replaces the single SOLVER_ENGINE_SOURCE_START:<file> .. SOLVER_ENGINE_SOURCE_END
+ * block with (canonical bytes) + ENGINE_END. Deterministic; throws on any anomaly.
+ * If the page carries no engine-source marker it is returned unchanged (a page
+ * that already holds an inline ENGINE_START..END, e.g. a pre-E1 fixture, is left
+ * to the UI step).
+ */
+function composeEngineSource(html, rootDir) {
+  rootDir = rootDir || '.';
+  const starts = [];
+  let m;
+  while ((m = ENGINE_SRC_START_RE.exec(html)) !== null) {
+    starts.push({ file: m[1], index: m.index, len: m[0].length });
+  }
+  const ends = [];
+  while ((m = ENGINE_SRC_END_RE.exec(html)) !== null) {
+    ends.push({ index: m.index, len: m[0].length });
+  }
+  if (starts.length === 0 && ends.length === 0) {
+    return html; // no engine-source marker: page not migrated to E1
+  }
+  if (starts.length !== ends.length) {
+    throw new Error('compose-solver: unbalanced ENGINE_SOURCE markers (' +
+      starts.length + ' start, ' + ends.length + ' end)');
+  }
+  if (starts.length > 1) {
+    throw new Error('compose-solver: more than one ENGINE_SOURCE start marker');
+  }
+  const s = starts[0], e = ends[0];
+  if (e.index < s.index) {
+    throw new Error('compose-solver: ENGINE_SOURCE_END before START');
+  }
+  // Between the two markers the source holds only whitespace/newline.
+  const between = html.slice(s.index + s.len, e.index);
+  if (between.replace(/[\r\n]/g, '') !== '') {
+    throw new Error('compose-solver: unexpected content between ENGINE_SOURCE markers');
+  }
+  // The migrated source must NOT already contain an inline engine region.
+  if (html.indexOf(ENGINE_START) !== -1 || html.indexOf(ENGINE_END) !== -1) {
+    throw new Error('compose-solver: source carries an ENGINE_SOURCE marker AND an inline engine region');
+  }
+  const full = resolveEngineSource(s.file, rootDir);
+  if (!fs.existsSync(full)) {
+    throw new Error('compose-solver: engine source file not found: ' + s.file);
+  }
+  const bytes = fs.readFileSync(full, 'utf8');
+  if (bytes.length === 0) {
+    throw new Error('compose-solver: engine source is empty: ' + s.file);
+  }
+  // The canonical file IS the official slice: it must start with ENGINE_START and
+  // must NOT itself contain an ENGINE_END (that marker is added on composition).
+  if (bytes.indexOf(ENGINE_START) !== 0) {
+    throw new Error('compose-solver: engine source must begin with ENGINE_START');
+  }
+  if (bytes.indexOf(ENGINE_END) !== -1) {
+    throw new Error('compose-solver: engine source must not contain ENGINE_END');
+  }
+  // Replace [START marker .. END marker] with canonical bytes + ENGINE_END.
+  const out = html.slice(0, s.index) + bytes + ENGINE_END + html.slice(e.index + e.len);
+  // No residual engine-source marker may survive.
+  if (/\/\* SOLVER_ENGINE_SOURCE_(?:START|END)/.test(out)) {
+    throw new Error('compose-solver: residual ENGINE_SOURCE marker after composition');
+  }
+  // The composed engine slice must equal the canonical bytes exactly.
+  const s2 = out.indexOf(ENGINE_START), e2 = out.indexOf(ENGINE_END);
+  if (s2 === -1 || e2 === -1 || out.slice(s2, e2) !== bytes) {
+    throw new Error('compose-solver: composed engine slice does not match canonical source');
+  }
+  return out;
+}
+
 function isSolverPage(label) {
   const base = String(label || '').replace(/\\/g, '/').split('/').pop();
   return base === SOLVER_FILE;
 }
+
+// findEngineRegion(html) -> { start, end } byte offsets of the STRUCTURAL engine
+// markers in a COMPOSED solver, or null if none. The literals ENGINE_START/END
+// also appear INSIDE engineSource() as quoted search strings; the structural
+// markers stand on their own comment line (preceded by a newline). This is the
+// ONE shared way to locate the engine region; tests must use it rather than a
+// naive indexOf/lastIndexOf, which would confuse the literal for the marker.
+function isStructuralMarkerAt(html, idx) {
+  if (idx <= 0) return idx === 0;
+  return html[idx - 1] === '\n';
+}
+function findEngineRegion(html) {
+  const starts = [];
+  let i = -1;
+  while ((i = html.indexOf(ENGINE_START, i + 1)) !== -1) {
+    if (isStructuralMarkerAt(html, i)) starts.push(i);
+  }
+  const ends = [];
+  i = -1;
+  while ((i = html.indexOf(ENGINE_END, i + 1)) !== -1) {
+    if (isStructuralMarkerAt(html, i)) ends.push(i);
+  }
+  if (starts.length === 0 && ends.length === 0) return null;
+  if (starts.length !== 1 || ends.length !== 1) {
+    throw new Error('findEngineRegion: expected exactly one structural ENGINE_START and ENGINE_END, got ' +
+      starts.length + '/' + ends.length);
+  }
+  if (ends[0] < starts[0]) throw new Error('findEngineRegion: ENGINE_END before ENGINE_START');
+  return { start: starts[0], end: ends[0] };
+}
+
 
 // Validate a declared fragment path: closed allowlist name, no traversal, no
 // absolute path, stays inside FRAGMENT_DIR. Returns the resolved absolute path.
@@ -94,7 +231,17 @@ function composeSolverInterface(html, rootDir) {
   if (typeof html !== 'string') throw new Error('compose-solver: html must be a string');
   rootDir = rootDir || '.';
 
-  // Engine boundary in the incoming source (must exist and be well-ordered).
+  // CANONICAL COMPOSITION SEQUENCE (Checkpoint E1):
+  //   1. engine source  -> restores the ENGINE_START..END region from the
+  //      internal canonical file (this step is a no-op for a pre-E1 page that
+  //      still holds the engine inline).
+  //   2. solver UI       -> restores the 9 UI regions from their fragments.
+  // Vite's own HTML transform runs afterwards on the composed result. This is
+  // the ONE canonical order; dev, build, tests and validate_dist all use it.
+  html = composeEngineSource(html, rootDir);
+
+  // Engine boundary in the (now engine-composed) source: must exist and be
+  // well-ordered before the UI step runs.
   const engS = html.indexOf(ENGINE_START);
   const engE = html.indexOf(ENGINE_END);
   if (engS === -1 || engE === -1 || engE < engS) {
@@ -218,14 +365,22 @@ function composeSolverInterface(html, rootDir) {
 // Convenience: compose only when the page is solver.html AND it carries markers.
 function composeSolverIfNeeded(html, label, rootDir) {
   if (!isSolverPage(label)) return html;
-  if (html.indexOf('/* ' + MARK_PREFIX) === -1) return html;
+  // Compose when the page carries either a solver-UI marker or the engine-source
+  // marker (an E1 source has both; either alone is enough to trigger).
+  const hasUi = html.indexOf('/* ' + MARK_PREFIX) !== -1;
+  const hasEngineSrc = html.indexOf('/* SOLVER_ENGINE_SOURCE_START:') !== -1;
+  if (!hasUi && !hasEngineSrc) return html;
   return composeSolverInterface(html, rootDir);
 }
 
 module.exports = {
   composeSolverInterface: composeSolverInterface,
   composeSolverIfNeeded: composeSolverIfNeeded,
+  composeEngineSource: composeEngineSource,
   FRAGMENT_DIR: FRAGMENT_DIR,
   REGIONS: REGIONS,
+  ENGINE_SOURCE_DIR: ENGINE_SOURCE_DIR,
+  ENGINE_SOURCE_FILE: ENGINE_SOURCE_FILE,
   isSolverPage: isSolverPage,
+  findEngineRegion: findEngineRegion,
 };

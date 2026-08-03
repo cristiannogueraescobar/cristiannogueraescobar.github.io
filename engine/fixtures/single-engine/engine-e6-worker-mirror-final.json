@@ -1,0 +1,346 @@
+{
+  "note": "Checkpoint E6 baseline: single editable engine source + generated Node/add-on mirror + Worker/main-thread integration + final overlay. engine/source/plumline-engine.js is the ONE editable mathematical source. engine/engine.js is now a DERIVED artefact produced by engine/generate-engine-mirror.js from the canonical source + engine/source/engine-platform-adapter.json. E6 changes NO mathematics, NO algorithm, NO tolerance, NO status, NO stopReason, NO error, NO translation, NO UI, and the public output stays byte-identical. Current behaviours are COMPATIBILITY CHARACTERISATIONS, not endorsements.",
+  "base_commit": "2832526220e79d3b278497219b030b95c3d6d8dd",
+  "branch": "refactor/single-engine",
+  "engine": {
+    "canonical_path": "engine/source/plumline-engine.js",
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes_utf8": 82697
+  },
+  "mirror": {
+    "path": "engine/engine.js",
+    "old_sha256": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa",
+    "old_bytes_utf8": 90220,
+    "final_sha256": "faabb2c240951bb9c2e90bb0d1762a3cf29409f12cf02d4958a0fcb5c77a39a6",
+    "final_bytes_utf8": 84242,
+    "status": "GENERATED artefact (was hand-maintained). Derived deterministically from the canonical source by engine/generate-engine-mirror.js. Byte-identity with the old mirror was NOT maintainable: 11 functions carried independently-authored comments (~4583 bytes of comment divergence, e.g. detectModel_ 2046 chars) that cannot be derived from the canonical file in a maintainable way. The generated mirror is AST- and functionally equivalent to the old one: 88 top-level functions, all normalized-identical, same 20 exports in the same order, identical solveModel_ results (elapsedMs excluded). Only comments and formatting differ, hence the new SHA.",
+    "byte_identity_maintainable": false,
+    "byte_identity_reason": "11 functions have independently-authored add-on comments (~4583 bytes) not derivable from the canonical source without embedding full comment blocks (which would duplicate platform text and be unmaintainable). Approved E6.4 path: new SHA + demonstrated AST/functional equivalence."
+  },
+  "generator": {
+    "path": "engine/generate-engine-mirror.js",
+    "sha256": "c563560df07dcd7ce0b30ac5d75351febfdcee5fddeebc4895c70accf89b35b6",
+    "deterministic": true,
+    "reads_only_canonical_and_adapter": true,
+    "no_dist": true,
+    "no_solver_html": true,
+    "no_network": true,
+    "no_engine_run": true,
+    "no_timestamp": true,
+    "no_absolute_path": true,
+    "lf_utf8": true,
+    "atomic_write": true,
+    "regenerate_command": "node engine/generate-engine-mirror.js --write"
+  },
+  "adapter_manifest": {
+    "path": "engine/source/engine-platform-adapter.json",
+    "sha256": "3e592a8e8452fec480539023c3bbb022ec076e301eb1dd4b92f11810769a2935"
+  },
+  "approved_transformations": [
+    {
+      "id": "A1",
+      "target": "newContext_",
+      "kind": "signature-and-fallback",
+      "web": "allowCachedFormulaFallback always false",
+      "mirror": "options-aware, defaults to allowed (add-on)"
+    },
+    {
+      "id": "A2",
+      "target": "readConstraint_",
+      "kind": "guard-nesting",
+      "web": "combined guard if(limitFormula!==null && variables)",
+      "mirror": "nested if(limitFormula!==null){if(variables){...}} — identical outcome"
+    }
+  ],
+  "canonical_mirror_inventory": {
+    "top_level_functions_canonical": 88,
+    "top_level_functions_mirror": 88,
+    "byte_identical_functions": 75,
+    "comment_only_functions": 11,
+    "functional_divergences": 2,
+    "divergence_functions": [
+      "newContext_",
+      "readConstraint_"
+    ],
+    "third_divergence": "none — a third normalized-body divergence must fail the checker"
+  },
+  "constants_inventory": {
+    "BRANCH_NODES": 4000,
+    "BRANCH_DEPTH": 60,
+    "BRANCH_MILLIS": 20000,
+    "EPSILON": "1e-9",
+    "PIVOT_TOLERANCE": "1e-7",
+    "MAX_ITERATIONS": 20000,
+    "shared_count": 10,
+    "note": "identical in canonical and generated mirror; a changed constant must fail"
+  },
+  "mirror_api": {
+    "count": 20,
+    "exports": [
+      "ENGINE",
+      "detectModel_",
+      "solveModel_",
+      "detectLocale_",
+      "normalizeFormula_",
+      "normalizeValue_",
+      "isFormulaInput_",
+      "formulaCellText_",
+      "classifyGridCell_",
+      "optimise_",
+      "classifyModel_",
+      "buildVariableDomains_",
+      "feasibleAt_",
+      "dotProduct_",
+      "pivot_",
+      "finiteModel_",
+      "validModelShape_",
+      "senseFor_",
+      "loadGrid_",
+      "readConstraint_"
+    ],
+    "surface": "module.exports = api; root.PlumlineEngine = api (window/globalThis)"
+  },
+  "wrapper_contract": {
+    "kind": "IIFE + CommonJS/global tail",
+    "header": "/* === Plumline engine: the exact same code as the Google Sheets add-on === */",
+    "no_engine_markers": "the mirror carries NO ENGINE_START/ENGINE_END (standalone module, not a Worker slice)"
+  },
+  "generated_file_policy": {
+    "editable_source": "engine/source/plumline-engine.js",
+    "editable_adapter": "engine/source/engine-platform-adapter.json + engine/generate-engine-mirror.js",
+    "generated_artefact": "engine/engine.js",
+    "verify_checks_freshness": "npm run verify checks engine.js == generator output; it does NOT regenerate",
+    "regenerate_command": "npm run generate:engine-mirror (node engine/generate-engine-mirror.js --write)",
+    "guard_fails_if": [
+      "engine.js != generator output",
+      "engine.js hand-edited",
+      "engine.js missing",
+      "engine.js stale bytes",
+      "a transformation misses its target",
+      "a third divergence appears",
+      "an export changes",
+      "a constant changes",
+      "a common function changes"
+    ]
+  },
+  "worker_execution": {
+    "engine_source_bytes": 82697,
+    "engine_source_sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "glue_bytes": 900,
+    "glue_sha256": "5bc80049a8575056596b834e45e46b338ae38e095d5abfc2072175d40ab9b7b9",
+    "separator": {
+      "value": "\n",
+      "byte": 10,
+      "hex": "0x0a",
+      "count": 1,
+      "position_offset": 82697,
+      "inserted_by": "buildWorker(): new Blob([src + '\\n' + glue]) — the single LF between engineSource and glue",
+      "part_of_canonical_engine": false,
+      "modified": false
+    },
+    "blob_source_bytes": 83598,
+    "blob_source_arithmetic": "82697 + 1 + 900 = 83598",
+    "blob_source_sha256": "ec3d60685850dfa5fc43d7a79b0e60028dd7264303734cf7d9cf45413b0e3a05",
+    "engine_source_slice": "engineSource() scans the page's <script> text for /* ENGINE_START */..indexOf(/* ENGINE_END */) and returns txt.slice(a,b): INCLUDES ENGINE_START, EXCLUDES ENGINE_END. Returns exactly the canonical bytes. Worker never reads engine/source, never fetches, never uses engine/engine.js, adds no request.",
+    "worker_client": "engine/fragments/solver-ui/solve-worker-client.js",
+    "worker_client_sha256": "121dfb653cd89c8633f00cbfda7823b42d3cb6f38587919435e1b3d2cd239f49"
+  },
+  "request_contract": {
+    "fields": [
+      "token",
+      "formulas",
+      "values",
+      "localeMode",
+      "wholeNumbers",
+      "domains",
+      "sense"
+    ],
+    "note": "postMessage payload from main thread to Worker; token added last (payload.token=myToken)"
+  },
+  "response_success_contract": {
+    "fields": [
+      "token",
+      "ok:true",
+      "out",
+      "wholeNumbers"
+    ],
+    "note": "{token, ok:true, out, wholeNumbers}"
+  },
+  "response_error_contract": {
+    "fields": [
+      "token",
+      "ok:false",
+      "phase",
+      "error"
+    ],
+    "note": "{token, ok:false, phase, error}; phase is 'read' (detectModel_ threw) or 'solve'"
+  },
+  "token_contract": {
+    "creation": "workerToken starts at 0; each solve does myToken=++workerToken",
+    "stale_guard": "onmessage compares e.data.token !== workerToken (the GLOBAL, not captured myToken) and returns early; onerror compares myToken !== workerToken",
+    "stale_effect": "a stale response does not set lastResult, does not announce, does not plot, does not export, does not replace current errors; workerBusy stays as-is for the stale message",
+    "cancel": "cancel/edit does workerToken++ then terminate() + engineWorker=null (rebuild next time)"
+  },
+  "lifecycle_contract": {
+    "build": "buildWorker(): Blob([src + '\\n' + glue], {type:'application/javascript'}); URL.createObjectURL; new Worker; URL.revokeObjectURL immediately after (code already loaded)",
+    "success": "onmessage: token guard, workerBusy=false, present result",
+    "error": "onerror: token guard, workerBusy=false, engineWorker.terminate()",
+    "cleanup": "terminate + engineWorker=null on cancel/replace so the next solve rebuilds; revokeObjectURL frees the Blob URL",
+    "no_support": "buildWorker sets engineWorker=false when Worker/Blob/URL unavailable -> main-thread fallback"
+  },
+  "fallback_contract": {
+    "trigger": "no Worker/Blob/URL support, or engine source not found -> engineWorker=false; solve() then uses solveMainThread()",
+    "path": "solveMainThread() -> setTimeout(runSolve,30); runSolve() calls detectModel_(sheet,lm) then solveModel_(sheet,model,lm) — the SAME composed canonical functions as the Worker, NOT engine/engine.js, no parser/solver reimplementation",
+    "parity": "Worker and fallback produce identical deterministic result fields (status/stopReason/optimalityProven/objective/values/nodesExplored/modelType); elapsedMs is the only non-comparable temporal field"
+  },
+  "error_routing_contract": {
+    "engine_math_status": "a FIELD on out (optimal/feasible/infeasible/unbounded/unknown/numerical_failure/invalid_model)",
+    "engine_technical_error": "thrown; Worker wraps as {ok:false, phase, error}; fallback catches in runSolve",
+    "infrastructure_error": "Worker/Blob/postMessage/onerror failure -> engineWorker=false or terminate; distinct from an engine error",
+    "localization": "localizeEngineError(msg) maps an engine error string to localized UI text; used on the Worker error path, the fallback/runSolve path, and solve — the engine never localizes",
+    "handoff": "localizeEngineError stays in the UI layer; no error text or translation moved into the engine"
+  },
+  "suites_final": {
+    "canonical_harness": [
+      "tests_canonical_engine_source(+positive/negative)",
+      "tests_canonical_parser_frontend(+positive/negative)",
+      "tests_canonical_model_continuous(+positive/negative)",
+      "tests_canonical_integer_branch_and_bound(+positive/negative)",
+      "tests_canonical_verification_statuses(+positive/negative)",
+      "tests_e2/e3/e4/e5_needle_audit",
+      "tests_e6_worker_mirror(+positive/negative)",
+      "tests_e6_needle_audit"
+    ],
+    "mirror_generated": [
+      "tests_states",
+      "tests_safety",
+      "tests_bounds",
+      "tests_single_var",
+      "tests_strict",
+      "tests_sumif_criteria",
+      "tests_locale",
+      "tests_panel",
+      "tests_grid_input (via legacy harness.js -> generated engine/engine.js)"
+    ],
+    "worker_source": [
+      "tests_worker_parity",
+      "tests_worker_token",
+      "tests_solver_execution"
+    ],
+    "composedHtml": [
+      "tests_direction",
+      "tests_examples",
+      "tests_error_i18n",
+      "tests_solve_announce"
+    ],
+    "note": "No suite depends on a SECOND editable mathematical source. engine/harness.js is now the explicit adapter for the GENERATED mirror (documented as a compatibility adapter, not the primary authority)."
+  },
+  "suite_migrations": {
+    "migrated": 0,
+    "split": 0,
+    "note": "The status-bearing legacy suites drive the generated mirror end-to-end via engine/harness.js. Their maths now traces to the single canonical source (the mirror is derived). They are kept as mirror-parity coverage; no case lost, no PASSED lost, no expected changed, no export added to the mirror to ease tests."
+  },
+  "parity": {
+    "canonical_mirror": {
+      "direct": [
+        "feasibleAt_",
+        "validModelShape_",
+        "finiteModel_"
+      ],
+      "observable": [
+        "solveModel_"
+      ],
+      "approved_divergences": [
+        "newContext_",
+        "readConstraint_"
+      ],
+      "note": "generated mirror == canonical except the 2 approved divergences; a third must fail"
+    },
+    "worker_fallback": {
+      "cases": [
+        "continuous optimal",
+        "integer optimal",
+        "binary optimal",
+        "mixed optimal",
+        "infeasible",
+        "unbounded",
+        "unknown/time limit",
+        "numerical failure",
+        "technical error",
+        "localized error handoff"
+      ],
+      "compared": "all deterministic fields; elapsedMs excluded"
+    },
+    "direct_worker": {
+      "note": "direct and Worker use the SAME engineSource bytes (canonical); identical maths"
+    }
+  },
+  "public_output": {
+    "composed_solver_bytes": 215539,
+    "dist_solver_bytes": 218349,
+    "dist_solver_sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
+    "requests": 6,
+    "worker_parity": 143,
+    "worker_token": 6,
+    "engine_integrity": 3,
+    "languages": 5,
+    "zero_canonical_published": true,
+    "no_SOLVER_ENGINE_SOURCE_in_dist": true
+  },
+  "allowlist": {
+    "post_e5": 18,
+    "post_e6": 18,
+    "note": "unchanged; generator/adapter/fixture/checker/suites are NOT in RAW_SOURCE_ALLOWLIST — the generator reads the canonical source as a physical composition/integrity contract via its own module, not through a test raw-read"
+  },
+  "fixture_sha256": {
+    "e0_baseline": "b174a9e58127393823842a06f6877f8fb52905af6f0a7e1688be4cd2ad8b11da",
+    "e1_source": "c6323a42ef236ac1dbd8ceafec29820f4faeb758aa19b2f52bc7d9529dc1105f",
+    "e2_front_end": "7ea5b1cf484213ccdcf89638c7d238d4e16f44bdabdab5642f6842a067afdb28",
+    "e3_model_continuous": "2c4d9582140a83891a29c92aab097f51f491cadb9abc36016203f0c14cec0ea2",
+    "e4_integer_branch_and_bound": "547f0d3bc8830bf4aaa802533f3d8a98e9503be518d75792ebf4aa9a4d935c7c",
+    "e5_verification_statuses": "c680f8ebe0f0e9b714a8baa08c56d96a45753aa3f8e56cd308c5f389e0cafbb3"
+  },
+  "metrics": {
+    "baseline_e5": 11392,
+    "note": "E6 total/increment recorded after suites are registered and the battery is measured; see docs/checkpoint-e6-worker-mirror-final.md"
+  },
+  "provenance": {
+    "diff": "AST comparison (acorn) of canonical and historical mirror: 88/88 functions, 86 byte-identical-or-comment-only, 2 functional divergences",
+    "mirror_generation": "engine/generate-engine-mirror.js applies A1/A2 + header + wrapper; two runs identical; output == engine/engine.js",
+    "equivalence": "generated vs historical mirror: 88/88 normalized-identical functions, 20 exports same order, identical solveModel_ results",
+    "worker": "contracts read from engine/fragments/solver-ui/solve-worker-client.js and solve-orchestration.js; byte values from the E1 fixture"
+  },
+  "PINNED_SHA": {
+    "engine": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "mirror_final": "faabb2c240951bb9c2e90bb0d1762a3cf29409f12cf02d4958a0fcb5c77a39a6",
+    "generator": "c563560df07dcd7ce0b30ac5d75351febfdcee5fddeebc4895c70accf89b35b6",
+    "adapter": "3e592a8e8452fec480539023c3bbb022ec076e301eb1dd4b92f11810769a2935"
+  },
+  "do_not_regenerate": "This fixture pins E6 contracts. checkSingleEngineWorkerAndMirror verifies them. The mirror is regenerated only by the explicit command, never during verify. No absolute paths, no timestamps, no real times, no full function bodies, no values regenerated during verify.",
+  "historical_fixture_policy": {
+    "principle": "Each phase fixture describes its own phase. E0 describes pre-E; E1-E5 describe their phase; ONLY E6 records the transition from the hand-maintained mirror to the generated mirror.",
+    "e0": "keeps the historical mirror (6190cb47, 90220 bytes) as the pre-E baseline; restored byte-identical (self-SHA b174a9e5)",
+    "e1": "not applicable - no mirror-current-state pin",
+    "e2": "not applicable - no mirror-current-state pin",
+    "e3": "keeps the historical mirror SHA (6190cb47) for its phase",
+    "e4": "keeps the historical mirror SHA (6190cb47) for its phase",
+    "e5": "keeps the historical mirror SHA (6190cb47) for its phase",
+    "e6": "the ONLY fixture whose current mirror is the generated new mirror",
+    "enforcement": "checker asserts E0/E3/E4/E5 keep the historical SHA and never the E6 SHA; negatives N54/N55 fail if a historical fixture adopts the E6 mirror"
+  },
+  "single_editable_source_policy": {
+    "editable": "engine/source/plumline-engine.js is the ONE editable mathematical source",
+    "derived": "engine/engine.js is generated; engine/generate-engine-mirror.js + engine/source/engine-platform-adapter.json are the editable adapter authority",
+    "rule": "no developer edits two engines; editing the mirror is caught by the freshness guard"
+  },
+  "generated_file_header": {
+    "present": true,
+    "banner_first_line": "/* GENERATED FILE — DO NOT EDIT MANUALLY.",
+    "declares": [
+      "canonical source path",
+      "regenerate command"
+    ],
+    "inert": "comment block; API and behaviour identical with or without it (verified)"
+  }
+}

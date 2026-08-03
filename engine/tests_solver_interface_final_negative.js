@@ -29,6 +29,8 @@ function makeTree(root) {
   fs.mkdirSync(path.join(dir, FIX_REL), { recursive: true });
   fs.mkdirSync(path.join(dir, 'src', 'shared'), { recursive: true });
   fs.copyFileSync(path.join(SITE, SOLVER), path.join(dir, SOLVER));
+  fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
+  fs.copyFileSync(path.join(SITE, 'engine', 'source', 'plumline-engine.js'), path.join(dir, 'engine', 'source', 'plumline-engine.js'));
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
@@ -39,6 +41,7 @@ function makeTree(root) {
   return dir;
 }
 const readSolver = dir => fs.readFileSync(path.join(dir, SOLVER), 'utf8');
+const engineSrcPath = dir => path.join(dir, 'engine', 'source', 'plumline-engine.js');
 const writeSolver = (dir, s) => fs.writeFileSync(path.join(dir, SOLVER), s);
 const bootPath = dir => path.join(dir, FRAG_DIR, BOOT_FILE);
 const readBoot = dir => fs.readFileSync(bootPath(dir), 'utf8');
@@ -163,8 +166,9 @@ expectCheckFail('N22 external script changed', dir => writeSolver(dir, readSolve
 expectCheckFail('N23 asset version changed', dir => writeSolver(dir, readSolver(dir).replace('plumline.css?v=21', 'plumline.css?v=555')), 'css version intact');
 // 24. Engine modified by one byte.
 expectCheckFail('N24 engine one-byte change', dir => {
-  const s = readSolver(dir); const at = s.indexOf('/* ENGINE_START */') + 40;
-  writeSolver(dir, s.slice(0, at) + ' ' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 200) + ' ' + e.slice(200));
 }, 'engine bytes canonical');
 // 25. Worker glue modified (in the solve-worker-client fragment).
 expectCheckFail('N25 worker glue modified', dir => {

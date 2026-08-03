@@ -8,7 +8,11 @@
  */
 const fs = require('fs');
 const path = require('path');
-const html = fs.readFileSync(path.join(__dirname, '..', 'solver.html'), 'utf8');
+// E1: the engine and the app script live in the COMPOSED solver, not the raw
+// source (which now holds the SOLVER_ENGINE_SOURCE marker and UI fragment
+// markers). Compose once; this is a functional read via the canonical compositor.
+const { composedHtml } = require('./composed-html.js');
+const html = composedHtml(path.join(__dirname, '..'), 'solver.html');
 const SHARED = require(path.join(__dirname, '..', 'assets', 'examples-data.js'));
 
 // Load the inline engine.

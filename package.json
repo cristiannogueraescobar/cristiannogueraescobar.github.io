@@ -12,6 +12,7 @@
     "build": "vite build",
     "preview": "vite preview --outDir dist",
     "validate": "node engine/validate_dist.js",
+    "generate:engine-mirror": "node engine/generate-engine-mirror.js --write",
     "verify": "node engine/verify_all.js"
   },
   "devDependencies": {

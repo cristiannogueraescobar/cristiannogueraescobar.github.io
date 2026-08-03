@@ -1,0 +1,62 @@
+{
+  "note": "Declarative authority for the platform differences between the web build (engine/source/plumline-engine.js, the single editable mathematical source) and the generated Node/add-on mirror (engine/engine.js). The generator engine/generate-engine-mirror.js applies EXACTLY these adaptations and nothing else. No full function bodies are stored here. A third divergence, a widened scope, an adaptation touching another function, or an adaptation changing a mathematical constant must FAIL the checker.",
+  "canonical_source": "engine/source/plumline-engine.js",
+  "generated_mirror": "engine/engine.js",
+  "generator": "engine/generate-engine-mirror.js",
+  "header": {
+    "canonical_first_line": "/* ENGINE_START */",
+    "mirror_first_line": "/* === Plumline engine: the exact same code as the Google Sheets add-on === */",
+    "reason": "The web source opens with the structural ENGINE_START marker (consumed by the Worker engineSource slice). The mirror opens with a plain add-on header comment; it carries no ENGINE_START/ENGINE_END markers because it is a standalone CommonJS/global module, not a Worker slice."
+  },
+  "wrapper": {
+    "kind": "IIFE + CommonJS/global export tail",
+    "open": "(function (root) {",
+    "api_var": "var api = {",
+    "close": "})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));",
+    "exports_tail": "  if (typeof module !== 'undefined' && module.exports) {\n    module.exports = api;\n  }\n  if (root) {\n    root.PlumlineEngine = api;\n  }",
+    "api_exports": ["ENGINE", "detectModel_", "solveModel_", "detectLocale_", "normalizeFormula_", "normalizeValue_", "isFormulaInput_", "formulaCellText_", "classifyGridCell_", "optimise_", "classifyModel_", "buildVariableDomains_", "feasibleAt_", "dotProduct_", "pivot_", "finiteModel_", "validModelShape_", "senseFor_", "loadGrid_", "readConstraint_"],
+    "reason": "Node/add-on consumers require a standalone module that exports a closed API on module.exports and on the global (window/globalThis). The web source is a bare function body composed into the Worker/main-thread interface, so it has no wrapper. The wrapper is platform packaging, not mathematics."
+  },
+  "adaptations": [
+    {
+      "id": "A1",
+      "target": "newContext_",
+      "function": "newContext_",
+      "transformation": "signature-and-fallback",
+      "canonical_signature": "function newContext_(grid, variables)",
+      "mirror_signature": "function newContext_(grid, variables, options)",
+      "canonical_fallback_block": "    // On the web every formula's stored value is 0, so folding an unsupported\n    // formula to its \"cached\" value would inject a false 0. Always forbid it\n    // here; the Google Sheets add-on (where the value is exact) allows it.\n    allowCachedFormulaFallback: false,",
+      "mirror_fallback_block": "    // In Google Sheets a formula's cached value is exact, so an unsupported but\n    // variable-independent formula can safely fold to its value. On the web the\n    // grid stores 0 for every formula, so that fallback would inject a false 0.\n    // Callers pass false to forbid it (web) or true/undefined to allow it (add-on).\n    allowCachedFormulaFallback: !(options && options.allowCachedFormulaFallback === false),",
+      "reason": "On the web every formula's stored value is 0, so folding an unsupported formula to its cached value would inject a false 0; the web build ALWAYS forbids the cached-formula fallback. In the Google Sheets add-on the cached value is exact, so the fallback is safe and allowed by default. The add-on mirror therefore takes an options argument and defaults the fallback to allowed unless a caller explicitly passes false.",
+      "web_behavior": "allowCachedFormulaFallback is always false",
+      "mirror_behavior": "allowCachedFormulaFallback defaults to true (add-on), false only when options.allowCachedFormulaFallback === false",
+      "tests": ["tests_canonical_verification_statuses (parity)", "tests_e6_worker_mirror (adapter)"],
+      "approved": true,
+      "provenance": "pre-E baseline; the historical hand-maintained mirror already carried this exact divergence"
+    },
+    {
+      "id": "A2",
+      "target": "readConstraint_",
+      "function": "readConstraint_",
+      "transformation": "guard-nesting",
+      "canonical_guard": "  if (limitFormula !== null && variables) {",
+      "mirror_guard_outer": "  if (limitFormula !== null) {",
+      "mirror_guard_inner": "    if (variables) {",
+      "reason": "The mirror nests the variable-aware formula-limit evaluation inside an explicit `if (variables)` block within `if (limitFormula !== null)`, rather than the web build's combined `if (limitFormula !== null && variables)`. The two are behaviourally identical (the inner block only runs when both are truthy), but the add-on keeps the structure split so the add-on can extend the no-variables branch. No result, error, field or value changes.",
+      "web_behavior": "combined guard; identical outcome",
+      "mirror_behavior": "nested guard; identical outcome",
+      "tests": ["tests_canonical_parser_frontend (parity)", "tests_e6_worker_mirror (adapter)"],
+      "approved": true,
+      "provenance": "pre-E baseline; the historical hand-maintained mirror already carried this exact divergence"
+    }
+  ],
+  "approved_divergence_count": 2,
+  "forbidden": {
+    "third_divergence": "a third function whose normalized body differs between canonical and generated mirror must fail",
+    "widened_scope": "an adaptation matching zero or multiple sites must fail",
+    "cross_function": "an adaptation editing a function other than its declared target must fail",
+    "constant_change": "an adaptation changing a mathematical constant (ENGINE.*, EPSILON, PIVOT_TOLERANCE, tolerances) must fail"
+  },
+  "provenance": "Derived by AST comparison of engine/source/plumline-engine.js and the historical engine/engine.js: 88 top-level functions in both, 86 with byte-identical or comment-only bodies, exactly 2 functional divergences (newContext_, readConstraint_).",
+  "do_not_regenerate": "This manifest is the editable authority for platform differences. Editing it changes what the generator is allowed to do. It is NOT regenerated during verify."
+}

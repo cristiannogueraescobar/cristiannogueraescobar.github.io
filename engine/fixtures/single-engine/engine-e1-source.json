@@ -1,0 +1,157 @@
+{
+  "note": "Checkpoint E1 baseline: the production engine now has ONE physical, internal, editable source (engine/source/plumline-engine.js) composed build-time into the historical ENGINE_START..END position of solver.html. Direct execution and the Web Worker consume exactly the composed engine bytes. This fixture pins every contract as complete SHA-256 hashes (never abbreviated). It is NOT regenerated during verify; checkCanonicalEngineSource pins the values below. E1 does NOT change engine bytes, public output, or the Worker payload, and does NOT modify engine/engine.js (the legacy Google Sheets add-on mirror, consolidated only in a later phase).",
+
+  "canonical_source": {
+    "path": "engine/source/plumline-engine.js",
+    "internal": true,
+    "published": false,
+    "representation": "B — the OFFICIAL slice: includes /* ENGINE_START */, excludes /* ENGINE_END */",
+    "slice_convention": "html.slice(indexOf(ENGINE_START), indexOf(ENGINE_END)); START included, END excluded; same as tests_engine_integrity.js",
+    "markers_included": ["/* ENGINE_START */"],
+    "markers_excluded": ["/* ENGINE_END */"],
+    "line_endings": "LF",
+    "encoding": "UTF-8",
+    "verbatim": true,
+    "lines": 2154,
+    "chars": 82657,
+    "bytes_utf8": 82697,
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf"
+  },
+
+  "engine_slice": {
+    "chars": 82657,
+    "bytes_utf8": 82697,
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "equals_canonical_file": true
+  },
+  "inner_engine": {
+    "note": "engine bytes with the leading ENGINE_START marker removed (the inner body)",
+    "bytes_utf8": 82679,
+    "sha256": "e9bc961271dd80205ac95987abc326b0f40c0142502e982ef25ddeb93c8a3741"
+  },
+
+  "source_markers": {
+    "start": "/* SOLVER_ENGINE_SOURCE_START:plumline-engine.js */",
+    "end": "/* SOLVER_ENGINE_SOURCE_END */",
+    "start_bytes": 50,
+    "end_bytes": 30,
+    "note": "These markers live in solver.html SOURCE only; they are replaced at build time and NEVER appear in dist. The composer inserts (canonical bytes) + ENGINE_END in their place.",
+    "historical_position": "same inline <script>, before the 9 SOLVER_UI regions (engine composed first, then UI)"
+  },
+
+  "solver_source": {
+    "path": "solver.html",
+    "note": "post-E1 source: engine removed, replaced by the SOLVER_ENGINE_SOURCE markers; not directly executable",
+    "bytes_utf8": 40925,
+    "sha256": "876d969fa6d02ff773790907188b654e9d9dcd8e6ae243a34e206270e0800e83"
+  },
+
+  "composed": {
+    "inline_script_bytes": 187795,
+    "inline_script_sha256": "b59f930fbf87acaf322ff2d9ef1d0b8c56da91b850f0e610761c4dab185431b8",
+    "ui_pre_engine_bytes": 2621,
+    "ui_pre_engine_sha256": "ab0852a078d4e49c404cce75bfd8aad4ef591d4024328e2a9e0449066ca92ce7",
+    "ui_post_engine_bytes": 102494,
+    "ui_post_engine_sha256": "5bdd1b30c2c1cd4afb6e593a7a2ef416d79f7f9ef4ce8106e2e6dd11e0c17d19",
+    "composed_solver_bytes": 215539,
+    "composed_solver_sha256": "232ad6c05edd19bd93d36ecefd318a2d8e8ace828348935943784350f6938666"
+  },
+  "dist_public": {
+    "path": "dist/solver.html",
+    "bytes": 218349,
+    "sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
+    "engine_markers_present": true,
+    "source_marker_present": false,
+    "canonical_path_present": false
+  },
+
+  "worker": {
+    "engine_source_bytes": 82697,
+    "engine_source_sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "glue_bytes": 900,
+    "glue_sha256": "5bc80049a8575056596b834e45e46b338ae38e095d5abfc2072175d40ab9b7b9",
+    "separator": {
+      "value": "\n",
+      "byte": 10,
+      "hex": "0x0a",
+      "count": 1,
+      "position_offset": 82697,
+      "inserted_by": "buildWorker(): new Blob([src + '\\n' + glue]) — the single LF between engineSource and glue",
+      "part_of_canonical_engine": false,
+      "modified": false
+    },
+    "blob_source_bytes": 83598,
+    "blob_source_arithmetic": "82697 + 1 + 900 = 83598",
+    "blob_source_sha256": "ec3d60685850dfa5fc43d7a79b0e60028dd7264303734cf7d9cf45413b0e3a05",
+    "request_contract": ["token", "formulas", "values", "localeMode", "wholeNumbers", "domains", "sense"],
+    "response_contract_ok": ["token", "ok:true", "out", "wholeNumbers"],
+    "response_contract_err": ["token", "ok:false", "phase", "error"],
+    "token_contract": "workerToken increments per solve; responses whose token != current are ignored (stale guard)",
+    "fallback_contract": "solveMainThread() runs the same inline engine functions when Worker/Blob/URL are unavailable"
+  },
+
+  "requests": 6,
+  "asset_versions": ["assets/plumline.css?v=21", "assets/examples-data.js?v=1", "assets/i18n.js?v=82", "assets/nav-menu.js?v=6", "assets/build-badge.js?v=2"],
+
+  "mirror_inventory": {
+    "production_file": "engine/source/plumline-engine.js",
+    "mirror_file": "engine/engine.js",
+    "production_declarations": 90,
+    "production_unique_names": 89,
+    "mirror_declarations": 90,
+    "mirror_unique_names": 89,
+    "shared_names": 89,
+    "production_only": [],
+    "mirror_only": [],
+    "equivalent_count": 87,
+    "divergent": ["newContext_", "readConstraint_"],
+    "comparison_rule": "normalisation may ignore ONLY comments, whitespace and CRLF/LF; it must NOT ignore parameters, literals, operators, calls, returns, conditions, branch structure or defaults",
+    "constants_shared": 10,
+    "constants_divergent": [],
+    "constants_list": {
+      "MAX_DEPTH": 40, "BRANCH_NODES": 4000, "BRANCH_DEPTH": 60, "BRANCH_MILLIS": 20000,
+      "EPSILON": 1e-9, "PIVOT_TOLERANCE": 1e-7, "MAX_ITERATIONS": 20000,
+      "MAX_SCAN_COLUMNS": 4, "FREE_VARIABLE_LIMIT": 50, "FREE_CONSTRAINT_LIMIT": 20
+    },
+    "mirror_entry_points": ["ENGINE", "detectModel_", "solveModel_", "detectLocale_", "normalizeFormula_", "normalizeValue_", "isFormulaInput_", "formulaCellText_", "classifyGridCell_", "optimise_", "classifyModel_", "buildVariableDomains_", "feasibleAt_", "dotProduct_", "pivot_", "finiteModel_", "validModelShape_", "senseFor_", "loadGrid_", "readConstraint_"],
+    "production_entry_points": ["detectModel_", "solveModel_"],
+    "production_entry_note": "the Worker glue and direct path call detectModel_/solveModel_ in the same lexical scope; the mirror additionally exports the api object for harness.js (Node)"
+  },
+
+  "dotProduct_duplicate": {
+    "declared_twice_in_both_files": true,
+    "production_lines": [291, 1628],
+    "mirror_lines": [305, 1680],
+    "enclosing_functions": ["isWhole_ (first)", "isSatisfied_ (second)"],
+    "scope": "each is a NESTED function local to its enclosing function; no top-level hoisting conflict because they live in separate function scopes",
+    "prevails": "neither shadows the other — they are independent locals; each enclosing function sees only its own",
+    "bodies_identical_between_the_two": false,
+    "difference": "same computation (sum of coeff*value products); parameter names differ (coeffs/values vs coefficients/values) and one uses a one-line loop, the other a braced loop",
+    "behaviour_equivalent": true,
+    "consumers": ["isWhole_", "isSatisfied_"],
+    "tests": ["tests_safety", "tests_states", "tests_bounds (via harness/engine.js)", "tests_worker_parity (inline)"]
+  },
+
+  "approved_divergences": {
+    "newContext_": {
+      "kind": "platform policy",
+      "detail": "production forces allowCachedFormulaFallback:false (web grid stores 0 for formulas); the mirror parameterises it via an options argument (Sheets cached value is exact). Different parameter list and default — a real functional divergence, not comments.",
+      "not_math": true
+    },
+    "readConstraint_": {
+      "kind": "conditional structure",
+      "detail": "production combines the guard as `if (limitFormula !== null && variables) {...}`; the mirror nests `if (limitFormula !== null) { if (variables) {...} }`. Same allowCachedFormulaFallback:false context is built inside; the branch STRUCTURE differs. A real functional divergence, NOT a comments-only difference.",
+      "not_math": true
+    },
+    "contract": "exactly these two names may diverge; a third divergent function, a vanished shared name, a mis-classified exclusive, or a divergent constant must fail the checker"
+  },
+
+  "provenance": {
+    "canonical_source": "extracted VERBATIM from the approved pre-E1 solver.html engine slice (SHA 5d68ed17...); byte-identical to the D-approved engine",
+    "engine_slice_inner": "computed from the canonical file",
+    "composed_dist": "composed via the ONE official compositor (compose-solver.js), the same used by Vite/composed-html/validate_dist; composed_solver 215539 and dist 218349 match the D-approved public output",
+    "worker": "glue reconstructed verbatim from solve-worker-client.js; engineSource == canonical; Blob = engineSource + LF + glue",
+    "mirror_inventory": "static AST-style comparison of the two files (comment/whitespace-normalised bodies), pre-E1 state",
+    "do_not_regenerate": "This fixture must NOT be rebuilt from the running implementation. checkCanonicalEngineSource pins these hashes; engine-e0-baseline.json pins the same engine SHA and Worker hashes independently; the D goldens pin dist. Update only on a deliberate, reviewed baseline change."
+  }
+}

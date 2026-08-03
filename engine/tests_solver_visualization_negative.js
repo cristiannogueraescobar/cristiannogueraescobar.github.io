@@ -33,6 +33,8 @@ function makeTree(root) {
   fs.mkdirSync(path.join(dir, FRAG_DIR), { recursive: true });
   fs.mkdirSync(path.join(dir, 'engine', 'fixtures', 'solver-ui-golden'), { recursive: true });
   fs.copyFileSync(path.join(SITE, SOLVER), path.join(dir, SOLVER));
+  fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
+  fs.copyFileSync(path.join(SITE, 'engine', 'source', 'plumline-engine.js'), path.join(dir, 'engine', 'source', 'plumline-engine.js'));
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
@@ -42,6 +44,7 @@ function makeTree(root) {
   return dir;
 }
 const readSolver = dir => fs.readFileSync(path.join(dir, SOLVER), 'utf8');
+const engineSrcPath = dir => path.join(dir, 'engine', 'source', 'plumline-engine.js');
 const writeSolver = (dir, s) => fs.writeFileSync(path.join(dir, SOLVER), s);
 const fragPath = (dir, f) => path.join(dir, FRAG_DIR, f);
 const readFrag = (dir, f) => fs.readFileSync(fragPath(dir, f), 'utf8');
@@ -102,8 +105,9 @@ expectThrow('N5 D4 overlaps D2', dir => writeSolver(dir, readSolver(dir).replace
 expectThrow('N6 D4 overlaps D3', dir => writeSolver(dir, readSolver(dir).replace(D3_START, D3_START + '\n' + RPE_START)), 'unbalanced');
 // 7. Marker inside the engine region.
 expectThrow('N7 marker inside engine', dir => {
-  const s = readSolver(dir); const at = s.indexOf('/* ENGINE_START */') + '/* ENGINE_START */'.length;
-  writeSolver(dir, s.slice(0, at) + '\n' + RPE_START + '\n' + RPE_END + '\n' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 100) + '\n/* SOLVER_UI_RECEIPT_PLOT_EXPORTS_START:x.js */\n/* SOLVER_UI_RECEIPT_PLOT_EXPORTS_END */\n' + e.slice(100));
 }, 'inside the engine region');
 // 8. Unknown fragment name.
 expectThrow('N8 unknown fragment name', dir => writeSolver(dir, readSolver(dir).replace(RPE_START, '/* SOLVER_UI_NOPE_START:receipt-plot-exports.js */').replace(RPE_END, '/* SOLVER_UI_NOPE_END */')), 'unknown');
@@ -216,8 +220,9 @@ expectCheckFail('N58 request added', dir => writeSolver(dir, readSolver(dir).rep
 expectCheckFail('N59 residual placeholder', dir => fs.appendFileSync(fragPath(dir, RPE_FILE), '\n  /* SOLVER_UI_RECEIPT_PLOT_EXPORTS_START:x */\n'), 'residual SOLVER_UI marker after composition');
 // 60. Engine modified by one byte.
 expectCheckFail('N60 engine one-byte change', dir => {
-  const s = readSolver(dir); const at = s.indexOf('/* ENGINE_START */') + 40;
-  writeSolver(dir, s.slice(0, at) + ' ' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 200) + ' ' + e.slice(200));
 }, 'engine bytes canonical');
 // 61. D1 fragment modified.
 expectCheckFail('N61 D1 fragment modified', dir => fs.appendFileSync(fragPath(dir, D1_FILE), '\n/* stray */\n'), 'fragment grid-interaction.js bytes match golden');
