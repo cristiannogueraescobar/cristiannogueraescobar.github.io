@@ -17,6 +17,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 const os = require('os');
 const { composedHtml } = require('./composed-html.js');
 const { checkShellIsolation } = require('./tests_shell_isolation.js');
@@ -113,6 +114,8 @@ function makeTree() {
   fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
   fs.copyFileSync(path.join(siteDir, 'engine', 'source', 'plumline-engine.js'),
     path.join(dir, 'engine', 'source', 'plumline-engine.js'));
+  // F1: composing solver.html projects EXAMPLES from the canonical catalogue.
+  copyCatalogueTree(siteDir, dir);
   return dir;
 }
 

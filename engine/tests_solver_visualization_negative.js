@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { composeSolverInterface } = require('../src/shared/compose-solver.js');
+const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 const { checkSolverVisualizationInterface } = require('./tests_solver_visualization.js');
 
 let pass = 0, fail = 0; const failures = [];
@@ -38,6 +39,8 @@ function makeTree(root) {
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
+  // F1: composer needs the canonical catalogue module tree to project EXAMPLES.
+  copyCatalogueTree(SITE, dir);
   fs.copyFileSync(
     path.join(SITE, 'engine', 'fixtures', 'solver-ui-golden', 'solver-visualization-d4.json'),
     path.join(dir, 'engine', 'fixtures', 'solver-ui-golden', 'solver-visualization-d4.json'));

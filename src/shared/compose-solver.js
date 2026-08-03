@@ -227,9 +227,71 @@ function resolveFragment(name, declaredFile, rootDir) {
  * anomaly. Does not modify pages other than solver.html (caller decides when to
  * call this; it only rewrites the string it is given).
  */
+// ---- Canonical example catalogue projection (Checkpoint F1) -------------------
+// The historical solver.html EXAMPLES object is projected from the single canonical
+// catalogue (src/shared/examples/catalogue.js). The SOURCE solver.html carries one
+// marker pair in place of the inline object:
+//
+//   /* SOLVER_EXAMPLES_CATALOGUE_START */
+//   /* SOLVER_EXAMPLES_CATALOGUE_END */
+//
+// composeExamplesCatalogue() replaces that block with the deterministic projection
+// serializeSolverExamples(CATALOGUE), which reproduces the original object
+// byte-for-byte. The catalogue is internal source (never published, never fetched,
+// never in dist). No transformation beyond the serializer; exactly one marker pair
+// is allowed.
+const EX_CAT_START = '/* SOLVER_EXAMPLES_CATALOGUE_START */';
+const EX_CAT_END = '/* SOLVER_EXAMPLES_CATALOGUE_END */';
+
+function resolveCatalogueModule(rootDir) {
+  return path.join(rootDir, 'src', 'shared', 'examples');
+}
+
+function composeExamplesCatalogue(html, rootDir) {
+  rootDir = rootDir || '.';
+  const sIdx = html.indexOf(EX_CAT_START);
+  const eIdx = html.indexOf(EX_CAT_END);
+  if (sIdx === -1 && eIdx === -1) return html; // page not migrated to F1 catalogue
+  if (sIdx === -1 || eIdx === -1) {
+    throw new Error('compose-solver: unbalanced EXAMPLES_CATALOGUE markers');
+  }
+  if (html.indexOf(EX_CAT_START, sIdx + EX_CAT_START.length) !== -1) {
+    throw new Error('compose-solver: more than one EXAMPLES_CATALOGUE start marker');
+  }
+  if (html.indexOf(EX_CAT_END, eIdx + EX_CAT_END.length) !== -1) {
+    throw new Error('compose-solver: more than one EXAMPLES_CATALOGUE end marker');
+  }
+  if (eIdx < sIdx) throw new Error('compose-solver: EXAMPLES_CATALOGUE_END before START');
+  const between = html.slice(sIdx + EX_CAT_START.length, eIdx);
+  if (between.replace(/[\r\n]/g, '') !== '') {
+    throw new Error('compose-solver: unexpected content between EXAMPLES_CATALOGUE markers');
+  }
+  // Guard: a migrated source must NOT also carry an inline EXAMPLES authority.
+  if (/var\s+EXAMPLES\s*=\s*\{/.test(html)) {
+    throw new Error('compose-solver: source carries EXAMPLES_CATALOGUE marker AND an inline EXAMPLES object');
+  }
+  const dir = resolveCatalogueModule(rootDir);
+  const idxPath = path.resolve(dir, 'index.js');
+  // Fresh read each time: different rootDirs (per-test temp trees that mutate the
+  // catalogue) must never see a cached module from another tree.
+  delete require.cache[idxPath];
+  const { loadAndValidateCatalogue } = require(idxPath);
+  // Validate before projecting: a schema-invalid catalogue fails here, not silently
+  // in the serializer.
+  const loaded = loadAndValidateCatalogue(rootDir);
+  const projected = loaded.serialize.serializeSolverExamples(loaded.catalogue);
+  // Replace the ENTIRE marker block (START .. END inclusive) with the projection,
+  // so the composed output carries the historical EXAMPLES object and no markers.
+  return html.slice(0, sIdx) + projected + html.slice(eIdx + EX_CAT_END.length);
+}
+
 function composeSolverInterface(html, rootDir) {
   if (typeof html !== 'string') throw new Error('compose-solver: html must be a string');
   rootDir = rootDir || '.';
+
+  // Catalogue projection (F1) runs first: it restores the historical EXAMPLES
+  // object from the canonical catalogue. No-op for a page not yet migrated.
+  html = composeExamplesCatalogue(html, rootDir);
 
   // CANONICAL COMPOSITION SEQUENCE (Checkpoint E1):
   //   1. engine source  -> restores the ENGINE_START..END region from the
@@ -369,7 +431,8 @@ function composeSolverIfNeeded(html, label, rootDir) {
   // marker (an E1 source has both; either alone is enough to trigger).
   const hasUi = html.indexOf('/* ' + MARK_PREFIX) !== -1;
   const hasEngineSrc = html.indexOf('/* SOLVER_ENGINE_SOURCE_START:') !== -1;
-  if (!hasUi && !hasEngineSrc) return html;
+  const hasCatalogue = html.indexOf(EX_CAT_START) !== -1;
+  if (!hasUi && !hasEngineSrc && !hasCatalogue) return html;
   return composeSolverInterface(html, rootDir);
 }
 
@@ -377,6 +440,7 @@ module.exports = {
   composeSolverInterface: composeSolverInterface,
   composeSolverIfNeeded: composeSolverIfNeeded,
   composeEngineSource: composeEngineSource,
+  composeExamplesCatalogue: composeExamplesCatalogue,
   FRAGMENT_DIR: FRAGMENT_DIR,
   REGIONS: REGIONS,
   ENGINE_SOURCE_DIR: ENGINE_SOURCE_DIR,

@@ -11,6 +11,7 @@ const path = require('path');
 const os = require('os');
 const { composeSolverInterface } = require('../src/shared/compose-solver.js');
 const { checkSolverGridInterface } = require('./tests_solver_grid.js');
+const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 
 let pass = 0, fail = 0; const failures = [];
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push(name + (detail ? ' — ' + detail : '')); } }
@@ -33,6 +34,9 @@ function makeTree(root) {
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
+  // F1: the solver source carries an EXAMPLES catalogue marker, so the composer
+  // needs the canonical catalogue module tree to project the EXAMPLES object.
+  copyCatalogueTree(SITE, dir);
   fs.copyFileSync(
     path.join(SITE, 'engine', 'fixtures', 'solver-ui-golden', 'solver-grid-d1.json'),
     path.join(dir, 'engine', 'fixtures', 'solver-ui-golden', 'solver-grid-d1.json'));
@@ -234,6 +238,14 @@ expectCheckFail('N32 extra request added', dir => {
     ok('N33 spaced path: mutation trips the checker', checkSolverGridInterface(spaced).fail > 0);
   } finally { fs.rmSync(spaced, { recursive: true, force: true }); }
 })();
+
+// F1-N: the temp tree must be self-sufficient — with the catalogue module removed,
+// composition MUST fail (Cannot find module) rather than silently reading the
+// catalogue from the main repository. This guards against an isolated test
+// accidentally depending on the real siteDir.
+expectThrow('F1-N catalogue absent: composer does not fall back to main repo',
+  dir => fs.rmSync(path.join(dir, 'src', 'shared', 'examples', 'catalogue.js')),
+  'catalogue.js');
 
 console.log('SOLVER GRID NEGATIVE TESTS  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail) { failures.forEach(f => console.log('  FAIL:', f)); process.exit(1); }

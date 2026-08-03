@@ -103,3 +103,24 @@ E5 pins solution verification, final statuses, stop reasons, optimalityProven, t
 Regenerate with `npm run generate:engine-mirror`; `npm run verify` only checks
 freshness. The public web output is byte-identical and the Worker slices the
 canonical engine, not the mirror.
+
+## Canonical example catalogue (Checkpoint F1)
+
+The nine built-in solver examples have a single editable authority,
+`src/shared/examples/catalogue.js` (data-only CommonJS). Every consumer is a
+projection derived from it at build/composition time: the solver `EXAMPLES` object
+(via a `SOLVER_EXAMPLES_CATALOGUE` marker in `solver.html`, composed to 6125 bytes),
+the two i18n sub-sections per language in `assets/i18n.js` (180 occurrences,
+regenerated in place by closed structure), the `assets/examples-data.js` META lines,
+the `examples.html` ItemList JSON-LD and no-JS links, Home slug references, and the
+capability↔example relation in `assets/product-capabilities.js` (by `exampleId`).
+
+Helpers are separated: `schema.js` (validation), `serialize.js` (deterministic
+serializers), `projectors.js` (region regeneration), `index.js`
+(`loadAndValidateCatalogue`, the validated entry every projection uses). The
+catalogue is internal source — never published to dist, no runtime request. The
+public output is byte-identical to the pre-F1 baseline (composed solver 215539, dist
+solver 218349, sha `4dbf1a8a…`, six requests, five languages). `model.fieldOrder` is
+a historical serialization contract, not a model authority. `npm run generate:examples`
+is the single generator; `npm run verify` step 4b checks projection staleness without
+writing. See `docs/checkpoint-f1-canonical-example-catalogue.md`.

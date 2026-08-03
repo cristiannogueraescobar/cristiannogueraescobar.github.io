@@ -15,6 +15,7 @@ const os = require('os');
 const crypto = require('crypto');
 const { checkCanonicalEngineSource } = require('./tests_canonical_engine_source.js');
 const { composeSolverInterface, findEngineRegion } = require('../src/shared/compose-solver.js');
+const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 
 const SITE = path.join(__dirname, '..');
 let pass = 0, fail = 0; const failures = [];
@@ -72,6 +73,7 @@ ok('engine/source not published to dist',
       fs.copyFileSync(path.join(SITE, 'engine', 'fragments', 'solver-ui', f),
         path.join(base, 'engine', 'fragments', 'solver-ui', f));
     }
+    copyCatalogueTree(SITE, base);
     const c = composeSolverInterface(fs.readFileSync(path.join(base, 'solver.html'), 'utf8'), base);
     ok('composition works from a spaced path', Buffer.byteLength(c, 'utf8') === 215539);
   } finally { fs.rmSync(base, { recursive: true, force: true }); }
