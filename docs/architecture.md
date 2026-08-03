@@ -76,3 +76,30 @@ EXAMPLES_DRAWER, and BOOTSTRAP_ACCESSIBILITY. The engine region
 throughout D and are the province of Checkpoint E. Module-level i18n utilities and the
 IIFE-head example data/state remain inline by design. See
 docs/checkpoint-d5-integration.md for the full account.
+
+Checkpoint E (single canonical engine) is in its baseline phase E0 only: an
+inventory and architecture map, no engine move. E0 found ONE production engine
+source (the inline ENGINE_START..END region, sliced identically by direct
+execution and the Worker) plus a second real source, engine/engine.js (the
+Google Sheets add-on twin, 87/89 bodies identical after normalisation). See
+docs/checkpoint-e-baseline.md and docs/single-engine-architecture.md
+(PROPOSED — NOT IMPLEMENTED). Checkpoint E1 then extracted the engine VERBATIM into the internal canonical file engine/source/plumline-engine.js (the official slice: includes ENGINE_START, excludes ENGINE_END), composed build-time into the historical position by the one official compositor; direct execution and the Worker consume the same composed bytes, dist/solver.html stays byte-identical, and engine/engine.js remains the legacy mirror (consolidated only later). See docs/checkpoint-e1-canonical-source.md. Checkpoint E is NOT complete after E1. Checkpoint E2 then made the mathematical front-end (references, ranges, tokeniser, parser, SUM/SUMIF, comparison + criteria, validation, linearisation, coefficient extraction) run directly against the canonical source through a vm harness (engine/canonical-engine-harness.js) with a closed export list (engine/e2-exports.js); no engine byte, parser, operator, error or result changed, and engine/engine.js stays the untouched mirror. See docs/checkpoint-e2-parser-validation-linearization.md. Checkpoint E is NOT complete after E2. Checkpoint E3 then made canonical model construction and continuous solving (context, grid, variable order, objective, direction, constraints, operators, RHS, coefficient vectors/matrices, normalisation, bounds, free/fixed variables, domain metadata, continuous classification, standard form, tableau, continuous simplex, pivot, continuous optimal/unbounded/infeasible at the internal level) run directly against the canonical source through the same harness with a separate closed export list (engine/e3-exports.js, phase 'e3'); a fully-continuous model never enters branch-and-bound; no engine byte, mirror byte, tolerance, algorithm or public output changed. See docs/checkpoint-e3-model-construction-continuous-simplex.md. Checkpoint E is NOT complete after E3. Checkpoint E4 then made canonical integer / binary / mixed solving and branch-and-bound (integer indices, whole-number detection, binary/mixed domains, integrality, branch-variable selection, node creation, ceil-first DFS traversal, incumbent, pruning, node/depth/time limits, and the internal integer result contract) run directly against the canonical source through the same harness with a separate closed export list (engine/e4-exports.js, phase 'e4'); a fully-continuous model still never enters branch-and-bound; no engine byte, mirror byte, constant, tolerance, branching policy or public output changed. See docs/checkpoint-e4-integer-branch-and-bound.md. Checkpoint E is NOT complete after E4.
+
+
+## Update: dist-determinism correction (during E4)
+
+During Checkpoint E4 a dist-dependency was found: five canonical suites gated a dist/solver.html byte-identical assertion on fs.existsSync(dist), making the battery count 11095 without a prior build and 11104 with one. Fix: the six E1 composition checks now use the OFFICIAL compositor (composeSolverInterface) and run always; the three Category-B byte-identity assertions (parser_frontend, model_continuous, integer checker) plus two skip-as-pass branches (P48, P54) were removed, their byte-identity contract owned solely by validate_dist during npm run build. The battery is now deterministic: TOTAL PASSED 11099 with and without dist. E3 baseline adjusted to 10849; E4 increment 250; E4 total 11099. See docs/checkpoint-e4-integer-branch-and-bound.md.
+
+
+## Update: Checkpoint E5 (canonical verification, statuses and error contracts)
+
+E5 pins solution verification, final statuses, stop reasons, optimalityProven, the result adaptation and the status-vs-error separation directly against the canonical source through the harness (E5 phase). No engine/mirror/algorithm/public-output change. Verification is the COMBINATION of isSatisfied_ / feasibleAt_ / buildVariableDomains_ / isWhole_ / dotProduct_ orchestrated by solveModel_ (there is no single verifySolution_). Real statuses: optimal/feasible/infeasible/unbounded/unknown/numerical_failure/invalid_model; incomplete is UI-only, NOT an engine status. Exports: E2 24 / E3 22 / E4 8 / E5 9. Parity 3 direct + 1 observable (solveModel_, elapsedMs documented as a non-deterministic temporal field, the ONLY excluded field; all other contractual fields compared exactly). Approved divergences stay 2 (newContext_/readConstraint_). Characterised defects D-E5-1 (explainStatus_ dead branch) and D-E5-2 (limit without incumbent -> unknown, stopReason preserved) are pinned, NOT fixed. Suites: checker 70, positive 54, negative 53, auditor 116; migrated 0, split 0 (status-bearing legacy drive the mirror end-to-end -> E6). Allowlist stays 18. E5 increment +293; total 11392, identical with and without dist. See docs/checkpoint-e5-verification-statuses-errors.md.
+
+## Engine source of truth (Checkpoint E6)
+
+`engine/source/plumline-engine.js` is the single editable mathematical source.
+`engine/engine.js` is a generated Node/add-on mirror (see
+`docs/single-engine-architecture.md` and `docs/checkpoint-e6-worker-mirror-final.md`).
+Regenerate with `npm run generate:engine-mirror`; `npm run verify` only checks
+freshness. The public web output is byte-identical and the Worker slices the
+canonical engine, not the mirror.

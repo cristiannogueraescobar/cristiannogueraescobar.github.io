@@ -1,0 +1,631 @@
+{
+  "note": "Checkpoint E2 baseline: the mathematical FRONT-END (references, ranges, tokeniser, parser/AST-forms, SUM/SUMIF, comparison + SUMIF criteria, syntactic validation, linearity detection, linearisation, coefficient extraction) is now exercised DIRECTLY against the canonical production source engine/source/plumline-engine.js through the canonical harness (vm), not only against the legacy mirror engine/engine.js. E2 is structural and contractual: it changes NO engine byte, no parser, no operator, no literal, no error, no tolerance, no result, no order, no name, no parameter, no return, no logic. The engine SHA stays 5d68ed17...; engine/engine.js is untouched (consolidated only in a later phase). This fixture captures the PRE-E2 behaviour and is not regenerated during verify.",
+  "engine": {
+    "canonical_path": "engine/source/plumline-engine.js",
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes_utf8": 82697
+  },
+  "harness": {
+    "path": "engine/canonical-engine-harness.js",
+    "authority_module": "engine/e2-exports.js",
+    "loads": "engine/source/plumline-engine.js ONLY",
+    "mechanism": "Node vm.runInContext with a test-only export epilogue",
+    "requested_names": 24,
+    "exported_functions": 24,
+    "all_exports_are_functions": true,
+    "undeclared_aliases": 0,
+    "reconciliation_22_24": "an earlier report said 22 exports; that was the count BEFORE the two shared context builders (loadGrid_, newContext_) were added to feed the front-end functions. The reconciled count is 24 requested == 24 exported, verified programmatically; 0 missing, 0 extra, 0 non-function, 0 undeclared alias.",
+    "guards": [
+      "rejects an E3-E5 name (is an E3-E5 function...)",
+      "rejects an unknown name (not in the closed E2 export list)",
+      "rejects a non-function export",
+      "rejects an undeclared alias (two names -> same function)",
+      "epilogue throws if a requested function is missing"
+    ],
+    "does_not": [
+      "modify the source",
+      "copy function bodies",
+      "use engine/engine.js",
+      "read solver.html",
+      "read dist",
+      "depend on dist existing"
+    ],
+    "environment_stubs": [
+      {
+        "name": "console",
+        "reason": "defensive log branches",
+        "value": "no-op log/warn/error",
+        "impact": "none \u2014 tests never assert on logs"
+      },
+      {
+        "name": "Math/Date/JSON/Number/Array/Object/String/Boolean/RegExp/isNaN/isFinite/parseFloat/parseInt",
+        "reason": "standard globals the engine uses for pure computation",
+        "value": "native",
+        "impact": "none \u2014 native semantics"
+      },
+      {
+        "name": "sheetStub",
+        "reason": "loadGrid_ reads its grid through a Sheets-like reader; tests supply formulas/values as 2-D arrays",
+        "value": "getDataRange().getFormulas()/getValues()/getRow()=1/getColumn()=1",
+        "impact": "none \u2014 loadGrid_ (the engine's own loader) does all shaping/normalisation; the stub adds no math or parsing"
+      }
+    ],
+    "e2_exports_closed_list": [
+      "cellAt_",
+      "parseAddress_",
+      "columnIndex_",
+      "columnLetter_",
+      "expandRange_",
+      "expandReference_",
+      "referencedCells_",
+      "listFormulaCells_",
+      "isFormulaInput_",
+      "formulaCellText_",
+      "classifyGridCell_",
+      "detectLocale_",
+      "normalizeFormula_",
+      "normalizeValue_",
+      "compareValues_",
+      "parseCriterionOperand_",
+      "matchesCriterion_",
+      "tokenize_",
+      "linearize_",
+      "safeLinearize_",
+      "candidateIsLinear_",
+      "coefficientVector_",
+      "loadGrid_",
+      "newContext_"
+    ],
+    "not_exposed_e3_e5": [
+      "detectModel_",
+      "solveModel_",
+      "optimise_",
+      "classifyModel_",
+      "buildVariableDomains_",
+      "feasibleAt_",
+      "pivot_",
+      "solveLinearProgram_",
+      "finiteModel_",
+      "senseFor_",
+      "readConstraint_",
+      "validModelShape_"
+    ]
+  },
+  "functions_e2": {
+    "cellAt_": {
+      "lines": "735-743",
+      "category": "reference",
+      "throws": []
+    },
+    "parseAddress_": {
+      "lines": "745-749",
+      "category": "reference",
+      "throws": [
+        "bad cell reference \"...\""
+      ]
+    },
+    "columnIndex_": {
+      "lines": "751-757",
+      "category": "reference",
+      "note": "1-based: A=1, Z=26, AA=27"
+    },
+    "columnLetter_": {
+      "lines": "759-768",
+      "category": "reference",
+      "note": "1-based: 0->'' , 25->Y, 26->Z"
+    },
+    "expandRange_": {
+      "lines": "770-782",
+      "category": "range",
+      "note": "row-major: A1:B2 -> [A1,B1,A2,B2]"
+    },
+    "expandReference_": {
+      "lines": "1866-1870",
+      "category": "range"
+    },
+    "referencedCells_": {
+      "lines": "814-825",
+      "category": "reference"
+    },
+    "listFormulaCells_": {
+      "lines": "1854-1864",
+      "category": "reference"
+    },
+    "isFormulaInput_": {
+      "lines": "609-617",
+      "category": "grid-cell"
+    },
+    "formulaCellText_": {
+      "lines": "624-626",
+      "category": "grid-cell"
+    },
+    "classifyGridCell_": {
+      "lines": "635-647",
+      "category": "grid-cell"
+    },
+    "detectLocale_": {
+      "lines": "662-687",
+      "category": "locale"
+    },
+    "normalizeFormula_": {
+      "lines": "688-703",
+      "category": "normalisation"
+    },
+    "normalizeValue_": {
+      "lines": "704-709",
+      "category": "normalisation"
+    },
+    "compareValues_": {
+      "lines": "873-886",
+      "category": "comparison",
+      "throws": [
+        "unknown comparison ..."
+      ],
+      "note": "evaluates <, >, <=, >=, =, ==; strict </> ARE evaluated here \u2014 the strict REJECTION lives in the constraint layer (STRICT_RELATION_TOKENS), not here"
+    },
+    "parseCriterionOperand_": {
+      "lines": "893-905",
+      "category": "sumif-criteria",
+      "note": "numeric criteria parse: '.5'->0.5, '+10'->10, '1e3'->1000, '>10' stays '>10'"
+    },
+    "matchesCriterion_": {
+      "lines": "907-916",
+      "category": "sumif-criteria"
+    },
+    "tokenize_": {
+      "lines": "1010-1042",
+      "category": "tokeniser",
+      "throws": [
+        "unsupported syntax near \"...\""
+      ]
+    },
+    "linearize_": {
+      "lines": "960-1004",
+      "category": "linearisation",
+      "throws": [
+        "reference cycle or too deep",
+        "unexpected token ...",
+        "... has no numeric value to fall back on"
+      ]
+    },
+    "safeLinearize_": {
+      "lines": "1571-1578",
+      "category": "linearisation",
+      "note": "wraps linearize_ errors as '<cell> could not be read as a number or a linear expression of ...'"
+    },
+    "candidateIsLinear_": {
+      "lines": "1585-1596",
+      "category": "linearity"
+    },
+    "coefficientVector_": {
+      "lines": "1636-1638",
+      "category": "coefficients",
+      "note": "returns coefficients in the requested variable order"
+    },
+    "loadGrid_": {
+      "lines": "shared G",
+      "category": "context-builder",
+      "note": "engine's own grid loader \u2014 used to build the grid object, not a test reimplementation"
+    },
+    "newContext_": {
+      "lines": "shared G",
+      "category": "context-builder",
+      "note": "approved divergence with the mirror (allowCachedFormulaFallback policy)"
+    }
+  },
+  "excluded_functions": {
+    "mixed_or_e3_e5": [
+      "detectModel_ (E3 model construction)",
+      "solveModel_ / solveLinearProgram_ / optimise_ / pivot_ (E3/E4 solver)",
+      "classifyModel_ / buildVariableDomains_ / feasibleAt_ (E3 model)",
+      "readConstraint_ (E3 constraint reading; also an approved divergence)",
+      "finiteModel_ / validModelShape_ / senseFor_ (E3/E5)"
+    ],
+    "ui_plot": [
+      "the plot's own normalizeConstraint_ lives in the UI fragment, not the engine (class F)"
+    ],
+    "reason": "these consume or produce full model/solve/verification state; exposing them to the E2 API would force simulating E3+"
+  },
+  "grammar": {
+    "integer_literal": {
+      "example": "10",
+      "supported": true
+    },
+    "decimal_literal": {
+      "example": "20.0",
+      "supported": true,
+      "note": "20.0 parses as 20"
+    },
+    "leading_dot_decimal": {
+      "example": ".5",
+      "supported_in_parser": false,
+      "supported_in_sumif_criteria": true,
+      "note": "tokenize_('.5') throws 'unsupported syntax near'; parseCriterionOperand_('.5') -> 0.5"
+    },
+    "scientific_notation": {
+      "example": "1e3",
+      "supported_in_parser": false,
+      "supported_in_sumif_criteria": true,
+      "note": "tokenize_('1e3') -> number '1' + ref 'E3' (NOT scientific); parseCriterionOperand_('1e3') -> 1000"
+    },
+    "positive_sign": {
+      "example": "+10",
+      "supported": true,
+      "note": "unary + as punct in parser; +10 -> 10 in SUMIF criteria"
+    },
+    "negative_sign": {
+      "example": "-10",
+      "supported": true
+    },
+    "parentheses": {
+      "supported": true
+    },
+    "addition": {
+      "supported": true
+    },
+    "subtraction": {
+      "supported": true
+    },
+    "multiplication": {
+      "supported": true
+    },
+    "division": {
+      "supported": true,
+      "note": "division by a variable is non-linear -> error"
+    },
+    "operators_le_ge_eq": {
+      "tokens": [
+        "<=",
+        ">=",
+        "=",
+        "==",
+        "=<",
+        "=>",
+        "\u2264",
+        "\u2265"
+      ],
+      "supported": true
+    },
+    "strict_operators": {
+      "tokens": [
+        "<",
+        ">"
+      ],
+      "tokenised": true,
+      "rejected_in_constraints": true,
+      "reject_error": "STRICT_INEQUALITY:",
+      "note": "< and > tokenise and compareValues_ evaluates them, but the constraint layer throws STRICT_INEQUALITY for a strict relation; </> are NOT accepted as substitutes for <=/>="
+    },
+    "functions_supported": [
+      "SUM",
+      "SUMPRODUCT",
+      "IF",
+      "SUMIF"
+    ],
+    "constant_functions": [
+      "MIN",
+      "MAX",
+      "and the rest of CONSTANT_FUNCTIONS (constant-only, no variables)"
+    ],
+    "countif": {
+      "supported": false,
+      "announced": false,
+      "note": "COUNTIF is NOT implemented"
+    },
+    "formula_with_or_without_equals": {
+      "note": "normalizeFormula_ strips a leading '='"
+    },
+    "locale_mode": {
+      "values": [
+        "auto",
+        "us",
+        "eu"
+      ],
+      "note": "detectLocale_ decides EU vs US decimal; unchanged in E2"
+    }
+  },
+  "grammar_by_layer": {
+    "tokeniser_general_parser": {
+      "'.5'": "REJECTED (unsupported syntax near)",
+      "'1e3'": "NOT scientific \u2014 tokenises as number '1' + ref 'E3'",
+      "'<=' '>=' '='": "tokenise as punct",
+      "strict '<' '>'": "tokenise as punct (NOT rejected at this layer)"
+    },
+    "sumif_criteria_parser": {
+      "'.5'": "accepted as 0.5",
+      "'1e3'": "accepted as 1000",
+      "'+10'": "accepted as 10",
+      "'20.0'": "numerically equals 20",
+      "'>10'": "kept as the string '>10' (operator + operand)"
+    },
+    "compareValues_internal": {
+      "'<' '>'": "EVALUATED here (5<10 true, 5>10 false)",
+      "'<=' '>=' '='": "evaluated"
+    },
+    "constraint_reading_and_validation_E3_boundary": {
+      "strict '<' '>' as a relation": "REJECTED with STRICT_INEQUALITY: (this lives in the constraint layer, an E2/E3 boundary, NOT in the tokeniser or compareValues_)",
+      "'<=' '>=' '='": "supported relations",
+      "'</>' as substitutes for <=/>=": "NOT accepted"
+    },
+    "note": "These are COMPATIBILITY CHARACTERISATIONS of current behaviour, not desirable features. The layer matters: a blanket 'strict < and > unsupported' is wrong because the tokeniser and compareValues_ do handle them; only the constraint layer rejects them."
+  },
+  "errors_front_end": [
+    {
+      "message": "bad cell reference \"...\"",
+      "from": "parseAddress_",
+      "condition": "malformed A1 address"
+    },
+    {
+      "message": "unknown comparison ...",
+      "from": "compareValues_",
+      "condition": "operator not in the relation set"
+    },
+    {
+      "message": "unsupported syntax near \"...\"",
+      "from": "tokenize_",
+      "condition": "a character the tokeniser does not accept (e.g. '.5')"
+    },
+    {
+      "message": "unexpected token ...",
+      "from": "parseFactor_ / linearize_",
+      "condition": "token the parser cannot place"
+    },
+    {
+      "message": "unexpected end of formula",
+      "from": "parseFactor_",
+      "condition": "formula ends mid-expression"
+    },
+    {
+      "message": "expected ...",
+      "from": "consume_",
+      "condition": "a required token is missing"
+    },
+    {
+      "message": "a range is only valid inside SUM or SUMPRODUCT",
+      "from": "parseFactor_",
+      "condition": "a bare range outside an aggregate"
+    },
+    {
+      "message": "a comparison involves a decision variable",
+      "from": "parseComparison_",
+      "condition": "comparison operand depends on a variable"
+    },
+    {
+      "message": "unsupported function ...",
+      "from": "parseFunction_",
+      "condition": "a function name outside the supported set (e.g. COUNTIF)"
+    },
+    {
+      "message": "SUMPRODUCT ranges have different sizes",
+      "from": "parseFunction_",
+      "condition": "mismatched SUMPRODUCT ranges"
+    },
+    {
+      "message": "IF() tests a decision variable",
+      "from": "parseFunction_",
+      "condition": "IF condition depends on a variable"
+    },
+    {
+      "message": "the SUMIF criterion depends on a decision variable",
+      "from": "parseFunction_",
+      "condition": "SUMIF criterion depends on a variable"
+    },
+    {
+      "message": "reference cycle or too deep",
+      "from": "linearize_",
+      "condition": "cyclic or over-deep reference chain"
+    },
+    {
+      "message": "non-linear: a variable is multiplied by another variable",
+      "from": "multiplyForms_ (via parser)",
+      "condition": "variable*variable"
+    },
+    {
+      "message": "non-linear: division by a variable",
+      "from": "divideForms_ (via parser)",
+      "condition": "x/variable"
+    },
+    {
+      "message": "division by zero",
+      "from": "divideForms_",
+      "condition": "constant/0"
+    },
+    {
+      "message": "STRICT_INEQUALITY: ...",
+      "from": "constraint layer (E3 boundary; strict-operator rejection)",
+      "condition": "a strict < or > used as a relation"
+    },
+    {
+      "message": "<cell> could not be read as a number or a linear expression of ...",
+      "from": "safeLinearize_",
+      "condition": "wraps any linearize_ failure for a cell"
+    }
+  ],
+  "contracts": {
+    "reference": {
+      "parseAddress_('A1')": {
+        "column": 1,
+        "row": 1
+      },
+      "parseAddress_('AA10')": {
+        "column": 27,
+        "row": 10
+      },
+      "parseAddress_('1A')": "throws bad cell reference"
+    },
+    "range": {
+      "expandRange_('A1:B2')": [
+        "A1",
+        "B1",
+        "A2",
+        "B2"
+      ],
+      "expandRange_('A1:A3')": [
+        "A1",
+        "A2",
+        "A3"
+      ],
+      "expandRange_('A1')": [
+        "A1"
+      ]
+    },
+    "linearisation": {
+      "'=A2+A3' vars[A2,A3]": {
+        "constant": 0,
+        "terms": {
+          "A2": 1,
+          "A3": 1
+        }
+      },
+      "'=2*A2+3*A3'": {
+        "constant": 0,
+        "terms": {
+          "A2": 2,
+          "A3": 3
+        }
+      },
+      "'=A2*A3'": "non-linear -> safeLinearize_ error",
+      "'=A2/A3'": "non-linear -> safeLinearize_ error"
+    },
+    "coefficient_vector": {
+      "form(=2*A2+3*A3), order[A2,A3]": [
+        2,
+        3
+      ],
+      "order[A3,A2]": [
+        3,
+        2
+      ]
+    },
+    "sumif": {
+      "SUMIF(A2:A4,'>15') over [10,20,30]": {
+        "constant": 50,
+        "terms": {}
+      },
+      "parseCriterionOperand_('>10')": ">10",
+      "parseCriterionOperand_('.5')": 0.5,
+      "parseCriterionOperand_('+10')": 10,
+      "parseCriterionOperand_('1e3')": 1000,
+      "matchesCriterion_(20,'20.0')": true
+    },
+    "comparison": {
+      "compareValues_(5,'<=',10)": true,
+      "compareValues_(10,'>=',5)": true,
+      "compareValues_(5,'=',5)": true,
+      "compareValues_(5,'<',10)": true,
+      "compareValues_(5,'>',10)": false
+    }
+  },
+  "parity_matrix": {
+    "authority": "canonical source",
+    "note": "Exact comparison runs WHERE the mirror exposes the same operation (direct) or through a shared public entry point (observable). engine/engine.js exports only 20 entry points; the pure front-end functions are not exported, so parity is anchored at loadGrid_ (direct) and detectModel_ (observable). detectModel_ is used ONLY as an observable E2/E3-boundary probe: NOT exposed through the E2 harness, NOT counted as a migrated E2 function, NOT the parser checker's authority.",
+    "rows": [
+      {
+        "id": "P1",
+        "canonical": "loadGrid_",
+        "mirror": "loadGrid_",
+        "kind": "direct",
+        "input": "3x2 grid =A2+A3",
+        "result": "identical grid shape + normalised formulas/values",
+        "approved_divergence": null
+      },
+      {
+        "id": "P2",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "strict-< constraint sheet",
+        "result": "same model/error",
+        "approved_divergence": null
+      },
+      {
+        "id": "P3",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "SUMIF criteria sheet",
+        "result": "same model/error",
+        "approved_divergence": null
+      },
+      {
+        "id": "P4",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "locale eu decimal sheet",
+        "result": "same model/error",
+        "approved_divergence": null
+      }
+    ],
+    "direct_parity_cases": 1,
+    "observable_parity_cases": 3,
+    "approved_divergences": [
+      "newContext_",
+      "readConstraint_"
+    ],
+    "rule": "a new divergence in any E2 case must fail; the mirror is never modified to force parity"
+  },
+  "migrated_suites": {
+    "note": "Audit by REAL call graph, not by suite name. harness.js run() calls detectModel_ AND solveModel_ end-to-end, so any suite built on run() reaches E3 model construction + solver and is NOT pure front-end. The E2 migration is the NEW canonical suites; the four legacy candidates stay legacy because migrating would force exposing detectModel_/solveModel_/readConstraint_.",
+    "e2_canonical_suites": [
+      "tests_canonical_parser_frontend (checker)",
+      "tests_canonical_parser_frontend_positive",
+      "tests_canonical_parser_frontend_negative"
+    ],
+    "candidate_audit": {
+      "tests_strict.js": {
+        "run_calls": 16,
+        "reaches": "detectModel_ + solveModel_ (via run)",
+        "strict_rejection_at": "readConstraint_ (E3 boundary)",
+        "classification": "C legacy (E3)",
+        "reason": "end-to-end via run(); migrating forces exposing detectModel_/readConstraint_"
+      },
+      "tests_sumif_criteria.js": {
+        "run_calls": 3,
+        "reaches": "detectModel_ + solveModel_ (via run)",
+        "classification": "C legacy (E3)",
+        "reason": "cases run full models; pure SUMIF-criteria contracts covered by the E2 checker/positive + observable parity probe"
+      },
+      "tests_locale.js": {
+        "run_calls": 11,
+        "direct_calls": [
+          "detectLocale_",
+          "normalizeFormula_",
+          "normalizeValue_"
+        ],
+        "classification": "C legacy (mixed, no clean split)",
+        "reason": "cases mix direct locale calls with run(); no clean split; locale/normalisation contracts covered by the E2 checker"
+      },
+      "tests_single_var.js": {
+        "run_calls": 25,
+        "reaches": "detectModel_ + solveModel_ (via run)",
+        "classification": "C legacy (E3)",
+        "reason": "single-variable MODEL classification \u2014 entirely E3"
+      }
+    },
+    "migrated_count": 0,
+    "split_count": 0,
+    "still_legacy_engine_js": {
+      "tests_bounds.js": "E3 model construction / variable bounds",
+      "tests_states.js": "E5 solve statuses",
+      "tests_safety.js": "E3/E4 solver safety limits",
+      "tests_single_var.js": "E3 single-variable model classification",
+      "tests_locale.js": "mixed; kept legacy (no clean E2 split)",
+      "tests_sumif_criteria.js": "E3 end-to-end; E2 criteria covered canonically",
+      "tests_strict.js": "E3 constraint-layer strict rejection"
+    },
+    "composed_html_integration": [
+      "tests_direction",
+      "tests_panel",
+      "tests_grid_input",
+      "tests_examples"
+    ]
+  },
+  "provenance": {
+    "grammar_and_errors": "characterised by executing the canonical source through the harness (vm) on the pre-E2 tree; behaviour recorded as-is, no correction",
+    "engine_sha": "read from engine/source/plumline-engine.js (unchanged since E1)",
+    "parity": "canonical harness vs engine/engine.js at the shared exposed boundary",
+    "do_not_regenerate": "This fixture pins pre-E2 behaviour. checkCanonicalParserFrontEnd verifies these contracts; the engine SHA is pinned here and in engine-e0-baseline.json / engine-e1-source.json independently. Do not rebuild from the running implementation; update only on a deliberate, reviewed baseline change."
+  }
+}

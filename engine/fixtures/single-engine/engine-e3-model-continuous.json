@@ -1,0 +1,452 @@
+{
+  "note": "Checkpoint E3 baseline: canonical MODEL CONSTRUCTION and CONTINUOUS solving are exercised directly against engine/source/plumline-engine.js through the canonical harness (E3 phase). E3 is structural and contractual: NO engine byte, mirror byte, tolerance, algorithm, pivot order, tie-breaking, normalisation, name, parameter, return, message, status or public output changed. The engine SHA stays 5d68ed17...; the mirror SHA stays 6190cb47...; branch-and-bound, integer/binary/mixed solving, final public status semantics and verification remain E4/E5. Current behaviours below are COMPATIBILITY CHARACTERISATIONS, not endorsements.",
+  "engine": {
+    "canonical_path": "engine/source/plumline-engine.js",
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes_utf8": 82697
+  },
+  "mirror": {
+    "path": "engine/engine.js",
+    "sha256": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa",
+    "status": "unchanged since E0; the legacy add-on twin; NOT reconciled in E3"
+  },
+  "e2_fixture_sha256": "7ea5b1cf484213ccdcf89638c7d238d4e16f44bdabdab5642f6842a067afdb28",
+  "exports": {
+    "e2_count": 24,
+    "e3_count": 22,
+    "e3_list": [
+      "detectModel_",
+      "solveModel_",
+      "readConstraint_",
+      "senseFor_",
+      "pickObjective_",
+      "describeModel_",
+      "reachableConstants_",
+      "dependsOnVariables_",
+      "applyBounds_",
+      "buildVariableDomains_",
+      "integerIndices_",
+      "classifyModel_",
+      "optimise_",
+      "solveLinearProgram_",
+      "normalizeConstraint_",
+      "pivot_",
+      "feasibleAt_",
+      "finiteModel_",
+      "validModelShape_",
+      "loadGrid_",
+      "newContext_",
+      "coefficientVector_"
+    ],
+    "e3_categories": {
+      "detectModel_": "model-construction",
+      "solveModel_": "model-construction",
+      "readConstraint_": "model-construction",
+      "senseFor_": "model-construction",
+      "pickObjective_": "model-construction",
+      "describeModel_": "model-construction",
+      "reachableConstants_": "model-construction",
+      "dependsOnVariables_": "model-construction",
+      "applyBounds_": "bounds",
+      "buildVariableDomains_": "domains",
+      "integerIndices_": "domains-metadata",
+      "classifyModel_": "model-classification",
+      "optimise_": "dispatcher",
+      "solveLinearProgram_": "continuous-simplex",
+      "normalizeConstraint_": "continuous-simplex",
+      "pivot_": "continuous-simplex",
+      "feasibleAt_": "continuous-feasibility",
+      "finiteModel_": "model-guard",
+      "validModelShape_": "model-guard",
+      "loadGrid_": "context-builder",
+      "newContext_": "context-builder",
+      "coefficientVector_": "coefficients"
+    },
+    "forbidden_e4_e6": [
+      "solveIntegerProgram_",
+      "isWhole_"
+    ],
+    "note": "E3 list is a SEPARATE closed set, not a copy of E2. The harness serves both phases from one infrastructure; it never merges the two export sets. E2 stays exactly 24."
+  },
+  "function_map": {
+    "model_construction_A": [
+      "detectModel_ (L1660)",
+      "solveModel_ (L1385)",
+      "readConstraint_ (L2017, APPROVED DIVERGENCE)",
+      "senseFor_ (L2105)",
+      "pickObjective_ (L2123)",
+      "describeModel_ (L1948)",
+      "reachableConstants_ (L1872)",
+      "dependsOnVariables_ (L827)"
+    ],
+    "bounds_domains_B": [
+      "applyBounds_ (L161)",
+      "buildVariableDomains_ (L220)",
+      "integerIndices_ (L266, metadata only)",
+      "classifyModel_ (L193)"
+    ],
+    "continuous_simplex_C": [
+      "optimise_ (L33, dispatcher; continuous path only)",
+      "solveLinearProgram_ (L417)",
+      "normalizeConstraint_ (L525)",
+      "pivot_ (L575)",
+      "feasibleAt_ (L296)",
+      "finiteModel_ (L140)",
+      "validModelShape_ (L91)"
+    ],
+    "shared_I": [
+      "loadGrid_ (L711)",
+      "newContext_ (L790, APPROVED DIVERGENCE)",
+      "coefficientVector_ (L1636)"
+    ],
+    "excluded_E4_E6": [
+      "solveIntegerProgram_ (L314, E4 branch-and-bound)",
+      "isWhole_ (L276, E4 integer feasibility)"
+    ]
+  },
+  "model_schema": {
+    "note": "The internal model consumed by optimise_/solveLinearProgram_. Field names are the REAL engine field names; do not rename.",
+    "fields": {
+      "objective": {
+        "type": "array<number> (coefficients)",
+        "required": true,
+        "produced_by": "solveModel_ / detectModel_",
+        "consumed_by": "solveLinearProgram_"
+      },
+      "constant": {
+        "type": "number",
+        "required": false,
+        "default": 0,
+        "note": "objective constant, folded into the objective value"
+      },
+      "maximize": {
+        "type": "boolean",
+        "required": true,
+        "note": "true=maximise, false=minimise"
+      },
+      "constraints": {
+        "type": "array<{coefficients:array<number>, relation:'<='|'>='|'=', rhs:number}>",
+        "required": true
+      },
+      "integer": {
+        "type": "array<number> (variable indices)",
+        "required": false,
+        "note": "read by integerIndices_; EMPTY -> continuous path -> NO branch-and-bound"
+      },
+      "bounds": {
+        "type": "array<{lower:number, upper:number}>",
+        "required": false,
+        "note": "folded into constraints by applyBounds_; upper->x<=upper, lower>0->x>=lower"
+      },
+      "__infeasible": {
+        "type": "boolean (internal flag)",
+        "note": "set by applyBounds_ when lower>upper"
+      }
+    }
+  },
+  "objective_direction": {
+    "maximize": "maximize:true",
+    "minimize": "maximize:false",
+    "default": "the model always sets maximize explicitly via senseFor_/pickObjective_ during construction",
+    "constant": "model.constant is added to the objective value (e.g. +10 -> obj 13)",
+    "parsing_vs_construction": "objective PARSING is E2 (linearize_); objective CONSTRUCTION (choosing the cell, sense) is E3 (pickObjective_/senseFor_); result PRESENTATION is E5/UI"
+  },
+  "constraints": {
+    "operators": [
+      "<=",
+      ">=",
+      "="
+    ],
+    "strict_rejected": "< and > as a relation are rejected by readConstraint_ with STRICT_INEQUALITY: (E2/E3 boundary)",
+    "rhs_normalisation": "normalizeConstraint_: if rhs<0, negate coefficients, flip relation (<=<->>=, = stays), negate rhs",
+    "order": "constraints keep their construction order (deterministic)"
+  },
+  "bounds": {
+    "default_lower": 0,
+    "default_upper": "none (x>=0 assumed by simplex)",
+    "fixed": "lower==upper -> variable fixed",
+    "incompatible": "lower>upper -> __infeasible -> status infeasible",
+    "free_variable_limit": "FREE_VARIABLE_LIMIT 50 (unchanged)",
+    "infinity_characterisation": "an Infinity bound makes finiteModel_ return false -> optimise_ returns numerical_failure (CHARACTERISED current behaviour, not corrected)"
+  },
+  "domains_metadata": {
+    "continuous": "integer:[] -> continuous path",
+    "integer": "integer:[i,...] -> would take the E4 path (NOT executed in E3 tests)",
+    "binary": "integer index + bounds {0,1} -> E4 (metadata only in E3)",
+    "mixed": "some integer indices -> E4 (metadata only in E3)",
+    "rule": "E3 reads/stores/classifies/propagates domain metadata but NEVER branches, tests integrality, or solves mixed-integer"
+  },
+  "continuous_dispatch": {
+    "contract": "optimise_ calls integerIndices_(model); if empty -> solveLinearProgram_ (E3). A fully-continuous model NEVER invokes solveIntegerProgram_ (E4).",
+    "internal_result": "{status, stopReason, optimalityProven, nodesExplored, objective, values}",
+    "internal_statuses": [
+      "optimal",
+      "feasible",
+      "infeasible",
+      "numerical_failure",
+      "invalid_model",
+      "unbounded"
+    ],
+    "note": "nodesExplored is undefined on the continuous path (only branch-and-bound populates it)"
+  },
+  "simplex": {
+    "standard_form": "solveLinearProgram_ maps constraints via normalizeConstraint_, adds slack for non-'=', artificials for non-'<=', total = n + extra + artificials",
+    "tableau": "built inside solveLinearProgram_ (basis + rows)",
+    "pivot": "pivot_(...) — order, ratio test and tie-breaking are the engine's own; NOT changed",
+    "tolerances": "EPSILON 1e-9, PIVOT_TOLERANCE 1e-7, MAX_ITERATIONS 20000 (unchanged; tests use existing tolerances, never a new one)"
+  },
+  "continuous_cases": [
+    {
+      "id": "C1",
+      "desc": "max 3x+2y st x+y<=4",
+      "status": "optimal",
+      "objective": 12,
+      "values": [
+        4,
+        0
+      ]
+    },
+    {
+      "id": "C2",
+      "desc": "min x+y st x+y>=2",
+      "status": "optimal",
+      "objective": 2
+    },
+    {
+      "id": "C3",
+      "desc": "single var max 5x st x<=10",
+      "status": "optimal",
+      "objective": 50,
+      "values": [
+        10
+      ]
+    },
+    {
+      "id": "C4",
+      "desc": "equality x+y=3 max x",
+      "status": "optimal",
+      "objective": 3
+    },
+    {
+      "id": "C5",
+      "desc": "RHS neg -x<=-2 (==x>=2) min x",
+      "status": "optimal",
+      "objective": 2
+    },
+    {
+      "id": "C6",
+      "desc": "objective constant +10",
+      "status": "optimal",
+      "objective": 13
+    },
+    {
+      "id": "C7",
+      "desc": "optimum at zero min x st x<=5",
+      "status": "optimal",
+      "objective": 0,
+      "values": [
+        0
+      ]
+    },
+    {
+      "id": "C8",
+      "desc": "unbounded max x no upper",
+      "status": "unbounded"
+    },
+    {
+      "id": "C9",
+      "desc": "infeasible x>=5 and x<=1",
+      "status": "infeasible"
+    },
+    {
+      "id": "C10",
+      "desc": "degenerate x+y<=2,x<=2,y<=2 max x+y",
+      "status": "optimal",
+      "objective": 2
+    },
+    {
+      "id": "C11",
+      "desc": "redundant x<=5,x<=10 max x",
+      "status": "optimal",
+      "objective": 5
+    },
+    {
+      "id": "C12",
+      "desc": "small coeff 0.0001x<=1 max x",
+      "status": "optimal",
+      "objective": 10000
+    },
+    {
+      "id": "C13",
+      "desc": "large coeff 1e6 x<=1e9 max x",
+      "status": "optimal",
+      "objective": 1000
+    },
+    {
+      "id": "C14",
+      "desc": "upper bound x<=3 (bounds) max x",
+      "status": "optimal",
+      "objective": 3
+    },
+    {
+      "id": "C15",
+      "desc": "lower bound x>=2 (finite upper) min x",
+      "status": "optimal",
+      "objective": 2
+    },
+    {
+      "id": "C16",
+      "desc": "fixed var x=5",
+      "status": "optimal",
+      "objective": 5
+    },
+    {
+      "id": "C17",
+      "desc": "incompatible bounds lower>upper",
+      "status": "infeasible"
+    },
+    {
+      "id": "C18",
+      "desc": "CHARACTERISED Infinity bound",
+      "status": "numerical_failure",
+      "note": "finiteModel_ rejects Infinity; documented defect-adjacent behaviour, classified for a later algorithmic phase, NOT corrected in E3"
+    }
+  ],
+  "errors": {
+    "model_construction": [
+      "This sheet has no formulas, so there is no model to read.",
+      "Every formula on this sheet feeds another one, so none of...",
+      "NO_OBJECTIVE_CELL",
+      "AMBIGUOUS_DECISION_CELLS",
+      "CONSTRAINT_MISSING_LIMIT",
+      "LIMIT_DEPENDS_ON_VARIABLE",
+      "<cell> looks like a constraint but has no explicit ..."
+    ],
+    "constraint": [
+      "STRICT_INEQUALITY: ... (readConstraint_)"
+    ],
+    "note": "E3 records these; it does not redefine or translate them (translation is E5/UI)"
+  },
+  "suites": {
+    "migrated": [],
+    "split": [],
+    "legacy_reason": {
+      "tests_strict.js": "reaches readConstraint_ (E3 boundary) via run() but also solveModel_; strict rejection tested end-to-end — kept legacy",
+      "tests_single_var.js": "model construction + solve end-to-end; E3 contracts covered canonically",
+      "tests_bounds.js": "bounds folded into a full solve (E3) but assertions read final solve output (E5-adjacent) — kept legacy",
+      "tests_sumif_criteria.js": "E2 boundary; kept legacy",
+      "tests_locale.js": "mixed; kept legacy",
+      "tests_safety.js": "E4 branch-and-bound safety limits",
+      "tests_states.js": "E5 final public statuses",
+      "tests_direction/panel/grid_input/examples": "composedHtml integration",
+      "tests_worker_parity": "E6 Worker"
+    },
+    "note": "E3 migration is the NEW canonical E3 suites that exercise model construction + continuous simplex DIRECTLY through the harness. No legacy suite was migrated or split (migrated 0, split 0) because each reaches solveModel_ end-to-end and/or final-status assertions (E5) or branch-and-bound (E4)."
+  },
+  "parity": {
+    "authority": "canonical source",
+    "approved_divergences": [
+      "newContext_",
+      "readConstraint_"
+    ],
+    "rows": [
+      {
+        "id": "P1",
+        "phase": "E3",
+        "canonical": "loadGrid_",
+        "mirror": "loadGrid_",
+        "kind": "direct",
+        "input": "LP sheet",
+        "result": "identical grid"
+      },
+      {
+        "id": "P2",
+        "phase": "E3",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "LP sheet",
+        "result": "same model/error"
+      },
+      {
+        "id": "P3",
+        "phase": "E3",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "no-formula sheet",
+        "result": "same error"
+      },
+      {
+        "id": "P4",
+        "phase": "E3",
+        "canonical": "detectModel_ (probe)",
+        "mirror": "detectModel_",
+        "kind": "observable",
+        "input": "max-hint sheet",
+        "result": "same model/error"
+      },
+      {
+        "id": "P5",
+        "phase": "E3",
+        "canonical": "solveModel_ (probe)",
+        "mirror": "solveModel_",
+        "kind": "observable",
+        "input": "continuous LP",
+        "result": "same internal result"
+      }
+    ],
+    "direct_parity_cases": 1,
+    "observable_parity_cases": 4,
+    "readConstraint_divergence": {
+      "description": "readConstraint_ has an allowCachedFormulaFallback path that diverges by PLATFORM POLICY: on the web (newContext_ forces allowCachedFormulaFallback false) a formula whose stored value is 0 is NOT folded to its cached value; the add-on (mirror) allows it. For inputs that do NOT trigger the fallback, canonical == mirror exactly. For inputs that DO trigger it, the difference must match this approved contract exactly, never a false equality.",
+      "status": "APPROVED, temporary; reconciled in E6, NOT modified in E3"
+    },
+    "rule": "inputs that do not trigger the approved divergences must be exactly equal; a third divergence must fail; the mirror is never modified to force parity"
+  },
+  "harness": {
+    "path": "engine/canonical-engine-harness.js",
+    "authority_e2": "engine/e2-exports.js",
+    "authority_e3": "engine/e3-exports.js",
+    "phase_api": "createCanonicalEngineHarness({phase:'e3'})",
+    "mechanism": "Node vm; test-only export epilogue; one infrastructure for both phases",
+    "stubs": [
+      {
+        "name": "console",
+        "reason": "defensive logs",
+        "value": "no-op",
+        "impact": "none"
+      },
+      {
+        "name": "native globals",
+        "reason": "pure computation",
+        "value": "native",
+        "impact": "none"
+      },
+      {
+        "name": "sheetStub",
+        "reason": "loadGrid_ needs a Sheets-like reader",
+        "value": "getDataRange().getFormulas()/getValues()/getRow()=1/getColumn()=1",
+        "impact": "none — loadGrid_ does all shaping"
+      }
+    ]
+  },
+  "allowlist": {
+    "post_e1": 18,
+    "post_e2": 18,
+    "post_e3": 18,
+    "note": "unchanged; the E3 harness/suites use a normal API, not raw reads; no negative is in the allowlist"
+  },
+  "provenance": {
+    "model_and_simplex": "characterised by running the canonical source through the harness (E3 phase) and via optimise_/detectModel_/solveModel_ probes on the pre-E3 tree; behaviour recorded as-is, no correction",
+    "engine_sha": "read from engine/source/plumline-engine.js (unchanged since E1)",
+    "mirror_sha": "read from engine/engine.js (unchanged since E0)",
+    "parity": "canonical harness/probe vs engine/engine.js at loadGrid_ (direct) and detectModel_/solveModel_ (observable)"
+  },
+  "PINNED_SHA": {
+    "engine": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "mirror": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa"
+  },
+  "do_not_regenerate": "This fixture pins pre-E3 behaviour. checkCanonicalModelAndContinuousSolver verifies these contracts; the engine and mirror SHAs are pinned here and independently in engine-e0/e1/e2 fixtures. Do not rebuild from the running implementation; update only on a deliberate, reviewed baseline change. No absolute paths, no timestamps, no function bodies, no time-dependent data."
+}

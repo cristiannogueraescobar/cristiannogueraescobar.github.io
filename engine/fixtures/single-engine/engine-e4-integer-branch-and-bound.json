@@ -1,0 +1,498 @@
+{
+  "note": "Checkpoint E4 baseline: canonical INTEGER / BINARY / MIXED solving and BRANCH-AND-BOUND are exercised directly against engine/source/plumline-engine.js through the canonical harness (E4 phase). E4 is structural and contractual: NO engine byte, mirror byte, constant, tolerance, branching policy, variable selection, node order, tie-breaking, pruning, limit, default, result, error, status, stopReason or public output changed. The engine SHA stays 5d68ed17...; the mirror SHA stays 6190cb47... Final public status/stopReason/optimalityProven semantics, independent verification, localised messages, Worker and mirror reconciliation remain E5/E6. Current behaviours below are COMPATIBILITY CHARACTERISATIONS, not endorsements.",
+  "engine": {
+    "canonical_path": "engine/source/plumline-engine.js",
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes_utf8": 82697
+  },
+  "mirror": {
+    "path": "engine/engine.js",
+    "sha256": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa",
+    "status": "unchanged since E0; legacy add-on twin; NOT reconciled in E4"
+  },
+  "fixture_sha256": {
+    "e1_source": "c6323a42ef236ac1dbd8ceafec29820f4faeb758aa19b2f52bc7d9529dc1105f",
+    "e2_front_end": "7ea5b1cf484213ccdcf89638c7d238d4e16f44bdabdab5642f6842a067afdb28",
+    "e3_model_continuous": "2c4d9582140a83891a29c92aab097f51f491cadb9abc36016203f0c14cec0ea2"
+  },
+  "exports": {
+    "e2_count": 24,
+    "e3_count": 22,
+    "e4_count": 8,
+    "e4_list": [
+      "solveIntegerProgram_",
+      "isWhole_",
+      "integerIndices_",
+      "buildVariableDomains_",
+      "classifyModel_",
+      "solveLinearProgram_",
+      "feasibleAt_",
+      "optimise_"
+    ],
+    "e4_categories": {
+      "solveIntegerProgram_": "branch-and-bound",
+      "isWhole_": "integrality",
+      "integerIndices_": "integer-indices",
+      "buildVariableDomains_": "domain-metadata",
+      "classifyModel_": "model-classification",
+      "solveLinearProgram_": "node-relaxation",
+      "feasibleAt_": "node-feasibility",
+      "optimise_": "dispatcher"
+    },
+    "forbidden_e5_e6": [
+      "solveModel_",
+      "describeModel_"
+    ],
+    "note": "E4 list is a SEPARATE closed set, not a copy of E2 or E3. The harness serves all phases from one infrastructure; it never merges the export sets. E2 stays 24, E3 stays 22."
+  },
+  "constants": {
+    "BRANCH_NODES": 4000,
+    "BRANCH_DEPTH": 60,
+    "BRANCH_MILLIS": 20000,
+    "EPSILON": 1e-09,
+    "PIVOT_TOLERANCE": 1e-07,
+    "MAX_ITERATIONS": 20000,
+    "INTEGRALITY_TOLERANCE": "1e-6 (isWhole_ literal; NOT a named ENGINE constant)",
+    "note": "All ENGINE.* constants unchanged. isWhole_ uses a literal 1e-6 tolerance, distinct from EPSILON."
+  },
+  "function_map": {
+    "integrality_B": [
+      "isWhole_ (L276, |v-round(v)|<1e-6)"
+    ],
+    "branch_selection_C": [
+      "solveIntegerProgram_ inner loop: first fractional index in `wanted` order"
+    ],
+    "node_construction_D": [
+      "solveIntegerProgram_ explore(extra, depth): ceil branch (>= ceil) FIRST, then floor (<= floor)"
+    ],
+    "node_solve_E": [
+      "solveLinearProgram_ (per-node LP relaxation)",
+      "feasibleAt_ (snapped-point re-check)"
+    ],
+    "incumbent_pruning_F": [
+      "solveIntegerProgram_ best/improves logic; prune by bound, by infeasible dead-end, by integrality"
+    ],
+    "limits_G": [
+      "BRANCH_NODES/BRANCH_DEPTH -> node_limit",
+      "BRANCH_MILLIS deadline -> time_limit"
+    ],
+    "metadata_A": [
+      "integerIndices_ (L266)",
+      "buildVariableDomains_ (L220)",
+      "classifyModel_ (L193)"
+    ],
+    "dispatcher_D": [
+      "optimise_ (L33): integerIndices_ empty -> solveLinearProgram_ (E3); non-empty -> solveIntegerProgram_ (E4)"
+    ],
+    "excluded_E5_E6": [
+      "solveModel_ (E5 adaptation / final status)",
+      "describeModel_ (E5/UI presentation)"
+    ]
+  },
+  "domain_schema": {
+    "integer_spec": "model.integer: undefined -> [] (continuous); true -> all indices; array -> those indices",
+    "binary": "an integer index whose bounds are lower===0 && upper===1 (classifyModel_ / buildVariableDomains_)",
+    "mixed": "has continuous vars alongside integer/binary, OR both binary and plain-integer vars",
+    "classify": "classifyModel_(domains, wholeToggle, n) -> 'continuous'|'integer'|'binary'|'mixed'",
+    "default_domain": "continuous, lower 0, upper null (unbounded above)",
+    "metadata_only": "buildVariableDomains_ produces the per-variable receipt; it does NOT solve"
+  },
+  "integrality_contract": {
+    "fn": "isWhole_(value) => Math.abs(value - Math.round(value)) < 1e-6",
+    "exact_integer": "true",
+    "within_tolerance": "3.0000001 -> true",
+    "outside_tolerance": "3.5 -> false",
+    "negative_integer": "-2 -> true",
+    "zero": "0 -> true",
+    "note": "applied only to declared integer indices; continuous vars are not integrality-checked"
+  },
+  "binary_contract": {
+    "bounds": "binary requires bounds {lower:0, upper:1}; supplied via model.bounds and folded by applyBounds_ (E3)",
+    "value_0_or_1": "accepted; a fractional binary value is branched like any integer",
+    "classification": "all-binary integer vars -> 'binary'; binary + plain integer -> 'mixed'; binary + continuous -> 'mixed'"
+  },
+  "node_schema": {
+    "representation": "recursive explore(extra, depth): extra = accumulated branch constraints, depth = tree depth",
+    "root_relaxation": "solveLinearProgram_ on model.constraints (no extra) at depth 0",
+    "traversal": "DFS (recursion)",
+    "order": "CEIL branch first ({coefficients:unit, relation:'>=', rhs:Math.ceil(value)}), then FLOOR ({relation:'<=', rhs:Math.floor(value)})",
+    "branch_variable": "first index i in `wanted` where !isWhole_(relaxed.values[i])",
+    "incumbent_init": "best = null",
+    "incumbent_update": "only if the snapped exact-integer objective strictly improves (maximise: > best+EPSILON; minimise: < best-EPSILON)",
+    "snap": "snapped = values.map(v=>Math.round(v*1e9)/1e9); then Math.round on integer indices; re-checked with feasibleAt_",
+    "pruning": [
+      "bound: if incumbent exists and relaxed cannot beat it (+/-1e-9), return",
+      "infeasible: proven dead end, return (search stays exhaustive)",
+      "non-optimal non-infeasible (unbounded/numerical/iteration): mark search not exhaustive, record stopReason"
+    ]
+  },
+  "limits": {
+    "node_limit": "nodes++ > BRANCH_NODES(4000) -> exhausted=false, stopReason='node_limit'",
+    "depth_limit": "depth > BRANCH_DEPTH(60) -> exhausted=false, stopReason='node_limit'",
+    "time_limit": "Date.now() > deadline (start + BRANCH_MILLIS=20000) -> exhausted=false, stopReason='time_limit'",
+    "lp_iterations": "MAX_ITERATIONS(20000) per-node LP cap (solveLinearProgram_)",
+    "at_incumbent": "limit reached WITH incumbent -> status 'feasible', optimalityProven false, stopReason set",
+    "no_incumbent": "limit reached WITHOUT incumbent -> status 'unknown', stopReason set (or 'iteration_limit')",
+    "determinism_note": "time_limit is tested with a Date.now() STUB (no real 20s wait); the stub returns a base time then a value past the deadline, hitting the exact deadline branch"
+  },
+  "result_schema": {
+    "fields": [
+      "status",
+      "stopReason",
+      "optimalityProven",
+      "nodesExplored",
+      "objective",
+      "values",
+      "nodes (duplicate of nodesExplored on the success path)"
+    ],
+    "internal_statuses": [
+      "optimal",
+      "feasible",
+      "infeasible",
+      "unknown"
+    ],
+    "optimal": "exhausted search with an incumbent -> optimal, optimalityProven true, stopReason null",
+    "feasible": "incumbent found but search stopped by a limit -> feasible, optimalityProven false",
+    "infeasible": "exhausted search, no incumbent -> infeasible, optimalityProven false",
+    "unknown": "non-exhausted search, no incumbent -> unknown, stopReason (time/node/iteration)",
+    "note": "these are INTERNAL contracts; the public status/stopReason/optimalityProven semantics remain E5 and are not redefined here"
+  },
+  "integer_cases": [
+    {
+      "id": "I1",
+      "desc": "integer 1 var max 5x st 2x<=7",
+      "status": "optimal",
+      "objective": 15,
+      "values": [
+        3
+      ],
+      "nodes": 3,
+      "optimalityProven": true
+    },
+    {
+      "id": "I2",
+      "desc": "integer 2 var max 3x+2y st x+y<=4 (already integral)",
+      "status": "optimal",
+      "objective": 12,
+      "values": [
+        4,
+        0
+      ],
+      "nodes": 1,
+      "optimalityProven": true
+    },
+    {
+      "id": "I3",
+      "desc": "integer fractional relaxation max x+y st 2x+2y<=5",
+      "status": "optimal",
+      "objective": 2,
+      "values": [
+        0,
+        2
+      ],
+      "nodes": 13,
+      "optimalityProven": true
+    },
+    {
+      "id": "I4",
+      "desc": "integer:true (all indices) max 5x st 2x<=7",
+      "status": "optimal",
+      "objective": 15,
+      "values": [
+        3
+      ],
+      "nodes": 3,
+      "optimalityProven": true
+    },
+    {
+      "id": "I5",
+      "desc": "integer infeasible x>=2 and x<=1",
+      "status": "infeasible",
+      "objective": null,
+      "values": null,
+      "nodes": 1,
+      "optimalityProven": false
+    },
+    {
+      "id": "I6",
+      "desc": "maximize integer",
+      "status": "optimal",
+      "objective": 15
+    },
+    {
+      "id": "I7",
+      "desc": "minimize integer min x st x>=1.5 (int)",
+      "status": "optimal",
+      "note": "characterised via probe"
+    }
+  ],
+  "binary_cases": [
+    {
+      "id": "B1",
+      "desc": "binary 1 var max 5x, bounds {0,1}",
+      "status": "optimal",
+      "objective": 5,
+      "values": [
+        1
+      ],
+      "nodes": 1,
+      "optimalityProven": true
+    },
+    {
+      "id": "B2",
+      "desc": "binary knapsack max 6a+5b st 3a+3b<=4, both {0,1}",
+      "status": "optimal",
+      "objective": 6,
+      "values": [
+        1,
+        0
+      ],
+      "nodes": 5,
+      "optimalityProven": true
+    }
+  ],
+  "mixed_cases": [
+    {
+      "id": "M1",
+      "desc": "mixed x continuous + y integer, max x+10y st x+y<=3.5",
+      "status": "optimal",
+      "objective": 30.5,
+      "values": [
+        0.5,
+        3
+      ],
+      "nodes": 3,
+      "optimalityProven": true
+    }
+  ],
+  "limit_cases": [
+    {
+      "id": "L1",
+      "desc": "time_limit without incumbent (Date stub jumps past deadline on 2nd call)",
+      "status": "unknown",
+      "stopReason": "time_limit",
+      "optimalityProven": false,
+      "nodes": 1
+    },
+    {
+      "id": "L2",
+      "desc": "time_limit WITH incumbent (Date stub jumps after ~12 calls)",
+      "status": "feasible",
+      "objective": 2,
+      "stopReason": "time_limit",
+      "optimalityProven": false,
+      "nodes": 13
+    },
+    {
+      "id": "L3",
+      "desc": "normal model does not hit any limit",
+      "status": "optimal",
+      "note": "nodes well below BRANCH_NODES"
+    }
+  ],
+  "classification_cases": {
+    "continuous": "classifyModel_(null,false,2) -> continuous",
+    "integer_whole": "classifyModel_(null,true,2) -> integer",
+    "integer_idx": "classifyModel_({integer:[0,1],bounds:[]},false,2) -> integer",
+    "binary": "classifyModel_({integer:[0,1],bounds:[{0,1},{0,1}]},false,2) -> binary",
+    "mixed_cont_int": "classifyModel_({integer:[1],bounds:[]},false,2) -> mixed",
+    "mixed_bin_int": "classifyModel_({integer:[0,1],bounds:[{0,1},{}]},false,2) -> mixed"
+  },
+  "continuous_bypass": {
+    "contract": "a fully-continuous model (integerIndices_ empty) is dispatched to solveLinearProgram_ and NEVER enters solveIntegerProgram_",
+    "protected_by": "E3 + E4 checkers"
+  },
+  "suites": {
+    "migrated": [],
+    "split": [],
+    "legacy_reason": {
+      "tests_bounds.js": "mixes continuous (E3) and integer:[...] (E4) cases with assertions on final solve output (E5-adjacent); boundary not clean without splitting; canonical E4 contracts already covered by the new suites \u2014 kept legacy",
+      "tests_single_var.js": "run() reaches detectModel_+solveModel_ end-to-end incl. final-status semantics (E5) \u2014 kept legacy",
+      "tests_safety.js": "branch-and-bound safety limits but asserted through solveModel_/final status (E5) \u2014 kept legacy",
+      "tests_states.js": "E5 final public statuses",
+      "tests_strict/sumif_criteria/locale": "E2/E3 boundary via run()",
+      "tests_direction/examples/panel/grid_input": "composedHtml integration",
+      "tests_worker_parity": "E6 Worker"
+    },
+    "note": "E4 migration is the NEW canonical E4 suites that exercise integer/binary/mixed + branch-and-bound DIRECTLY through the harness. No legacy suite was migrated or split (migrated 0, split 0): each reaches solveModel_ end-to-end and/or final-status assertions (E5). The new canonical E4 suites constitute the primary E4 coverage."
+  },
+  "parity": {
+    "authority": "canonical source",
+    "approved_divergences": [
+      "newContext_",
+      "readConstraint_"
+    ],
+    "rows": [
+      {
+        "id": "P1",
+        "phase": "E4",
+        "canonical": "classifyModel_ (probe)",
+        "mirror": "classifyModel_",
+        "kind": "direct",
+        "input": "binary/mixed domains",
+        "result": "identical classification"
+      },
+      {
+        "id": "P2",
+        "phase": "E4",
+        "canonical": "optimise_ (probe)",
+        "mirror": "optimise_",
+        "kind": "observable",
+        "input": "integer LP model",
+        "result": "same internal integer result (surfaces isWhole_/solveIntegerProgram_/integerIndices_ parity)"
+      },
+      {
+        "id": "P3",
+        "phase": "E4",
+        "canonical": "optimise_ (probe)",
+        "mirror": "optimise_",
+        "kind": "observable",
+        "input": "binary knapsack",
+        "result": "same branch-and-bound result"
+      },
+      {
+        "id": "P4",
+        "phase": "E4",
+        "canonical": "optimise_ (probe)",
+        "mirror": "optimise_",
+        "kind": "observable",
+        "input": "mixed continuous+integer",
+        "result": "same result"
+      }
+    ],
+    "direct_parity_cases": 1,
+    "observable_parity_cases": 3,
+    "rule": "inputs that do not trigger the approved divergences must be exactly equal; a third divergence must fail; the mirror is never modified to force parity; nodesExplored/stopReason/optimalityProven/values order/constraints order/errors are never dropped",
+    "note": "isWhole_/solveIntegerProgram_/integerIndices_ are NOT exported by the mirror; their parity is covered observably through optimise_'s branch-and-bound results. classifyModel_ is the direct-parity case."
+  },
+  "harness": {
+    "path": "engine/canonical-engine-harness.js",
+    "authority_e2": "engine/e2-exports.js",
+    "authority_e3": "engine/e3-exports.js",
+    "authority_e4": "engine/e4-exports.js",
+    "phase_api": "createCanonicalEngineHarness({phase:'e4'})",
+    "mechanism": "Node vm; test-only export epilogue; ONE infrastructure for all phases",
+    "stubs": [
+      {
+        "name": "console",
+        "reason": "defensive logs",
+        "value": "no-op",
+        "impact": "none"
+      },
+      {
+        "name": "native globals",
+        "reason": "pure computation",
+        "value": "native",
+        "impact": "none"
+      },
+      {
+        "name": "Date.now (limit tests only)",
+        "reason": "deterministic time_limit without a real 20s wait",
+        "value": "base time then a value past the deadline",
+        "impact": "reaches the exact deadline branch; no production change; not flaky"
+      }
+    ]
+  },
+  "allowlist": {
+    "post_e1": 18,
+    "post_e2": 18,
+    "post_e3": 18,
+    "post_e4": 18,
+    "note": "unchanged; the E4 harness/suites use the harness API, not raw reads; no negative is in the allowlist"
+  },
+  "provenance": {
+    "branch_and_bound": "characterised by running the canonical source through the harness (E4 phase) and via optimise_/solveIntegerProgram_ probes on the pre-E4 tree; behaviour recorded as-is, no correction",
+    "limits": "time_limit characterised with a deterministic Date.now() stub; node/depth limits characterised structurally against the constants",
+    "engine_sha": "read from engine/source/plumline-engine.js (unchanged)",
+    "mirror_sha": "read from engine/engine.js (unchanged)",
+    "parity": "canonical harness/probe vs engine/engine.js at isWhole_ (direct) and optimise_/solveIntegerProgram_/classifyModel_ (observable)"
+  },
+  "PINNED_SHA": {
+    "engine": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "mirror": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa"
+  },
+  "do_not_regenerate": "This fixture pins pre-E4 behaviour. checkCanonicalIntegerAndBranchAndBound verifies these contracts; engine and mirror SHAs are pinned here and independently in engine-e0/e1/e2/e3 fixtures. Do not rebuild from the running implementation; update only on a deliberate, reviewed baseline change. No absolute paths, no timestamps, no function bodies, no time-dependent data.",
+  "metrics": {
+    "baseline_main_pre_e": 10231,
+    "post_e0": 10267,
+    "post_e1": 10450,
+    "post_e2": 10630,
+    "post_e3_original": 10852,
+    "e3_baseline_adjusted": 10849,
+    "e3_baseline_adjustment": -3,
+    "e3_baseline_adjustment_detail": "deterministic dist-independence correction on pre-E4 suites: parser_frontend 61->60 (dist byte-identity moved to validate_dist), model_continuous 52->51 (dist byte-identity moved to validate_dist), model_continuous_positive P48 50->49 (skip-as-pass branch removed). These 3 assertions were removed from normal suites; the byte-identity contract is now owned solely by validate_dist during npm run build.",
+    "e4_total": 11099,
+    "e4_increment": 250,
+    "e4_suites": {
+      "checker": 55,
+      "positive": 55,
+      "negative": 52,
+      "needle_audit": 88,
+      "note": "read from each suite's own PASSED line, not grep. 55+55+52+88=250."
+    },
+    "e4_suites_negative_cases": 52,
+    "e4_exports": 8,
+    "e3_exports": 22,
+    "e2_exports": 24,
+    "dist_reconciliation": {
+      "problem": "npm run verify runs run_all.js (step 1-2) BEFORE the build (step 6). Five suites gated a 'dist/solver.html byte-identical' assertion on fs.existsSync(distSolver), so a first verify from a clean checkout (no dist) skipped them (11095) while a second verify (dist from prior build present) counted them (11104). Difference 9.",
+      "nine_assertions": {
+        "tests_canonical_engine_source": "4 (composition: ENGINE_START/END, no SOLVER_ENGINE_SOURCE, no canonical path, source not copied) - Category A",
+        "tests_canonical_engine_source_positive": "2 (six requests, engine/source not published) - Category A",
+        "tests_canonical_integer_branch_and_bound": "1 (dist byte-identical) - Category B",
+        "tests_canonical_model_continuous": "1 (dist byte-identical) - Category B",
+        "tests_canonical_parser_frontend": "1 (dist byte-identical) - Category B"
+      },
+      "category_A_fix": "E1 composition (6 assertions across the two E1 suites) now use the composed output from the OFFICIAL compositor (composeSolverInterface), which E1 already computes from solver.html; they run always, dist or not. E1 was already allowlisted for reading solver.html to feed the compositor. E1 counts with dist were already 50/11 in the baseline, so E1 does NOT change the total-with-dist and does NOT affect the E3 baseline.",
+      "category_B_fix": "3 'dist byte-identical' assertions (parser_frontend, model_continuous, integer checker) removed from normal suites; the contract is owned solely by validate_dist (assertion 'dist matches expected (composed) source: solver.html', run during npm run build). Plus 2 skip-as-pass branches removed: P48 (model_continuous_positive) and P54 (integer_positive) - these were 'else { ok(..., true) }' skips, not real deterministic assertions.",
+      "category_B_count": "THREE genuine Category-B byte-identity assertions (parser, model_continuous, integer checker). An earlier note said 'four'; that was wrong. Separately, TWO skip-as-pass branches (P48, P54) were removed. Total of 5 count changes: 3 lower the E3 baseline (parser, model_continuous, P48), 2 lower the provisional E4 count (integer checker, P54).",
+      "P48": {
+        "suite": "tests_canonical_model_continuous_positive",
+        "before": 50,
+        "after": 49,
+        "treatment": "skip-as-pass branch removed (was 'else { ok(dist absent skipped, true) }'); assertion removed, not substituted",
+        "contract_now": "validate_dist owns dist byte-identity",
+        "affects": "E3 baseline (-1)"
+      },
+      "P54": {
+        "suite": "tests_canonical_integer_branch_and_bound_positive",
+        "before": 56,
+        "after": 55,
+        "treatment": "skip-as-pass branch removed; assertion removed, not substituted",
+        "contract_now": "validate_dist owns dist byte-identity",
+        "affects": "E4 increment (provisional 56 -> final 55)"
+      },
+      "determinism": "verified: every affected suite returns the same PASSED with and without dist; the full battery returns 11099 both ways.",
+      "guard": "engine/tests_needle_audit.js already forbids existsSync(dist...) branches and dist/solver.html reads in the positive checkers ('assertion count must not depend on dist existence')."
+    },
+    "modified_preexisting_suites": {
+      "tests_canonical_parser_frontend": {
+        "before_with_dist": 61,
+        "after": 60,
+        "removed": "dist byte-identical (Category B -> validate_dist)"
+      },
+      "tests_canonical_model_continuous": {
+        "before_with_dist": 52,
+        "after": 51,
+        "removed": "dist byte-identical (Category B -> validate_dist)"
+      },
+      "tests_canonical_model_continuous_positive": {
+        "before_with_dist": 50,
+        "after": 49,
+        "removed": "P48 skip-as-pass branch"
+      },
+      "tests_canonical_engine_source": {
+        "before_with_dist": 50,
+        "after": 50,
+        "changed": "6 composition checks now deterministic (were dist-gated; identical count with dist, now also without)"
+      },
+      "tests_canonical_engine_source_positive": {
+        "before_with_dist": 11,
+        "after": 11,
+        "changed": "composition checks now deterministic"
+      }
+    },
+    "verify_identical_with_and_without_dist": true
+  }
+}

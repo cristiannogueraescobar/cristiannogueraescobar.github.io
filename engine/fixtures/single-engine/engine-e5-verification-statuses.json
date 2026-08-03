@@ -1,0 +1,715 @@
+{
+  "note": "Checkpoint E5 baseline: canonical SOLUTION VERIFICATION, FINAL STATUSES, STOP REASONS, optimalityProven, result adaptation and the status-vs-error separation are exercised directly against engine/source/plumline-engine.js through the canonical harness (E5 phase). E5 is structural and contractual: NO engine byte, mirror byte, solver, tolerance, status, stopReason, optimalityProven, error, message, field order, result, algorithm, Worker or public output changed. The engine SHA stays 5d68ed17...; the mirror SHA stays 6190cb47... Worker Blob/glue/postMessage/stale/cancel/fallback and mirror reconciliation remain E6. Current behaviours below are COMPATIBILITY CHARACTERISATIONS, not endorsements.",
+  "engine": {
+    "canonical_path": "engine/source/plumline-engine.js",
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "chars": 82657,
+    "bytes_utf8": 82697
+  },
+  "mirror": {
+    "path": "engine/engine.js",
+    "sha256": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa",
+    "status": "unchanged since E0; legacy add-on twin; NOT reconciled in E5"
+  },
+  "fixture_sha256": {
+    "e1_source": "c6323a42ef236ac1dbd8ceafec29820f4faeb758aa19b2f52bc7d9529dc1105f",
+    "e2_front_end": "7ea5b1cf484213ccdcf89638c7d238d4e16f44bdabdab5642f6842a067afdb28",
+    "e3_model_continuous": "2c4d9582140a83891a29c92aab097f51f491cadb9abc36016203f0c14cec0ea2",
+    "e4_integer_branch_and_bound": "547f0d3bc8830bf4aaa802533f3d8a98e9503be518d75792ebf4aa9a4d935c7c"
+  },
+  "exports": {
+    "e2_count": 24,
+    "e3_count": 22,
+    "e4_count": 8,
+    "e5_count": 9,
+    "e5_list": [
+      "solveModel_",
+      "isSatisfied_",
+      "feasibleAt_",
+      "buildVariableDomains_",
+      "isWhole_",
+      "dotProduct_",
+      "explainStatus_",
+      "validModelShape_",
+      "finiteModel_"
+    ],
+    "e5_categories": {
+      "solveModel_": "result-adaptation",
+      "isSatisfied_": "constraint-verification",
+      "feasibleAt_": "point-feasibility",
+      "buildVariableDomains_": "bound-integer-binary-verification",
+      "isWhole_": "integrality-verification",
+      "dotProduct_": "objective-recompute",
+      "explainStatus_": "status-explanation",
+      "validModelShape_": "shape-guard",
+      "finiteModel_": "finiteness-guard"
+    },
+    "forbidden_e6": [
+      "buildWorkerSource_",
+      "engineSource_"
+    ],
+    "note": "E5 list is a SEPARATE closed set, not a copy of E2/E3/E4. The harness serves all phases from one infrastructure; it never merges the export sets. E2 stays 24, E3 22, E4 8."
+  },
+  "function_map": {
+    "result_adaptation_B": [
+      "solveModel_ (L1385): builds the final result from optimise_'s internal solution"
+    ],
+    "constraint_verification_A": [
+      "isSatisfied_ (L1621): <=/>=/= with 1e-6 tolerance"
+    ],
+    "point_feasibility_A": [
+      "feasibleAt_ (L296): shape + finiteness + every-constraint re-check"
+    ],
+    "bound_integer_binary_verification_A": [
+      "buildVariableDomains_ (L220): per-variable type/min/max/value/satisfied/integralitySatisfied/binarySatisfied/lowerBinding/upperBinding"
+    ],
+    "integrality_verification_A": [
+      "isWhole_ (L276): 1e-6 tolerance"
+    ],
+    "objective_recompute_A": [
+      "dotProduct_ (recomputes objective and each constraint LHS)"
+    ],
+    "status_explanation_CDE": [
+      "explainStatus_ (L1598): maps a final status to explanatory text"
+    ],
+    "shape_finiteness_J": [
+      "validModelShape_ (L91)",
+      "finiteModel_ (L140)"
+    ],
+    "excluded_E6": [
+      "Worker Blob/glue/postMessage/stale/cancel/fallback",
+      "mirror reconciliation"
+    ]
+  },
+  "result_schema": {
+    "always_present": [
+      "status",
+      "stopReason",
+      "optimalityProven",
+      "nodesExplored",
+      "objectiveLabel",
+      "elapsedMs",
+      "variables",
+      "modelType",
+      "sense",
+      "labels",
+      "previous",
+      "foldedConstants"
+    ],
+    "optimal_or_feasible_only": [
+      "values",
+      "objective",
+      "objectiveBefore",
+      "constraints",
+      "variableDomains"
+    ],
+    "two_variable_only": [
+      "plot (result.plot); constraint.coefficients + constraint.constant"
+    ],
+    "feasible_only": [
+      "caveat (why optimality was not proven)"
+    ],
+    "non_optimal_non_feasible_only": [
+      "explanation (from explainStatus_)"
+    ],
+    "adaptation_rules": {
+      "status": "solution.status (verbatim from optimise_)",
+      "stopReason": "solution.stopReason || null (ALWAYS present, null when none)",
+      "optimalityProven": "solution.optimalityProven === true (ALWAYS a boolean; default false)",
+      "nodesExplored": "typeof solution.nodesExplored === 'number' ? solution.nodesExplored : null (null on the continuous path)",
+      "objective": "round_(solution.objective) (optimal/feasible only)",
+      "values": "solution.values.map(round_) (optimal/feasible only)"
+    },
+    "constraint_report": {
+      "fields": [
+        "label",
+        "cell",
+        "relation",
+        "used",
+        "limit",
+        "slack",
+        "binding",
+        "satisfied",
+        "(coefficients,constant if 2 vars)",
+        "(objectiveDelta,rhsChange if binding & shadow-priced)"
+      ],
+      "used": "round_(dotProduct_(c.coefficients, solution.values) + c.constant)",
+      "slack": "round_(c.limit - used)",
+      "binding": "Math.abs(slack) < 1e-6",
+      "satisfied": "isSatisfied_(used, c.relation, c.limit)"
+    },
+    "non_deterministic_fields": [
+      "elapsedMs (Date.now()-started; excluded from equality comparisons)"
+    ],
+    "note": "These are the ENGINE result fields. UI-only fields are not listed. Field presence depends on status."
+  },
+  "statuses": {
+    "optimal": {
+      "produced_by": [
+        "optimise_ (continuous exhausted) / solveIntegerProgram_ (exhausted + incumbent)"
+      ],
+      "meaning": "proven optimum",
+      "optimalityProven": true,
+      "stopReason": null,
+      "has_values": true
+    },
+    "feasible": {
+      "produced_by": [
+        "solveIntegerProgram_ (incumbent found but a limit stopped the search)"
+      ],
+      "meaning": "valid solution, optimality NOT proven",
+      "optimalityProven": false,
+      "stopReason": "time_limit|node_limit|iteration_limit|numerical_failure",
+      "has_values": true,
+      "extra": "result.caveat set"
+    },
+    "infeasible": {
+      "produced_by": [
+        "solveLinearProgram_ / solveIntegerProgram_ (exhausted, no incumbent)"
+      ],
+      "meaning": "proven infeasible",
+      "optimalityProven": false,
+      "stopReason": null,
+      "has_values": false,
+      "extra": "result.explanation set"
+    },
+    "unbounded": {
+      "produced_by": [
+        "solveLinearProgram_"
+      ],
+      "meaning": "objective grows without limit",
+      "optimalityProven": "undefined (not set on the continuous unbounded path)",
+      "stopReason": "undefined",
+      "has_values": false,
+      "extra": "result.explanation set"
+    },
+    "unknown": {
+      "produced_by": [
+        "solveIntegerProgram_ (non-exhausted, no incumbent)"
+      ],
+      "meaning": "search stopped before a conclusion",
+      "optimalityProven": false,
+      "stopReason": "the internal stop reason preserved by solveModel_ (e.g. time_limit); can be null on a raw optimise_ probe depending on the deadline-crossing call",
+      "has_values": false,
+      "extra": "result.explanation set"
+    },
+    "numerical_failure": {
+      "produced_by": [
+        "solveLinearProgram_ (non-finite model / pivot overflow)"
+      ],
+      "meaning": "numeric problem prevented a reliable result",
+      "optimalityProven": "undefined",
+      "stopReason": "undefined",
+      "has_values": false,
+      "extra": "result.explanation set"
+    },
+    "invalid_model": {
+      "produced_by": [
+        "solveLinearProgram_ (validModelShape_ fails)"
+      ],
+      "meaning": "model shape invalid",
+      "has_values": false
+    },
+    "note": "These are the REAL status strings found in the source. No status was added, removed or unified. 'incomplete' does NOT exist in the engine; the UI may present 'unknown'/limit stops as incomplete.",
+    "incomplete_is_ui_only": "'incomplete' is NOT an engine status. It does not appear in any engine return. The UI may present 'unknown' or a limit stop as 'incomplete', but the engine never produces it. It is NOT counted as a canonical mathematical status (the 7 real statuses are optimal/feasible/infeasible/unbounded/unknown/numerical_failure/invalid_model)."
+  },
+  "stop_reasons": {
+    "node_limit": {
+      "producer": "solveIntegerProgram_ (nodes > BRANCH_NODES 4000, or depth > BRANCH_DEPTH 60)",
+      "internal": "branch-and-bound"
+    },
+    "time_limit": {
+      "producer": "solveIntegerProgram_ (Date.now() > start + BRANCH_MILLIS 20000)",
+      "internal": "branch-and-bound"
+    },
+    "iteration_limit": {
+      "producer": "solveLinearProgram_ (LP hits MAX_ITERATIONS 20000) surfaced as the branch stopReason",
+      "internal": "LP / branch fallback"
+    },
+    "numerical_failure": {
+      "producer": "solveIntegerProgram_ (a branch relaxation returned numerical_failure)",
+      "internal": "branch-and-bound"
+    },
+    "null": {
+      "producer": "proven optimal or proven infeasible",
+      "meaning": "no incompleteness"
+    },
+    "note": "stopReason is INTERNAL to the solve; solveModel_ copies it verbatim (solution.stopReason || null). No stopReason string was added."
+  },
+  "optimality_proven_matrix": [
+    {
+      "case": "continuous optimal",
+      "status": "optimal",
+      "optimalityProven": true,
+      "stopReason": null
+    },
+    {
+      "case": "integer optimal (exhausted)",
+      "status": "optimal",
+      "optimalityProven": true,
+      "stopReason": null
+    },
+    {
+      "case": "relaxation already integral",
+      "status": "optimal",
+      "optimalityProven": true,
+      "stopReason": null
+    },
+    {
+      "case": "feasible (incumbent + limit)",
+      "status": "feasible",
+      "optimalityProven": false,
+      "stopReason": "time_limit|node_limit"
+    },
+    {
+      "case": "integer infeasible (exhausted)",
+      "status": "infeasible",
+      "optimalityProven": false,
+      "stopReason": null
+    },
+    {
+      "case": "continuous infeasible",
+      "status": "infeasible",
+      "optimalityProven": "undefined internally -> solveModel_ coerces to false",
+      "stopReason": "null"
+    },
+    {
+      "case": "continuous unbounded",
+      "status": "unbounded",
+      "optimalityProven": "undefined internally -> solveModel_ coerces to false",
+      "stopReason": "null"
+    },
+    {
+      "case": "unknown (limit, no incumbent)",
+      "status": "unknown",
+      "optimalityProven": false,
+      "stopReason": "see defect note"
+    },
+    {
+      "case": "numerical_failure",
+      "status": "numerical_failure",
+      "optimalityProven": "coerced false",
+      "stopReason": "null"
+    }
+  ],
+  "optimality_proven_contract": "solveModel_ sets optimalityProven = (solution.optimalityProven === true): ALWAYS a boolean, default false. It is NOT derived from the status and NOT recalculated; it is copied (strict-=== coerced) from the internal solve result. The field ALWAYS exists on the final result.",
+  "verification_contract": {
+    "shape": "validModelShape_ / feasibleAt_ reject a values vector of the wrong length",
+    "finite": "feasibleAt_ rejects NaN and Infinity values (finiteModel_ / isFinite checks)",
+    "objective_recompute": "round_(dotProduct_(objectiveCoeffs, values)) recomputed independently in solveModel_",
+    "constraint_le": "isSatisfied_(used,'<=',limit) => used <= limit + 1e-6",
+    "constraint_ge": "isSatisfied_(used,'>=',limit) => used >= limit - 1e-6",
+    "equality": "isSatisfied_(used,'=',limit) => |used - limit| < 1e-6",
+    "lower_bound": "buildVariableDomains_: value >= lower - 1e-6",
+    "upper_bound": "buildVariableDomains_: (upper===null) || value <= upper + 1e-6",
+    "integer": "buildVariableDomains_: !isInt || |value - round(value)| < 1e-6",
+    "binary": "buildVariableDomains_: !isBinary || (|value|<1e-6 || |value-1|<1e-6)",
+    "tolerance": "all verification uses the engine's own 1e-6; NO test tolerance is introduced",
+    "note": "There is NO single verifySolution_ function. Verification is the COMBINATION of isSatisfied_ (constraints), buildVariableDomains_ (bounds/integer/binary), feasibleAt_ (point feasibility/shape/finiteness) and dotProduct_ (objective recompute), all invoked by solveModel_. The checker runs the REAL functions through the harness; it never re-implements the maths."
+  },
+  "status_error_separation": {
+    "mathematical_status": [
+      "optimal",
+      "feasible",
+      "infeasible",
+      "unbounded",
+      "unknown",
+      "numerical_failure",
+      "invalid_model"
+    ],
+    "technical_errors": [
+      "guessed-constraint: throw 'looks like a constraint but has no explicit operator and limit' (solveModel_)",
+      "safeLinearize_: throw '<role> (<cell>) could not be read. <inner>' (objective/constraint could not be linearised)"
+    ],
+    "rule": "A mathematical status is a FIELD on the returned result object; a technical error is a THROWN Error. solveModel_ NEVER converts one into the other: an unreadable objective throws, an infeasible model returns {status:'infeasible'}. E6 infrastructure errors (Worker/Blob/postMessage/timeout) are NOT in the engine."
+  },
+  "known_defects": [
+    {
+      "id": "D-E5-1",
+      "desc": "explainStatus_ references the status string 'no whole-number solution found in time', which the engine's internal solver never produces (optimise_ returns 'unknown'/'feasible' instead). Dead branch in explainStatus_.",
+      "classification": "cosmetic / dead code; UI-facing text; defer to a later phase; NOT fixed",
+      "deterministic": true
+    },
+    {
+      "id": "D-E5-2",
+      "desc": "On a time/node limit with NO incumbent, solveIntegerProgram_ returns status 'unknown'. Through solveModel_ the stopReason is preserved (e.g. time_limit); a raw optimise_ probe can show stopReason null depending on exactly which Date.now() call crosses the deadline (the first-call jump returns before stopReason is set). optimalityProven is false either way. Characterised, not corrected.",
+      "classification": "internal stop-reason completeness; defer to a later algorithmic phase; NOT fixed",
+      "deterministic": true
+    }
+  ],
+  "continuous_cases": [
+    {
+      "id": "S1",
+      "desc": "continuous optimal max 3x+2y st x+y<=4",
+      "status": "optimal",
+      "objective": 12,
+      "values": [
+        4,
+        0
+      ],
+      "optimalityProven": true,
+      "stopReason": null,
+      "nodesExplored": null,
+      "modelType": "continuous"
+    },
+    {
+      "id": "S2",
+      "desc": "minimize continuous",
+      "status": "optimal",
+      "note": "sense=min honoured"
+    },
+    {
+      "id": "S3",
+      "desc": "continuous unbounded",
+      "status": "unbounded",
+      "has_values": false
+    },
+    {
+      "id": "S4",
+      "desc": "continuous infeasible",
+      "status": "infeasible",
+      "has_values": false
+    },
+    {
+      "id": "S5",
+      "desc": "numerical_failure (Infinity bound)",
+      "status": "numerical_failure",
+      "has_values": false
+    },
+    {
+      "id": "S6",
+      "desc": "solution at zero",
+      "status": "optimal",
+      "objective": 0
+    },
+    {
+      "id": "S7",
+      "desc": "objective constant folded",
+      "status": "optimal"
+    }
+  ],
+  "integer_cases": [
+    {
+      "id": "I1",
+      "desc": "integer optimal max 5x+y st 2x+y<=7 (int)",
+      "status": "optimal",
+      "objective": 16,
+      "values": [
+        3,
+        1
+      ],
+      "optimalityProven": true,
+      "nodesExplored": 3,
+      "modelType": "integer"
+    },
+    {
+      "id": "I2",
+      "desc": "integer infeasible",
+      "status": "infeasible",
+      "optimalityProven": false,
+      "nodesExplored": 1
+    },
+    {
+      "id": "I3",
+      "desc": "relaxation already integral",
+      "status": "optimal",
+      "optimalityProven": true,
+      "nodesExplored": 1
+    }
+  ],
+  "binary_cases": [
+    {
+      "id": "B1",
+      "desc": "binary optimal (single)",
+      "status": "optimal",
+      "objective": 5,
+      "values": [
+        1
+      ],
+      "modelType": "binary"
+    },
+    {
+      "id": "B2",
+      "desc": "binary knapsack",
+      "status": "optimal",
+      "objective": 6,
+      "values": [
+        1,
+        0
+      ]
+    }
+  ],
+  "mixed_cases": [
+    {
+      "id": "M1",
+      "desc": "mixed continuous+integer optimal",
+      "status": "optimal",
+      "objective": 30.5,
+      "values": [
+        0.5,
+        3
+      ],
+      "modelType": "mixed"
+    }
+  ],
+  "incumbent_cases": [
+    {
+      "id": "L2",
+      "desc": "time_limit WITH incumbent (Date stub jumps after 12 calls)",
+      "status": "feasible",
+      "stopReason": "time_limit",
+      "optimalityProven": false,
+      "objective": 2,
+      "extra": "result.caveat present"
+    }
+  ],
+  "limit_cases": [
+    {
+      "id": "L1",
+      "desc": "time_limit WITHOUT incumbent (Date stub jumps on 2nd call)",
+      "status": "unknown",
+      "optimalityProven": false,
+      "has_values": false,
+      "extra": "result.explanation present",
+      "stopReason": "time_limit",
+      "note": "via solveModel_ the stopReason is preserved (time_limit); status unknown, no values, explanation present"
+    },
+    {
+      "id": "L3",
+      "desc": "normal model hits no limit",
+      "status": "optimal"
+    }
+  ],
+  "verification_cases": [
+    {
+      "id": "V1",
+      "desc": "valid solution: every constraint satisfied, objective recomputed matches",
+      "check": "isSatisfied_ true for all, round_(dotProduct_)==objective"
+    },
+    {
+      "id": "V2",
+      "desc": "objective inconsistency detected by recompute",
+      "check": "dotProduct_ recompute != claimed"
+    },
+    {
+      "id": "V3",
+      "desc": "constraint <= violated",
+      "check": "isSatisfied_(used>limit+tol,'<=') false"
+    },
+    {
+      "id": "V4",
+      "desc": "constraint >= violated",
+      "check": "isSatisfied_(used<limit-tol,'>=') false"
+    },
+    {
+      "id": "V5",
+      "desc": "equality violated",
+      "check": "|used-limit|>=tol false"
+    },
+    {
+      "id": "V6",
+      "desc": "lower bound violated",
+      "check": "buildVariableDomains_ satisfied=false"
+    },
+    {
+      "id": "V7",
+      "desc": "upper bound violated",
+      "check": "buildVariableDomains_ satisfied=false"
+    },
+    {
+      "id": "V8",
+      "desc": "integer fractional",
+      "check": "integralitySatisfied=false"
+    },
+    {
+      "id": "V9",
+      "desc": "binary out of {0,1}",
+      "check": "binarySatisfied=false"
+    },
+    {
+      "id": "V10",
+      "desc": "short vector",
+      "check": "feasibleAt_ handles length safely"
+    },
+    {
+      "id": "V11",
+      "desc": "long vector",
+      "check": "feasibleAt_ handles length safely"
+    },
+    {
+      "id": "V12",
+      "desc": "NaN value",
+      "check": "feasibleAt_ false"
+    },
+    {
+      "id": "V13",
+      "desc": "Infinity value",
+      "check": "feasibleAt_ false"
+    },
+    {
+      "id": "V14",
+      "desc": "value just inside tolerance",
+      "check": "isSatisfied_ true at limit+1e-7"
+    },
+    {
+      "id": "V15",
+      "desc": "value just outside tolerance",
+      "check": "isSatisfied_ false at limit+2e-6"
+    }
+  ],
+  "suites": {
+    "migrated": [],
+    "split": [],
+    "legacy_reason": {
+      "tests_states.js": "drives detectModel_+solveModel_ via the MIRROR (engine.js), asserts final statuses (E5 territory) but through the add-on twin; kept legacy - canonical E5 status contracts are covered by the new suites. Reconciling engine.js is E6.",
+      "tests_safety.js": "P0 safety asserts final statuses (optimal/feasible/numerical_failure) via the mirror; kept legacy",
+      "tests_bounds.js": "mixes continuous/integer with final-output assertions; kept legacy",
+      "tests_single_var.js": "run() reaches solveModel_ end-to-end via mirror; kept legacy",
+      "tests_strict/sumif_criteria/locale": "E2/E3 boundary via run()",
+      "tests_error_i18n.js": "UI localisation integration - kept UI",
+      "tests_solve_announce.js": "accessible announcements - kept UI",
+      "tests_direction/examples/panel/grid_input": "composedHtml integration",
+      "tests_worker_parity.js": "E6 Worker"
+    },
+    "note": "E5 migration is the NEW canonical E5 suites that exercise verification + statuses + stop reasons + result adaptation DIRECTLY against the canonical source through the harness. No legacy suite was migrated or split (migrated 0, split 0): the status-bearing legacy suites (tests_states/safety/bounds/single_var) drive the MIRROR end-to-end, and reconciling the mirror is E6. The new canonical E5 suites are the primary E5 coverage."
+  },
+  "parity": {
+    "authority": "canonical source",
+    "approved_divergences": [
+      "newContext_",
+      "readConstraint_"
+    ],
+    "rows": [
+      {
+        "id": "P1",
+        "kind": "direct",
+        "canonical": "feasibleAt_",
+        "mirror": "feasibleAt_",
+        "input": "point + constraints",
+        "result": "identical boolean"
+      },
+      {
+        "id": "P2",
+        "kind": "direct",
+        "canonical": "validModelShape_",
+        "mirror": "validModelShape_",
+        "input": "model",
+        "result": "identical boolean"
+      },
+      {
+        "id": "P3",
+        "kind": "direct",
+        "canonical": "finiteModel_",
+        "mirror": "finiteModel_",
+        "input": "model",
+        "result": "identical boolean"
+      },
+      {
+        "id": "P4",
+        "kind": "observable",
+        "canonical": "solveModel_",
+        "mirror": "solveModel_",
+        "input": "same sheet/model",
+        "result": "same status/stopReason/optimalityProven/objective/values (elapsedMs excluded); surfaces isSatisfied_/explainStatus_ parity"
+      }
+    ],
+    "direct_parity_cases": 3,
+    "observable_parity_cases": 1,
+    "rule": "inputs outside the two approved divergences must be exactly equal; a third divergence must fail; the mirror is never modified; stopReason/optimalityProven/values order/status/errors are never dropped; optimalityProven is never manually derived; nothing rounded beyond production. elapsedMs is non-deterministic and excluded from equality.",
+    "elapsedMs_treatment": "elapsedMs is a NON-DETERMINISTIC temporal field (Date.now()-started). It is NOT silently ignored: it is documented here as a temporal, non-comparable field and is the ONLY field excluded from the observable solveModel_ equality. Every other contractual field is compared EXACTLY: status, stopReason, optimalityProven, objective, values, nodesExplored, modelType, sense, variables, labels, constraints, variableDomains, caveat, explanation. No contractual field is dropped to obtain parity."
+  },
+  "harness": {
+    "path": "engine/canonical-engine-harness.js",
+    "authority_e2": "engine/e2-exports.js",
+    "authority_e3": "engine/e3-exports.js",
+    "authority_e4": "engine/e4-exports.js",
+    "authority_e5": "engine/e5-exports.js",
+    "phase_api": "createCanonicalEngineHarness({phase:'e5'})",
+    "mechanism": "Node vm; test-only export epilogue; ONE infrastructure for all phases",
+    "stubs": [
+      {
+        "name": "console",
+        "reason": "defensive logs",
+        "value": "no-op",
+        "impact": "none"
+      },
+      {
+        "name": "native globals",
+        "reason": "pure computation",
+        "value": "native",
+        "impact": "none"
+      },
+      {
+        "name": "sheetStub",
+        "reason": "minimal Sheets-like sheet for solveModel_/detectModel_",
+        "value": "getDataRange/getFormulas/getValues",
+        "impact": "none"
+      },
+      {
+        "name": "Date.now (limit tests only)",
+        "reason": "deterministic time_limit without a real 20s wait",
+        "value": "base time then a value past the deadline",
+        "impact": "reaches the exact deadline branch; no production change; not flaky"
+      }
+    ]
+  },
+  "allowlist": {
+    "post_e1": 18,
+    "post_e2": 18,
+    "post_e3": 18,
+    "post_e4": 18,
+    "post_e5": 18,
+    "note": "unchanged; the E5 harness/suites use the harness API, not raw reads; no negative is in the allowlist"
+  },
+  "dist_independence": {
+    "note": "E5 suites are dist-independent, per the E4 correction. The public-output byte-identity is owned solely by validate_dist during npm run build; no E5 suite gates an assertion on existsSync(dist) or reads dist/solver.html. tests_needle_audit enforces this."
+  },
+  "provenance": {
+    "verification": "characterised by running the canonical source (E5 phase) through the harness: solveModel_ end-to-end on stub sheets, plus isSatisfied_/feasibleAt_/buildVariableDomains_/isWhole_ probes",
+    "statuses": "the real status strings grepped from the canonical source and confirmed by running optimise_/solveModel_",
+    "limits": "time_limit characterised with a deterministic Date.now() stub",
+    "engine_sha": "read from engine/source/plumline-engine.js (unchanged)",
+    "mirror_sha": "read from engine/engine.js (unchanged)",
+    "parity": "canonical harness/probe vs engine/engine.js at feasibleAt_/validModelShape_/finiteModel_ (direct) and solveModel_ (observable)"
+  },
+  "metrics": {
+    "baseline_main_pre_e": 10231,
+    "post_e0": 10267,
+    "post_e1": 10450,
+    "post_e2": 10630,
+    "post_e3_historic": 10852,
+    "e3_baseline_adjusted": 10849,
+    "post_e4": 11099,
+    "e5_baseline": 11099,
+    "e5_total": 11392,
+    "e5_increment": 293,
+    "e5_suites": {
+      "checker": 70,
+      "positive": 54,
+      "negative": 53,
+      "needle_audit": 116,
+      "note": "read from each suite's own PASSED line (not grep): checker 70 + positive 54 + negative 53 + auditor 116 = 293; 11099+293=11392."
+    },
+    "e5_negative_cases": 53,
+    "exports": {
+      "e2": 24,
+      "e3": 22,
+      "e4": 8,
+      "e5": 9
+    },
+    "e5_function_count": 9,
+    "statuses_count": 7,
+    "stop_reasons_count": 5,
+    "technical_errors_count": 2,
+    "verification_cases": 15,
+    "parity_direct": 3,
+    "parity_observable": 1,
+    "approved_divergences": 2,
+    "note": "E5 total and increment confirmed by the full battery (run_all via suites.js) and by npm run verify, identical with and without a prior build."
+  },
+  "PINNED_SHA": {
+    "engine": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "mirror": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa"
+  },
+  "do_not_regenerate": "This fixture pins pre-E5 behaviour. checkCanonicalVerificationAndStatuses verifies these contracts; engine and mirror SHAs are pinned here and independently in engine-e0/e1/e2/e3/e4 fixtures. Do not rebuild from the running implementation; update only on a deliberate, reviewed baseline change. No absolute paths, no timestamps, no sleeps, no real times, no function bodies, no data regenerated during verify."
+}

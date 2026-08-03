@@ -28,6 +28,8 @@ function makeTree(root) {
   fs.mkdirSync(path.join(dir, FRAG_DIR), { recursive: true });
   fs.mkdirSync(path.join(dir, 'engine', 'fixtures', 'solver-ui-golden'), { recursive: true });
   fs.copyFileSync(path.join(SITE, SOLVER), path.join(dir, SOLVER));
+  fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
+  fs.copyFileSync(path.join(SITE, 'engine', 'source', 'plumline-engine.js'), path.join(dir, 'engine', 'source', 'plumline-engine.js'));
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
@@ -37,6 +39,7 @@ function makeTree(root) {
   return dir;
 }
 const readSolver = dir => fs.readFileSync(path.join(dir, SOLVER), 'utf8');
+const engineSrcPath = dir => path.join(dir, 'engine', 'source', 'plumline-engine.js');
 const writeSolver = (dir, s) => fs.writeFileSync(path.join(dir, SOLVER), s);
 const fragPath = dir => path.join(dir, FRAG_REL);
 
@@ -118,9 +121,9 @@ expectThrow('N10 residual content between markers', dir => {
 }, 'unexpected content');
 // 11. A marker introduced inside the engine region.
 expectThrow('N11 marker inside engine', dir => {
-  const s = readSolver(dir);
-  const at = s.indexOf('/* ENGINE_START */') + '/* ENGINE_START */'.length;
-  writeSolver(dir, s.slice(0, at) + '\n/* SOLVER_UI_GRID_INTERACTION_START:grid-interaction.js */\n/* SOLVER_UI_GRID_INTERACTION_END */\n' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 100) + '\n/* SOLVER_UI_GRID_INTERACTION_START:x.js */\n/* SOLVER_UI_GRID_INTERACTION_END */\n' + e.slice(100));
 }, 'inside the engine region');
 
 // 12. Fragment published under a public dir would be caught by the publication
@@ -195,9 +198,9 @@ expectCheckFail('N26 asset version changed', dir => {
 }, 'css version intact');
 // 27. Engine modified by one byte.
 expectCheckFail('N27 engine one-byte change', dir => {
-  const s = readSolver(dir);
-  const at = s.indexOf('/* ENGINE_START */') + 40;
-  writeSolver(dir, s.slice(0, at) + ' ' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 200) + ' ' + e.slice(200));
 }, 'engine sha canonical');
 // 28. CSV import removed from the fragment.
 expectCheckFail('N28 CSV import removed', dir => {

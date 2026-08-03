@@ -1,3 +1,9 @@
+/* GENERATED FILE — DO NOT EDIT MANUALLY.
+ * Canonical source: engine/source/plumline-engine.js
+ * Regenerate with: npm run generate:engine-mirror
+ * This mirror is a deterministic derivation of the canonical engine plus the
+ * two approved platform adaptations (newContext_, readConstraint_) and the
+ * Node/add-on wrapper. Edit the canonical source, not this file. */
 /* === Plumline engine: the exact same code as the Google Sheets add-on === */
 /**
  * Engine.gs — model extraction and optimisation
@@ -32,9 +38,8 @@ const ENGINE = {
  */
 function optimise_(model) {
   // Reject structurally invalid models before anything else: a shared engine
-  // must defend itself rather than trust the caller. An unknown relation would
-  // otherwise slip through feasibleAt_ without triggering any comparison, and
-  // integerIndices_ passes through whatever array it's given.
+  // must defend itself. An unknown relation would otherwise slip through
+  // feasibleAt_ without triggering any comparison.
   if (!validModelShape_(model)) {
     return { status: 'invalid_model', stopReason: 'invalid_model',
              optimalityProven: false, nodesExplored: 0, objective: null, values: null };
@@ -66,15 +71,11 @@ function optimise_(model) {
   }
   // Defensive final feasibility check against the FULL applied model (bounds
   // folded in). This covers every variable's non-negativity — including plain
-  // continuous ones that have no entry in the receipt's variableDomains — plus
-  // all constraints. A solution that only looks feasible against the visible
-  // rows, but has a tiny negative from numerical noise, is rejected here.
+  // continuous ones with no receipt entry — plus all constraints.
   if (solution.status === 'optimal' || solution.status === 'feasible') {
     if (!feasibleAt_(model, model.constraints || [], solution.values || [])) {
       return numericalFailure_(solution.nodesExplored);
     }
-    // Re-verify integrality of every wanted index, and that the objective the
-    // engine returned matches the objective recomputed from the final point.
     for (let i = 0; i < wanted.length; i++) {
       const v = solution.values[wanted[i]];
       if (Math.abs(v - Math.round(v)) > 1e-6) return numericalFailure_(solution.nodesExplored);
@@ -93,26 +94,17 @@ function numericalFailure_(nodes) {
            objective: null, values: null };
 }
 
-// Structural validation: types and shape must be exactly right, or the shared
-// engine could silently solve a different model (e.g. a missing 'maximize'
-// reads as false and flips the direction; a negative lower bound is dropped by
-// applyBounds_). Type errors here are distinct from finite-but-NaN numbers,
-// which finiteModel_ catches and reports as numerical_failure.
 function validModelShape_(model) {
   if (!model || !Array.isArray(model.objective)) return false;
   const n = model.objective.length;
   if (n < 1) return false;
-
   if (typeof model.maximize !== 'boolean') return false;
   if (!Array.isArray(model.constraints)) return false;
-
-  // Objective must be a dense array of numbers (no holes, no numeric strings).
   for (let i = 0; i < n; i++) {
     if (!(i in model.objective)) return false;
     if (typeof model.objective[i] !== 'number') return false;
   }
   if (model.constant != null && typeof model.constant !== 'number') return false;
-
   for (let k = 0; k < model.constraints.length; k++) {
     const c = model.constraints[k];
     if (!c) return false;
@@ -125,8 +117,6 @@ function validModelShape_(model) {
     if (typeof c.rhs !== 'number') return false;
     if (c.relation !== '<=' && c.relation !== '>=' && c.relation !== '=') return false;
   }
-
-  // integer may be true, false, null/undefined, or an array of indices.
   if (model.integer != null && model.integer !== false && model.integer !== true &&
       !Array.isArray(model.integer)) return false;
   if (Array.isArray(model.integer)) {
@@ -138,25 +128,21 @@ function validModelShape_(model) {
       seen[idx] = true;
     }
   }
-
   if (model.bounds != null && !Array.isArray(model.bounds)) return false;
   const bounds = model.bounds || [];
   if (bounds.length > n) return false;
   for (let i = 0; i < bounds.length; i++) {
     const b = bounds[i];
-    if (b == null) continue;                                  // no bound for this var
+    if (b == null) continue;
     if (typeof b !== 'object' || Array.isArray(b)) return false;
     if (b.lower != null && typeof b.lower !== 'number') return false;
     if (b.upper != null && typeof b.upper !== 'number') return false;
-    if (b.lower != null && b.lower < 0) return false;         // negative vars unsupported in beta
+    if (b.lower != null && b.lower < 0) return false;
   }
-
   return true;
 }
-
 // Every objective coefficient, constant, constraint coefficient, rhs, and bound
-// must be a finite number. Uses Number.isFinite (no coercion), so a numeric
-// string is NOT finite here; type validation is validModelShape_'s job.
+// must be a finite number. Uses Number.isFinite (no coercion).
 function finiteModel_(model) {
   if (!model || !model.objective) return false;
   if ((model.objective || []).some(function (c) { return !Number.isFinite(c); })) return false;
@@ -209,6 +195,7 @@ function applyBounds_(model) {
 }
 
 // Classify a model for display: 'continuous', 'integer', 'binary', or 'mixed'.
+// Uses the per-variable domains when present, else the global whole-numbers flag.
 function classifyModel_(domains, wholeToggle, n) {
   if (!domains) return wholeToggle ? 'integer' : 'continuous';
   const bounds = domains.bounds || [];
@@ -232,6 +219,10 @@ function classifyModel_(domains, wholeToggle, n) {
   return 'integer';
 }
 
+// Build a per-variable domain report for the receipt. Lists only variables
+// whose domain differs from the default (continuous, 0..inf) or whose type was
+// set explicitly, so untouched models report nothing. Each entry records the
+// resulting value and whether its limits are satisfied and binding.
 function buildVariableDomains_(domains, wholeToggle, variables, labels, values, modelType) {
   if (!domains && !wholeToggle) return [];
   const n = variables.length;
@@ -249,6 +240,8 @@ function buildVariableDomains_(domains, wholeToggle, variables, labels, values, 
     const isBinary = isInt && lower === 0 && upper === 1;
     let type = 'continuous';
     if (isBinary) type = 'binary'; else if (isInt) type = 'integer';
+    // Skip variables at the plain default (continuous, no bounds) to keep the
+    // report focused on what the user actually set.
     const isDefault = (type === 'continuous' && lower === 0 && upper === null);
     if (isDefault) continue;
     const value = round_(values[i]);
@@ -301,19 +294,14 @@ function isWhole_(value) {
  * Saying so is the point — a solver that cannot tell the difference is how
  * users end up trusting a number they should not.
  */
-// Dot product of a coefficient vector with a values vector.
 function dotProduct_(coeffs, values) {
   let s = 0;
   for (let i = 0; i < coeffs.length; i++) s += (coeffs[i] || 0) * (values[i] || 0);
   return s;
 }
-
-// Is a specific point feasible against a constraint list? Used to re-verify a
-// rounded integer incumbent before accepting it.
 function feasibleAt_(model, constraints, values) {
   const TOL = 1e-6;
   if (!Array.isArray(values)) return false;
-  // The point must have one value per objective variable (when we know how many).
   if (model && model.objective && values.length !== model.objective.length) return false;
   for (let i = 0; i < values.length; i++) {
     if (!isFinite(values[i])) return false;   // NaN / Infinity is never feasible
@@ -322,16 +310,13 @@ function feasibleAt_(model, constraints, values) {
   for (let k = 0; k < constraints.length; k++) {
     const c = constraints[k];
     const lhs = dotProduct_(c.coefficients, values);
-    // A non-finite lhs (e.g. Infinity - Infinity = NaN) would make every
-    // comparison below false and pass by accident. Reject it explicitly.
-    if (!isFinite(lhs)) return false;
+    if (!isFinite(lhs)) return false;   // Infinity - Infinity = NaN would pass by accident
     if (c.relation === '<=' && lhs > c.rhs + TOL) return false;
     if (c.relation === '>=' && lhs < c.rhs - TOL) return false;
     if (c.relation === '=' && Math.abs(lhs - c.rhs) > TOL) return false;
   }
   return true;
 }
-
 function solveIntegerProgram_(model, wanted) {
   const deadline = Date.now() + ENGINE.BRANCH_MILLIS;
   let best = null;
@@ -375,16 +360,12 @@ function solveIntegerProgram_(model, wanted) {
     }
 
     if (fractional === -1) {
-      // Snap the integer variables to exact integers (a value of 0.9999995 is
-      // "whole" within tolerance but must be stored as 1), recompute the
-      // objective from the snapped point, and re-check every constraint. Only
-      // accept it if the exact-integer point is still feasible, so we never
-      // record an incumbent that's only feasible in its rounded-off form.
+      // Snap the integer variables to exact integers, recompute the objective
+      // from the snapped point, and re-check every constraint. Only accept it
+      // if the exact-integer point is still feasible.
       const snapped = relaxed.values.map(function (v) { return Math.round(v * 1e9) / 1e9; });
       wanted.forEach(function (idx) { snapped[idx] = Math.round(snapped[idx]); });
       if (!feasibleAt_(model, model.constraints.concat(extra), snapped)) {
-        // The rounded point breaks a constraint: treat this branch as
-        // unresolved rather than banking a bad incumbent.
         exhausted = false;
         if (!stopReason) stopReason = 'numerical_failure';
         return;
@@ -392,8 +373,7 @@ function solveIntegerProgram_(model, wanted) {
       const snappedObjective = round_(dotProduct_(model.objective, snapped) + (model.constant || 0));
       // Only accept if the EXACT-integer objective actually improves on the
       // incumbent. Rounding within tolerance can make the snapped point slightly
-      // worse than the relaxation that beat 'best', so re-compare here or we
-      // could replace a better solution with a worse one.
+      // worse, so re-compare here or we could replace a better solution.
       const improves = !best || (model.maximize
         ? snappedObjective > best.objective + ENGINE.EPSILON
         : snappedObjective < best.objective - ENGINE.EPSILON);
@@ -491,8 +471,8 @@ function solveLinearProgram_(model) {
     for (let j = 0; j < total; j++) phaseOneCost.push(isArtificial[j] ? 1 : 0);
     const phaseOneStatus = iterate_(tableau, basis, phaseOneCost, total, null);
     // Phase 1 must end 'optimal'. Anything else means we don't know feasibility:
-    // 'unbounded' shouldn't happen for the phase-1 auxiliary problem in exact
-    // arithmetic, so treat it as a numerical anomaly; the rest pass through.
+    // 'unbounded' shouldn't happen for the auxiliary problem, so treat it as a
+    // numerical anomaly; the rest pass through.
     if (phaseOneStatus !== 'optimal') {
       return { status: phaseOneStatus === 'unbounded' ? 'numerical_failure' : phaseOneStatus };
     }
@@ -501,9 +481,6 @@ function solveLinearProgram_(model) {
     for (let i = 0; i < basis.length; i++) {
       if (isArtificial[basis[i]]) residual += tableau[i][total];
     }
-    // A non-finite or negative residual is a numerical anomaly (the sum of
-    // artificial values should be >= 0 and finite). Only a clearly positive
-    // residual is a genuine proof of infeasibility.
     if (!isFinite(residual)) return { status: 'numerical_failure' };
     if (residual < -1e-6) return { status: 'numerical_failure' };
     if (residual > 1e-6) return { status: 'infeasible' };
@@ -604,10 +581,8 @@ function iterate_(tableau, basis, cost, total, forbidden) {
 function pivot_(tableau, row, column) {
   const pivotValue = tableau[row][column];
   // Guard the pivot value AND the result of every division and subtraction: a
-  // tableau that starts finite can still overflow to +/-Infinity mid-pivot
-  // (e.g. dividing a huge entry by a tiny pivot), and Infinity - Infinity is
-  // NaN. Any non-finite result aborts the pivot so the caller can report a
-  // numerical failure instead of banking a corrupted tableau.
+  // tableau that starts finite can still overflow to +/-Infinity mid-pivot, and
+  // Infinity - Infinity is NaN. Any non-finite result aborts the pivot.
   if (!isFinite(pivotValue) || Math.abs(pivotValue) <= ENGINE.EPSILON) return false;
   for (let j = 0; j < tableau[row].length; j++) {
     tableau[row][j] /= pivotValue;
@@ -630,14 +605,120 @@ function pivot_(tableau, row, column) {
 /* Grid — the whole sheet read in one call                             */
 /* ================================================================== */
 
+// Classify a raw grid cell: is it a FORMULA, or a relation-operator VALUE?
+// A formula starts with '=' — but so do the relation operators the grid uses
+// in the operator column ('=', '==', '=<', '=>'), which are plain text VALUES,
+// not formulas. Treating '=' as a formula turned an equality constraint into a
+// formula cell with value 0, silently dropping the relation. This ONE helper is
+// the single source of truth used by both the app (sheetFromGrid) and the tests
+// so a test copy can never drift from the real converter again.
+function isFormulaInput_(raw) {
+  var text = String(raw).trim();
+  if (text.charAt(0) !== '=') return false;
+  var RELATION_TOKENS = {
+    '=': true, '==': true, '<=': true, '>=': true,
+    '=<': true, '=>': true, '\u2264': true, '\u2265': true, '<': true, '>': true
+  };
+  return !RELATION_TOKENS[text];
+}
+
+// The canonical TEXT to store for a formula cell: the trimmed form. Classifying
+// on trimmed text but storing the raw (untrimmed) string left a leading space
+// before '=', so the later `replace(/^=/, '')` could not strip it and the
+// formula failed to tokenize. Storing the trimmed form keeps classification and
+// canonicalisation consistent. Callers use it only when isFormulaInput_ is true.
+function formulaCellText_(raw) {
+  return String(raw).trim();
+}
+
+// Full cell conversion — the SINGLE source of truth for splitting a raw grid
+// cell into {formula, value}, shared by the app (sheetFromGrid) and every test
+// harness. Centralising the VALUE conversion too (not just the formula
+// classification) stops the harness from drifting from the app on inputs like
+// "01", "+3" or "3.0". A formula cell stores the trimmed formula and value 0;
+// anything else stores '' as the formula and, as its value, the number when the
+// raw string is cleanly numeric, else the raw text (operators, labels).
+function classifyGridCell_(raw) {
+  if (raw == null) return { formula: '', value: '' };
+  var text = String(raw);
+  if (isFormulaInput_(text)) return { formula: formulaCellText_(text), value: 0 };
+  // A whitespace-only cell is EMPTY, not 0: Number('   ') and Number('\t') are
+  // both 0, which would silently build a false "<= 0" limit from a blank the
+  // user left after an operator. Trim before the emptiness test so spaces/tabs
+  // become '' — but keep Number() on the untrimmed text so "01"/"+3"/"3.0"
+  // still convert (Number ignores surrounding whitespace anyway).
+  if (text.trim() === '') return { formula: '', value: '' };
+  var n = Number(text);
+  return { formula: '', value: (!isNaN(n)) ? n : text };
+}
+
+// Locale (decimal comma / semicolon separator) normalisation. A European sheet
+// writes 1,5 and SUM(A;B); the tokenizer and Number() expect '.' decimals and
+// ',' separators, so we detect the sheet locale once and normalise formulas and
+// values into canonical form. Only European and US are supported (no thousands
+// grouping). localeMode may force 'eu'/'us'; default is 'auto'.
+//
+// SCOPE / KNOWN LIMITS (by design): auto-detect needs a signal (';' or a
+// decimal-comma value); a lone "=1,5*B2" stays US under auto and needs the
+// manual EU selector. Value detection accepts 7,5 and -3,75 but not +7,5, ,5,
+// 7, or 1,5e3. Variable-Settings bound fields still parse with Number().
+function isEuropeanDecimal_(raw) {
+  return typeof raw === 'string' && /^-?\d+,\d+$/.test(raw.trim());
+}
+function detectLocale_(formulas, values, mode) {
+  if (mode === 'eu') return 'eu';
+  if (mode === 'us') return 'us';
+  var rows = formulas || [];
+  for (var r = 0; r < rows.length; r++) {
+    var frow = rows[r] || [];
+    for (var c = 0; c < frow.length; c++) {
+      var f = frow[c];
+      if (!f || typeof f !== 'string') continue;
+      var inStr = false;
+      for (var i = 0; i < f.length; i++) {
+        var ch = f.charAt(i);
+        if (ch === '"') inStr = !inStr;
+        else if (ch === ';' && !inStr) return 'eu';
+      }
+    }
+  }
+  rows = values || [];
+  for (var vr = 0; vr < rows.length; vr++) {
+    var vrow = rows[vr] || [];
+    for (var vc = 0; vc < vrow.length; vc++) {
+      if (isEuropeanDecimal_(vrow[vc])) return 'eu';
+    }
+  }
+  return 'us';
+}
+function normalizeFormula_(formula, locale) {
+  if (locale !== 'eu' || typeof formula !== 'string' ||
+      (formula.indexOf(',') === -1 && formula.indexOf(';') === -1)) {
+    return formula;
+  }
+  var out = '', inStr = false;
+  for (var i = 0; i < formula.length; i++) {
+    var ch = formula.charAt(i);
+    if (ch === '"') { inStr = !inStr; out += ch; }
+    else if (inStr) { out += ch; }
+    else if (ch === ';') { out += ','; }
+    else if (ch === ',') { out += '.'; }
+    else { out += ch; }
+  }
+  return out;
+}
+function normalizeValue_(raw, locale) {
+  if (locale === 'eu' && isEuropeanDecimal_(raw)) {
+    return Number(raw.trim().replace(',', '.'));
+  }
+  return raw;
+}
+
 function loadGrid_(sheet, localeMode) {
   const range = sheet.getDataRange();
   const rawFormulas = range.getFormulas();
   const rawValues = range.getValues();
   const columns = rawFormulas.length ? rawFormulas[0].length : 0;
-  // Detect the sheet locale once, then normalise every formula and value into
-  // canonical (US) form so the tokenizer and Number() see '.' decimals and ','
-  // separators regardless of what the user typed. localeMode may force 'eu'/'us'.
   const locale = detectLocale_(rawFormulas, rawValues, localeMode || 'auto');
   const formulas = rawFormulas.map(function (row) {
     return row.map(function (f) { return normalizeFormula_(f, locale); });
@@ -910,7 +991,7 @@ function linearize_(context, a1, depth) {
     } catch (err) {
       // Anything the parser cannot handle is still usable as long as it does
       // not lead back to a decision variable AND the caller allows folding a
-      // cached value (true in Sheets, false on the web where the value is 0).
+      // cached value. On the web this is off, so an unsupported formula fails.
       if (context.allowCachedFormulaFallback && !dependsOnVariables_(context, cell, {})) {
         const cached = entry.value;
         if (typeof cached !== 'number') {
@@ -927,137 +1008,6 @@ function linearize_(context, a1, depth) {
 
   context.memo[cell] = form;
   return form;
-}
-
-/* ================================================================== */
-/* Locale (decimal comma / semicolon separator) normalisation          */
-/* ================================================================== */
-
-/* ================================================================== */
-/* Grid-input classification (formula vs relation-operator value)      */
-/* ================================================================== */
-
-// Classify a raw grid cell: is it a FORMULA, or a relation-operator VALUE?
-// A formula starts with '=' — but so do the relation operators the grid uses
-// in the operator column ('=', '==', '=<', '=>'), which are plain text VALUES,
-// not formulas. Treating '=' as a formula turned an equality constraint into a
-// formula cell with value 0, silently dropping the relation. This ONE helper is
-// the single source of truth used by both the app (sheetFromGrid) and the tests
-// so a test copy can never drift from the real converter again.
-function isFormulaInput_(raw) {
-  var text = String(raw).trim();
-  if (text.charAt(0) !== '=') return false;
-  var RELATION_TOKENS = {
-    '=': true, '==': true, '<=': true, '>=': true,
-    '=<': true, '=>': true, '\u2264': true, '\u2265': true, '<': true, '>': true
-  };
-  return !RELATION_TOKENS[text];
-}
-
-// The canonical TEXT to store for a formula cell: the trimmed form. Classifying
-// on trimmed text but storing the raw (untrimmed) string left a leading space
-// before '=', so the later `replace(/^=/, '')` could not strip it and the
-// formula failed to tokenize. Storing the trimmed form keeps classification and
-// canonicalisation consistent. Callers use it only when isFormulaInput_ is true.
-function formulaCellText_(raw) {
-  return String(raw).trim();
-}
-
-// Full cell conversion — the SINGLE source of truth for splitting a raw grid
-// cell into {formula, value}, shared by the app (sheetFromGrid) and every test
-// harness. Centralising the VALUE conversion too (not just the formula
-// classification) stops the harness from drifting from the app on inputs like
-// "01", "+3" or "3.0". A formula cell stores the trimmed formula and value 0;
-// anything else stores '' as the formula and, as its value, the number when the
-// raw string is cleanly numeric, else the raw text (operators, labels).
-function classifyGridCell_(raw) {
-  if (raw == null) return { formula: '', value: '' };
-  var text = String(raw);
-  if (isFormulaInput_(text)) return { formula: formulaCellText_(text), value: 0 };
-  // A whitespace-only cell is EMPTY, not 0: Number('   ') and Number('\t') are
-  // both 0, which would silently build a false "<= 0" limit from a blank the
-  // user left after an operator. Trim before the emptiness test so spaces/tabs
-  // become '' — but keep Number() on the untrimmed text so "01"/"+3"/"3.0"
-  // still convert (Number ignores surrounding whitespace anyway).
-  if (text.trim() === '') return { formula: '', value: '' };
-  var n = Number(text);
-  return { formula: '', value: (!isNaN(n)) ? n : text };
-}
-
-// A European-locale sheet writes 1,5 for 1.5 and SUM(A;B) for SUM(A,B). The
-// tokenizer and Number() both expect the canonical (US) form: '.' decimal, ','
-// argument separator. We detect the sheet's locale ONCE and normalise every
-// formula and value into canonical form before parsing. Only two locales are
-// supported (European and US); thousands separators are out of scope.
-//
-// SCOPE / KNOWN LIMITS (by design): auto-detect needs a signal (';' or a
-// decimal-comma value); a lone "=1,5*B2" stays US under auto and needs the
-// manual EU selector. Value detection accepts 7,5 and -3,75 but not +7,5, ,5,
-// 7, or 1,5e3. Variable-Settings bound fields still parse with Number().
-
-// Is a raw string a European decimal number like "7,5" or "-12,0"? (No
-// thousands grouping — a bare integer-comma-fraction only.)
-function isEuropeanDecimal_(raw) {
-  return typeof raw === 'string' && /^-?\d+,\d+$/.test(raw.trim());
-}
-
-// Detect the sheet locale from its formulas and values. European if any formula
-// uses ';' as a separator (outside strings) or any value is a decimal-comma
-// number. 'mode' can force it: 'eu' | 'us' | 'auto' (default).
-function detectLocale_(formulas, values, mode) {
-  if (mode === 'eu') return 'eu';
-  if (mode === 'us') return 'us';
-  var rows = formulas || [];
-  for (var r = 0; r < rows.length; r++) {
-    var frow = rows[r] || [];
-    for (var c = 0; c < frow.length; c++) {
-      var f = frow[c];
-      if (!f || typeof f !== 'string') continue;
-      var inStr = false;
-      for (var i = 0; i < f.length; i++) {
-        var ch = f.charAt(i);
-        if (ch === '"') inStr = !inStr;
-        else if (ch === ';' && !inStr) return 'eu';
-      }
-    }
-  }
-  rows = values || [];
-  for (var vr = 0; vr < rows.length; vr++) {
-    var vrow = rows[vr] || [];
-    for (var vc = 0; vc < vrow.length; vc++) {
-      if (isEuropeanDecimal_(vrow[vc])) return 'eu';
-    }
-  }
-  return 'us';
-}
-
-// Normalise a European formula string to canonical form: outside string
-// literals, ';' becomes ',' (argument separator) and ',' becomes '.' (decimal).
-// US formulas (and any formula on a US-locale sheet) pass through untouched.
-function normalizeFormula_(formula, locale) {
-  if (locale !== 'eu' || typeof formula !== 'string' ||
-      (formula.indexOf(',') === -1 && formula.indexOf(';') === -1)) {
-    return formula;
-  }
-  var out = '', inStr = false;
-  for (var i = 0; i < formula.length; i++) {
-    var ch = formula.charAt(i);
-    if (ch === '"') { inStr = !inStr; out += ch; }
-    else if (inStr) { out += ch; }
-    else if (ch === ';') { out += ','; }
-    else if (ch === ',') { out += '.'; }
-    else { out += ch; }
-  }
-  return out;
-}
-
-// Normalise a raw cell value to a canonical number when it is a European
-// decimal string ("7,5" -> 7.5). Anything else is returned unchanged.
-function normalizeValue_(raw, locale) {
-  if (locale === 'eu' && isEuropeanDecimal_(raw)) {
-    return Number(raw.trim().replace(',', '.'));
-  }
-  return raw;
 }
 
 /* ================================================================== */
@@ -1421,12 +1371,10 @@ const RELATION_TOKENS = {
   '>=': '>=', '=>': '>=', '≥': '>=',
   '=': '=', '==': '=',
 };
-// Strict inequalities are intentionally NOT in RELATION_TOKENS: silently
-// treating "x < 10" as "x <= 10" changes the model and could report a solution
-// the user explicitly excluded. They are detected and rejected as constraint
-// operators (see readConstraint_). This does not affect SUMIF criteria or
-// strict comparisons inside supported formulas, which parse their own
-// comparison operators elsewhere.
+// Strict inequalities are intentionally NOT normalized here: silently treating
+// "x < 10" as "x <= 10" changes the model and could report a solution the user
+// excluded. They are rejected as constraint operators (see readConstraint_),
+// which does not affect SUMIF criteria or strict comparisons inside formulas.
 const STRICT_RELATION_TOKENS = { '<': true, '>': true };
 const APP = {
   NAME: 'Solver',
@@ -1484,9 +1432,12 @@ function solveModel_(sheet, model, localeMode) {
     bounds: domains ? domains.bounds : null,
   });
 
+  // Real integer-variable check (not just the global toggle): a panel-set
+  // integer or binary variable makes this a discrete model too.
   const integerSpec = domains ? domains.integer : (model.wholeNumbers === true);
   const hasIntegerVariables = integerSpec === true ||
     (Array.isArray(integerSpec) && integerSpec.length > 0);
+  // Classify the model for display: continuous / integer / binary / mixed.
   const modelType = classifyModel_(domains, model.wholeNumbers === true, variables.length);
 
   const result = {
@@ -1512,6 +1463,8 @@ function solveModel_(sheet, model, localeMode) {
     return result;
   }
   if (solution.status === 'feasible') {
+    // Explain WHY optimality wasn't proven, from the actual stop reason, rather
+    // than always blaming time.
     var reasonText = {
       time_limit: 'stopped at the time limit',
       node_limit: 'stopped at the node limit',
@@ -1555,6 +1508,9 @@ function solveModel_(sheet, model, localeMode) {
     };
   }
 
+  // Per-variable domains for the receipt: type, min, max, the resulting value,
+  // and whether each limit is satisfied/binding. This makes the bounds part of
+  // the verification, not just something applied silently during the solve.
   result.variableDomains = buildVariableDomains_(domains, model.wholeNumbers === true,
     variables, result.labels, solution.values, modelType);
 
@@ -1629,11 +1585,10 @@ function safeLinearize_(context, cell, role) {
 }
 
 // Would treating `varCells` as the decision variables yield a LINEAR model?
-// Probes every output the variables feed: if any output is non-linear in those
-// variables (e.g. B2*C2 when BOTH are variables), the candidate is non-linear.
-// Used to prefer a single-cell candidate over a contiguous block that only
-// looks like two variables because the cells happen to be adjacent (=B2*C2 with
-// C2 a coefficient). Never throws — returns a boolean.
+// Probes every output the variables feed; if any is non-linear in those cells
+// (e.g. B2*C2 when BOTH are variables), the candidate is non-linear. Never
+// throws — returns a boolean. Used to prefer a single-cell candidate over a
+// contiguous block that only looks like two variables (=B2*C2, C2 a coefficient).
 function candidateIsLinear_(grid, varCells, outputs, options) {
   const context = newContext_(grid, varCells, options);
   const varSet = toSet_(varCells);
@@ -1743,13 +1698,11 @@ function detectModel_(sheet, localeMode) {
     });
   });
 
-  // Prefer multi-cell blocks exactly as before: whenever any block of two or
-  // more input cells feeds a total, it normally wins and the behaviour for
-  // normal models is unchanged. The one refinement (see below) is that a block
-  // which is only ever formed by the OBJECTIVE — never by a constraint — is weak
-  // evidence: it can be an accidental pairing like =B2*C2, where B2 is the
-  // decision and C2 a unit coefficient. Such a block must not out-rank a genuine
-  // single-cell variable that has objective + constraint evidence.
+  // Prefer multi-cell blocks exactly as before, with one refinement: a block
+  // formed ONLY by the objective (never by a constraint) is weak evidence — it
+  // can be an accidental pairing like =B2*C2 where C2 is a coefficient — and
+  // must not out-rank a genuine single-cell variable with objective+constraint
+  // evidence.
   let variables = null;
   let bestScore = -1;
   Object.keys(blockCells).forEach(function (block) {
@@ -1759,10 +1712,9 @@ function detectModel_(sheet, localeMode) {
     if (score > bestScore) { bestScore = score; variables = block; }
   });
 
-  // Single-cell candidates: a cell reached by the objective AND by at least one
-  // constraint (proven per role, not by a bare count — two constraints and no
-  // objective must not qualify). Computed regardless of whether a block was
-  // found, so we can compare the evidence.
+  // Single-cell candidates: reached by the objective AND by at least one
+  // constraint (proven per role — two constraints and no objective must not
+  // qualify, or picking one as the objective would drop a real limit).
   const eligibleSingles = [];
   {
     const cellReach = {};
@@ -1779,13 +1731,6 @@ function detectModel_(sheet, localeMode) {
       let hasObjective = false, hasConstraint = false;
       reached.forEach(function (output) {
         const role = readConstraint_(grid, output);
-        // Use precise signals, not `guessed` (which lumps an objective together
-        // with an incomplete constraint). Only a real objective (no relation)
-        // counts as the objective; a complete constraint counts as one. A
-        // FORMULA limit reads as incomplete here (no variable context yet), but
-        // it MIGHT resolve to a constant, so count it as a provisional
-        // constraint — the later variable-aware pass rejects it if it truly
-        // depends on a decision variable.
         if (role.isObjective) hasObjective = true;
         else if (role.isCompleteConstraint) hasConstraint = true;
         else if (role.hasRelation && role.limitFormula) hasConstraint = true;
@@ -1794,6 +1739,13 @@ function detectModel_(sheet, localeMode) {
     });
   }
 
+  // Priority (independent of how many outputs reach the block — a linear block
+  // reached only by the objective, e.g. =10*B2+20*C2 with a limit on B2 alone,
+  // is still a real multi-variable model and must NOT be reduced to one cell):
+  //  - A LINEAR multi-cell block always wins.
+  //  - A NON-LINEAR block (=B2*C2 with C2 a coefficient) yields to exactly one
+  //    linear single cell; several linear singles => ambiguous.
+  //  - No block: one linear single is the model; several are ambiguous.
   const opts = { allowCachedFormulaFallback: false };
   const linearSingles = eligibleSingles.filter(function (cell) {
     return candidateIsLinear_(grid, expandRange_(grid, cell), outputs, opts);
@@ -1802,37 +1754,25 @@ function detectModel_(sheet, localeMode) {
     ? candidateIsLinear_(grid, blockCells[variables] || expandRange_(grid, variables), outputs, opts)
     : false;
 
-  // Priority (independent of how many outputs reach the block — that gate was
-  // the bug: a linear block reached only by the objective, e.g. =10*B2+20*C2 with a limit on B2 alone,
-  // is still a real multi-variable model and must NOT be reduced to one cell):
-  //  - A LINEAR multi-cell block always wins, preserving multi-variable models.
-  //  - A NON-LINEAR block (e.g. =B2*C2 with C2 a coefficient) yields to exactly
-  //    one linear single cell; if several single cells are linear, it is
-  //    ambiguous (which cell is the variable and which the coefficient?).
-  //  - With no block, one linear single is the model; several are ambiguous.
   if (variables && blockLinear) {
-    // keep the linear multi-cell block — real multi-variable behaviour intact
+    // keep the linear multi-cell block
   } else if (variables && !blockLinear && linearSingles.length === 1) {
-    variables = linearSingles[0];        // block non-linear; one linear single wins
+    variables = linearSingles[0];
   } else if (variables && !blockLinear && linearSingles.length > 1) {
-    throw new Error('AMBIGUOUS_DECISION_CELLS');   // several linear singles: ambiguous
+    throw new Error('AMBIGUOUS_DECISION_CELLS');
   } else if (variables && !blockLinear) {
-    // block non-linear and no linear single: keep the block so the downstream
-    // solve reports the genuine non-linear error, as before.
+    // non-linear block, no linear single: keep block so solve reports it.
   } else if (!variables && linearSingles.length === 1) {
     variables = linearSingles[0];
   } else if (!variables && linearSingles.length > 1) {
     throw new Error('AMBIGUOUS_DECISION_CELLS');
   }
-  // else: keep whatever weak block we had, or fall through to the error below.
 
   if (!variables) {
-    // Before giving the generic "pick them yourself" message, check whether a
-    // plausible single decision cell was blocked only because a constraint on it
-    // is INCOMPLETE (relation, no limit). That is a specific, fixable problem —
-    // report it with its own marker instead of the vague fallback. Scoped to
-    // cells actually reached by an objective, so an unrelated incomplete
-    // calculation elsewhere on the sheet does not trigger it.
+    // A plausible single decision cell blocked only by an INCOMPLETE constraint
+    // on it gets the specific marker, not the vague fallback. Scoped to cells
+    // reached by an objective so an unrelated incomplete calc elsewhere on the
+    // sheet does not trigger it.
     const cellReach2 = {};
     outputs.forEach(function (output) {
       reachableConstants_(grid, output, {}).forEach(function (cell) {
@@ -1860,8 +1800,8 @@ function detectModel_(sheet, localeMode) {
   }
 
   // variableCells is the set of decision cells. For a multi-cell block it comes
-  // from blockCells; for the single-cell fallback, `variables` is one cell that
-  // was never added to blockCells, so build the set from it directly.
+  // from blockCells; for the single-cell fallback, `variables` is one cell not
+  // in blockCells, so build the set from it directly.
   const variableCells = toSet_(blockCells[variables] || expandRange_(grid, variables));
   const dependent = outputs.filter(function (output) {
     return reachableConstants_(grid, output, {}).some(function (cell) {
@@ -1869,12 +1809,10 @@ function detectModel_(sheet, localeMode) {
     });
   });
 
-  // Classify each dependent output by role before choosing the objective. An
-  // INCOMPLETE constraint (relation but no limit) must never be promoted to the
-  // objective, and if there is no genuine objective (every output is a genuine
-  // constraint) we must refuse rather than invent one from a constraint. Pass
-  // the decision variables so a FORMULA limit (e.g. =100) resolves to its
-  // constant instead of reading as incomplete from the web's cached 0.
+  // Classify dependent outputs by role. Pass the decision variables so a
+  // FORMULA limit (=100) resolves to its constant instead of reading as
+  // incomplete from the web's cached 0. Refuse a variable-dependent limit, an
+  // incomplete constraint, or a sheet with no genuine objective.
   const variableList = expandRange_(grid, variables);
   const roles = dependent.map(function (cell) { return readConstraint_(grid, cell, variableList); });
   if (roles.some(function (r) { return r.limitDependsOnVariable; })) {
@@ -1896,19 +1834,9 @@ function detectModel_(sheet, localeMode) {
   const constraints = [];
   dependent.forEach(function (cell) {
     if (cell === objectiveCell) return;
-    // Pass the decision variables so a FORMULA limit is evaluated safely (a
-    // finite constant is accepted; the cached web value 0 is never trusted).
     const parsed = readConstraint_(grid, cell, variableList);
-    if (parsed.limitDependsOnVariable) {
-      // A limit that depends on a decision variable is not a fixed right-hand
-      // side; refuse rather than freeze the current value into a wrong model.
-      throw new Error('LIMIT_DEPENDS_ON_VARIABLE');
-    }
-    if (parsed.isIncompleteConstraint) {
-      // A formula limit that resolved to text/empty leaves the constraint
-      // without a usable limit; refuse with the specific marker.
-      throw new Error('CONSTRAINT_MISSING_LIMIT');
-    }
+    if (parsed.limitDependsOnVariable) { throw new Error('LIMIT_DEPENDS_ON_VARIABLE'); }
+    if (parsed.isIncompleteConstraint) { throw new Error('CONSTRAINT_MISSING_LIMIT'); }
     constraints.push(parsed);
   });
   // Never silently drop constraints: a model with more limits than we support
@@ -2098,13 +2026,13 @@ function readConstraint_(grid, a1, variables) {
   const label = labelFor_(grid, a1);
   let relation = null;
   let limit = null;
-  let limitFormula = null;   // set when the limit cell holds a formula
-  let limitCell = null;      // A1 of the cell we took the limit from
+  let limitFormula = null;
+  let limitCell = null;
 
   for (let step = 1; step <= APP.MAX_SCAN_COLUMNS; step++) {
-    // Stop at the grid's right edge: cellAt_ returns {value:0} for out-of-bounds
-    // cells, and reading that as a limit would silently turn an EMPTY limit into
-    // 0 (making an incomplete constraint look complete). Only scan real cells.
+    // Stop at the grid's right edge: cellAt_ returns {value:0} out of bounds,
+    // and reading that would turn an EMPTY limit into 0 (incomplete looking
+    // complete). Only scan real cells.
     if (address.column + step - grid.firstColumn >= grid.columns) break;
     const addr = columnLetter_(address.column + step) + address.row;
     const entry = cellAt_(grid, addr);
@@ -2112,9 +2040,6 @@ function readConstraint_(grid, a1, variables) {
     if (relation === null && typeof value === 'string') {
       const trimmed = value.trim();
       if (STRICT_RELATION_TOKENS[trimmed]) {
-        // Reject strict inequalities as constraint operators rather than
-        // silently widening them to <= or >=. The 'STRICT_INEQUALITY' marker
-        // lets the UI show a localized explanation.
         throw new Error('STRICT_INEQUALITY: ' + label + ' uses "' + trimmed +
           '". Strict inequalities (< and >) are not supported as constraint ' +
           'operators. Use <= or >= (equality at the limit is allowed).');
@@ -2123,14 +2048,10 @@ function readConstraint_(grid, a1, variables) {
       if (token) { relation = token; continue; }
     }
     if (relation !== null) {
-      // The limit is the FIRST real cell after the operator. Blank cells between
-      // the operator and the limit are allowed and skipped, but any non-blank,
-      // non-numeric content stops the scan.
-      //
-      // A FORMULA in the limit cell must NOT be read from its cached value: on
-      // the web the grid caches every formula as 0, so "<= =100" would silently
-      // become "<= 0" (a false model). Record the formula and defer to a
-      // variable-aware evaluation below; a literal number is taken directly.
+      // Limit is the FIRST real cell after the operator: skip blanks, accept the
+      // first number, and STOP on any other content. A FORMULA limit must never
+      // be read from its cached value (0 on the web): record it and evaluate it
+      // against the decision variables below.
       if (entry.formula) { limitFormula = entry.formula; limitCell = addr; break; }
       if (value === '' || value === null || value === undefined) continue;
       if (typeof value === 'number') { limit = value; limitCell = addr; }
@@ -2138,33 +2059,31 @@ function readConstraint_(grid, a1, variables) {
     }
   }
 
-  // Evaluate a formula limit safely: it is valid ONLY if it reduces to a finite
-  // numeric constant with no decision-variable terms. This accepts =100,
-  // =50+50, =H1 (constant cells), and rejects =2*B2 (depends on a variable) and
-  // ="" (text). Without a variable set we cannot prove independence, so a
-  // formula limit stays unresolved (hasLimit false) and reads as incomplete.
+  // A formula limit is valid ONLY if it reduces to a finite numeric constant
+  // with no decision-variable terms (=100, =50+50, =H1). It is rejected if it
+  // depends on a variable (=2*B2) or resolves to text/empty (="").
   let limitDependsOnVariable = false;
   if (limitFormula !== null) {
-    if (variables) {
-      const context = {
-        grid: grid,
-        variables: toSet_(variables),
-        memo: {},
-        constantFallbacks: [],
-        allowCachedFormulaFallback: false,
-      };
-      try {
-        const form = linearize_(context, limitCell, 0);
-        if (form.text !== undefined) {
-          // formula resolves to text (e.g. =""): treated as a missing limit
-        } else if (!isConstant_(form)) {
-          limitDependsOnVariable = true;
-        } else if (Number.isFinite(form.constant)) {
-          limit = form.constant;
-        }
-      } catch (err) {
-        // Unparseable or cyclic: leave the limit unresolved (incomplete).
+  if (variables) {
+    const context = {
+      grid: grid,
+      variables: toSet_(variables),
+      memo: {},
+      constantFallbacks: [],
+      allowCachedFormulaFallback: false,
+    };
+    try {
+      const form = linearize_(context, limitCell, 0);
+      if (form.text !== undefined) {
+        // formula resolves to text (e.g. =""): treated as a missing limit
+      } else if (!isConstant_(form)) {
+        limitDependsOnVariable = true;
+      } else if (Number.isFinite(form.constant)) {
+        limit = form.constant;
       }
+    } catch (err) {
+      // Unparseable or cyclic: leave the limit unresolved (incomplete).
+    }
     }
   }
 
@@ -2175,18 +2094,11 @@ function readConstraint_(grid, a1, variables) {
     relation: relation === null ? '<=' : relation,
     limit: limit === null ? (typeof current === 'number' ? round_(current) : 0) : limit,
     guessed: relation === null || limit === null,
-    // Separated role signals so callers can distinguish a real objective (no
-    // relation) from an INCOMPLETE constraint (relation present, limit missing).
-    // Both make `guessed` true, but only the former is a legitimate objective;
-    // conflating them let an incomplete constraint be promoted to the objective.
     hasRelation: relation !== null,
     hasLimit: limit !== null,
     isObjective: relation === null,
     isCompleteConstraint: relation !== null && limit !== null,
     isIncompleteConstraint: relation !== null && limit === null,
-    // A formula-valued limit that depends on a decision variable is unsafe: it
-    // can't be a fixed right-hand side. Surfaced so detection can refuse it with
-    // a specific marker instead of freezing a wrong value.
     limitFormula: limitFormula,
     limitDependsOnVariable: limitDependsOnVariable,
   };
@@ -2249,13 +2161,8 @@ function matchesAnyHint_(label, hints) {
   return false;
 }
 
-
-
-/* === Module exports (added for testing/reuse; does not change engine logic) ===
-   In the browser this attaches the engine to window.PlumlineEngine.
-   In Node (tests) it populates module.exports. The maths is untouched. */
 (function (root) {
-  var api = {
+var api = {
     ENGINE: ENGINE,
     detectModel_: detectModel_,
     solveModel_: solveModel_,

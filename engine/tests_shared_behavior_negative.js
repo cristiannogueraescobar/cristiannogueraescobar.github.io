@@ -103,6 +103,16 @@ function makeTree() {
   fs.mkdirSync(path.join(dir, 'engine', 'templates'), { recursive: true });
   const tpl = path.join(siteDir, 'engine', 'templates', 'capabilities.template.html');
   if (fs.existsSync(tpl)) fs.copyFileSync(tpl, path.join(dir, 'engine', 'templates', 'capabilities.template.html'));
+  // E1: checkShellIsolation composes solver.html, which needs the solver-UI
+  // fragments and the internal canonical engine file. Copy both.
+  const fragDir = path.join('engine', 'fragments', 'solver-ui');
+  fs.mkdirSync(path.join(dir, fragDir), { recursive: true });
+  fs.readdirSync(path.join(siteDir, fragDir)).forEach(function (f) {
+    fs.copyFileSync(path.join(siteDir, fragDir, f), path.join(dir, fragDir, f));
+  });
+  fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
+  fs.copyFileSync(path.join(siteDir, 'engine', 'source', 'plumline-engine.js'),
+    path.join(dir, 'engine', 'source', 'plumline-engine.js'));
   return dir;
 }
 

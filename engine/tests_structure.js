@@ -245,10 +245,14 @@ PAGES.forEach(function (p) {
 // the STRICT_INEQUALITY marker.
 (function () {
   const engineJs = fs.readFileSync(path.join(siteDir, 'engine', 'engine.js'), 'utf8');
-  const solverSrc = fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8');
-  const a = solverSrc.indexOf('/* ENGINE_START */'), b = solverSrc.indexOf('/* ENGINE_END */');
-  const inline = a >= 0 && b > a ? solverSrc.slice(a, b) : '';
-  ok('inline engine markers are present', !!inline, a + '/' + b);
+  // E1: the production engine is composed into ENGINE_START..END from the
+  // internal canonical file; read the COMPOSED solver and locate the STRUCTURAL
+  // engine region (findEngineRegion ignores the engineSource() literals).
+  const { findEngineRegion } = require('../src/shared/compose-solver.js');
+  const solverComposed = composedHtml(siteDir, 'solver.html');
+  const region = findEngineRegion(solverComposed);
+  const inline = region ? solverComposed.slice(region.start, region.end) : '';
+  ok('inline engine markers are present', !!inline, region ? (region.start + '/' + region.end) : 'null');
   [['engine.js', engineJs], ['inline engine', inline]].forEach(function (pair) {
     const [name, src] = pair;
     // RELATION_TOKENS must NOT map "<" or ">" (no silent widening).

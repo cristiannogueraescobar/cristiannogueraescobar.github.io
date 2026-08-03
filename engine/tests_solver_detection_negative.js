@@ -26,6 +26,8 @@ function makeTree(root) {
   fs.mkdirSync(path.join(dir, FRAG_DIR), { recursive: true });
   fs.mkdirSync(path.join(dir, 'engine', 'fixtures', 'solver-ui-golden'), { recursive: true });
   fs.copyFileSync(path.join(SITE, SOLVER), path.join(dir, SOLVER));
+  fs.mkdirSync(path.join(dir, 'engine', 'source'), { recursive: true });
+  fs.copyFileSync(path.join(SITE, 'engine', 'source', 'plumline-engine.js'), path.join(dir, 'engine', 'source', 'plumline-engine.js'));
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
@@ -35,6 +37,7 @@ function makeTree(root) {
   return dir;
 }
 const readSolver = dir => fs.readFileSync(path.join(dir, SOLVER), 'utf8');
+const engineSrcPath = dir => path.join(dir, 'engine', 'source', 'plumline-engine.js');
 const writeSolver = (dir, s) => fs.writeFileSync(path.join(dir, SOLVER), s);
 const d2Path = dir => path.join(dir, FRAG_DIR, D2_FILE);
 const d1Path = dir => path.join(dir, FRAG_DIR, D1_FILE);
@@ -107,8 +110,9 @@ expectThrow('N10 subdirectory', dir => writeSolver(dir, readSolver(dir).replace(
 expectThrow('N11 residual content', dir => writeSolver(dir, readSolver(dir).replace(D2_START + '\n' + D2_END, D2_START + '\nLEFTOVER\n' + D2_END)), 'unexpected content');
 // 12. D2 marker inside the engine region.
 expectThrow('N12 D2 marker inside engine', dir => {
-  const s = readSolver(dir); const at = s.indexOf('/* ENGINE_START */') + '/* ENGINE_START */'.length;
-  writeSolver(dir, s.slice(0, at) + '\n' + D2_START + '\n' + D2_END + '\n' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 100) + '\n/* SOLVER_UI_VARIABLE_SETTINGS_START:x.js */\n/* SOLVER_UI_VARIABLE_SETTINGS_END */\n' + e.slice(100));
 }, 'inside the engine region');
 // 13. D1 START marker inside the D2 region (an unmatched extra START).
 expectThrow('N13 D1 marker in D2 region', dir => {
@@ -189,8 +193,9 @@ expectCheckFail('N42 settings contract renamed', dir => writeD2(dir, readD2(dir)
 expectCheckFail('N43 detector call renamed', dir => writeD2(dir, readD2(dir).replace('detectModel_(sheet', 'detectModelX_(sheet')), 'D2 contract "detector call detectModel_" intact');
 // 44. Engine modified by one byte.
 expectCheckFail('N44 engine one-byte change', dir => {
-  const s = readSolver(dir); const at = s.indexOf('/* ENGINE_START */') + 40;
-  writeSolver(dir, s.slice(0, at) + ' ' + s.slice(at));
+  const ep = engineSrcPath(dir);
+  const e = fs.readFileSync(ep, 'utf8');
+  fs.writeFileSync(ep, e.slice(0, 200) + ' ' + e.slice(200));
 }, 'engine bytes canonical');
 // 45. Worker glue modified (buildWorker in post-engine UI).
 // 45. Worker glue modified (now in the D3 solve-worker-client fragment; the D2

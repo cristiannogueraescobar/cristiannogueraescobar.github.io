@@ -1,0 +1,108 @@
+{
+  "note": "Checkpoint E0 baseline for the Plumline mathematical engine. Captures the pre-E state as INVENTORY ONLY: hashes, sizes, contracts, function/constant maps and the two-source architecture finding. It is NOT regenerated during verify; tests_engine_baseline.js pins the values below. E0 changes NO engine byte, NO public output, NO Worker payload. See provenance for the origin of each group.",
+
+  "slice_convention": {
+    "start_marker": "/* ENGINE_START */",
+    "end_marker": "/* ENGINE_END */",
+    "rule": "html.slice(indexOf(START), indexOf(END))",
+    "includes_start_marker": true,
+    "includes_end_marker": false,
+    "same_as": "engine/tests_engine_integrity.js"
+  },
+
+  "engine_canonical": {
+    "source_file": "solver.html",
+    "region": "inline <script> between ENGINE_START and ENGINE_END",
+    "line_start": 433,
+    "line_end": 2586,
+    "chars": 82657,
+    "bytes_utf8": 82697,
+    "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf",
+    "functions_declared": 90,
+    "classes": 0,
+    "constant_objects": ["ENGINE", "APP"]
+  },
+
+  "constants_tolerances": {
+    "note": "Identical in solver.html inline engine AND engine/engine.js. Values frozen; E0 changes none.",
+    "MAX_DEPTH": 40,
+    "BRANCH_NODES": 4000,
+    "BRANCH_DEPTH": 60,
+    "BRANCH_MILLIS": 20000,
+    "EPSILON": 1e-9,
+    "PIVOT_TOLERANCE": 1e-7,
+    "MAX_ITERATIONS": 20000,
+    "MAX_SCAN_COLUMNS": 4,
+    "FREE_VARIABLE_LIMIT": 50,
+    "FREE_CONSTRAINT_LIMIT": 20,
+    "plot_geometry_tolerances_are_separate": "ANGULAR_EPS / geometryEpsilon_ live in receipt-plot-exports.js (D4 visualization) and DO NOT affect the solver result; they are NOT engine tolerances"
+  },
+
+  "second_source": {
+    "path": "engine/engine.js",
+    "role": "Node-requireable twin of the Google Sheets add-on engine (Engine.gs). Reads a Sheets-like sheet object (getDataRange/getFormulas/getValues) and exposes module.exports for tests.",
+    "bytes_utf8": 90220,
+    "sha256": "6190cb4720dab3493fb2d903abf4bc0d915c1176605f121a903cdcdd0eb3a7fa",
+    "functions_declared": 90,
+    "relation_to_inline_engine": {
+      "function_names_shared": 89,
+      "bodies_identical_normalized": 87,
+      "bodies_divergent": 2,
+      "divergent_functions": ["newContext_", "readConstraint_"],
+      "divergence_kind": "platform-policy + comments, NOT mathematics",
+      "newContext_": "inline forces allowCachedFormulaFallback:false (web grid stores 0 for formulas); engine.js parameterises it via options (Sheets cached value is exact). Same maths, different platform fallback policy.",
+      "readConstraint_": "identical logic; only inline comments differ",
+      "normalized_comparison": "block+line comments stripped, whitespace collapsed"
+    }
+  },
+
+  "direct_execution": {
+    "entry_point": "runSolve() -> solve() in solve-orchestration.js",
+    "engine_source": "the inline engine functions in the same lexical scope (detectModel_, solveModel_ called directly)",
+    "fallback": "solveMainThread() runs the SAME inline functions on the main thread when Worker/Blob/URL unavailable",
+    "consumes_same_bytes_as_worker": true
+  },
+
+  "worker_execution": {
+    "engine_source_acquisition": "engineSource() scans document <script> textContent for the ENGINE_START..END slice (same slice convention)",
+    "glue_bytes": 900,
+    "glue_sha256": "5bc80049a8575056596b834e45e46b338ae38e095d5abfc2072175d40ab9b7b9",
+    "blob_source_bytes": 83598,
+    "blob_source_sha256": "ec3d60685850dfa5fc43d7a79b0e60028dd7264303734cf7d9cf45413b0e3a05",
+    "blob_mime": "application/javascript",
+    "object_url": "URL.createObjectURL then revokeObjectURL after Worker constructed",
+    "request_contract": ["token", "formulas", "values", "localeMode", "wholeNumbers", "domains", "sense"],
+    "response_contract_ok": ["token", "ok:true", "out", "wholeNumbers"],
+    "response_contract_err": ["token", "ok:false", "phase", "error"],
+    "token_correlation": "workerToken increments per solve; stale responses (token mismatch) ignored",
+    "worker_uses": "the SAME inline engine bytes (engineSource == canonical engine sha), NOT engine.js"
+  },
+
+  "statuses": ["optimal", "feasible", "infeasible", "unbounded", "numerical_failure", "invalid_model", "unknown", "iteration_limit", "time_limit", "node_limit"],
+  "stop_reasons": ["invalid_model", "iteration_limit", "time_limit", "node_limit", "and status-derived limit normalisation in solveDetailsHTML"],
+
+  "test_map": {
+    "run_against_engine_js_addon_twin": ["tests_bounds", "tests_safety", "tests_states", "tests_locale", "tests_panel", "tests_grid_input", "harness"],
+    "run_against_inline_via_composedHtml_eval": ["tests_direction", "tests_region_plot", "tests_solve_announce", "tests_error_i18n", "tests_worker_parity", "tests_examples", "tests_ex_drawer"],
+    "inspect_inline_raw_slice": ["tests_engine_integrity", "tests_structure"],
+    "worker_token": ["tests_worker_token"]
+  },
+
+  "textual_dependencies": {
+    "slice_ENGINE_markers": ["tests_engine_integrity", "tests_worker_parity (via composedHtml)", "solve-worker-client.js engineSource()"],
+    "eval_of_extracted_functions": ["tests_panel", "tests_grid_input", "tests_direction", "tests_region_plot", "tests_solve_announce", "tests_error_i18n", "tests_worker_parity", "tests_examples", "tests_ex_drawer"],
+    "require_engine_js": ["tests_bounds", "tests_safety", "tests_states", "tests_locale", "tests_panel", "tests_grid_input", "harness"]
+  },
+
+  "architecture_finding": "Conclusion B+C+D combined: there is ONE canonical PRODUCTION engine (the solver.html inline region; direct + Worker consume exactly the same bytes, engineSource sha == canonical sha). But a SECOND real source exists: engine/engine.js, the Google Sheets add-on twin, 87/89 function bodies byte-identical after comment/whitespace normalisation, 2 divergent by platform policy only. The production contract is coupled to solver.html (Worker slices the page's own script). No math duplication inside production; the duplication is production-inline vs add-on-twin, kept in sync manually.",
+
+  "provenance": {
+    "engine_canonical": "captured from solver.html pre-E via the tests_engine_integrity slice convention",
+    "constants_tolerances": "read from the inline ENGINE/APP objects and confirmed equal in engine.js",
+    "second_source": "engine/engine.js pre-E; normalized-body comparison done in E0 analysis (comments stripped, whitespace collapsed)",
+    "worker_execution": "glue reconstructed verbatim from engine/fragments/solver-ui/solve-worker-client.js; hashes computed over engineSource + glue",
+    "statuses_stop_reasons": "enumerated from the inline engine and errors-results.js pre-E",
+    "test_map_textual_dependencies": "static inspection of engine/tests_*.js pre-E",
+    "do_not_regenerate": "This fixture must NOT be rebuilt by any future engine implementation; tests_engine_baseline.js pins engine sha, glue sha, blob sha and the engine.js sha. Update only on a deliberate, reviewed baseline change."
+  }
+}

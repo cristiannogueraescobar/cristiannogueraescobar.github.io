@@ -1,4 +1,12 @@
-/* Test harness for the Plumline engine.
+/* Compatibility harness for the generated engine mirror.
+ *
+ * This harness is NOT the mathematical authority. It requires engine/engine.js —
+ * the GENERATED Node/add-on mirror (a deterministic derivation of the single
+ * editable canonical source engine/source/plumline-engine.js, produced by
+ * engine/generate-engine-mirror.js). Its purpose is to exercise the standalone
+ * add-on artefact and confirm it stays behaviour-compatible with the canonical
+ * engine, which the canonical-engine-harness validates directly.
+ *
  * Builds the Google-Sheets-like `sheet` object the engine expects from a plain
  * 2D grid of strings, so tests can be written compactly. Nothing here touches
  * the engine; it only feeds it and reads results.
