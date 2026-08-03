@@ -45,6 +45,8 @@ const RAW_SOURCE_ALLOWLIST = {
   'tests_capabilities_page.js': 'inspects capabilities.html <head>/<main> raw + the capabilities.template.html raw + require()s product-capabilities.js/media.json for the HTML<->inventory/media sync (State D generated page); regions the shell composer never touches (verified byte-identical source vs dist); the negative suite copies to temp trees and the generator suite drives the real generator, neither is allowlisted',
   'tests_home_page.js': 'inspects index.html <head>/<main> raw + require()s product-capabilities.js and reads data/home-faq.json for the FAQ/capabilities/image sync (State D+C: generated regions + hand-authored sections); head/main are regions the shell composer never touches (verified byte-identical source vs dist); the negative suite copies to temp trees and the generator suite drives the real generators, neither is allowlisted',
   'tests_shell_composition_negative.js': 'case 15 deliberately reads solver.html raw to prove the raw-read guard: it runs tests_composed_reads.js against a seeded bad suite and asserts a non-zero exit naming it',
+  'tests_examples_page_projection.js': 'reads examples.html raw ONLY to assert the ItemList JSON-LD + no-JS links are a byte-faithful projection of the canonical catalogue (a region the shell composer never touches; verified byte-identical source vs dist); the negatives copy to temp trees and are NOT allowlisted',
+  'tests_home_capabilities_refs.js': 'reads index.html raw ONLY to assert Home example slug references resolve to catalogue slugs and Home does not re-store canonical example titles/descriptions (regions the shell composer never touches); the negatives copy to temp trees and are NOT allowlisted',
   'composed-html.js': 'the composer helper itself',
 };
 

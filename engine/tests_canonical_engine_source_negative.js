@@ -13,6 +13,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { composeSolverInterface, composeEngineSource } = require('../src/shared/compose-solver.js');
+const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 const { checkCanonicalEngineSource } = require('./tests_canonical_engine_source.js');
 
 const SITE = path.join(__dirname, '..');
@@ -41,6 +42,8 @@ function makeTree() {
   for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
     fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(dir, FRAG_DIR, f));
   }
+  // F1: composer needs the canonical catalogue module tree to project EXAMPLES.
+  copyCatalogueTree(SITE, dir);
   return dir;
 }
 const rd = (d, f) => fs.readFileSync(path.join(d, f), 'utf8');
@@ -298,6 +301,8 @@ expectCheckFail('N37 requests count wrong', dir => {
     for (const f of fs.readdirSync(path.join(SITE, FRAG_DIR))) {
       fs.copyFileSync(path.join(SITE, FRAG_DIR, f), path.join(base, FRAG_DIR, f));
     }
+    // F1: composer needs the canonical catalogue module tree (spaced path).
+    copyCatalogueTree(SITE, base);
     // clean tree passes:
     const clean = checkCanonicalEngineSource(base);
     ok('N38 spaced-path clean tree passes', clean.fail === 0, clean.failures.join('; '));

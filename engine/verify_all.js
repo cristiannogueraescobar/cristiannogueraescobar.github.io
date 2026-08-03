@@ -44,6 +44,10 @@ step('3. HTML validity (source)', 'node engine/validate_html.js .');
 // 4. JSON-LD validity.
 step('4. JSON-LD validity', 'node engine/tests_jsonld.js');
 
+// 4b. Canonical example catalogue: schema + projection staleness (never regenerates;
+//     --check writes nothing and fails if any projection is stale).
+step('4b. Example catalogue projections up to date', 'node engine/generate-examples.js --check');
+
 // 5. Lockfile portability.
 step('5. Lockfile portability', 'node engine/validate_lockfile.js');
 

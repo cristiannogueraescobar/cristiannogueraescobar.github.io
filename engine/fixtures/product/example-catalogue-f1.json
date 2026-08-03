@@ -1,0 +1,197 @@
+{
+  "checkpoint": "F1",
+  "base_commit": "9566e152d59e1a53397eb1a624f0d11cf1774403",
+  "catalogue": {
+    "path": "src/shared/examples/catalogue.js",
+    "bytes": 23734,
+    "sha256": "8eaabd72fdcea96274915e8e732ad23d6fee2f599317d27632e2b9946ba14474",
+    "example_count": 9,
+    "languages": [
+      "en",
+      "es",
+      "pt",
+      "de",
+      "fr"
+    ]
+  },
+  "examples": [
+    {
+      "key": "production",
+      "slug": "production-plan",
+      "order": 1,
+      "category": "start",
+      "type": "continuous",
+      "sense": "max",
+      "expected": {
+        "status": "optimal",
+        "modelType": "continuous",
+        "objective": 1760
+      }
+    },
+    {
+      "key": "workshop",
+      "slug": "workshop-chart",
+      "order": 2,
+      "category": "start",
+      "type": "continuous",
+      "sense": "max",
+      "expected": {
+        "status": "optimal",
+        "modelType": "continuous",
+        "objective": 900
+      }
+    },
+    {
+      "key": "blend",
+      "slug": "cheapest-feed-blend",
+      "order": 3,
+      "category": "start",
+      "type": "continuous",
+      "sense": "min",
+      "expected": {
+        "status": "optimal",
+        "modelType": "continuous",
+        "objective": 27.352941176470587,
+        "tolerance": 1e-8
+      }
+    },
+    {
+      "key": "marketing",
+      "slug": "marketing-budget",
+      "order": 4,
+      "category": "business",
+      "type": "continuous",
+      "sense": "max",
+      "expected": {
+        "status": "optimal",
+        "modelType": "continuous",
+        "objective": 21350
+      }
+    },
+    {
+      "key": "workforce",
+      "slug": "workforce-scheduling",
+      "order": 5,
+      "category": "business",
+      "type": "integer",
+      "sense": "min",
+      "expected": {
+        "status": "optimal",
+        "modelType": "integer",
+        "objective": 23
+      }
+    },
+    {
+      "key": "shipping",
+      "slug": "shipping-plan",
+      "order": 6,
+      "category": "business",
+      "type": "integer",
+      "sense": "min",
+      "expected": {
+        "status": "optimal",
+        "modelType": "integer",
+        "objective": 450
+      }
+    },
+    {
+      "key": "project",
+      "slug": "project-selection",
+      "order": 7,
+      "category": "binary",
+      "type": "binary",
+      "sense": "max",
+      "expected": {
+        "status": "optimal",
+        "modelType": "binary",
+        "objective": 125
+      }
+    },
+    {
+      "key": "delivery",
+      "slug": "delivery-load",
+      "order": 8,
+      "category": "binary",
+      "type": "binary",
+      "sense": "max",
+      "expected": {
+        "status": "optimal",
+        "modelType": "binary",
+        "objective": 240
+      }
+    },
+    {
+      "key": "supplier",
+      "slug": "supplier-activation",
+      "order": 9,
+      "category": "binary",
+      "type": "mixed",
+      "sense": "min",
+      "expected": {
+        "status": "optimal",
+        "modelType": "mixed",
+        "objective": 830
+      }
+    }
+  ],
+  "projections": {
+    "solver_examples": {
+      "bytes": 6125,
+      "sha256": "d41b8a3e4d7759dd4191e01699fd2cbd1d36f12fc68d73c2024dfb7d198211d7"
+    },
+    "i18n": {
+      "file": "assets/i18n.js",
+      "bytes": 274099,
+      "sha256": "46db27e8ba6a5613442783e0683a9e5b42b5b5e3f84af50abcdb4e7660ac4dde",
+      "occurrences": 180
+    },
+    "examples_data": {
+      "file": "assets/examples-data.js",
+      "bytes": 2644,
+      "sha256": "651ba403f377ee1935235a01e42fd953ef4c7711659f31ed6d8cbf7e2ffabea0",
+      "meta_lines": 9
+    },
+    "examples_page_jsonld": {
+      "file": "examples.html",
+      "jsonld_bytes": 1232,
+      "jsonld_sha256": "c5c2d2c7d09afda51367e11e9d398f13ff20d25327d41504537474384d6bd3c8",
+      "list_items": 9
+    }
+  },
+  "url_contract": {
+    "builder": "buildExampleSolverUrl",
+    "pattern": "solver.html?ex=<slug>",
+    "stores_full_url": false
+  },
+  "ownership": {
+    "home": {
+      "file": "index.html",
+      "stores": "slug selection/order/placement + own use-case copy (uc*)",
+      "derives": "slugs from catalogue",
+      "restores_canonical_titles": false
+    },
+    "capabilities": {
+      "file": "assets/product-capabilities.js",
+      "owner_of": "capability<->example relation",
+      "references_by": "exampleId (catalogue key)",
+      "stores_metadata": false,
+      "stores_full_url": false
+    }
+  },
+  "public_output": {
+    "composed_solver_bytes": 215539,
+    "dist_solver_bytes": 218349,
+    "dist_solver_sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
+    "requests": 6,
+    "languages": 5
+  },
+  "policy": {
+    "catalogue_published_to_dist": false,
+    "generator": "engine/generate-examples.js",
+    "generator_check_writes": false,
+    "verify_checks_staleness": true,
+    "no_new_expected_variable_values": true,
+    "engine_touched": false,
+    "do_not_regenerate_historical_output": true
+  }
+}

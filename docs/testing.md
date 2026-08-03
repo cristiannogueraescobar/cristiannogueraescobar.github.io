@@ -509,3 +509,21 @@ checks freshness and is identical with and without dist. `RAW_SOURCE_ALLOWLIST`
 stays at 18; no E6 suite/generator/adapter/fixture/harness is allowlisted.
 `engine/harness.js` is the compatibility harness for the generated mirror, not a
 mathematical authority.
+
+## Canonical example catalogue suites (Checkpoint F1)
+
+New suites: `tests_examples_i18n_projection` (i18n 180-occurrence stale guard),
+`tests_examples_data_projection` (META projection + URL builder), `tests_examples_page_projection`
+(JSON-LD + no-JS), `tests_home_capabilities_refs` (Home slugs + capability exampleIds),
+`tests_examples_solve_parity` (nine examples run through the canonical engine and
+matched to the catalogue expected status/modelType/objective), `tests_canonical_catalogue_positive`,
+`tests_canonical_catalogue_negative`, and `tests_canonical_catalogue_needle_audit`.
+
+The reusable checker `engine/check-canonical-catalogue.js` validates the catalogue and
+every projection from one entry and verifies the fixture
+`engine/fixtures/product/example-catalogue-f1.json`. Suites that compose the solver in
+temp trees copy the catalogue module set via `engine/copy-catalogue-tree.js`.
+`RAW_SOURCE_ALLOWLIST` gained exactly two entries (`tests_examples_page_projection.js`,
+`tests_home_capabilities_refs.js`), each reading raw regions the shell composer never
+touches to assert catalogue-faithful projection. The catalogue, generator, checker,
+positive/negative suites, needle auditor and fixture are not allowlisted.

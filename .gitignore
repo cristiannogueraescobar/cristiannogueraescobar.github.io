@@ -12,6 +12,6 @@ dist/
 
 # Review artifacts generated for Checkpoint A.1 review — NOT for commit.
 review-artifacts/
-docs/checkpoint-f0-product-design-marketing-baseline.md
-docs/product-information-architecture.md
-docs/example-library-architecture.md
+
+# Generated checkpoint archives
+plumline-checkpoint-*.zip
