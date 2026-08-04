@@ -21,7 +21,7 @@ ok('home seo: has a <title>', !!titleM);
 if (titleM) {
   const title = titleM[1];
   ok('home seo: title is the approved concise title',
-     title === 'Plumline | Free Spreadsheet Optimisation Solver', title);
+     title === 'Plumline | Spreadsheet Optimisation You Can Check', title);
   // Descriptive and not overlong; and no "coming soon" marketing in the title.
   ok('home seo: title is not overlong', title.length <= 65, title.length + ' chars');
   ok('home seo: title has no "coming soon"', !/coming soon/i.test(title), title);
@@ -33,7 +33,7 @@ ok('home seo: has a meta description', !!descM);
 if (descM) {
   const desc = descM[1];
   ok('home seo: description is the approved copy',
-     desc === 'Solve continuous, integer, binary and mixed spreadsheet models in your browser. Paste from Excel or Google Sheets, verify every constraint and keep your data local.',
+     desc === 'Turn spreadsheet decisions into answers you can check. Plumline finds the best allocation for your model and verifies it against your own formulas.',
      desc);
   ok('home seo: description length is reasonable', desc.length >= 70 && desc.length <= 200, desc.length + ' chars');
 }
@@ -110,8 +110,10 @@ function imgSize(rel) {
 const imgRefs = [];
 for (const m of html.matchAll(/(?:src|srcset)="(assets\/[^"]+\.(?:png|webp|jpg|jpeg|svg))"/g)) imgRefs.push(m[1]);
 const uniqueRefs = [...new Set(imgRefs)];
-ok('home seo: Home references the hero, mobile and verify screenshots (png+webp)',
-   uniqueRefs.length >= 5, uniqueRefs.length + ' image refs');
+// F3a replaced the hero screenshot with a semantic HTML/CSS product demo, so
+// the Home now references only the verify-section screenshot (png+webp).
+ok('home seo: Home references the verify screenshot (png+webp)',
+   uniqueRefs.length >= 2, uniqueRefs.length + ' image refs');
 uniqueRefs.forEach(function (ref) {
   const p = path.join(siteDir, ref);
   const exists = fs.existsSync(p);
@@ -157,7 +159,7 @@ catch (e) {
 if (JSDOM_SEO) {
   const doc = new JSDOM_SEO(html).window.document;
   const shots = [...doc.querySelectorAll('img[src*="assets/screenshots/"]')];
-  ok('home seo: found the hero and verify <img> tags', shots.length >= 2, shots.length + ' screenshot imgs');
+  ok('home seo: found the verify <img> tag', shots.length >= 1, shots.length + ' screenshot imgs');
   shots.forEach(function (img) {
     const key = img.getAttribute('data-i18n-alt');
     ok('home seo: screenshot img has data-i18n-alt', !!key, img.getAttribute('src'));
@@ -276,31 +278,31 @@ FORBIDDEN_PROOF.forEach(function (phrase) {
 // non-English dictionary, which an English-only needle check would miss.
 const EXPECTED_PROOF_COPY = {
   en: {
-    heroLead2: 'Paste a model from Excel or Google Sheets, or build one in the grid. Plumline searches for the best allocation, checks it against your formulas, and tells you whether optimality was proven.',
+    heroLead2: 'Paste a spreadsheet model or build one in the grid. Plumline finds the best allocation, then checks it against your own formulas and tells you the status in plain words.',
     howSolveP: 'It searches for the best allocation.',
     verStatusH: 'A clear solve status',
     limUnsupportedH: 'It distinguishes optimal, feasible and incomplete results'
   },
   es: {
-    heroLead2: 'Pega un modelo desde Excel o Google Sheets, o constrúyelo en la cuadrícula. Plumline busca la mejor asignación, la comprueba contra tus fórmulas y te dice si se demostró la optimalidad.',
+    heroLead2: 'Pega un modelo de hoja de cálculo o constrúyelo en la cuadrícula. Plumline encuentra la mejor asignación, la comprueba con tus propias fórmulas y te dice el estado con palabras claras.',
     howSolveP: 'Busca la mejor asignación.',
     verStatusH: 'Un estado de resolución claro',
     limUnsupportedH: 'Distingue resultados óptimos, viables e incompletos'
   },
   pt: {
-    heroLead2: 'Cola um modelo do Excel ou do Google Sheets, ou constrói um na grelha. O Plumline procura a melhor alocação, verifica-a com as tuas fórmulas e diz-te se a otimalidade foi comprovada.',
+    heroLead2: 'Cola um modelo de folha de cálculo ou constrói um na grelha. O Plumline encontra a melhor alocação, verifica-a com as tuas próprias fórmulas e diz-te o estado com palavras claras.',
     howSolveP: 'Procura a melhor alocação.',
     verStatusH: 'Um estado de resolução claro',
     limUnsupportedH: 'Distingue resultados ótimos, viáveis e incompletos'
   },
   de: {
-    heroLead2: 'Füge ein Modell aus Excel oder Google Sheets ein oder erstelle eines im Raster. Plumline sucht die beste Zuteilung, prüft sie anhand deiner Formeln und sagt dir, ob die Optimalität bewiesen wurde.',
+    heroLead2: 'Füge ein Tabellenmodell ein oder erstelle eines im Raster. Plumline findet die beste Zuteilung, prüft sie anhand deiner eigenen Formeln und nennt dir den Status in klaren Worten.',
     howSolveP: 'Es sucht die beste Zuteilung.',
     verStatusH: 'Ein klarer Lösungsstatus',
     limUnsupportedH: 'Es unterscheidet optimale, zulässige und unvollständige Ergebnisse'
   },
   fr: {
-    heroLead2: "Collez un modèle depuis Excel ou Google Sheets, ou construisez-en un dans la grille. Plumline cherche la meilleure répartition, la vérifie avec vos formules et vous indique si l'optimalité a été prouvée.",
+    heroLead2: "Collez un modèle de tableur ou construisez-en un dans la grille. Plumline trouve la meilleure répartition, la vérifie avec vos propres formules et vous indique le statut en mots clairs.",
     howSolveP: 'Il cherche la meilleure répartition.',
     verStatusH: 'Un statut de résolution clair',
     limUnsupportedH: 'Il distingue les résultats optimaux, réalisables et incomplets'

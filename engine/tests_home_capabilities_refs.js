@@ -89,7 +89,7 @@ function expectTrip(label, mutate) {
 // 1. Home references an unknown slug.
 expectTrip('N1 home unknown slug', dir => wr(homePath(dir), rd(homePath(dir)).replace('solver.html?ex=production-plan', 'solver.html?ex=nonexistent-slug')));
 // 2. Home re-stores a canonical example title key.
-expectTrip('N2 home restores example title key', dir => wr(homePath(dir), rd(homePath(dir)).replace('data-i18n="heroCtaExample"', 'data-i18n="exName_production"')));
+expectTrip('N2 home restores example title key', dir => wr(homePath(dir), rd(homePath(dir)).replace('data-i18n="heroCtaPrimary"', 'data-i18n="exName_production"')));
 // 3. Capability references an unknown exampleId.
 expectTrip('N3 capability unknown exampleId', dir => wr(pcPath(dir), rd(pcPath(dir)).replace(/exampleId:\s*'production'/, "exampleId: 'ghostexample'")));
 // 4. Capability stores a full example URL.

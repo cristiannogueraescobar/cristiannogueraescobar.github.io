@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plumline | Free Spreadsheet Optimisation Solver</title>
-<meta name="description" content="Solve continuous, integer, binary and mixed spreadsheet models in your browser. Paste from Excel or Google Sheets, verify every constraint and keep your data local.">
-<meta property="og:title" content="Plumline: Optimization Solver for Spreadsheets">
-<meta property="og:description" content="Find the best allocation and verify it against your own numbers. Free online solver for continuous, integer, binary and mixed-integer models, with per-variable limits and verified results.">
+<title>Plumline | Spreadsheet Optimisation You Can Check</title>
+<meta name="description" content="Turn spreadsheet decisions into answers you can check. Plumline finds the best allocation for your model and verifies it against your own formulas.">
+<meta property="og:title" content="Plumline: Turn spreadsheet decisions into answers you can check">
+<meta property="og:description" content="Plumline finds the best allocation for your spreadsheet model and checks it against your own formulas, telling you the status in plain words. Free, runs in your browser, no account.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://plumline.online/">
 <meta property="og:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">
@@ -15,8 +15,8 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Plumline solving and verifying a spreadsheet optimisation model, with an Optimal solution proven status.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Plumline: Optimization Solver for Spreadsheets">
-<meta name="twitter:description" content="Find the best allocation and verify it against your own numbers. Free online solver for continuous, integer, binary and mixed-integer models, with per-variable limits and verified results.">
+<meta name="twitter:title" content="Plumline: Turn spreadsheet decisions into answers you can check">
+<meta name="twitter:description" content="Plumline finds the best allocation for your spreadsheet model and checks it against your own formulas. Free, runs in your browser, no account.">
 <meta name="twitter:image" content="https://plumline.online/assets/screenshots/plumline-home-og.png">
 <meta name="twitter:image:alt" content="Plumline solving and verifying a spreadsheet optimisation model, with an Optimal solution proven status.">
 <link rel="canonical" href="https://plumline.online/">
@@ -44,43 +44,80 @@
 <main id="content">
 <div class="field-deep">
   <div class="plumb">
-    <section class="hero-split">
-      <div>
-        <p class="eyebrow" data-i18n="heroEyebrow">Optimisation you can verify</p>
-        <h1 style="max-width:14ch" data-i18n="heroTitle">Find the best answer. Then see it checked.</h1>
-        <p class="lead" style="margin-top:22px" data-i18n="heroLead2">Paste a model from Excel or Google Sheets, or build one in the grid. Plumline searches for the best allocation, checks it against your formulas, and tells you whether optimality was proven.</p>
+    <section class="hero-split hero-f3">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="heroEyebrow">Spreadsheet optimisation you can check</p>
+        <h1 style="max-width:16ch" data-i18n="heroTitle">Turn spreadsheet decisions into answers you can check.</h1>
+        <p class="lead" style="margin-top:20px" data-i18n="heroLead2">Paste a spreadsheet model or build one in the grid. Plumline finds the best allocation, then checks it against your own formulas and tells you the status in plain words.</p>
         <div class="row hero-ctas">
-          <a class="btn2 btn2--primary btn2--lg" href="solver.html?ex=production-plan" data-i18n="heroCtaExample">Try a real business example</a>
-          <a class="btn2 btn2--secondary btn2--lg" href="solver.html" data-i18n="heroCtaPaste">Paste your spreadsheet model</a>
+          <a class="btn2 btn2--primary btn2--lg" href="solver.html" data-i18n="heroCtaPrimary">Open the solver</a>
+          <a class="btn2 btn2--secondary btn2--lg" href="examples.html" data-i18n="heroCtaSecondary">Explore examples</a>
         </div>
-        <div class="hero-chips">
-          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipPaste">Paste from Excel or Google Sheets</span></span>
-          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipBrowser">Runs locally in your browser</span></span>
-          <span class="hchip"><b aria-hidden="true">&#10003;</b> <span data-i18n="chipNoAccount">No Plumline account needed</span></span>
-        </div>
+        <p class="hero-trust" data-i18n="heroTrust">Runs in your browser. No account. Your model stays on your device.</p>
       </div>
-      <div class="hero-shot hero-shot--main">
-        <picture>
-          <source media="(max-width:680px)" type="image/webp" srcset="assets/screenshots/hero-production-mobile.webp" width="800" height="900">
-          <source media="(max-width:680px)" srcset="assets/screenshots/hero-production-mobile.png" width="800" height="900">
-          <source type="image/webp" srcset="assets/screenshots/hero-production-desktop.webp" width="1200" height="900">
-          <img src="assets/screenshots/hero-production-desktop.png" width="1200" height="900" loading="eager" fetchpriority="high" decoding="async" data-i18n-alt="heroShotAlt" alt="Plumline solving a production planning model: the detected objective and decisions, the optimal values, the objective and constraints checked, and the status “Optimal solution proven”.">
-        </picture>
-      </div>
+
+      <!-- Product demonstration: a semantic HTML/CSS panel, no runtime solver,
+           no heavy image. Values shown are the pinned historical authority for
+           the Production plan example (status/modelType/sense/objective). -->
+      <figure class="hero-demo" aria-labelledby="hero-demo-cap">
+        <figcaption id="hero-demo-cap" class="hero-demo__cap" data-i18n="demoTitle">A production plan, solved and checked</figcaption>
+        <ol class="hero-demo__flow">
+          <li class="hero-demo__stage panel">
+            <span class="hero-demo__n" aria-hidden="true">1</span>
+            <div>
+              <p class="hero-demo__h" data-i18n="demoStep1">Spreadsheet model</p>
+              <div class="hero-demo__sheet" aria-hidden="true">
+                <span class="c hdr">Product</span><span class="c hdr">Profit</span><span class="c hdr">Hours</span>
+                <span class="c">A</span><span class="c">30</span><span class="c">2</span>
+                <span class="c">B</span><span class="c">20</span><span class="c">1</span>
+                <span class="c">C</span><span class="c">48</span><span class="c">3</span>
+              </div>
+              <p class="hero-demo__note" data-i18n="demoStep1Note">Products, profit per unit and hour limits, as ordinary formulas.</p>
+            </div>
+          </li>
+          <li class="hero-demo__stage panel">
+            <span class="hero-demo__n" aria-hidden="true">2</span>
+            <div>
+              <p class="hero-demo__h" data-i18n="demoStep2">Decisions and limits detected</p>
+              <p class="hero-demo__meta"><span class="badge badge--accent" data-i18n="demoModel">Continuous &middot; maximise</span></p>
+              <p class="hero-demo__note" data-i18n="demoStep2Note">Plumline reads the objective to maximise and the constraints to respect.</p>
+            </div>
+          </li>
+          <li class="hero-demo__stage panel">
+            <span class="hero-demo__n" aria-hidden="true">3</span>
+            <div>
+              <p class="hero-demo__h" data-i18n="demoStep3">Optimised result</p>
+              <p class="hero-demo__obj"><span class="hero-demo__obj-l" data-i18n="demoObjLabel">Objective (profit)</span> <b>1,760</b></p>
+              <p class="hero-demo__note" data-i18n="demoStep3Note">The best allocation within every limit.</p>
+            </div>
+          </li>
+          <li class="hero-demo__stage panel panel--verify">
+            <span class="hero-demo__n" aria-hidden="true">4</span>
+            <div>
+              <p class="hero-demo__h" data-i18n="demoStep4">Verification</p>
+              <p class="hero-demo__status"><span class="badge badge--verify" data-i18n="demoStatus">Optimal solution proven</span></p>
+              <ul class="hero-demo__checks">
+                <li><span class="tick" aria-hidden="true">&#10003;</span> <span data-i18n="demoCheckObj">Objective checked against your formula</span></li>
+                <li><span class="tick" aria-hidden="true">&#10003;</span> <span data-i18n="demoCheckCons">Every constraint recalculated and satisfied</span></li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+      </figure>
     </section>
   </div>
 </div>
 
 <div class="plumb">
 
-  <!-- Trust bar -->
-  <section class="section trust-bar" aria-label="Why Plumline">
-    <ul class="trust-list">
-      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="trustLocal">Runs locally</span></li>
-      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="trustNoAccount">No account</span></li>
-      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="trustLangs">Five languages</span></li>
-      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="trustFormats">EU and US formulas</span></li>
-      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="trustChecked">Checked against your formulas</span></li>
+  <!-- Proof strip (F3a): short, verifiable trust claims -->
+  <section class="section proof-strip" data-i18n-aria="proofLabel" aria-label="Why Plumline">
+    <ul class="proof-list">
+      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="proofBrowser">Runs in your browser</span></li>
+      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="proofNoAccount">No account required</span></li>
+      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="proofDevice">Your model stays on your device</span></li>
+      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="proofFree">Free to use</span></li>
+      <li><b aria-hidden="true">&#10003;</b> <span data-i18n="proofLangs">Five languages</span></li>
     </ul>
   </section>
 

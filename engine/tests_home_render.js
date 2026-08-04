@@ -70,8 +70,10 @@ LANGS.forEach(function (lang) {
     if (expected) ok('home render [' + lang + ']: ' + key + ' matches dictionary',
                      text === expected.replace(/<[^>]+>/g, ''), key);
   });
-  // Hero and verify images keep a src and a non-empty, translated alt.
-  ['heroShotAlt', 'verifyShotAlt'].forEach(function (altKey) {
+  // Verify image keeps a src and a non-empty, translated alt. The hero image
+  // was replaced in F3a by a semantic HTML/CSS product demonstration, so only
+  // the verify-section image remains here.
+  ['verifyShotAlt'].forEach(function (altKey) {
     const img = doc.querySelector('img[data-i18n-alt="' + altKey + '"]');
     ok('home render [' + lang + ']: image ' + altKey + ' present', !!img, altKey);
     if (img) {

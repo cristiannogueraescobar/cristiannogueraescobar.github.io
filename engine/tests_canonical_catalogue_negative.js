@@ -111,7 +111,7 @@ expectCheckerTrips('N24 examples-data order changed', dir => {
 expectCheckerTrips('N25 examples.html card omitted', dir => wr(P(dir, 'examples.html'), rd(P(dir, 'examples.html')).replace(/,\{"@type":"ListItem","position":9[^}]*\}/, '')), 'examples.html');
 expectCheckerTrips('N26 examples.html no-JS link stale', dir => wr(P(dir, 'examples.html'), rd(P(dir, 'examples.html')).replace('href="solver.html?ex=production-plan">Production plan</a>', 'href="solver.html?ex=WRONG">Production plan</a>')), 'examples.html');
 expectCheckerTrips('N27 home unknown slug', dir => wr(P(dir, 'index.html'), rd(P(dir, 'index.html')).replace('solver.html?ex=production-plan', 'solver.html?ex=ghost-slug')), 'home');
-expectCheckerTrips('N28 home restores canonical title key', dir => wr(P(dir, 'index.html'), rd(P(dir, 'index.html')).replace('data-i18n="heroCtaExample"', 'data-i18n="exName_production"')), 'home');
+expectCheckerTrips('N28 home restores canonical title key', dir => wr(P(dir, 'index.html'), rd(P(dir, 'index.html')).replace('data-i18n="heroCtaPrimary"', 'data-i18n="exName_production"')), 'home');
 expectCheckerTrips('N29 capability unknown exampleId', dir => wr(P(dir, 'assets/product-capabilities.js'), rd(P(dir, 'assets/product-capabilities.js')).replace(/exampleId:\s*'production'/, "exampleId: 'ghost'")), 'home + capabilities');
 expectCheckerTrips('N30 capability stores full url', dir => wr(P(dir, 'assets/product-capabilities.js'), rd(P(dir, 'assets/product-capabilities.js')).replace(/(\* CI, every exampleId is real or null)/, "* url: 'solver.html?ex=production-plan'\n$1")), 'home + capabilities');
 

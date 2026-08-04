@@ -226,7 +226,7 @@ negative('N29 (remove an image)', function (d) {
 // 30. Change src/srcset.
 negative('N30 (change an image srcset)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('hero-production-desktop.webp', 'hero-x.webp')));
+  writeF(ix(d), s.replace(main, main.replace('verified-result-production.webp', 'verified-x.webp')));
 }, 'home: every picture/source/img matches golden');
 // 31. Remove alt.
 negative('N31 (remove an alt)', function (d) {
@@ -238,16 +238,16 @@ negative('N32 (change image width/height)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
   writeF(ix(d), s.replace(main, main.replace('width="1200"', 'width="640"')));
 }, 'home: <main> SHA-256');
-// 33. Change loading.
+// 33. Change loading (the verify image now carries loading="lazy").
 negative('N33 (change image loading)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('loading="eager"', 'loading="lazy"')));
+  writeF(ix(d), s.replace(main, main.replace('loading="lazy"', 'loading="eager"')));
 }, 'home: <main> SHA-256');
-// 34. Change fetchpriority.
-negative('N34 (change fetchpriority)', function (d) {
+// 34. Change the demo objective value (pinned historical authority 1,760).
+negative('N34 (change the pinned demo objective)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('fetchpriority="high"', 'fetchpriority="low"')));
-}, 'home: every picture/source/img matches golden');
+  writeF(ix(d), s.replace(main, main.replace('<b>1,760</b>', '<b>9,999</b>')));
+}, 'home: <main> SHA-256');
 // 35. Remove a mobile/desktop <source>.
 negative('N35 (remove a picture source)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);

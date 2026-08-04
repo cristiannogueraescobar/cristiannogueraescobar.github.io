@@ -1,12 +1,12 @@
 {
   "_note": "Independent C5 fixture for index.html (State D+C). Region SHA-256 + bytes + 13-section order + generated-region markers + FAQ/capabilities/image sync + hero/contact/addon. Captured from pre-C5 approved output, NOT re-run through any generator by the test.",
-  "head_sha256": "ddf260b922b38a65d796c61ca8a5d8caf52146fc9239c4dfae85d2b0093ecdb6",
-  "head_bytes": 5179,
-  "main_sha256": "36f0923946545392842f17b5986fe73b43bb55c57f71462d4f7a3635809cf3fd",
-  "main_bytes": 19106,
+  "head_sha256": "50726eb959fbf1857882aff01439fd9b253b088fff972d03111779df29780450",
+  "head_bytes": 5145,
+  "main_sha256": "37ee8b3578965238aa48e0a0879e4a26b803a0db9e762b636be4507f37022ade",
+  "main_bytes": 21154,
   "section_signatures": [
-    "|hero-split",
-    "|section trust-bar",
+    "|hero-split hero-f3",
+    "|section proof-strip",
     "how|section",
     "use-cases|section",
     "verify|section",
@@ -67,6 +67,7 @@
     "example",
     "faq",
     "help",
+    "hero-demo-cap",
     "how",
     "limits",
     "privacy",
@@ -102,12 +103,22 @@
     "capsLead",
     "capsSeeAll",
     "capsTitle",
-    "chipBrowser",
-    "chipNoAccount",
-    "chipPaste",
     "ctaBtn",
     "ctaP",
     "ctaTitle",
+    "demoCheckCons",
+    "demoCheckObj",
+    "demoModel",
+    "demoObjLabel",
+    "demoStatus",
+    "demoStep1",
+    "demoStep1Note",
+    "demoStep2",
+    "demoStep2Note",
+    "demoStep3",
+    "demoStep3Note",
+    "demoStep4",
+    "demoTitle",
     "exEyebrow",
     "exLead",
     "exOpenCta",
@@ -132,11 +143,12 @@
     "helpCta",
     "helpP",
     "helpTitle",
-    "heroCtaExample",
-    "heroCtaPaste",
+    "heroCtaPrimary",
+    "heroCtaSecondary",
     "heroEyebrow",
     "heroLead2",
     "heroTitle",
+    "heroTrust",
     "howCheckH",
     "howCheckP",
     "howConfirmH",
@@ -163,12 +175,12 @@
     "privLink",
     "privP",
     "privTitle",
+    "proofBrowser",
+    "proofDevice",
+    "proofFree",
+    "proofLangs",
+    "proofNoAccount",
     "skipToContent",
-    "trustChecked",
-    "trustFormats",
-    "trustLangs",
-    "trustLocal",
-    "trustNoAccount",
     "ucBudgetH",
     "ucBudgetP",
     "ucDeliveryH",
@@ -195,7 +207,7 @@
     "verUnderstoodH",
     "verUnderstoodP"
   ],
-  "aria_attrs_count": 14,
+  "aria_attrs_count": 19,
   "scripts": [
     "assets/build-badge.js?v=2",
     "assets/i18n.js?v=82",
@@ -218,39 +230,6 @@
     {
       "sources": [
         {
-          "media": "(max-width:680px)",
-          "type": "image/webp",
-          "srcset": "assets/screenshots/hero-production-mobile.webp",
-          "width": "800",
-          "height": "900"
-        },
-        {
-          "media": "(max-width:680px)",
-          "type": null,
-          "srcset": "assets/screenshots/hero-production-mobile.png",
-          "width": "800",
-          "height": "900"
-        },
-        {
-          "media": null,
-          "type": "image/webp",
-          "srcset": "assets/screenshots/hero-production-desktop.webp",
-          "width": "1200",
-          "height": "900"
-        }
-      ],
-      "img": {
-        "src": "assets/screenshots/hero-production-desktop.png",
-        "alt": "heroShotAlt",
-        "width": "1200",
-        "height": "900",
-        "loading": "eager",
-        "fetchpriority": "high"
-      }
-    },
-    {
-      "sources": [
-        {
           "media": null,
           "type": "image/webp",
           "srcset": "assets/screenshots/verified-result-production.webp",
@@ -268,7 +247,7 @@
       }
     }
   ],
-  "picture_count": 2,
+  "picture_count": 1,
   "standalone_main_images": [],
   "generated_region_markers": [
     "HOME_SOFTWARE_JSONLD_START",
