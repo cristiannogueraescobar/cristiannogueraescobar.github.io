@@ -124,6 +124,8 @@ function ok(name, cond, detail) { if (!cond) { fail++; console.log('  FAIL:', na
       if (/^(https?:|mailto:|tel:|\/\/|data:|#)/.test(u)) continue;
       // Skip anything that looks like a JS/template literal, not a real path.
       if (/[+'`${}]/.test(u)) continue;
+      // F2: '/' and '/#addon' are the canonical Home URL (root) — served as index.html.
+      if (u === '/' || u.startsWith('/#')) u = 'index.html';
       u = u.replace(/^\.\//, '').split('#')[0].split('?')[0];
       if (!u || seen.has(u)) continue;
       seen.add(u);

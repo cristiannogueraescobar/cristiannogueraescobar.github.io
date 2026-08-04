@@ -160,7 +160,7 @@
       common: {
         navSolver:'Solver',
         closeMenu:'Close', ariaCloseMenu:'Close menu',
-        ariaPrimary:'Primary', ariaOnPage:'On this page', ariaLanguage:'Language', ariaMobileMenu:'Site menu', menuLabel:'Menu',
+        ariaPrimary:'Primary', ariaOnPage:'On this page', ariaLanguage:'Language', ariaMobileMenu:'Site menu', menuLabel:'Menu', skipToContent:'Skip to content',
         navExamples:'Examples', navAddon:'Add-on', navGuide:'Guide', navHow:'How to use', navCapabilities:'Capabilities',
         footLegal:'Legal',
         footSolver:'Online solver', footAddon:'Sheets add-on', footGuide:'Guide',
@@ -762,7 +762,7 @@
       common: {
         navSolver:'Solver',
         closeMenu:'Cerrar', ariaCloseMenu:'Cerrar men\u00fa',
-        ariaPrimary:'Principal', ariaOnPage:'En esta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Men\u00fa del sitio', menuLabel:'Men\u00fa',
+        ariaPrimary:'Principal', ariaOnPage:'En esta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Men\u00fa del sitio', menuLabel:'Men\u00fa', skipToContent:'Saltar al contenido',
         navExamples:'Ejemplos', navAddon:'Complemento', navGuide:'Gu\u00eda', navHow:'C\u00f3mo se usa', navCapabilities:'Capacidades',
         footLegal:'Legal',
         footSolver:'Solver online', footAddon:'Complemento de Sheets', footGuide:'Gu\u00eda',
@@ -1364,7 +1364,7 @@
       common: {
         navSolver:'Solver',
         closeMenu:'Fechar', ariaCloseMenu:'Fechar menu',
-        ariaPrimary:'Principal', ariaOnPage:'Nesta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Menu do site', menuLabel:'Menu',
+        ariaPrimary:'Principal', ariaOnPage:'Nesta p\u00e1gina', ariaLanguage:'Idioma', ariaMobileMenu:'Menu do site', menuLabel:'Menu', skipToContent:'Saltar para o conte\u00fado',
         navExamples:'Exemplos', navAddon:'Complemento', navGuide:'Guia', navHow:'Como usar', navCapabilities:'Recursos',
         footLegal:'Legal',
         footSolver:'Solver online', footAddon:'Complemento do Sheets', footGuide:'Guia',
@@ -1966,7 +1966,7 @@
       common: {
         navSolver:'Solver',
         closeMenu:'Schlie\u00dfen', ariaCloseMenu:'Men\u00fc schlie\u00dfen',
-        ariaPrimary:'Haupt', ariaOnPage:'Auf dieser Seite', ariaLanguage:'Sprache', ariaMobileMenu:'Seitenmen\u00fc', menuLabel:'Men\u00fc',
+        ariaPrimary:'Haupt', ariaOnPage:'Auf dieser Seite', ariaLanguage:'Sprache', ariaMobileMenu:'Seitenmen\u00fc', menuLabel:'Men\u00fc', skipToContent:'Zum Inhalt springen',
         navExamples:'Beispiele', navAddon:'Add-on', navGuide:'Anleitung', navHow:'So geht\u2019s', navCapabilities:'Funktionen',
         footLegal:'Rechtliches',
         footSolver:'Online-Solver', footAddon:'Sheets-Add-on', footGuide:'Anleitung',
@@ -2568,7 +2568,7 @@
       common: {
         navSolver:'Solveur',
         closeMenu:'Fermer', ariaCloseMenu:'Fermer le menu',
-        ariaPrimary:'Principale', ariaOnPage:'Sur cette page', ariaLanguage:'Langue', ariaMobileMenu:'Menu du site', menuLabel:'Menu',
+        ariaPrimary:'Principale', ariaOnPage:'Sur cette page', ariaLanguage:'Langue', ariaMobileMenu:'Menu du site', menuLabel:'Menu', skipToContent:'Aller au contenu',
         navExamples:'Exemples', navAddon:'Module', navGuide:'Guide', navHow:'Comment \u00e7a marche', navCapabilities:'Capacit\u00e9s',
         footLegal:'L\u00e9gal',
         footSolver:'Solveur en ligne', footAddon:'Module Sheets', footGuide:'Guide',

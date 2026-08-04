@@ -544,7 +544,7 @@ ok('coverage: covered + not-applicable + pending == total',
      html.indexOf('rel="canonical" href="https://plumline.online/capabilities.html"') !== -1);
   // The page uses the shared width container.
   ok('capabilities.html: main uses the shared .plumb width container',
-     /<main class="plumb">/.test(html));
+     /<main[^>]*\bclass="plumb">/.test(html));
 
   // Terminology: we normalised on "checked again", never "re-checked". Guard
   // against it creeping back into the page (alt/caption included).

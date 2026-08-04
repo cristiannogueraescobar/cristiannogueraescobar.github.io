@@ -29,7 +29,7 @@ catch (e) {
 
 const siteDir = path.join(__dirname, '..');
 const navmenu = fs.readFileSync(path.join(siteDir, 'assets', 'nav-menu.js'), 'utf8');
-const EXPECTED = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
+const EXPECTED = ['solver.html', '/#addon', 'guide.html', 'examples.html', 'about.html'];
 const PAGES = ['index.html', 'solver.html', 'guide.html', 'about.html', 'examples.html', 'privacy.html', 'terms.html'];
 
 let pass = 0, fail = 0;

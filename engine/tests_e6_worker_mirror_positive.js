@@ -129,7 +129,7 @@ ok('P20 cleanup nulls engineWorker', /engineWorker=null/.test(orch));
 // 24-25. Localization handoff stays in UI + public output pinned (no solver.html
 // read: composition byte-identity is owned by E1/validate_dist).
 ok('P24 localizeEngineError not in engine or worker client', canonSrc.indexOf('localizeEngineError') === -1 && fs.readFileSync(path.join(SITE, 'engine', 'fragments', 'solver-ui', 'solve-worker-client.js'), 'utf8').indexOf('localizeEngineError') === -1);
-ok('P25 fixture pins composed public output 215539', g.public_output.composed_solver_bytes === 215539);
+ok('P25 fixture pins composed public output 215613', g.public_output.composed_solver_bytes === 215613);
 
 // 26. No dist dependency in this suite.
 ok('P26 no dist dependency', !/existsSync\([^)]*dist/.test(fs.readFileSync(__filename, 'utf8')) && !/readFileSync\([^)]*dist[^)]*solver/.test(fs.readFileSync(__filename, 'utf8')));

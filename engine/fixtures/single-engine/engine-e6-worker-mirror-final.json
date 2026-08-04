@@ -277,8 +277,8 @@
     }
   },
   "public_output": {
-    "composed_solver_bytes": 215539,
-    "dist_solver_bytes": 218349,
+    "composed_solver_bytes": 215613,
+    "dist_solver_bytes": 218396,
     "dist_solver_sha256": "4dbf1a8abe8498aa03d7620ad7f8043b646f914f38203906e483a8ca7f6514b4",
     "requests": 6,
     "worker_parity": 143,

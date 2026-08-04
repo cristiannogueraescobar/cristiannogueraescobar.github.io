@@ -23,7 +23,8 @@
         "aboutWhoH",
         "aboutWhoP",
         "aboutWhyH",
-        "aboutWhyP"
+        "aboutWhyP",
+        "skipToContent"
       ],
       "heading_order": [
         "h1:aboutTitle",
@@ -34,6 +35,7 @@
         "h3:aboutSolvesH"
       ],
       "links": [
+        "#content",
         "mailto:contact@plumline.online",
         "solver.html"
       ],
@@ -59,8 +61,8 @@
       "key_prefix": "pv",
       "head_sha256": "45e00f002a166222329fb33a23968e207144876de6be29eb390da950593f87aa",
       "head_bytes": 473,
-      "main_sha256": "16c8e0014d4a6c2327cd1490062302ba4a21ab8e88a244a0806e13014d670e49",
-      "main_bytes": 5311,
+      "main_sha256": "bbb268fab769bfebc96f5e9148d5893eaddbc196ed8270f180538fe839856e0d",
+      "main_bytes": 5324,
       "canonical": "https://plumline.online/privacy.html",
       "data_i18n_keys": [
         "pvAccessH",
@@ -96,6 +98,7 @@
         "pvWhereH",
         "pvWhereLink",
         "pvWhereP",
+        "skipToContent",
         "updated"
       ],
       "heading_order": [
@@ -111,12 +114,15 @@
         "h3:pvChangesH"
       ],
       "links": [
+        "#content",
         "https://developers.google.com/terms/api-services-user-data-policy",
         "https://myaccount.google.com/permissions",
         "https://policies.google.com/privacy",
         "mailto:contact@plumline.online"
       ],
-      "ids": [],
+      "ids": [
+        "content"
+      ],
       "scripts": [
         "assets/build-badge.js?v=2",
         "assets/i18n.js?v=82",
@@ -135,10 +141,11 @@
       "key_prefix": "tm",
       "head_sha256": "259a060a304682ac40099e6cbca761fb5859a0ebd679654431f435ccec87542a",
       "head_bytes": 393,
-      "main_sha256": "9331d605c72d1041bdd14c8b25536d4c3889352823b1d6307ae345c9c2acb65f",
-      "main_bytes": 3796,
+      "main_sha256": "b9e42405b1ad12750ea56618113251ed55957977cc2211ba6144801aeb820635",
+      "main_bytes": 3809,
       "canonical": "https://plumline.online/terms.html",
       "data_i18n_keys": [
+        "skipToContent",
         "tmAgreeH",
         "tmAgreeP",
         "tmAvailH",
@@ -178,9 +185,12 @@
         "h2:tmContactH"
       ],
       "links": [
+        "#content",
         "mailto:contact@plumline.online"
       ],
-      "ids": [],
+      "ids": [
+        "content"
+      ],
       "scripts": [
         "assets/build-badge.js?v=2",
         "assets/i18n.js?v=82",

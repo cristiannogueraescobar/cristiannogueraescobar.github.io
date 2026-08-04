@@ -2,10 +2,10 @@
   "_note": "Independent C4 fixture for capabilities.html (State D, generated). Region SHA-256 + bytes + template SHA + generated-region inventory + capability/image/JSON-LD sync. Captured from pre-C4 approved output, NOT re-run through the generator by the test.",
   "head_sha256": "110dad2402b1f51b42dc25a6919146c13ccb9b6b8727e30418034fb929a94c9e",
   "head_bytes": 3205,
-  "main_sha256": "353ee6ca612fcfa7a75e2c1a554a036603098cccb7b0910d4242314b712ced68",
-  "main_bytes": 12043,
-  "template_sha256": "bf22ce793a555a79b1b7886047a022298ef87f4afa29108c6380920dc9078628",
-  "template_bytes": 1322,
+  "main_sha256": "77448b3d17cad54e8f56db41dfdf3e73b1356e0782485f3294b5cf69b2478d55",
+  "main_bytes": 12080,
+  "template_sha256": "ede084f1b958188e723c4464f3831e057accea5940eace4bf213582b4bb162ef",
+  "template_bytes": 1405,
   "canonical": "https://plumline.online/capabilities.html",
   "section_order": [
     "models",
@@ -53,6 +53,7 @@
     "cap-sheet-paste",
     "cap-verify-constraints",
     "cap-verify-objective",
+    "content",
     "explanation",
     "explanation-title",
     "models",
@@ -63,10 +64,11 @@
     "verification-title"
   ],
   "anchors": [
-    "#explanation",
-    "#models",
-    "#spreadsheet",
-    "#verification"
+    "content",
+    "explanation",
+    "models",
+    "spreadsheet",
+    "verification"
   ],
   "data_i18n_keys": [
     "capCtaBinary",
@@ -140,7 +142,8 @@
     "capVerifyHeading",
     "capVerifyObjectiveDesc",
     "capVerifyObjectiveName",
-    "capWhenAppears"
+    "capWhenAppears",
+    "skipToContent"
   ],
   "scripts": [
     "assets/build-badge.js?v=2",

@@ -124,3 +124,19 @@ solver 218349, sha `4dbf1a8a…`, six requests, five languages). `model.fieldOrd
 a historical serialization contract, not a model authority. `npm run generate:examples`
 is the single generator; `npm run verify` step 4b checks projection staleness without
 writing. See `docs/checkpoint-f1-canonical-example-catalogue.md`.
+
+## Visual system and shared navigation (Checkpoint F2)
+
+F2 formalizes the shared visual language into an additive token + component
+layer in `assets/plumline.css` (semantic colors, spacing, fluid typography,
+shape, elevation, focus/interaction; system fonts only, zero remote fonts) and
+refines the shared header/footer/solver shell through it. It adds a focus-visible
+**skip link** and a normalized `<main id="content">` on all 8 pages, a
+`skipToContent` i18n key in all 5 languages, a unique `aria-current="page"` per
+page (the Home logo carries it via a new `home` key in `compose-shell.js`), and
+root-relative Home/add-on links (`/`, `/#addon`; zero `index.html` hrefs).
+`assets/nav-menu.js` is unchanged — its full mobile-drawer a11y contract is now
+pinned by tests. F2 is a **deliberate visual rebaseline**: public output changes
+on purpose (composed solver 215539 → 215613, dist solver 218349 → 218396); the
+engine, mirror, catalogue, 9 examples, 5 languages and 6 requests are unchanged.
+See `docs/checkpoint-f2-visual-system-navigation.md`.

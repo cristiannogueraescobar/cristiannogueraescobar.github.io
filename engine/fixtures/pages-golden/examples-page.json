@@ -29,7 +29,8 @@
   "data_i18n_keys": [
     "examplesEyebrow",
     "examplesPageLead",
-    "examplesPageTitle"
+    "examplesPageTitle",
+    "skipToContent"
   ],
   "scripts": [
     "assets/build-badge.js?v=2",

@@ -33,6 +33,11 @@ PAGES.forEach(function (p) {
   for (const m of body.matchAll(/href="([^"]+)"/g)) {
     const href = m[1];
     if (/^(https?:|mailto:|tel:|\/\/)/.test(href)) continue;
+    // F2: '/' and '/#addon' are the canonical Home URL (root), served as index.html.
+    if (href === '/' || href.startsWith('/#')) {
+      if (href.startsWith('/#')) ok(p + ' ' + href + ' -> #' + href.slice(2) + ' exists', ids['index.html'].has(href.slice(2)));
+      continue;
+    }
     const [pathPart, frag] = href.split('#');
     const clean = pathPart.split('?')[0];
     if (href.startsWith('#')) {
@@ -78,7 +83,7 @@ PAGES.forEach(function (p) {
 // Consistent primary nav, validated by a single reusable function so the SAME
 // logic guards the real pages AND a set of deliberately-broken fixtures below
 // (so the guard code itself is protected, not just the live HTML).
-const PRIMARY = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
+const PRIMARY = ['solver.html', '/#addon', 'guide.html', 'examples.html', 'about.html'];
 const CURRENT_OF = { 'solver.html': 'solver.html', 'guide.html': 'guide.html', 'examples.html': 'examples.html', 'about.html': 'about.html' };
 
 // Returns an array of { name, cond, detail } checks for the given page body.
@@ -330,7 +335,7 @@ const GOOD_NAV = [
   '<button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Site menu" data-i18n-aria="ariaMobileMenu">Menu</button>',
   '<nav class="nav" aria-label="Primary" data-i18n-aria="ariaPrimary">',
   '<a href="solver.html" class="hide-sm" aria-current="page" data-i18n="navSolver">Solver</a>',
-  '<a href="index.html#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>',
+  '<a href="/#addon" class="hide-sm" data-i18n="navAddon">Add-on</a>',
   '<a href="guide.html" class="hide-sm" data-i18n="navGuide">Guide</a>',
   '<a href="examples.html" class="hide-sm" data-i18n="navExamples">Examples</a>',
   '<a href="about.html" class="hide-sm" data-i18n="navAbout">About</a>',

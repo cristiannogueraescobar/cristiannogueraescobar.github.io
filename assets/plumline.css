@@ -53,6 +53,89 @@
   --rail:56px;            /* plumb-line offset from content edge */
   --radius:8px;
   --radius-sm:4px;
+
+  /* ---- Checkpoint F2 design tokens ------------------------------------------
+     A consistent, additive token layer. Existing tokens above are unchanged so
+     every current consumer keeps working; these add a coherent scale for
+     spacing, type, shape, elevation, layout and interaction. Balanced
+     professional + approachable: cream stays dominant, deep green keeps
+     authority, brass is an accent, verification green is reserved for trust. */
+
+  /* semantic colour aliases (map onto the identity palette above) */
+  --bg:var(--paper);            /* page background */
+  --surface:var(--panel);       /* card / surface */
+  --surface-2:#FBF9F4;          /* elevated / subtly raised surface on cream */
+  --text:var(--ink);            /* primary text */
+  --text-2:var(--ink-2);        /* secondary text */
+  --text-muted:var(--soft);     /* muted text */
+  --accent:var(--brass);        /* accent (brass) */
+  --accent-text:var(--brass-text); /* AA brass for text on light grounds */
+  --verify:var(--true);         /* verification green — trust / status only */
+  --border:var(--line);         /* default border */
+  --border-subtle:var(--line-fine); /* subtle border */
+  --success:var(--true);
+  --success-bg:var(--true-lo);
+  --warning:#9A6B12;            /* AA-contrast amber on cream */
+  --warning-bg:#F6ECD6;
+  --error:var(--wrong);
+  --error-bg:var(--wrong-lo);
+  --info:var(--deep-2);
+  --info-bg:#E6EEE9;
+
+  /* spacing scale (4px base; use these instead of arbitrary px) */
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  --space-10:40px;
+  --space-12:48px;
+  --space-16:64px;
+
+  /* typography scale */
+  --fs-display:clamp(2.2rem,1.6rem + 2.4vw,3.2rem);
+  --fs-h1:clamp(1.75rem,1.4rem + 1.4vw,2.4rem);
+  --fs-h2:clamp(1.35rem,1.2rem + 0.7vw,1.7rem);
+  --fs-h3:1.2rem;
+  --fs-body:1rem;
+  --fs-small:0.875rem;
+  --fs-label:0.8125rem;
+  --lh-tight:1.2;
+  --lh-heading:1.25;
+  --lh-body:1.6;
+  --fw-regular:400;
+  --fw-medium:500;
+  --fw-semibold:600;
+  --fw-bold:700;
+  --ls-tight:-0.01em;
+  --ls-label:0.02em;
+
+  /* layout widths */
+  --w-content:var(--edge);      /* wide content edge */
+  --w-reading:68ch;             /* comfortable reading measure */
+  --w-wide:1440px;
+  --gutter:24px;                /* page gutter (desktop) */
+  --gutter-sm:16px;             /* page gutter (mobile) */
+  --section-y:clamp(48px,6vw,88px); /* vertical rhythm between sections */
+
+  /* shape */
+  --radius-lg:14px;
+  --radius-pill:999px;
+
+  /* elevation */
+  --shadow-subtle:0 1px 2px rgba(18,33,26,.06),0 1px 3px rgba(18,33,26,.05);
+  --shadow-card:0 2px 6px rgba(18,33,26,.06),0 8px 22px -14px rgba(18,33,26,.22);
+  --shadow-float:0 14px 34px -18px rgba(18,33,26,.30),0 0 0 1px rgba(18,33,26,.05);
+
+  /* interaction */
+  --focus-ring:0 0 0 2px var(--paper),0 0 0 4px var(--true);
+  --focus-ring-offset:2px;
+  --transition:150ms ease;
+  --transition-slow:220ms ease;
+  --disabled-opacity:.55;
+  --tap-min:44px;               /* minimum primary touch target */
 }
 
 /* ---- (2) BASE ------------------------------------------------------------ */
@@ -639,3 +722,202 @@ main > .field-deep:first-child::after{inset:18px 0 0}
   background:var(--panel);font-size:14px;font-weight:600}
 .priv-arrow{color:var(--brass);font-size:18px}
 @media(max-width:560px){.priv-flow{flex-direction:column;align-items:flex-start}}
+
+/* ============================================================================
+   Checkpoint F2 — shared visual system: components, navigation, accessibility.
+   Additive layer built on the F2 token scale above. Does not remove historical
+   rules; where it refines a shared component it raises consistency (surface,
+   border, radius, focus/hover/active) without changing actions or destinations.
+   ========================================================================== */
+
+/* ---- Skip link (accessibility) ------------------------------------------- */
+.skip-link{position:absolute;left:var(--space-2);top:var(--space-2);z-index:1000;
+  transform:translateY(-150%);transition:transform var(--transition);
+  background:var(--surface);color:var(--text);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:var(--space-2) var(--space-4);
+  font-family:var(--sans);font-weight:var(--fw-semibold);font-size:var(--fs-small);
+  box-shadow:var(--shadow-card);text-decoration:none}
+.skip-link:focus{transform:translateY(0)}
+
+/* ---- Shared button system ------------------------------------------------ */
+/* Base: consistent metrics + focus/active for every button variant. The legacy
+   .btn keeps its brass treatment (primary); variants add secondary/tertiary/
+   danger with the same interaction contract. */
+.btn2{font-family:var(--sans);font-size:var(--fs-body);font-weight:var(--fw-semibold);
+  line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);
+  padding:12px 20px;min-height:var(--tap-min);border-radius:var(--radius-sm);
+  border:1px solid transparent;cursor:pointer;text-decoration:none;
+  transition:background var(--transition),border-color var(--transition),color var(--transition),transform var(--transition),box-shadow var(--transition)}
+.btn2:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.btn2:active{transform:translateY(0)}
+.btn2[disabled],.btn2[aria-disabled="true"]{opacity:var(--disabled-opacity);cursor:not-allowed;transform:none;box-shadow:none;pointer-events:none}
+
+.btn2--primary{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+.btn2--primary:hover{background:var(--brass-hi);border-color:var(--brass-hi);transform:translateY(-1px);box-shadow:var(--shadow-subtle)}
+.btn2--secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
+.btn2--secondary:hover{border-color:var(--accent-text);color:var(--accent-text);transform:translateY(-1px)}
+.btn2--tertiary{background:transparent;border-color:transparent;color:var(--accent-text);padding-left:var(--space-2);padding-right:var(--space-2)}
+.btn2--lg{font-size:var(--fs-h3);padding:16px 30px}
+.btn2--tertiary:hover{background:var(--brass-tint)}
+.btn2--danger{background:transparent;border-color:var(--error);color:var(--error)}
+.btn2--danger:hover{background:var(--error-bg)}
+.btn2--icon{padding:0;width:var(--tap-min);height:var(--tap-min);min-height:var(--tap-min)}
+
+/* ---- Inline + navigation links ------------------------------------------- */
+.link{color:var(--accent-text);text-decoration:underline;text-underline-offset:2px;
+  text-decoration-thickness:1px;transition:color var(--transition)}
+.link:hover{color:var(--brass);text-decoration-thickness:2px}
+.link:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:var(--radius-sm)}
+
+/* Primary nav links: clear hover + active (not colour-only) state. */
+.nav a{position:relative;border-radius:var(--radius-sm);transition:color var(--transition),background var(--transition)}
+.nav a:hover{color:var(--accent-text)}
+.nav a[aria-current="page"]{color:var(--text);font-weight:var(--fw-semibold)}
+.nav a[aria-current="page"]::after{content:"";position:absolute;left:2px;right:2px;bottom:-6px;
+  height:2px;background:var(--accent);border-radius:var(--radius-pill)}
+.nav a:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+/* solver header keeps a darker ground: keep the underline visible there too */
+.top .nav a[aria-current="page"]::after{background:var(--brass-hi)}
+
+/* ---- Shared cards -------------------------------------------------------- */
+.card2{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:var(--space-6);box-shadow:var(--shadow-subtle)}
+/* interactive cards (links/buttons) get affordance; static cards do not. */
+a.card2,button.card2,.card2--interactive{transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);cursor:pointer}
+a.card2:hover,button.card2:hover,.card2--interactive:hover{transform:translateY(-2px);box-shadow:var(--shadow-card);border-color:var(--accent-text)}
+a.card2:focus-visible,button.card2:focus-visible,.card2--interactive:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.card2__title{font-family:var(--serif);font-size:var(--fs-h3);line-height:var(--lh-heading);margin:0 0 var(--space-2)}
+.card2__meta{font-family:var(--mono);font-size:var(--fs-label);color:var(--text-muted);letter-spacing:var(--ls-label)}
+
+/* ---- Badges -------------------------------------------------------------- */
+.badge{display:inline-flex;align-items:center;gap:var(--space-1);
+  font-family:var(--mono);font-size:var(--fs-label);font-weight:var(--fw-semibold);
+  letter-spacing:var(--ls-label);padding:2px 10px;border-radius:var(--radius-pill);
+  border:1px solid transparent;line-height:1.5}
+.badge--verify{background:var(--success-bg);color:var(--true);border-color:var(--true)}
+.badge--accent{background:var(--brass-tint);color:var(--accent-text);border-color:var(--accent-text)}
+.badge--neutral{background:var(--surface-2);color:var(--text-2);border-color:var(--border)}
+.badge--info{background:var(--info-bg);color:var(--info);border-color:var(--info)}
+
+/* ---- Information / status panels ----------------------------------------- */
+.panel{border:1px solid var(--border);border-left-width:3px;border-radius:var(--radius-sm);
+  padding:var(--space-4) var(--space-5);background:var(--surface)}
+.panel--info{border-left-color:var(--info);background:var(--info-bg)}
+.panel--success{border-left-color:var(--success);background:var(--success-bg)}
+.panel--warning{border-left-color:var(--warning);background:var(--warning-bg)}
+.panel--error{border-left-color:var(--error);background:var(--error-bg)}
+
+/* ---- Focus contract: never remove outlines; use a visible ring ----------- */
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,
+textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--true);outline-offset:var(--focus-ring-offset)}
+
+/* ---- Reduced motion: neutralise the F2 transitions/transforms ------------ */
+@media(prefers-reduced-motion:reduce){
+  .btn2,.link,.nav a,.card2,a.card2,button.card2,.card2--interactive,.skip-link{transition:none}
+  .btn2--primary:hover,.btn2--secondary:hover,a.card2:hover,button.card2:hover,.card2--interactive:hover{transform:none}
+}
+
+/* ---- Responsive gutters via tokens (keeps existing layout, adds mobile) --- */
+@media(max-width:560px){
+  .card2{padding:var(--space-5)}
+}
+/* =====================================================================
+   F2 delta — apply the visual system to the REAL components
+   ---------------------------------------------------------------------
+   The F2 token + component layer defined .btn2/.card2/.panel but the live
+   markup still used only legacy classes, so the visible change was
+   near-zero. The delta (a) applies the F2 component classes to the real
+   interactive cards, info blocks and primary buttons in the markup, and
+   (b) tokenizes the remaining legacy chrome (the .btn variants that stay,
+   header, footer, nav, surfaces) so the whole shell reads consistently.
+   No markup copy, structure, engine or solver behavior changes. Cream
+   stays dominant; brass stays a restrained accent; verification green
+   stays reserved for trust/result states.
+   ===================================================================== */
+
+/* ---- Legacy .btn variants that remain in place get F2 tokens ---- */
+/* (Hero/CTA primaries are re-tagged .btn2 in markup; these rules cover the
+   solver's own buttons and any remaining .btn usage.) */
+.btn{
+  border-radius:var(--radius);
+  min-height:var(--tap-min);
+  transition:background var(--transition),border-color var(--transition),
+             box-shadow var(--transition),transform var(--transition),color var(--transition);
+}
+.btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.btn.big{border-radius:var(--radius)}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost:hover{
+  border-color:var(--accent);color:var(--accent-text);
+  background:var(--surface-2);transform:none;box-shadow:none;
+}
+/* result/trust button keeps verification green, tokenized */
+.btn.solve{background:var(--verify);border-color:var(--verify);color:#fff}
+.btn.solve:hover{
+  background:var(--verify);border-color:var(--verify);color:#fff;
+  box-shadow:0 8px 22px -8px rgba(30,122,84,.55);
+}
+
+/* ---- Static content card keeps its surface, now tokenized, no hover ---- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  padding:var(--space-6);
+  box-shadow:var(--shadow-subtle);
+}
+.card.brass{border-left:3px solid var(--accent)}
+.card.true{border-left:3px solid var(--verify)}
+.card:not(a):hover{transform:none;box-shadow:var(--shadow-subtle)}
+
+/* ---- Capabilities numbered step badge picks up the accent ---- */
+.cap-step::before{background:var(--accent);color:#fff}
+.cap-step h3{color:var(--text)}
+.cap-step p{color:var(--text-2)}
+
+/* ---- Header refinement ---- */
+.mast{border-bottom:1px solid var(--border-subtle)}
+.mast .nav a{transition:color var(--transition)}
+.mast .nav a:hover{color:var(--accent-text)}
+.lang-select,.mast select{
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  background:var(--surface);
+  transition:border-color var(--transition);
+}
+.lang-select:hover,.mast select:hover{border-color:var(--accent)}
+
+/* ---- Footer refinement ---- */
+footer.site,.site-footer,footer[role="contentinfo"]{border-top:1px solid var(--border-subtle)}
+footer .col h4{color:var(--text-2);letter-spacing:var(--ls-label,.04em)}
+footer a{transition:color var(--transition)}
+footer a:hover{color:var(--accent-text)}
+
+/* ---- Surface / hierarchy / spacing polish ---- */
+.checkline,.trust-row{gap:var(--space-4)}
+.eyebrow,.kicker{letter-spacing:var(--ls-label,.08em)}
+
+/* ---- Reduced motion for the hover transforms added here ---- */
+@media(prefers-reduced-motion:reduce){
+  .btn,.card{transition:none}
+}
+
+/* ---- Example chips (solver + examples) get tokenized hover/focus ---- */
+.chip{
+  border-radius:var(--radius-pill);
+  transition:border-color var(--transition),background var(--transition),color var(--transition);
+}
+.chip:hover{border-color:var(--accent)}
+.chip:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* ---- Examples page no-JS cards share the card surface ---- */
+.xcard{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:var(--space-5);
+  box-shadow:var(--shadow-subtle);
+  transition:border-color var(--transition),box-shadow var(--transition),transform var(--transition);
+}
+a.xcard:hover{border-color:var(--accent);box-shadow:var(--shadow-card);transform:translateY(-2px)}
+a.xcard:focus-visible{outline:none;box-shadow:var(--focus-ring)}

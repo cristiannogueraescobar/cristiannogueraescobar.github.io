@@ -2,16 +2,16 @@
   "note": "Checkpoint D1 golden for the COMPOSED solver.html (byte-identical to pre-D baseline). Captured from the composer output, NOT regenerated during verify. No abs paths/timestamps; no full engine body.",
   "composed_total": {
     "chars": 215429,
-    "bytes": 215539,
-    "sha256": "232ad6c05edd19bd93d36ecefd318a2d8e8ace828348935943784350f6938666"
+    "bytes": 215613,
+    "sha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74"
   },
   "head": {
     "sha256": "7cad86a09a237fb0c932853c01d01241665c8fd3b52281a2fb79db3f97529df7",
     "bytes": 20157
   },
   "body": {
-    "sha256": "92e55a2b901d00382527b0c1566384b68ef906fa8af0d895d574e1b99351e068",
-    "bytes": 195339
+    "sha256": "caa753416eeecd5f0559b8d0c530daff20c93230a8125bae426117d1c935ec0c",
+    "bytes": 195413
   },
   "inline_script": {
     "sha256": "b59f930fbf87acaf322ff2d9ef1d0b8c56da91b850f0e610761c4dab185431b8",

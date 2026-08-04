@@ -527,3 +527,29 @@ temp trees copy the catalogue module set via `engine/copy-catalogue-tree.js`.
 `tests_home_capabilities_refs.js`), each reading raw regions the shell composer never
 touches to assert catalogue-faithful projection. The catalogue, generator, checker,
 positive/negative suites, needle auditor and fixture are not allowlisted.
+
+## Visual system and shared navigation suite (Checkpoint F2)
+
+New suite `tests_f2_visual_nav.js` (registered in `engine/suites.js`, runs in
+CI), 107 assertions, deterministic and independent of whether `dist/` is present
+— the shared shell is composed in memory via `src/shared/compose-shell.js`
+(`composeHtml`) rather than read from `dist/`. It pins the F2 design-token layer,
+the skip link + unique `<main id="content">` on every page, `aria-current`
+uniqueness (one per page where a nav destination exists; the Home logo carries
+it; zero on capabilities/privacy/terms), root link normalization (`/`, `/#addon`,
+no `index.html` hrefs), the mobile-drawer a11y contract in `assets/nav-menu.js`,
+shared component classes, **computed WCAG AA contrast ratios** for the core
+text/background/accent pairings, reduced-motion, absence of remote fonts/CDN/
+trackers, and the six canonical requests.
+
+Battery increment: `11891` (effective F1 base) → `11955` (+64 from rebaselined
+suites gaining assertions — e.g. the shell golden's new `home` active case,
+solver golden and structure checks) → `12062` (+107 from `tests_f2_visual_nav`).
+The total is stable at `12062` whether the battery runs before or after a build.
+
+Fixtures rebaselined by F2 are classified in
+`docs/checkpoint-f2-visual-system-navigation.md`; all are deliberate visual
+rebaselines or accessibility improvements, none weaken a guard. The engine
+region SHA is preserved and verified in every regenerated solver golden. The
+anti-self-regeneration guard in `tests_no_selfgen_golden.js` is kept; only its
+pinned SHA moves to the new d5 golden.

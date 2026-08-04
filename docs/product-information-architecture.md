@@ -15,11 +15,15 @@ Status: proposal for review (Checkpoint F0). No public change made.
 - Privacy/Terms: legal.
 
 Problems: Home over-loaded; add-on over-weighted while status unconfirmed;
-audience journeys incomplete; solver carries marketing; the shared shell fragments
-(`header.html`, `footer.html`) use `index.html` / `index.html#addon` in several
-positions, propagated to all 8 pages (25 references across dist) — future
-normalisation to `/` and `/#addon` belongs in the shared fragments (see the main
-F0.5).
+audience journeys incomplete; solver carries marketing. The shared shell
+fragments (`header.html`, `footer.html`) formerly used `index.html` /
+`index.html#addon` in several positions, propagated to all 8 pages. **Resolved in
+Checkpoint F2**: all Home/add-on links are now root-relative (`/`, `/#addon`) in
+the shared fragments and the solver add-on CTA; zero `index.html` hrefs remain in
+sources or the composed shell. Header nav also now carries a unique
+`aria-current="page"` per page (the Home logo carries it), and every page has a
+focus-visible skip link to `<main id="content">`. See
+`docs/checkpoint-f2-visual-system-navigation.md`.
 
 ## Proposed IA (candidate, not approved)
 
