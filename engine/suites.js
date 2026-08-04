@@ -21,7 +21,8 @@ const SUITES = [
   'tests_canonical_catalogue_positive',
   'tests_canonical_catalogue_negative',
   'tests_canonical_catalogue_needle_audit',
-  'tests_f2_visual_nav'
+  'tests_f2_visual_nav',
+  'tests_f3a_hero'
 ];
 
 module.exports = SUITES;

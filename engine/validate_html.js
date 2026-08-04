@@ -114,17 +114,78 @@ for (const p of PAGES) {
        !/\.">"/.test(serialized) && !/">Optimal/.test(serialized), 'broken alt tail present');
   });
 
-  // Home's two image alts must equal the EN dictionary exactly.
+  // Home: the verify-section image alt must equal the EN dictionary exactly.
+  // (The hero image was replaced in F3a by a semantic HTML/CSS product demo.)
   if (p === 'index.html' && DICT && DICT.en && DICT.en.home) {
     const byKey = {};
     doc.querySelectorAll('img[data-i18n-alt]').forEach(img => {
       byKey[img.getAttribute('data-i18n-alt')] = img.getAttribute('alt');
     });
-    for (const key of ['heroShotAlt', 'verifyShotAlt']) {
-      ok('home img alt == DICT.en.home.' + key,
-         byKey[key] !== undefined && byKey[key] === DICT.en.home[key],
-         'html=' + JSON.stringify((byKey[key] || '').slice(0, 40)) +
-         ' dict=' + JSON.stringify((DICT.en.home[key] || '').slice(0, 40)));
+    // 7. verifyShotAlt still exists and matches the dictionary.
+    ok('home img alt == DICT.en.home.verifyShotAlt',
+       byKey.verifyShotAlt !== undefined && byKey.verifyShotAlt === DICT.en.home.verifyShotAlt,
+       'html=' + JSON.stringify((byKey.verifyShotAlt || '').slice(0, 40)) +
+       ' dict=' + JSON.stringify((DICT.en.home.verifyShotAlt || '').slice(0, 40)));
+    // The old hero image must NOT come back.
+    ok('home no longer carries a heroShotAlt image',
+       byKey.heroShotAlt === undefined, 'heroShotAlt present');
+
+    // ---- F3a product demonstration contract (replaces the hero image) ----
+    const demos = doc.querySelectorAll('figure.hero-demo');
+    // 1. Exactly one figure.hero-demo.
+    ok('home has exactly one figure.hero-demo', demos.length === 1, demos.length + ' demos');
+    const demo = demos[0] || null;
+    const hero = doc.querySelector('section.hero-f3');
+    // 2. The demo is inside the hero.
+    ok('hero-demo is inside the hero section', !!hero && !!demo && hero.contains(demo));
+    if (demo) {
+      // 3. Accessible name: a <figcaption>, or aria-label/aria-labelledby.
+      const figcap = demo.querySelector('figcaption');
+      const labelledby = demo.getAttribute('aria-labelledby');
+      const arialabel = demo.getAttribute('aria-label');
+      const hasName = (figcap && (figcap.textContent || '').trim().length > 0) ||
+                      (!!labelledby && !!doc.getElementById(labelledby)) || !!arialabel;
+      ok('hero-demo has an accessible name (figcaption/aria)', hasName);
+      // 4. Exactly the four expected phases, in order, via demoStep1..4 keys.
+      const stepKeys = Array.from(demo.querySelectorAll('[data-i18n]'))
+        .map(el => el.getAttribute('data-i18n'))
+        .filter(k => /^demoStep[1-4]$/.test(k));
+      ok('hero-demo has exactly four phases (demoStep1..4)',
+         stepKeys.length === 4 &&
+         stepKeys.indexOf('demoStep1') === 0 && stepKeys.indexOf('demoStep2') === 1 &&
+         stepKeys.indexOf('demoStep3') === 2 && stepKeys.indexOf('demoStep4') === 3,
+         stepKeys.join(','));
+      const stageCount = demo.querySelectorAll('.hero-demo__stage').length;
+      ok('hero-demo renders four stage blocks', stageCount === 4, stageCount + ' stages');
+      // 5. Pinned authorised data: objective 1,760 / optimal / continuous / max.
+      const demoHtml = demo.innerHTML;
+      ok('hero-demo shows the pinned objective 1,760', /<b>1,760<\/b>/.test(demoHtml));
+      ok('hero-demo status resolves to optimal (en)', /optimal/i.test(DICT.en.home.demoStatus || ''));
+      ok('hero-demo model states continuous + maximise (en)',
+         /continuous/i.test(DICT.en.home.demoModel || '') && /maximise/i.test(DICT.en.home.demoModel || ''));
+      // The pinned values must match the F1 fixture authority (never invented).
+      try {
+        const fx = require(path.join(root, 'engine', 'fixtures', 'product', 'example-catalogue-f1.json'));
+        const prod = (fx.examples || []).find(e => e.slug === 'production-plan');
+        ok('pinned demo authority matches F1 fixture (1760/optimal/continuous/max)',
+           !!prod && prod.expected && prod.expected.objective === 1760 &&
+           prod.expected.status === 'optimal' && prod.expected.modelType === 'continuous' &&
+           prod.sense === 'max');
+      } catch (e) { ok('pinned demo authority matches F1 fixture (1760/optimal/continuous/max)', false, e.message.slice(0, 40)); }
+      // 6. The demo must not contain a heavy/dynamic surface.
+      ok('hero-demo has no <img>', demo.querySelectorAll('img').length === 0);
+      ok('hero-demo has no <canvas>', demo.querySelectorAll('canvas').length === 0);
+      ok('hero-demo has no <iframe>', demo.querySelectorAll('iframe').length === 0);
+      ok('hero-demo has no <video>', demo.querySelectorAll('video').length === 0);
+      ok('hero-demo has no <script>/runtime fetch', demo.querySelectorAll('script').length === 0 && !/fetch\s*\(/.test(demoHtml));
+      ok('hero-demo references no remote asset', !/(?:src|href)\s*=\s*"https?:\/\//i.test(demoHtml));
+      // 8. Each language keeps the accessible-name / phase i18n keys populated.
+      const NEEDED = ['demoTitle', 'demoStep1', 'demoStep2', 'demoStep3', 'demoStep4', 'demoStatus', 'demoModel'];
+      ['en', 'es', 'pt', 'de', 'fr'].forEach(lang => {
+        const home = DICT[lang] && DICT[lang].home ? DICT[lang].home : {};
+        const okLang = NEEDED.every(k => typeof home[k] === 'string' && home[k].trim().length > 0);
+        ok('hero-demo i18n keys present + non-empty in ' + lang, okLang);
+      });
     }
   }
 }

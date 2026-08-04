@@ -71,6 +71,14 @@
   --accent:var(--brass);        /* accent (brass) */
   --accent-text:var(--brass-text); /* AA brass for text on light grounds */
   --verify:var(--true);         /* verification green — trust / status only */
+  /* secondary text ON the dark field (.field-deep). Light grounds use --text-2 /
+     --text-muted; those are near-invisible on --deep, so secondary copy over the
+     dark hero uses attenuated cream instead (composited over --deep):
+       --on-deep-2      cream @ .78  -> ~9.5:1 on --deep (AAA)
+       --on-deep-muted  cream @ .72  -> ~8.2:1 on --deep (AAA)
+     Both stay below the H1 (solid cream, ~14.9:1) so hierarchy is preserved. */
+  --on-deep-2:rgba(245,242,235,.78);
+  --on-deep-muted:rgba(245,242,235,.72);
   --border:var(--line);         /* default border */
   --border-subtle:var(--line-fine); /* subtle border */
   --success:var(--true);
@@ -921,3 +929,88 @@ footer a:hover{color:var(--accent-text)}
 }
 a.xcard:hover{border-color:var(--accent);box-shadow:var(--shadow-card);transform:translateY(-2px)}
 a.xcard:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* =====================================================================
+   F3a — Home hero, positioning and product demonstration
+   ---------------------------------------------------------------------
+   New hero (copy + two CTAs + trust microcopy) alongside a semantic
+   HTML/CSS product demonstration (no runtime solver, no heavy image).
+   Uses the F2 token system: panels, badges, tokens, spacing, focus.
+   Cream stays dominant; brass is the accent; verification green marks
+   the check. No gradients, blobs or decorative animation.
+   ===================================================================== */
+
+.hero-f3{align-items:center;gap:var(--space-10)}
+.hero-copy .lead{max-width:52ch}
+.hero-trust{
+  margin-top:var(--space-5);
+  font-size:var(--fs-small);
+  color:var(--on-deep-muted);
+}
+
+/* ---- Product demonstration ---- */
+.hero-demo{margin:0}
+.hero-demo__cap{
+  font-family:var(--mono);
+  font-size:var(--fs-label);
+  letter-spacing:var(--ls-label,.06em);
+  text-transform:uppercase;
+  color:var(--on-deep-2);
+  margin:0 0 var(--space-3);
+}
+.hero-demo__flow{
+  list-style:none;margin:0;padding:0;
+  display:grid;gap:var(--space-3);
+}
+.hero-demo__stage{
+  display:flex;gap:var(--space-3);align-items:flex-start;
+  padding:var(--space-4) var(--space-5);
+}
+.hero-demo__n{
+  flex:0 0 auto;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:var(--radius-pill);
+  background:var(--accent);color:#fff;
+  font-family:var(--mono);font-size:13px;font-weight:var(--fw-bold,700);
+}
+.hero-demo__h{margin:0 0 var(--space-2);font-weight:var(--fw-semibold,600);color:var(--text)}
+.hero-demo__note{margin:var(--space-2) 0 0;font-size:var(--fs-small);color:var(--text-2)}
+.hero-demo__meta,.hero-demo__obj,.hero-demo__status{margin:0}
+.hero-demo__obj b{font-family:var(--mono);font-size:var(--fs-h3);color:var(--text)}
+.hero-demo__obj-l{color:var(--text-2);font-size:var(--fs-small)}
+.hero-demo__checks{list-style:none;margin:var(--space-2) 0 0;padding:0;display:grid;gap:var(--space-1)}
+.hero-demo__checks li{display:flex;gap:var(--space-2);align-items:baseline;font-size:var(--fs-small);color:var(--text-2)}
+.hero-demo__checks .tick{color:var(--verify);font-weight:var(--fw-bold,700)}
+.panel--verify{border-left-color:var(--verify)}
+
+/* mini spreadsheet grid (decorative, aria-hidden) */
+.hero-demo__sheet{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border-subtle);
+  border:1px solid var(--border-subtle);border-radius:var(--radius-sm);
+  overflow:hidden;margin:var(--space-2) 0;max-width:280px;
+}
+.hero-demo__sheet .c{
+  background:var(--surface);padding:4px 8px;
+  font-family:var(--mono);font-size:12px;color:var(--text-2);
+}
+.hero-demo__sheet .c.hdr{background:var(--surface-2);color:var(--text);font-weight:var(--fw-semibold,600)}
+
+/* ---- Proof strip ---- */
+.proof-strip{padding-top:var(--space-6);padding-bottom:var(--space-6)}
+.proof-list{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-wrap:wrap;gap:var(--space-3) var(--space-6);
+  justify-content:center;
+}
+.proof-list li{display:flex;gap:var(--space-2);align-items:baseline;font-size:var(--fs-small);color:var(--text-2)}
+.proof-list b{color:var(--verify)}
+
+/* ---- Responsive ---- */
+@media(max-width:860px){
+  .hero-f3{gap:var(--space-6)}
+}
+@media(max-width:560px){
+  .hero-demo__stage{padding:var(--space-3) var(--space-4)}
+  .proof-list{gap:var(--space-2) var(--space-4)}
+}
