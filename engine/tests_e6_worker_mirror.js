@@ -210,14 +210,14 @@ function checkSingleEngineWorkerAndMirror(siteDir) {
   ok('E5 exports intact (9)', E5_EXPORTS.length === 9);
 
   // 38-40. Engine intact; composed + public output owned by E1/validate_dist.
-  // The composed byte-identity (215539), zero-source-published and the
+  // The composed byte-identity (215613), zero-source-published and the
   // localizeEngineError handoff are composition contracts owned by the E1 suite
   // and validate_dist (which feed the official compositor). E6 does NOT re-read
   // solver.html: it pins the expected public values from the fixture so it stays
   // dist-independent and off the raw-source allowlist.
   ok('engine byte-count intact', Buffer.byteLength(canonSrc, 'utf8') === 82697);
-  ok('fixture pins composed public output 215539', g.public_output.composed_solver_bytes === 215539);
-  ok('fixture pins dist byte-identity + six requests', g.public_output.dist_solver_bytes === 218349 && g.public_output.requests === 6 && g.public_output.zero_canonical_published === true && g.public_output.no_SOLVER_ENGINE_SOURCE_in_dist === true);
+  ok('fixture pins composed public output 215613', g.public_output.composed_solver_bytes === 215613);
+  ok('fixture pins dist byte-identity + six requests', g.public_output.dist_solver_bytes === 218396 && g.public_output.requests === 6 && g.public_output.zero_canonical_published === true && g.public_output.no_SOLVER_ENGINE_SOURCE_in_dist === true);
   ok('worker client does not embed localizeEngineError (UI concern)', workerClient.indexOf('localizeEngineError') === -1);
   ok('generator/adapter not published to dist path', !fs.existsSync(path.join(siteDir, 'dist', 'engine', 'generate-engine-mirror.js')) && !fs.existsSync(path.join(siteDir, 'dist', 'engine', 'source', 'engine-platform-adapter.json')));
 

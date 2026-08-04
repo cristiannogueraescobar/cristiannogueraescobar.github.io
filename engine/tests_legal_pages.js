@@ -120,9 +120,12 @@ function checkLegalPages(siteDir) {
     !pvKeys.some(function (k) { return k.indexOf('tm') === 0; }));
 
   // about is distinct: its own namespace, and it does NOT use legal pv*/tm* keys.
+  // Shared shell keys (e.g. the skip link, injected outside the page's own
+  // content) are allowed alongside the about* namespace.
+  const SHARED_SHELL_KEYS = ['skipToContent'];
   const abKeys = allMatch(/data-i18n="([^"]+)"/g, read.about);
   check('about uses its own about* namespace only',
-    abKeys.every(function (k) { return k.indexOf('about') === 0; }));
+    abKeys.every(function (k) { return k.indexOf('about') === 0 || SHARED_SHELL_KEYS.indexOf(k) !== -1; }));
 
   // No legal source fragment/partial exists to be published.
   check('no legal source partial directory', !fs.existsSync(path.join(siteDir, 'src', 'pages', 'legal')));

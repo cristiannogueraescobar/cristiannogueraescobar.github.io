@@ -39,7 +39,7 @@ const src = fs.readFileSync(path.join(SITE, 'solver.html'), 'utf8');
 const composedA = composeSolverInterface(src, SITE);
 const composedB = composeSolverInterface(src, SITE);
 ok('composition deterministic and independent of dist', composedA === composedB &&
-  Buffer.byteLength(composedA, 'utf8') === 215539);
+  Buffer.byteLength(composedA, 'utf8') === 215613);
 
 // 4. Composed engine bytes are exactly the approved engine.
 const region = findEngineRegion(composedA);
@@ -75,7 +75,7 @@ ok('engine/source not published to dist',
     }
     copyCatalogueTree(SITE, base);
     const c = composeSolverInterface(fs.readFileSync(path.join(base, 'solver.html'), 'utf8'), base);
-    ok('composition works from a spaced path', Buffer.byteLength(c, 'utf8') === 215539);
+    ok('composition works from a spaced path', Buffer.byteLength(c, 'utf8') === 215613);
   } finally { fs.rmSync(base, { recursive: true, force: true }); }
 })();
 

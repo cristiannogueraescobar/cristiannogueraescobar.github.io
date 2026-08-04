@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="assets/plumline.css?v=21">
 </head>
 <body data-page="capabilities">
+<a class="skip-link" href="#content" data-i18n="skipToContent">Skip to content</a>
 
 <div class="field-deep">
   <div class="plumb">
@@ -38,7 +39,7 @@
 </div>
 
 <!-- CAPABILITIES_CONTENT_START -->
-<main class="plumb">
+<main id="content" class="plumb">
   <div class="cap-hero">
     <div class="cap-hero-text">
       <h1 data-i18n="capPageH1">What Plumline can solve, check and explain</h1>
@@ -91,7 +92,7 @@
         </tr>
       </tbody>
     </table>
-    <div class="cap-notes">
+    <div class="cap-notes panel">
       <p class="cap-goodtoknow"><strong data-i18n="capModelContinuousName">Continuous models</strong>: <span data-i18n="capLimitContinuous">Plumline accepts linear relationships only. It stops and identifies formulas that are genuinely nonlinear.</span></p>
       <p class="cap-goodtoknow"><strong data-i18n="capModelIntegerName">Integer models</strong>: <span data-i18n="capLimitInteger">Proving the best result can take longer as an integer model grows.</span></p>
     </div>
@@ -104,15 +105,15 @@
   <section id="spreadsheet" aria-labelledby="spreadsheet-title">
     <h2 data-i18n="capGroupSpreadsheet" id="spreadsheet-title">Works with your spreadsheet</h2>
     <ol class="cap-steps">
-      <li class="cap-step" id="cap-sheet-paste">
+      <li class="cap-step card2" id="cap-sheet-paste">
         <h3 data-i18n="capStepPaste">Paste your model</h3>
         <p data-i18n="capStepPasteDesc">Copy a range from Excel or Google Sheets and paste it into the grid.</p>
       </li>
-      <li class="cap-step" id="cap-sheet-formula-limits">
+      <li class="cap-step card2" id="cap-sheet-formula-limits">
         <h3 data-i18n="capStepAdjust">Adjust it</h3>
         <p data-i18n="capStepAdjustDesc">Set fixed or formula-based limits, then choose whether to maximise or minimise.</p>
       </li>
-      <li class="cap-step" id="cap-sheet-export">
+      <li class="cap-step card2" id="cap-sheet-export">
         <h3 data-i18n="capStepExport">Export the result</h3>
         <p data-i18n="capStepExportDesc">Download as CSV or Excel, or copy a plain text summary.</p>
       </li>

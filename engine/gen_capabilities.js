@@ -222,7 +222,7 @@ function renderModels() {
   const notes = ['model-continuous', 'model-integer']
     .map(byId).filter(c => c && c.limitationsKey);
   if (notes.length) {
-    L.push('    <div class="cap-notes">');
+    L.push('    <div class="cap-notes panel">');
     notes.forEach(function (c) {
       L.push('      <p class="cap-goodtoknow">' +
              '<strong data-i18n="' + escAttr(c.nameKey) + '">' + escText(en(c.nameKey)) + '</strong>: ' +
@@ -255,7 +255,7 @@ function renderSpreadsheet() {
   ];
   steps.forEach(function (s) {
     const c = byId(s.id);
-    L.push('      <li class="cap-step" id="cap-' + escAttr(s.id) + '">');
+    L.push('      <li class="cap-step card2" id="cap-' + escAttr(s.id) + '">');
     L.push('        ' + t('h3', s.titleKey));
     L.push('        ' + t('p', s.descKey));
     const link = exampleLink(c);
@@ -325,7 +325,7 @@ function renderExplanation() {
 
 function buildContent() {
   const L = [];
-  L.push('<main class="plumb">');
+  L.push('<main id="content" class="plumb">');
 
   // Hero: two columns (text + CTA on the left, real product image on the right).
   L.push('  <div class="cap-hero">');

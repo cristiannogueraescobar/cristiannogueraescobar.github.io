@@ -24,7 +24,7 @@ const path = require('path');
 
 // ---- Authoritative per-page context -------------------------------------------
 const PAGE_CONTEXT = {
-  'index.html':        { pageType: 'informational', active: '',         learnCapabilities: false },
+  'index.html':        { pageType: 'informational', active: 'home',     learnCapabilities: false },
   'solver.html':       { pageType: 'solver',        active: 'solver',   learnCapabilities: false },
   'guide.html':        { pageType: 'informational', active: 'guide',    learnCapabilities: false },
   'examples.html':     { pageType: 'informational', active: 'examples', learnCapabilities: false },
@@ -35,9 +35,11 @@ const PAGE_CONTEXT = {
 };
 
 // Primary nav link keys, in order. The active key (if any) gets aria-current.
-const NAV_KEYS = ['solver', 'addon', 'guide', 'examples', 'about'];
+// 'home' is the logo/lockup link (not a primary nav item) — it carries
+// aria-current on the Home page so exactly one element is marked current there.
+const NAV_KEYS = ['home', 'solver', 'addon', 'guide', 'examples', 'about'];
 // active values map to a nav key; '' / 'none' means no active link.
-const ACTIVE_TO_KEY = { solver: 'solver', guide: 'guide', examples: 'examples', about: 'about', '': null, none: null };
+const ACTIVE_TO_KEY = { home: 'home', solver: 'solver', guide: 'guide', examples: 'examples', about: 'about', '': null, none: null };
 const VALID_PAGETYPE = new Set(['informational', 'solver']);
 
 const LEARN_CAP_LINK = '<a href="capabilities.html" data-i18n="navCapabilities">Capabilities</a>';

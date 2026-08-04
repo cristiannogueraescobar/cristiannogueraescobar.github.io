@@ -32,6 +32,7 @@ eq('header informational, solver active',   compose.renderHeader('informational'
 eq('header informational, guide active',    compose.renderHeader('informational', 'guide'),    'header-informational-guide.html');
 eq('header informational, examples active', compose.renderHeader('informational', 'examples'), 'header-informational-examples.html');
 eq('header informational, about active',    compose.renderHeader('informational', 'about'),    'header-informational-about.html');
+eq('header informational, home active',      compose.renderHeader('informational', 'home'),     'header-informational-home.html');
 eq('header solver',                         compose.renderHeader('solver', 'solver'),          'header-solver.html');
 
 // Footers.

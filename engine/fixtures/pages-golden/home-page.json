@@ -2,8 +2,8 @@
   "_note": "Independent C5 fixture for index.html (State D+C). Region SHA-256 + bytes + 13-section order + generated-region markers + FAQ/capabilities/image sync + hero/contact/addon. Captured from pre-C5 approved output, NOT re-run through any generator by the test.",
   "head_sha256": "ddf260b922b38a65d796c61ca8a5d8caf52146fc9239c4dfae85d2b0093ecdb6",
   "head_bytes": 5179,
-  "main_sha256": "67725a620562aaff3abc25f93b92d4db892af9ee0cc2bc9f050c64ed8f52792b",
-  "main_bytes": 18989,
+  "main_sha256": "36f0923946545392842f17b5986fe73b43bb55c57f71462d4f7a3635809cf3fd",
+  "main_bytes": 19106,
   "section_signatures": [
     "|hero-split",
     "|section trust-bar",
@@ -73,7 +73,9 @@
     "use-cases",
     "verify"
   ],
-  "anchors": [],
+  "anchors": [
+    "content"
+  ],
   "data_i18n_keys": [
     "addonInReview",
     "addonSoon",
@@ -161,6 +163,7 @@
     "privLink",
     "privP",
     "privTitle",
+    "skipToContent",
     "trustChecked",
     "trustFormats",
     "trustLangs",

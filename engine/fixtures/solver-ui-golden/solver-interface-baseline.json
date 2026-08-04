@@ -2,17 +2,17 @@
   "note": "Checkpoint D pre-D baseline for solver.html. Captured from approved main. Do NOT regenerate during verify. No absolute paths, no timestamps, no OS-specific data, no full engine body.",
   "page": "solver.html",
   "totals": {
-    "lines": 4573,
-    "chars": 215429,
-    "bytes": 215539
+    "lines": 4574,
+    "chars": 215503,
+    "bytes": 215613
   },
   "head": {
     "sha256": "7cad86a09a237fb0c932853c01d01241665c8fd3b52281a2fb79db3f97529df7",
     "bytes": 20157
   },
   "body": {
-    "sha256": "92e55a2b901d00382527b0c1566384b68ef906fa8af0d895d574e1b99351e068",
-    "bytes": 195339
+    "sha256": "caa753416eeecd5f0559b8d0c530daff20c93230a8125bae426117d1c935ec0c",
+    "bytes": 195413
   },
   "inline_style": {
     "count": 1,

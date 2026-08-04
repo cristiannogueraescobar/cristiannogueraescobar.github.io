@@ -20,7 +20,8 @@ const SUITES = [
   'tests_examples_solve_parity',
   'tests_canonical_catalogue_positive',
   'tests_canonical_catalogue_negative',
-  'tests_canonical_catalogue_needle_audit'
+  'tests_canonical_catalogue_needle_audit',
+  'tests_f2_visual_nav'
 ];
 
 module.exports = SUITES;

@@ -24,7 +24,7 @@ const goldenPath = path.join(siteDir, 'engine', 'fixtures', 'solver-ui-golden', 
 
 // PINNED SHA-256 of the D5 final golden. If the golden is regenerated (e.g. an
 // accidental self-capture from the composer), this hash changes and the build fails.
-const PINNED_SHA = '141320096a696e38ec0f4f51674b190d79b2047fe7639cbf6b3978cbdc96fb88';
+const PINNED_SHA = 'cf96da32a1646741996371fc2f1efc6acab83ff1b907850d752bb5bae01dbf4a';
 
 const raw = fs.readFileSync(goldenPath);
 const actualSha = crypto.createHash('sha256').update(raw).digest('hex');
@@ -48,7 +48,7 @@ ok('golden body == pre-D baseline body', golden.body.sha256 === d0.body.sha256);
 ok('golden engine == pre-D baseline engine', golden.engine.sha256 === d0.engine.sha256);
 ok('golden style(inner) == pre-D baseline inline_style', golden.style.sha256 === d0.inline_style.sha256);
 ok('golden ui_script(no engine) == pre-D baseline ui_script', golden.ui_script_no_engine.sha256 === d0.ui_script.sha256);
-ok('golden composed bytes == pre-D baseline bytes (215539)', golden.composed_total.bytes === d0.totals.bytes);
+ok('golden composed bytes == pre-D baseline bytes (215613)', golden.composed_total.bytes === d0.totals.bytes);
 
 // Fragment SHAs must equal the independent per-phase goldens (bootstrap is D5-only).
 const base = path.join(siteDir, 'engine', 'fixtures', 'solver-ui-golden');

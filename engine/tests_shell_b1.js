@@ -20,7 +20,7 @@ const ACTIVE = {
   'examples.html': 'examples.html', 'capabilities.html': null, 'about.html': 'about.html',
   'privacy.html': null, 'terms.html': null,
 };
-const PRIMARY_HREFS = ['solver.html', 'index.html#addon', 'guide.html', 'examples.html', 'about.html'];
+const PRIMARY_HREFS = ['solver.html', '/#addon', 'guide.html', 'examples.html', 'about.html'];
 
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }

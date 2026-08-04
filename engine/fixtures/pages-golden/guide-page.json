@@ -94,6 +94,7 @@
     "limitsHandlesP",
     "limitsSize",
     "limitsSizeP",
+    "skipToContent",
     "statusFeasibleDesc",
     "statusFeasibleLabel",
     "statusH",
@@ -106,7 +107,7 @@
     "statusUnboundedDesc",
     "statusUnboundedLabel"
   ],
-  "data_i18n_count": 63,
+  "data_i18n_count": 64,
   "ids": [
     "content",
     "direction",
@@ -116,10 +117,12 @@
     "variables"
   ],
   "anchors": [
-    "#direction",
-    "#status"
+    "content",
+    "direction",
+    "status"
   ],
   "links": [
+    "#content",
     "#direction",
     "#status",
     "capabilities.html#cap-explain-detection",
