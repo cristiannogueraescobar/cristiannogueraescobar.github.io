@@ -160,9 +160,10 @@ function checkHomePage(siteDir) {
   check('home: every picture/source/img matches golden',
     JSON.stringify(pics) === JSON.stringify(exp.pictures));
 
-  // ---- Hero: the first picture keeps its responsive contract ----
-  check('home: hero has a responsive <picture> as the golden first image',
-    pics.length > 0 && JSON.stringify(pics[0]) === JSON.stringify(exp.pictures[0]));
+  // ---- Hero/verify: Home is now image-free (F3a demo + F3b verify flow are
+  // semantic HTML/CSS). The golden pins zero content pictures. ----
+  check('home: golden pins zero content pictures (HTML/CSS sections)',
+    pics.length === exp.pictures.length && exp.pictures.length === 0);
 
   // ---- Contact + add-on ----
   check('home: contact mailto matches golden', (html.match(/(mailto:[^"]+)/) || [])[1] === exp.contact_mailto);

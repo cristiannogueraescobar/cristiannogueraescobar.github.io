@@ -14,7 +14,8 @@
     "validate": "node engine/validate_dist.js",
     "generate:engine-mirror": "node engine/generate-engine-mirror.js --write",
     "verify": "node engine/verify_all.js",
-    "generate:examples": "node engine/generate-examples.js"
+    "generate:examples": "node engine/generate-examples.js",
+    "generate:home-featured": "node engine/gen_home_featured.js"
   },
   "devDependencies": {
     "acorn": "8.18.0",

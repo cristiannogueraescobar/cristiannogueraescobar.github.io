@@ -70,19 +70,12 @@ LANGS.forEach(function (lang) {
     if (expected) ok('home render [' + lang + ']: ' + key + ' matches dictionary',
                      text === expected.replace(/<[^>]+>/g, ''), key);
   });
-  // Verify image keeps a src and a non-empty, translated alt. The hero image
-  // was replaced in F3a by a semantic HTML/CSS product demonstration, so only
-  // the verify-section image remains here.
-  ['verifyShotAlt'].forEach(function (altKey) {
+  // F3b replaced the verify-section screenshot with a semantic HTML/CSS flow, so
+  // Home no longer renders a translated content image. Assert that the old image
+  // hooks are gone (the hero and verify sections are now pure HTML/CSS).
+  ['heroShotAlt', 'verifyShotAlt'].forEach(function (altKey) {
     const img = doc.querySelector('img[data-i18n-alt="' + altKey + '"]');
-    ok('home render [' + lang + ']: image ' + altKey + ' present', !!img, altKey);
-    if (img) {
-      ok('home render [' + lang + ']: ' + altKey + ' has a src', !!img.getAttribute('src'));
-      const alt = img.getAttribute('alt') || '';
-      ok('home render [' + lang + ']: ' + altKey + ' alt non-empty', alt.length > 0);
-      ok('home render [' + lang + ']: ' + altKey + ' alt matches dictionary',
-         alt === DICT[lang].home[altKey], altKey);
-    }
+    ok('home render [' + lang + ']: no ' + altKey + ' image (replaced by HTML/CSS)', !img, altKey);
   });
 });
 

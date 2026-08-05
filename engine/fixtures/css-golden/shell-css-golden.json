@@ -1,7 +1,7 @@
 {
   "_note": "Regenerated at Checkpoint F2 (visual system evolution). Intentional visual rebaseline of plumline.css; solver/examples inline styles unchanged.",
-  "plumline_css_sha256": "e5167f396c394e241c0be2022047e9929c08893ad20f54fd3b3469a7149b658d",
-  "plumline_css_bytes": 53913,
+  "plumline_css_sha256": "4c743aed3f36104b10015369e4cbe116b3e1c19fb8a38f784da8de31bfe862b4",
+  "plumline_css_bytes": 58492,
   "shell_fragments": {
     ".mast": ".mast{display:flex;align-items:center;justify-content:space-between;padding:22px 0 18px;position:relative;z-index:2}",
     ":focus-visible": ":focus-visible{outline:2px solid var(--true);outline-offset:3px;border-radius:2px}",
@@ -27,7 +27,7 @@
     "1500",
     "1900"
   ],
-  "media_query_count": 28,
+  "media_query_count": 29,
   "custom_property_count": 104,
   "important_count": 4,
   "keyframes_count": 0,

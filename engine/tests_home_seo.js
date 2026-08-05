@@ -110,10 +110,10 @@ function imgSize(rel) {
 const imgRefs = [];
 for (const m of html.matchAll(/(?:src|srcset)="(assets\/[^"]+\.(?:png|webp|jpg|jpeg|svg))"/g)) imgRefs.push(m[1]);
 const uniqueRefs = [...new Set(imgRefs)];
-// F3a replaced the hero screenshot with a semantic HTML/CSS product demo, so
-// the Home now references only the verify-section screenshot (png+webp).
-ok('home seo: Home references the verify screenshot (png+webp)',
-   uniqueRefs.length >= 2, uniqueRefs.length + ' image refs');
+// F3b replaced the verify-section screenshot with a semantic HTML/CSS flow, so
+// the Home now references no content images (the hero was already HTML in F3a).
+ok('home seo: Home is image-free (hero + verify are HTML/CSS)',
+   uniqueRefs.length === 0, uniqueRefs.length + ' image refs');
 uniqueRefs.forEach(function (ref) {
   const p = path.join(siteDir, ref);
   const exists = fs.existsSync(p);
@@ -159,7 +159,7 @@ catch (e) {
 if (JSDOM_SEO) {
   const doc = new JSDOM_SEO(html).window.document;
   const shots = [...doc.querySelectorAll('img[src*="assets/screenshots/"]')];
-  ok('home seo: found the verify <img> tag', shots.length >= 1, shots.length + ' screenshot imgs');
+  ok('home seo: Home has no screenshot <img> (HTML/CSS sections)', shots.length === 0, shots.length + ' screenshot imgs');
   shots.forEach(function (img) {
     const key = img.getAttribute('data-i18n-alt');
     ok('home seo: screenshot img has data-i18n-alt', !!key, img.getAttribute('src'));
@@ -279,31 +279,31 @@ FORBIDDEN_PROOF.forEach(function (phrase) {
 const EXPECTED_PROOF_COPY = {
   en: {
     heroLead2: 'Paste a spreadsheet model or build one in the grid. Plumline finds the best allocation, then checks it against your own formulas and tells you the status in plain words.',
-    howSolveP: 'It searches for the best allocation.',
+    howStep3P: 'It finds the best allocation, then rechecks it against your own formulas and reports the status.',
     verStatusH: 'A clear solve status',
     limUnsupportedH: 'It distinguishes optimal, feasible and incomplete results'
   },
   es: {
     heroLead2: 'Pega un modelo de hoja de cálculo o constrúyelo en la cuadrícula. Plumline encuentra la mejor asignación, la comprueba con tus propias fórmulas y te dice el estado con palabras claras.',
-    howSolveP: 'Busca la mejor asignación.',
+    howStep3P: 'Encuentra la mejor asignación, la vuelve a comprobar con tus propias fórmulas e informa del estado.',
     verStatusH: 'Un estado de resolución claro',
     limUnsupportedH: 'Distingue resultados óptimos, viables e incompletos'
   },
   pt: {
     heroLead2: 'Cola um modelo de folha de cálculo ou constrói um na grelha. O Plumline encontra a melhor alocação, verifica-a com as tuas próprias fórmulas e diz-te o estado com palavras claras.',
-    howSolveP: 'Procura a melhor alocação.',
+    howStep3P: 'Encontra a melhor alocação, verifica-a com as tuas próprias fórmulas e comunica o estado.',
     verStatusH: 'Um estado de resolução claro',
     limUnsupportedH: 'Distingue resultados ótimos, viáveis e incompletos'
   },
   de: {
     heroLead2: 'Füge ein Tabellenmodell ein oder erstelle eines im Raster. Plumline findet die beste Zuteilung, prüft sie anhand deiner eigenen Formeln und nennt dir den Status in klaren Worten.',
-    howSolveP: 'Es sucht die beste Zuteilung.',
+    howStep3P: 'Es findet die beste Zuteilung, prüft sie anhand deiner eigenen Formeln und meldet den Status.',
     verStatusH: 'Ein klarer Lösungsstatus',
     limUnsupportedH: 'Es unterscheidet optimale, zulässige und unvollständige Ergebnisse'
   },
   fr: {
     heroLead2: "Collez un modèle de tableur ou construisez-en un dans la grille. Plumline trouve la meilleure répartition, la vérifie avec vos propres formules et vous indique le statut en mots clairs.",
-    howSolveP: 'Il cherche la meilleure répartition.',
+    howStep3P: 'Il trouve la meilleure répartition, la vérifie avec vos propres formules et indique le statut.',
     verStatusH: 'Un statut de résolution clair',
     limUnsupportedH: 'Il distingue les résultats optimaux, réalisables et incomplets'
   }
@@ -315,7 +315,7 @@ const EXPECTED_PROOF_COPY = {
   });
 });
 // And the inline English HTML carries the corrected copy (first paint / no-JS).
-['heroLead2', 'howSolveP', 'verStatusH', 'limUnsupportedH'].forEach(function (key) {
+['heroLead2', 'howStep3P', 'verStatusH', 'limUnsupportedH'].forEach(function (key) {
   ok('home seo: inline HTML carries the corrected ' + key, html.indexOf(EXPECTED_PROOF_COPY.en[key]) !== -1, key);
 });
 

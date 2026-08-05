@@ -28,12 +28,14 @@ function makeTree(rootDir) {
   fs.mkdirSync(path.join(dir, 'engine'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'data'), { recursive: true });
-  ['gen_home_capabilities.js', 'gen_home_faq.js', 'gen_jsonld.js', 'gen_claims.js'].forEach(function (f) {
+  ['gen_home_capabilities.js', 'gen_home_faq.js', 'gen_jsonld.js', 'gen_claims.js', 'gen_home_featured.js'].forEach(function (f) {
     fs.copyFileSync(path.join(siteDir, 'engine', f), path.join(dir, 'engine', f));
   });
   ['product-capabilities.js', 'examples-data.js', 'i18n.js'].forEach(function (f) {
     fs.copyFileSync(path.join(siteDir, 'assets', f), path.join(dir, 'assets', f));
   });
+  // gen_home_featured.js projects from the canonical catalogue under src/.
+  fs.cpSync(path.join(siteDir, 'src'), path.join(dir, 'src'), { recursive: true });
   ['home-faq.json', 'claims.json'].forEach(function (f) {
     fs.copyFileSync(path.join(siteDir, 'data', f), path.join(dir, 'data', f));
   });
@@ -59,7 +61,8 @@ function idx(dir) { return path.join(dir, INDEX); }
 const GENS = [
   { gen: 'gen_home_capabilities.js', start: '<!-- HOME_CAPABILITIES_START -->', end: '<!-- HOME_CAPABILITIES_END -->' },
   { gen: 'gen_home_faq.js', start: '<!-- HOME_FAQ_START -->', end: '<!-- HOME_FAQ_END -->' },
-  { gen: 'gen_jsonld.js', start: '<!-- HOME_SOFTWARE_JSONLD_START -->', end: '<!-- HOME_SOFTWARE_JSONLD_END -->' }
+  { gen: 'gen_jsonld.js', start: '<!-- HOME_SOFTWARE_JSONLD_START -->', end: '<!-- HOME_SOFTWARE_JSONLD_END -->' },
+  { gen: 'gen_home_featured.js', start: '<!-- HOME_FEATURED_START -->', end: '<!-- HOME_FEATURED_END -->' }
 ];
 
 // 1. Each generator --check is green on a clean tree.

@@ -1014,3 +1014,68 @@ a.xcard:focus-visible{outline:none;box-shadow:var(--focus-ring)}
   .hero-demo__stage{padding:var(--space-3) var(--space-4)}
   .proof-list{gap:var(--space-2) var(--space-4)}
 }
+
+/* =====================================================================
+   F3b — Home core sections (use cases, how it works, verification,
+   featured examples). Uses the F2/F3a token system: panels, badges,
+   cards, spacing, focus. Cream dominant, brass accent, verification
+   green reserved for the check. No gradients, blobs or animation.
+   Each section has its own rhythm so they do not read as four
+   interchangeable card grids.
+   ===================================================================== */
+
+/* ---- How it works: three horizontal steps ---- */
+.how3{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4)}
+.how3-step{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4) var(--space-5)}
+.how3-n{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:var(--radius-pill);background:var(--accent);color:#fff;font-family:var(--mono);font-weight:var(--fw-bold,700)}
+.how3-step h3{margin:0 0 var(--space-2);font-size:var(--fs-h4,1.05rem)}
+.how3-step .muted{margin:0;font-size:var(--fs-small)}
+
+/* ---- Use cases: two featured + a compact list (hierarchy) ---- */
+.uc-featured{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6)}
+.uc-hero{display:block;padding:var(--space-6);text-decoration:none}
+.uc-hero .uc-tag{display:inline-block;margin-bottom:var(--space-3)}
+.uc-hero h3{margin:0 0 var(--space-2);font-size:var(--fs-h3)}
+.uc-hero .muted{margin:0}
+.uc-more-title{font-size:var(--fs-label);letter-spacing:var(--ls-label,.06em);text-transform:uppercase;color:var(--text-muted);margin:0 0 var(--space-3);font-family:var(--mono)}
+.uc-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2) var(--space-6)}
+.uc-list li{border-top:1px solid var(--border-subtle)}
+.uc-list a{display:block;padding:var(--space-3) 0;text-decoration:none;color:var(--text)}
+.uc-list a:hover span:first-child,.uc-list a:focus span:first-child{color:var(--accent)}
+.uc-list a>span:first-child{font-weight:var(--fw-semibold,600)}
+.uc-list-p{display:block;font-size:var(--fs-small);margin-top:2px}
+
+/* ---- Verification: points + a four-step semantic flow ---- */
+.verify-layout{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-8);align-items:start}
+.verify-points .vp{margin-bottom:var(--space-4)}
+.verify-points .vp h3{margin:0 0 var(--space-1);font-size:var(--fs-h4,1.05rem)}
+.verify-points .vp .muted{margin:0;font-size:var(--fs-small)}
+.verify-honest{margin-top:var(--space-3);font-size:var(--fs-small)}
+.verify-flow{margin:0}
+.verify-flow__cap{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:var(--ls-label,.06em);text-transform:uppercase;color:var(--text-muted);margin:0 0 var(--space-3)}
+.verify-flow__steps{list-style:none;margin:0;padding:0;display:grid;gap:var(--space-3)}
+.verify-flow__step{display:flex;gap:var(--space-3);align-items:flex-start;padding:var(--space-4) var(--space-5);position:relative}
+.verify-flow__n{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--radius-pill);background:var(--accent);color:#fff;font-family:var(--mono);font-size:13px;font-weight:var(--fw-bold,700)}
+.verify-flow__n--ok{background:var(--verify)}
+.verify-flow__h{margin:0 0 var(--space-1);font-weight:var(--fw-semibold,600);color:var(--text)}
+.verify-flow__step .muted{margin:0;font-size:var(--fs-small)}
+
+/* ---- Featured examples: projected from the catalogue ---- */
+.featured-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-4)}
+.featured-card{padding:0}
+.featured-link{display:block;padding:var(--space-5);text-decoration:none;color:var(--text)}
+.featured-title{margin:0 0 var(--space-2);font-size:var(--fs-h4,1.1rem)}
+.featured-desc{margin:0 0 var(--space-3);font-size:var(--fs-small);color:var(--text-2)}
+.featured-meta{margin:0 0 var(--space-3);display:flex;gap:var(--space-2);flex-wrap:wrap}
+.featured-open{font-size:var(--fs-small);font-weight:var(--fw-semibold,600);color:var(--accent)}
+.featured-link:hover .featured-open,.featured-link:focus .featured-open{text-decoration:underline}
+.featured-all{margin-top:var(--space-5)}
+
+/* ---- Responsive ---- */
+@media(max-width:860px){
+  .how3{grid-template-columns:1fr}
+  .uc-featured{grid-template-columns:1fr}
+  .uc-list{grid-template-columns:1fr}
+  .verify-layout{grid-template-columns:1fr;gap:var(--space-6)}
+  .featured-grid{grid-template-columns:1fr}
+}
