@@ -76,11 +76,21 @@ function renderedText(doc, key) {
 }
 
 (function () {
-  // Static guard: index.html must wire the capabilities namespace. This catches
-  // a regression to init('home') even before the behavioural check runs.
-  ok('home i18n: index.html initialises the capabilities namespace',
-     html.includes("Plumline.i18n.init('home', ['capabilities'])"),
-     'expected init(\'home\', [\'capabilities\']) in index.html');
+  // Static guard: index.html must wire the capabilities AND examples namespaces
+  // (F3b projects catalogue titles/descriptions for the featured examples, which
+  // live in the examples table). Catches a regression to init('home') or to a
+  // list that drops examples or duplicates a namespace.
+  ok('home i18n: index.html initialises the capabilities+examples namespaces',
+     html.includes("Plumline.i18n.init('home', ['capabilities', 'examples'])"),
+     "expected init('home', ['capabilities', 'examples']) in index.html");
+  (function () {
+    const m = html.match(/Plumline\.i18n\.init\('home',\s*\[([^\]]*)\]\)/);
+    const list = m ? m[1].split(',').map(function (x) { return x.trim().replace(/^'|'$/g, ''); }).filter(Boolean) : [];
+    ok('home i18n: home extra namespaces are exactly [capabilities, examples]',
+       list.length === 2 && list.indexOf('capabilities') !== -1 && list.indexOf('examples') !== -1, list.join(','));
+    ok('home i18n: no duplicated extra namespace', new Set(list).size === list.length, list.join(','));
+    ok('home i18n: examples namespace present (needed for projected metadata)', list.indexOf('examples') !== -1);
+  })();
 
   const dom = bootHome();
   const doc = dom.window.document;
@@ -168,25 +178,26 @@ function renderedText(doc, key) {
   // real EN -> ES -> DE switch, no alt ends up empty, and an unknown key keeps
   // the existing text rather than clearing the attribute.
   (function () {
-    // The hero image was replaced in F3a by a semantic HTML/CSS product demo,
-    // so the verify-section image is the remaining translated image on Home.
-    const verifyImg = doc.querySelector('img[data-i18n-alt="verifyShotAlt"]');
-    ok('home i18n: verify image present', !!verifyImg);
-    if (!verifyImg) { done(); return; }
+    // F3b replaced the verify-section screenshot with a semantic HTML/CSS flow.
+    // Home no longer carries a content image, so assert the old image hooks are
+    // gone and the four-phase verification flow translates in each language.
+    ok('home i18n: no verifyShotAlt image (replaced by HTML/CSS flow)',
+       !doc.querySelector('img[data-i18n-alt="verifyShotAlt"]'));
+    ok('home i18n: no heroShotAlt image', !doc.querySelector('img[data-i18n-alt="heroShotAlt"]'));
+    const flow = doc.querySelector('figure.verify-flow');
+    ok('home i18n: verification flow present', !!flow);
+    if (!flow) { done(); return; }
+    const phaseKeys = ['verFlow1H', 'verFlow2H', 'verFlow3H', 'verFlow4H'];
     ['es', 'de'].forEach(function (lang) {
       sel.value = lang;
       sel.dispatchEvent(new dom.window.Event('change'));
-      ok('home i18n: verify alt translated to ' + lang,
-         verifyImg.getAttribute('alt') === DICT[lang].home.verifyShotAlt, verifyImg.getAttribute('alt').slice(0, 30));
-      ok('home i18n: verify alt non-empty in ' + lang, verifyImg.getAttribute('alt').length > 0);
+      phaseKeys.forEach(function (k) {
+        const el = flow.querySelector('[data-i18n="' + k + '"]');
+        ok('home i18n: ' + k + ' translated to ' + lang,
+           !!el && el.textContent === DICT[lang].home[k], el ? el.textContent.slice(0, 30) : 'missing');
+      });
     });
-    // Unknown key keeps existing alt (apply only writes when lookup returns a value).
-    const before = verifyImg.getAttribute('alt');
-    verifyImg.setAttribute('data-i18n-alt', '__missingKey__');
     sel.value = 'en'; sel.dispatchEvent(new dom.window.Event('change'));
-    ok('home i18n: unknown alt key keeps existing text (attribute not cleared)',
-       verifyImg.getAttribute('alt') === before && before.length > 0, verifyImg.getAttribute('alt').slice(0, 30));
-    verifyImg.setAttribute('data-i18n-alt', 'verifyShotAlt');
   })();
   done();
 })();

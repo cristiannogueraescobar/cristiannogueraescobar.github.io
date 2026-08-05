@@ -121,14 +121,69 @@ for (const p of PAGES) {
     doc.querySelectorAll('img[data-i18n-alt]').forEach(img => {
       byKey[img.getAttribute('data-i18n-alt')] = img.getAttribute('alt');
     });
-    // 7. verifyShotAlt still exists and matches the dictionary.
-    ok('home img alt == DICT.en.home.verifyShotAlt',
-       byKey.verifyShotAlt !== undefined && byKey.verifyShotAlt === DICT.en.home.verifyShotAlt,
-       'html=' + JSON.stringify((byKey.verifyShotAlt || '').slice(0, 40)) +
-       ' dict=' + JSON.stringify((DICT.en.home.verifyShotAlt || '').slice(0, 40)));
+    // F3b replaced the verify-section screenshot with a semantic HTML/CSS flow.
+    // The old image hooks must be gone.
+    ok('home no longer carries a verifyShotAlt image',
+       byKey.verifyShotAlt === undefined, 'verifyShotAlt present');
     // The old hero image must NOT come back.
     ok('home no longer carries a heroShotAlt image',
        byKey.heroShotAlt === undefined, 'heroShotAlt present');
+
+    // ---- F3b verification flow contract (replaces the verify screenshot) ----
+    const verifySec = doc.querySelector('section#verify');
+    ok('home has exactly one #verify section', doc.querySelectorAll('section#verify').length === 1);
+    const vflows = doc.querySelectorAll('section#verify figure.verify-flow');
+    ok('home #verify has exactly one verify-flow figure', vflows.length === 1, vflows.length + ' flows');
+    const vflow = vflows[0] || null;
+    if (vflow) {
+      // accessible name (figcaption or aria).
+      const vcap = vflow.querySelector('figcaption');
+      const vlab = vflow.getAttribute('aria-labelledby');
+      ok('verify-flow has an accessible name',
+         (vcap && (vcap.textContent || '').trim().length > 0) || (!!vlab && !!doc.getElementById(vlab)));
+      // exactly four phases, in the approved order.
+      const vkeys = Array.from(vflow.querySelectorAll('[data-i18n]'))
+        .map(el => el.getAttribute('data-i18n')).filter(k => /^verFlow[1-4]H$/.test(k));
+      ok('verify-flow has exactly four phases in order (verFlow1H..4H)',
+         vkeys.length === 4 && vkeys[0] === 'verFlow1H' && vkeys[1] === 'verFlow2H' &&
+         vkeys[2] === 'verFlow3H' && vkeys[3] === 'verFlow4H', vkeys.join(','));
+      const vsteps = vflow.querySelectorAll('.verify-flow__step').length;
+      ok('verify-flow renders four step blocks', vsteps === 4, vsteps + ' steps');
+      // Representation of the required concepts (in the #verify section as a whole).
+      const vsecHtml = verifySec.innerHTML;
+      const need = {
+        'decision cells': /decision cell/i.test(vsecHtml) || /verUnderstood|verFlow1/.test(vsecHtml),
+        'objective': /objective/i.test(vsecHtml) || /verObjective/.test(vsecHtml),
+        'constraints or limits': /constraint|limit/i.test(vsecHtml) || /verConstraints/.test(vsecHtml),
+        'result': /result|allocation/i.test(vsecHtml) || /verFlow2/.test(vsecHtml),
+        'supported-formula check': /formula/i.test(vsecHtml) || /verFlow3|verConstraints/.test(vsecHtml),
+        'honest status': /verFlow4H|verStatusH|optimal, feasible/i.test(vsecHtml)
+      };
+      Object.keys(need).forEach(function (label) {
+        ok('verify section represents: ' + label, need[label]);
+      });
+      // No heavy/dynamic surface, no old image, no remote asset.
+      ok('verify-flow has no <img>', vflow.querySelectorAll('img').length === 0);
+      ok('#verify has no verifyShotAlt image', !verifySec.querySelector('img[data-i18n-alt="verifyShotAlt"]'));
+      ok('#verify has no old verified-result screenshot', !/verified-result-production/.test(vsecHtml));
+      ok('verify-flow has no <canvas>', vflow.querySelectorAll('canvas').length === 0);
+      ok('verify-flow has no <iframe>', vflow.querySelectorAll('iframe').length === 0);
+      ok('verify-flow has no <video>', vflow.querySelectorAll('video').length === 0);
+      ok('verify-flow has no <script>/runtime fetch', vflow.querySelectorAll('script').length === 0 && !/fetch\s*\(/.test(vsecHtml));
+      ok('verify-flow references no remote asset', !/(?:src|href)\s*=\s*"https?:\/\//i.test(vflow.innerHTML));
+      // No forbidden claims anywhere in the verify section.
+      const FORBIDDEN = ['mathematical proof', 'guaranteed', 'always correct', 'perfect answer', 'error-free', 'error free'];
+      FORBIDDEN.forEach(function (bad) {
+        ok('#verify has no forbidden claim: "' + bad + '"', vsecHtml.toLowerCase().indexOf(bad) === -1, bad);
+      });
+      // i18n keys present in all five languages.
+      ['verFlow1H', 'verFlow2H', 'verFlow3H', 'verFlow4H', 'verFlowTitle', 'verHonest'].forEach(function (k) {
+        ['en', 'es', 'pt', 'de', 'fr'].forEach(function (lang) {
+          const v = DICT[lang] && DICT[lang].home ? DICT[lang].home[k] : undefined;
+          ok('verify i18n ' + lang + '.' + k + ' present', typeof v === 'string' && v.trim().length > 0);
+        });
+      });
+    }
 
     // ---- F3a product demonstration contract (replaces the hero image) ----
     const demos = doc.querySelectorAll('figure.hero-demo');

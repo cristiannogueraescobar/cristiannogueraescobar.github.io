@@ -125,14 +125,31 @@
   <section class="section" id="how">
     <div class="sec-head">
       <p class="eyebrow" data-i18n="howEyebrow">How it works</p>
-      <h2 data-i18n="howTitle">Four steps from spreadsheet to a checked answer</h2>
+      <h2 data-i18n="howTitle3">Three steps to a checked answer</h2>
     </div>
-    <div class="grid-4 how-steps">
-      <div class="how-step"><span class="how-n" aria-hidden="true">1</span><h3 data-i18n="howPasteH">Paste</h3><p class="muted" style="font-size:14.5px" data-i18n="howPasteP">Paste your table or build it in the grid.</p></div>
-      <div class="how-step"><span class="how-n" aria-hidden="true">2</span><h3 data-i18n="howConfirmH">Confirm</h3><p class="muted" style="font-size:14.5px" data-i18n="howConfirmP">Plumline shows the objective, decisions and limits it read.</p></div>
-      <div class="how-step"><span class="how-n" aria-hidden="true">3</span><h3 data-i18n="howSolveH">Solve</h3><p class="muted" style="font-size:14.5px" data-i18n="howSolveP">It searches for the best allocation.</p></div>
-      <div class="how-step"><span class="how-n" aria-hidden="true">4</span><h3 data-i18n="howCheckH">Check</h3><p class="muted" style="font-size:14.5px" data-i18n="howCheckP">It recalculates the result against your formulas.</p></div>
-    </div>
+    <ol class="how3">
+      <li class="how3-step panel">
+        <span class="how3-n" aria-hidden="true">1</span>
+        <div>
+          <h3 data-i18n="howStep1H">Paste or build your model</h3>
+          <p class="muted" data-i18n="howStep1P">Paste a table from Excel or Google Sheets, or build one in the grid.</p>
+        </div>
+      </li>
+      <li class="how3-step panel">
+        <span class="how3-n" aria-hidden="true">2</span>
+        <div>
+          <h3 data-i18n="howStep2H">Confirm decisions, limits and objective</h3>
+          <p class="muted" data-i18n="howStep2P">Plumline shows the decisions, limits and objective it read, so you can review them before solving.</p>
+        </div>
+      </li>
+      <li class="how3-step panel">
+        <span class="how3-n" aria-hidden="true">3</span>
+        <div>
+          <h3 data-i18n="howStep3H">Solve and check the result</h3>
+          <p class="muted" data-i18n="howStep3P">It finds the best allocation, then rechecks it against your own formulas and reports the status.</p>
+        </div>
+      </li>
+    </ol>
   </section>
 
   <!-- Use cases -->
@@ -140,15 +157,27 @@
     <div class="sec-head">
       <p class="eyebrow" data-i18n="ucEyebrow">Real problems</p>
       <h2 data-i18n="ucTitle">Decisions people bring to Plumline</h2>
+      <p class="lead" style="max-width:60ch;margin-top:14px" data-i18n="ucLead">From production to budgets, Plumline optimises the everyday decisions people keep in spreadsheets.</p>
     </div>
-    <div class="grid-3">
-      <a class="uc-card card2" href="solver.html?ex=production-plan"><h3 data-i18n="ucProductionH">Production planning</h3><p class="muted" style="font-size:14px" data-i18n="ucProductionP">Choose how much of each product to make for the most profit within your limits.</p></a>
-      <a class="uc-card card2" href="solver.html?ex=workforce-scheduling"><h3 data-i18n="ucWorkforceH">Workforce scheduling</h3><p class="muted" style="font-size:14px" data-i18n="ucWorkforceP">Cover every shift with the fewest people while meeting each rule.</p></a>
-      <a class="uc-card card2" href="solver.html?ex=supplier-activation"><h3 data-i18n="ucSupplierH">Supplier activation</h3><p class="muted" style="font-size:14px" data-i18n="ucSupplierP">Decide which suppliers to open so demand is met at the lowest total cost.</p></a>
-      <a class="uc-card card2" href="solver.html?ex=delivery-load"><h3 data-i18n="ucDeliveryH">Delivery loading</h3><p class="muted" style="font-size:14px" data-i18n="ucDeliveryP">Pack orders into vehicles without passing weight or space limits.</p></a>
-      <a class="uc-card card2" href="solver.html?ex=marketing-budget"><h3 data-i18n="ucBudgetH">Budget allocation</h3><p class="muted" style="font-size:14px" data-i18n="ucBudgetP">Split a budget across channels for the best return within each cap.</p></a>
-      <a class="uc-card card2" href="solver.html?ex=project-selection"><h3 data-i18n="ucProjectH">Project selection</h3><p class="muted" style="font-size:14px" data-i18n="ucProjectP">Pick the set of projects with the most value that still fits the budget.</p></a>
+    <div class="uc-featured">
+      <a class="uc-hero card2" href="solver.html?ex=production-plan">
+        <span class="uc-tag badge badge--accent" data-i18n="ucFeaturedTag">Featured decision</span>
+        <h3 data-i18n="ucProductionH">Production planning</h3>
+        <p class="muted" data-i18n="ucProductionP">Choose how much of each product to make for the most profit within your limits.</p>
+      </a>
+      <a class="uc-hero card2" href="solver.html?ex=workforce-scheduling">
+        <span class="uc-tag badge badge--accent" data-i18n="ucFeaturedTag">Featured decision</span>
+        <h3 data-i18n="ucWorkforceH">Workforce scheduling</h3>
+        <p class="muted" data-i18n="ucWorkforceP">Cover every shift with the fewest people while meeting each rule.</p>
+      </a>
     </div>
+    <h3 class="uc-more-title" data-i18n="ucMoreTitle">More decisions people optimise</h3>
+    <ul class="uc-list">
+      <li><a href="solver.html?ex=supplier-activation"><span data-i18n="ucSupplierH">Supplier activation</span> <span class="uc-list-p muted" data-i18n="ucSupplierP">Decide which suppliers to open so demand is met at the lowest total cost.</span></a></li>
+      <li><a href="solver.html?ex=delivery-load"><span data-i18n="ucDeliveryH">Delivery loading</span> <span class="uc-list-p muted" data-i18n="ucDeliveryP">Pack orders into vehicles without passing weight or space limits.</span></a></li>
+      <li><a href="solver.html?ex=marketing-budget"><span data-i18n="ucBudgetH">Budget allocation</span> <span class="uc-list-p muted" data-i18n="ucBudgetP">Split a budget across channels for the best return within each cap.</span></a></li>
+      <li><a href="solver.html?ex=project-selection"><span data-i18n="ucProjectH">Project selection</span> <span class="uc-list-p muted" data-i18n="ucProjectP">Pick the set of projects with the most value that still fits the budget.</span></a></li>
+    </ul>
   </section>
 
   <!-- How it verifies -->
@@ -157,21 +186,37 @@
       <p class="eyebrow" data-i18n="verEyebrow">How it verifies</p>
       <h2 data-i18n="verTitle">Every result shows what was checked</h2>
     </div>
-    <div class="grid-2">
+    <div class="verify-layout">
       <div class="verify-points">
-        <div class="vp"><h3 data-i18n="verUnderstoodH">What Plumline understood</h3><p class="muted" style="font-size:14.5px" data-i18n="verUnderstoodP">Before solving, it shows the objective, decisions and constraints it read from your sheet, so a misread cell surfaces early.</p></div>
-        <div class="vp"><h3 data-i18n="verObjectiveH">Objective checked again</h3><p class="muted" style="font-size:14.5px" data-i18n="verObjectiveP">It substitutes the solution back into your objective formula and confirms the value it reports.</p></div>
-        <div class="vp"><h3 data-i18n="verConstraintsH">Constraints checked again</h3><p class="muted" style="font-size:14.5px" data-i18n="verConstraintsP">It recalculates every constraint from your formulas and confirms the result stays within them.</p></div>
-        <div class="vp"><h3 data-i18n="verStatusH">A clear solve status</h3><p class="muted" style="font-size:14.5px" data-i18n="verStatusP">It reports whether the answer is optimal, feasible, incomplete, infeasible or unbounded, in plain words.</p></div>
-        <p class="muted" style="font-size:14.5px"><em data-i18n="f3P">For eligible continuous models, Plumline estimates how the result may change when a binding constraint is relaxed by one unit. This sensitivity insight is often called a shadow price.</em></p>
+        <div class="vp"><h3 data-i18n="verUnderstoodH">What Plumline understood</h3><p class="muted" data-i18n="verUnderstoodP">Before solving, it shows the objective, decisions and constraints it read from your sheet, so a misread cell surfaces early.</p></div>
+        <div class="vp"><h3 data-i18n="verObjectiveH">Objective checked again</h3><p class="muted" data-i18n="verObjectiveP">It substitutes the solution back into your objective formula and confirms the value it reports.</p></div>
+        <div class="vp"><h3 data-i18n="verConstraintsH">Constraints checked again</h3><p class="muted" data-i18n="verConstraintsP">It recalculates every constraint from your formulas and confirms the result stays within them.</p></div>
+        <div class="vp"><h3 data-i18n="verStatusH">A clear solve status</h3><p class="muted" data-i18n="verStatusP">It reports whether the answer is optimal, feasible, incomplete, infeasible or unbounded, in plain words.</p></div>
+        <p class="muted"><em data-i18n="f3P">For eligible continuous models, Plumline estimates how the result may change when a binding constraint is relaxed by one unit. This sensitivity insight is often called a shadow price.</em></p>
+        <p class="verify-honest muted" data-i18n="verHonest">Plumline shows the model it interpreted and rechecks the result against your formulas. It does not claim a whole spreadsheet is correct, and an inaccurate model may not represent the real decision.</p>
         <p class="doc-crosslink"><a href="guide.html#explanation" data-i18n="verSeeMore">See how verification works</a></p>
       </div>
-      <div class="hero-shot">
-        <picture>
-          <source type="image/webp" srcset="assets/screenshots/verified-result-production.webp">
-          <img src="assets/screenshots/verified-result-production.png" width="1200" height="900" loading="lazy" decoding="async" data-i18n-alt="verifyShotAlt" alt="Plumline verifying a production planning result: the objective recalculated from the formulas, every constraint checked and within its limit, and the status “Optimal solution proven”.">
-        </picture>
-      </div>
+      <figure class="verify-flow" aria-labelledby="verify-flow-cap">
+        <figcaption id="verify-flow-cap" class="verify-flow__cap" data-i18n="verFlowTitle">How a result is checked</figcaption>
+        <ol class="verify-flow__steps">
+          <li class="verify-flow__step panel">
+            <span class="verify-flow__n" aria-hidden="true">1</span>
+            <div><p class="verify-flow__h" data-i18n="verFlow1H">Model interpreted</p><p class="muted" data-i18n="verFlow1P">Plumline shows the decision cells, the objective and the constraints it read.</p></div>
+          </li>
+          <li class="verify-flow__step panel">
+            <span class="verify-flow__n" aria-hidden="true">2</span>
+            <div><p class="verify-flow__h" data-i18n="verFlow2H">Result calculated</p><p class="muted" data-i18n="verFlow2P">It solves the interpreted model and finds the best allocation within every limit.</p></div>
+          </li>
+          <li class="verify-flow__step panel">
+            <span class="verify-flow__n" aria-hidden="true">3</span>
+            <div><p class="verify-flow__h" data-i18n="verFlow3H">Formulas checked</p><p class="muted" data-i18n="verFlow3P">It substitutes the result back into your supported formulas and recalculates each one.</p></div>
+          </li>
+          <li class="verify-flow__step panel panel--verify">
+            <span class="verify-flow__n verify-flow__n--ok" aria-hidden="true">&#10003;</span>
+            <div><p class="verify-flow__h" data-i18n="verFlow4H">Status reported</p><p class="muted" data-i18n="verFlow4P">It reports an honest status: optimal, feasible, incomplete, infeasible or unbounded.</p></div>
+          </li>
+        </ol>
+      </figure>
     </div>
   </section>
 
@@ -182,14 +227,57 @@
       <h2 data-i18n="exTitle">Open a real model and solve it</h2>
       <p class="lead" style="max-width:60ch;margin-top:14px" data-i18n="exLead">Each one loads a complete model with a known result you can verify yourself.</p>
     </div>
-    <div class="grid-3">
-      <a class="ex-card card2" href="solver.html?ex=production-plan"><h3 data-i18n="ucProductionH">Production planning</h3><span class="ex-open" data-i18n="exOpenCta">Open in the solver</span></a>
-      <a class="ex-card card2" href="solver.html?ex=workforce-scheduling"><h3 data-i18n="ucWorkforceH">Workforce scheduling</h3><span class="ex-open" data-i18n="exOpenCta">Open in the solver</span></a>
-      <a class="ex-card card2" href="solver.html?ex=project-selection"><h3 data-i18n="ucProjectH">Project selection</h3><span class="ex-open" data-i18n="exOpenCta">Open in the solver</span></a>
-      <a class="ex-card card2" href="solver.html?ex=supplier-activation"><h3 data-i18n="ucSupplierH">Supplier activation</h3><span class="ex-open" data-i18n="exOpenCta">Open in the solver</span></a>
-      <a class="ex-card card2" href="solver.html?ex=workshop-chart"><h3 data-i18n="exWorkshopH">Workshop feasible region</h3><span class="ex-open" data-i18n="exOpenCta">Open in the solver</span></a>
-    </div>
-    <p style="margin-top:20px"><a href="examples.html" class="doc-crosslink" data-i18n="exSeeAll">See all examples</a></p>
+    <!-- HOME_FEATURED_START -->
+    <ul class="featured-grid">
+      <li class="featured-card card2">
+        <a class="featured-link" href="solver.html?ex=production-plan">
+          <h3 class="featured-title" data-i18n="exName_production">Production plan</h3>
+          <p class="featured-desc" data-i18n="exDesc_production">Maximise profit within available production hours</p>
+          <p class="featured-meta">
+            <span class="badge badge--accent" data-i18n="exTypeContinuous">Continuous</span>
+            <span class="badge" data-i18n="exSenseMax">Maximise</span>
+          </p>
+          <span class="featured-open" data-i18n="exOpenCta">Open in the solver</span>
+        </a>
+      </li>
+      <li class="featured-card card2">
+        <a class="featured-link" href="solver.html?ex=workforce-scheduling">
+          <h3 class="featured-title" data-i18n="exName_workforce">Workforce scheduling</h3>
+          <p class="featured-desc" data-i18n="exDesc_workforce">Minimise staff while covering daily demand</p>
+          <p class="featured-meta">
+            <span class="badge badge--accent" data-i18n="exTypeInteger">Integer</span>
+            <span class="badge" data-i18n="exSenseMin">Minimise</span>
+          </p>
+          <span class="featured-open" data-i18n="exOpenCta">Open in the solver</span>
+        </a>
+      </li>
+      <li class="featured-card card2">
+        <a class="featured-link" href="solver.html?ex=project-selection">
+          <h3 class="featured-title" data-i18n="exName_project">Project selection</h3>
+          <p class="featured-desc" data-i18n="exDesc_project">Pick projects to fund under budget and hours</p>
+          <p class="featured-meta">
+            <span class="badge badge--accent" data-i18n="exTypeBinary">Binary</span>
+            <span class="badge" data-i18n="exSenseMax">Maximise</span>
+          </p>
+          <span class="featured-open" data-i18n="exOpenCta">Open in the solver</span>
+        </a>
+      </li>
+      <li class="featured-card card2">
+        <a class="featured-link" href="solver.html?ex=cheapest-feed-blend">
+          <h3 class="featured-title" data-i18n="exName_blend">Cheapest feed blend</h3>
+          <p class="featured-desc" data-i18n="exDesc_blend">Minimise cost while meeting nutrient minimums</p>
+          <p class="featured-meta">
+            <span class="badge badge--accent" data-i18n="exTypeContinuous">Continuous</span>
+            <span class="badge" data-i18n="exSenseMin">Minimise</span>
+          </p>
+          <span class="featured-open" data-i18n="exOpenCta">Open in the solver</span>
+        </a>
+      </li>
+    </ul>
+    <p class="featured-all">
+      <a href="examples.html" class="btn2 btn2--secondary" data-i18n="exSeeAll">See all examples</a>
+    </p>
+    <!-- HOME_FEATURED_END -->
   </section>
 
   <section class="section" id="capabilities">
@@ -328,7 +416,7 @@
 <script src="assets/i18n.js?v=82"></script>
   <script src="assets/nav-menu.js?v=6" defer></script>
 <script>
-  var LANG = Plumline.i18n.init('home', ['capabilities']);
+  var LANG = Plumline.i18n.init('home', ['capabilities', 'examples']);
 </script>
 <script src="assets/build-badge.js?v=2"></script>
 </body>

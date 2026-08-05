@@ -35,7 +35,7 @@ const LANGS = ['en', 'es', 'pt', 'de', 'fr'];
 // Each page and the namespaces it loads, in resolution order after common. This
 // mirrors Plumline.i18n.init(page, [extras]) in each page's HTML.
 const PAGE_NS = {
-  'index.html':        { page: 'home',        extras: ['capabilities'] },
+  'index.html':        { page: 'home',        extras: ['capabilities', 'examples'] },
   'solver.html':       { page: 'solver',      extras: [] },
   'guide.html':        { page: 'guide',       extras: [] },
   'capabilities.html': { page: 'capabilities', extras: [] },

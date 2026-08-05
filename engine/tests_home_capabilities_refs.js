@@ -36,11 +36,20 @@ function checkHomeAndCapabilities(dir) {
   const homeSlugs = [...home.matchAll(/solver\.html\?ex=([a-z-]+)/g)].map(m => m[1]);
   [...new Set(homeSlugs)].forEach(s => { if (validSlugs.indexOf(s) === -1) problems.push('home-unknown-slug:' + s); });
 
-  // Home must not re-store canonical example titles/descriptions.
+  // Home must not re-store canonical example titles/descriptions BY HAND. F3b
+  // introduced a deterministic projector (gen_home_featured.js) that renders the
+  // featured preview from the catalogue between the HOME_FEATURED markers, so
+  // exName_/exDesc_ keys are legitimate ONLY inside that generated region (they
+  // are projected, not hand-copied). Any occurrence OUTSIDE the markers is manual
+  // duplication and fails.
+  const featStart = home.indexOf('<!-- HOME_FEATURED_START -->');
+  const featEnd = home.indexOf('<!-- HOME_FEATURED_END -->');
+  const outside = featStart === -1 || featEnd === -1
+    ? home
+    : home.slice(0, featStart) + home.slice(featEnd);
   catalogue.forEach(rec => {
-    const t = rec.translations.en;
-    if (home.indexOf('exName_' + rec.key) !== -1) problems.push('home-restores-title-key:' + rec.key);
-    if (home.indexOf('exDesc_' + rec.key) !== -1) problems.push('home-restores-desc-key:' + rec.key);
+    if (outside.indexOf('exName_' + rec.key) !== -1) problems.push('home-restores-title-key:' + rec.key);
+    if (outside.indexOf('exDesc_' + rec.key) !== -1) problems.push('home-restores-desc-key:' + rec.key);
   });
 
   // Capability exampleIds must all be catalogue keys.

@@ -50,7 +50,12 @@ function has(lang, page, key) {
   const inCommon = L.common && Object.prototype.hasOwnProperty.call(L.common, key);
   const inCaps = page === 'home' && L.capabilities &&
                  Object.prototype.hasOwnProperty.call(L.capabilities, key);
-  return !!(inPage || inCommon || inCaps);
+  // Home's featured-examples preview (F3b) projects titles/descriptions from the
+  // canonical catalogue, which live in the `examples` table; Home loads that
+  // namespace via Plumline.i18n.init('home', ['capabilities', 'examples']).
+  const inExamples = page === 'home' && L.examples &&
+                 Object.prototype.hasOwnProperty.call(L.examples, key);
+  return !!(inPage || inCommon || inCaps || inExamples);
 }
 
 Object.keys(PAGE_OF).forEach(function (file) {

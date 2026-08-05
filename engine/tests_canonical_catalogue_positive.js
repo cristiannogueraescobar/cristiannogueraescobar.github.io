@@ -157,7 +157,7 @@ ok('37 domains reference real cells', catalogue.every(r => {
 //     is asserted by the solver-composition suites, which own the composer contract).
 ok('38 solver EXAMPLES projection = 6125 bytes', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 6125);
 // 39. i18n.js served byte-identical to source (no editable second copy).
-ok('39 i18n.js served as-is', fs.readFileSync(path.join(SITE, 'assets', 'i18n.js')).length === 277218);
+ok('39 i18n.js served as-is', fs.readFileSync(path.join(SITE, 'assets', 'i18n.js')).length === 284501);
 // 40. examples-data.js served byte size preserved.
 ok('40 examples-data.js size preserved', fs.readFileSync(path.join(SITE, 'assets', 'examples-data.js')).length === 2644);
 // 41. Works from the loaded siteDir (spaced paths validated separately in negatives).

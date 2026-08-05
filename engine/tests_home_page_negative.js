@@ -219,40 +219,40 @@ generatorNegative('N28 (desync product-capabilities.js)', 'gen_home_capabilities
   writeF(cd(d), readF(cd(d)).replace("nameKey: 'capModelContinuousName'", "nameKey: 'capRenamedKeyXYZ'"));
 });
 // 29. Remove an image.
-negative('N29 (remove an image)', function (d) {
+negative('N29 (remove a How-it-works step)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace(/<picture>[\s\S]*?<\/picture>/, '')));
-}, 'home: picture count');
-// 30. Change src/srcset.
-negative('N30 (change an image srcset)', function (d) {
-  const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('verified-result-production.webp', 'verified-x.webp')));
-}, 'home: every picture/source/img matches golden');
-// 31. Remove alt.
-negative('N31 (remove an alt)', function (d) {
-  const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace(/ alt="[^"]*"/, '')));
+  writeF(ix(d), s.replace(main, main.replace(/<li class="how3-step[\s\S]*?<\/li>/, '')));
 }, 'home: <main> SHA-256');
-// 32. Change width/height.
-negative('N32 (change image width/height)', function (d) {
+// 30. Alter a use-case slug (must stay canonical).
+negative('N30 (alter a use-case slug)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('width="1200"', 'width="640"')));
+  writeF(ix(d), s.replace(main, main.replace('solver.html?ex=production-plan', 'solver.html?ex=made-up-plan')));
 }, 'home: <main> SHA-256');
-// 33. Change loading (the verify image now carries loading="lazy").
-negative('N33 (change image loading)', function (d) {
+// 31. Remove the verification flow figure.
+negative('N31 (remove the verify flow)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace('loading="lazy"', 'loading="eager"')));
+  writeF(ix(d), s.replace(main, main.replace(/<figure class="verify-flow"[\s\S]*?<\/figure>/, '')));
+}, 'home: <main> SHA-256');
+// 32. Add a fourth How-it-works step.
+negative('N32 (add a fourth How-it-works step)', function (d) {
+  const s = readF(ix(d)); const main = mainOf(s);
+  writeF(ix(d), s.replace(main, main.replace('</ol>', '<li class="how3-step panel"><span class="how3-n">4</span><div><h3>Extra</h3></div></li></ol>')));
+}, 'home: <main> SHA-256');
+// 33. Break the featured "Explore all examples" CTA target.
+negative('N33 (break the examples CTA)', function (d) {
+  const s = readF(ix(d)); const main = mainOf(s);
+  writeF(ix(d), s.replace(main, main.replace('href="examples.html" class="btn2 btn2--secondary"', 'href="broken.html" class="btn2 btn2--secondary"')));
 }, 'home: <main> SHA-256');
 // 34. Change the demo objective value (pinned historical authority 1,760).
 negative('N34 (change the pinned demo objective)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
   writeF(ix(d), s.replace(main, main.replace('<b>1,760</b>', '<b>9,999</b>')));
 }, 'home: <main> SHA-256');
-// 35. Remove a mobile/desktop <source>.
-negative('N35 (remove a picture source)', function (d) {
-  const s = readF(ix(d)); const main = mainOf(s);
-  writeF(ix(d), s.replace(main, main.replace(/<source\b[^>]*>/, '')));
-}, 'home: every picture/source/img matches golden');
+// 35. Remove a HOME_FEATURED marker.
+negative('N35 (remove a HOME_FEATURED marker)', function (d) {
+  const s = readF(ix(d));
+  writeF(ix(d), s.replace('<!-- HOME_FEATURED_END -->', ''));
+}, 'home: generated-region markers appear in the golden order');
 // 36. Change the hero CTA.
 negative('N36 (change the hero CTA)', function (d) {
   const s = readF(ix(d)); const main = mainOf(s);
