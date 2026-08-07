@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumline — F4a visual direction (prototype, not published)</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="./prototype.css">
+</head>
+<body>
+<div class="proto-flag" role="note">Plumline · F4a visual direction · isolated prototype · not a production page</div>
+
+<!-- 1. NAVIGATION -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <span class="brand" aria-label="Plumline"><span class="brand__mark" aria-hidden="true"></span> Plumline</span>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#solver">Solver</a>
+      <a href="#examples">Examples</a>
+      <a href="#capabilities">Capabilities</a>
+      <a class="nav__cta" href="#solver">Open the solver</a>
+      <label class="visually-hidden" for="lang">Language</label>
+      <select id="lang" class="nav__lang" aria-label="Language">
+        <option>EN</option><option>ES</option><option>PT</option><option>DE</option><option>FR</option>
+      </select>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- 2. HERO + 3. PRODUCT SEQUENCE -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero__grid">
+    <div class="hero__copy">
+      <span class="eyebrow">Spreadsheet optimisation you can check</span>
+      <h1 class="hero__title" id="hero-title">Turn spreadsheet decisions into answers you can check.</h1>
+      <p class="hero__lead">Paste a spreadsheet model or build one in the grid. Plumline finds the best allocation it can prove, then checks it against your own formulas and tells you the status in plain words.</p>
+      <div class="hero__ctas">
+        <a class="btn btn--primary" href="#solver">Open the solver</a>
+        <a class="btn btn--ghost" href="#examples">Explore examples</a>
+      </div>
+      <p class="hero__trust">Runs in your browser. No account. Your model stays on your device.</p>
+    </div>
+
+    <!-- The sequence: problem -> sheet -> interpretation -> answer -> verification.
+         Progressive enhancement: without JS, all five stages are visible and
+         readable. JS turns it into a single-stage interactive preview after init
+         (it hides stages 2-5 itself). Stage selection is a plain group of
+         buttons; the active stage is communicated with aria-current="step".
+         No ARIA tablist (this is not a full tab widget). -->
+    <figure class="seq" data-seq aria-labelledby="seq-cap">
+      <div class="seq__bar">
+        <figcaption class="seq__cap" id="seq-cap">A production plan, solved and checked</figcaption>
+        <span class="seq__preview">Preview</span>
+      </div>
+      <div class="seq__steps" role="group" aria-label="Sequence stages">
+        <button class="seq__step" data-step="0" aria-current="step" type="button"><span class="measure-n">01</span> Spreadsheet model</button>
+        <button class="seq__step" data-step="1" type="button"><span class="measure-n">02</span> Model detected</button>
+        <button class="seq__step" data-step="2" type="button"><span class="measure-n">03</span> Result calculated</button>
+        <button class="seq__step" data-step="3" type="button"><span class="measure-n">04</span> Formulas checked</button>
+        <button class="seq__step" data-step="4" type="button"><span class="measure-n">05</span> Status reported</button>
+      </div>
+
+      <div class="seq__stage" data-stage="0" role="group" aria-label="Spreadsheet model">
+        <table class="sheet">
+          <thead><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td>Product</td><td>Units</td><td>Profit</td><td>Contribution</td><td>Hours</td><td></td></tr>
+            <tr><td class="num">2</td><td>A</td><td class="num">0</td><td class="num">30</td><td class="formula">=B2*C2</td><td class="num">2</td><td></td></tr>
+            <tr><td class="num">3</td><td>B</td><td class="num">0</td><td class="num">20</td><td class="formula">=B3*C3</td><td class="num">1</td><td></td></tr>
+            <tr><td class="num">4</td><td>C</td><td class="num">0</td><td class="num">48</td><td class="formula">=B4*C4</td><td class="num">3</td><td></td></tr>
+            <tr class="total"><td class="num">6</td><td>Total profit</td><td></td><td></td><td class="formula">=SUM(D2:D4)</td><td></td><td></td></tr>
+            <tr class="total"><td class="num">7</td><td>Total hours</td><td></td><td></td><td class="formula">=SUMPRODUCT(B2:B4,E2:E4)</td><td class="mathsym">&#8804;</td><td class="num">100</td></tr>
+            <tr class="total"><td class="num">8</td><td>Units of B</td><td></td><td></td><td class="formula">=B3</td><td class="mathsym">&#8804;</td><td class="num">40</td></tr>
+          </tbody>
+        </table>
+        <p class="stage-note">A real spreadsheet: products, profit per unit, hour limits, all as ordinary formulas.</p>
+      </div>
+
+      <div class="seq__stage" data-stage="1" role="group" aria-label="Model detected">
+        <p><span class="tag">Continuous &middot; maximise</span></p>
+        <p class="stage-note">Plumline reads the objective to maximise (<span class="mono">Total profit</span>) and the constraints to respect (<span class="mono">Total hours <span class="mathsym">&#8804;</span> 100</span>, <span class="mono">Units of B <span class="mathsym">&#8804;</span> 40</span>).</p>
+      </div>
+
+      <div class="seq__stage" data-stage="2" role="group" aria-label="Result calculated">
+        <p class="measure-n">Objective (profit)</p>
+        <p class="result-figure">1,760</p>
+        <p class="stage-note">The best allocation within every limit.</p>
+      </div>
+
+      <div class="seq__stage" data-stage="3" role="group" aria-label="Formulas checked">
+        <div class="receipt__row"><span class="receipt__k">Objective</span><span class="receipt__v">recalculated from =SUM(D2:D4)</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="receipt__row"><span class="receipt__k">Total hours</span><span class="receipt__v">100 <span class="mathsym">&#8804;</span> 100</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="receipt__row"><span class="receipt__k">Units of B</span><span class="receipt__v">40 <span class="mathsym">&#8804;</span> 40</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <p class="stage-note">Every constraint recalculated from your own formulas and satisfied.</p>
+      </div>
+
+      <div class="seq__stage" data-stage="4" role="group" aria-label="Status reported">
+        <p><span class="tag tag--true">Optimal solution proven</span></p>
+        <p class="stage-note">The objective was checked against your formula and every constraint recalculated and satisfied.</p>
+      </div>
+
+      <div class="seq__controls">
+        <button class="seq__btn" type="button" data-seq-toggle data-label-play="Play" data-label-pause="Pause" aria-label="Play or pause the sequence">Play</button>
+        <div class="seq__dots" role="group" aria-label="Jump to stage">
+          <button class="seq__dot" data-step="0" type="button" aria-current="step" aria-label="Stage 1: Spreadsheet model"></button>
+          <button class="seq__dot" data-step="1" type="button" aria-label="Stage 2: Model detected"></button>
+          <button class="seq__dot" data-step="2" type="button" aria-label="Stage 3: Result calculated"></button>
+          <button class="seq__dot" data-step="3" type="button" aria-label="Stage 4: Formulas checked"></button>
+          <button class="seq__dot" data-step="4" type="button" aria-label="Stage 5: Status reported"></button>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- 4. TRUST BAR -->
+<section class="trustbar" aria-label="Why Plumline">
+  <div class="wrap trustbar__in">
+    <span class="trustbar__item"><span class="trustbar__check" aria-hidden="true">&#10003;</span> Runs in your browser</span>
+    <span class="trustbar__item"><span class="trustbar__check" aria-hidden="true">&#10003;</span> No account required</span>
+    <span class="trustbar__item"><span class="trustbar__check" aria-hidden="true">&#10003;</span> Your model stays on your device</span>
+    <span class="trustbar__item"><span class="trustbar__check" aria-hidden="true">&#10003;</span> Free to use</span>
+    <span class="trustbar__item"><span class="trustbar__check" aria-hidden="true">&#10003;</span> Five languages</span>
+  </div>
+</section>
+
+<!-- 5+6. EXAMPLES: featured + secondary -->
+<section class="section" id="examples" aria-labelledby="ex-title">
+  <div class="wrap">
+    <div class="section__label">
+      <div><span class="eyebrow">Examples</span><h2 id="ex-title" style="margin-top:12px">Ready-to-solve models.</h2></div>
+      <span class="measure-n">9 today &middot; room for 60</span>
+    </div>
+    <div class="ex-grid">
+      <article class="card card--featured">
+        <div class="card__meta">
+          <span class="meta-chip meta-chip--brass">Continuous &middot; maximise</span>
+          <span class="diff" aria-label="Difficulty: 1 of 3"><span class="diff__pip" data-on="true" aria-hidden="true"></span><span class="diff__pip" aria-hidden="true"></span><span class="diff__pip" aria-hidden="true"></span></span>
+        </div>
+        <h3 class="card__title">Production plan</h3>
+        <p class="card__desc">Maximise profit within available production hours. Opens in the solver with its objective, variable types and limits already set, then change the numbers to fit your own problem.</p>
+        <table class="sheet" style="margin:8px 0">
+          <tbody>
+            <tr><td>Product</td><td class="num">Profit</td><td class="num">Hours</td></tr>
+            <tr><td>A</td><td class="num">30</td><td class="num">2</td></tr>
+            <tr><td>B</td><td class="num">20</td><td class="num">1</td></tr>
+            <tr><td>C</td><td class="num">48</td><td class="num">3</td></tr>
+          </tbody>
+        </table>
+        <a class="card__action" href="#solver">Open in the solver</a>
+      </article>
+
+      <article class="card">
+        <div class="card__meta"><span class="meta-chip">Integer &middot; minimise</span></div>
+        <h3 class="card__title">Workforce scheduling</h3>
+        <p class="card__desc">Minimise staff while covering daily demand.</p>
+        <a class="card__action" href="#solver">Open in the solver</a>
+      </article>
+
+      <article class="card">
+        <div class="card__meta"><span class="meta-chip">Binary &middot; maximise</span></div>
+        <h3 class="card__title">Project selection</h3>
+        <p class="card__desc">Pick the mix of projects with the best return under a budget.</p>
+        <a class="card__action" href="#solver">Open in the solver</a>
+      </article>
+
+      <article class="card">
+        <div class="card__meta"><span class="meta-chip">Continuous &middot; minimise</span></div>
+        <h3 class="card__title">Cheapest feed blend</h3>
+        <p class="card__desc">Minimise cost while meeting nutrient minimums.</p>
+        <a class="card__action" href="#solver">Open in the solver</a>
+      </article>
+
+      <article class="card">
+        <div class="card__meta"><span class="meta-chip">Mixed &middot; minimise</span></div>
+        <h3 class="card__title">Supplier activation</h3>
+        <p class="card__desc">Choose which suppliers to open and how much to order.</p>
+        <a class="card__action" href="#solver">Open in the solver</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 7. VERIFICATION RECEIPT — primary proof object -->
+<section class="section section--deep" aria-labelledby="rec-title">
+  <div class="wrap receipt-split">
+    <div class="plumb">
+      <span class="eyebrow" style="color:var(--brass-hi)">The proof</span>
+      <h2 id="rec-title" style="margin:12px 0 16px">The answer arrives with its receipt.</h2>
+      <p style="color:rgba(245,242,235,.85);max-width:42ch">Plumline does not stop at a number. It hands you the check as well: the objective recalculated from your own formula, every constraint recomputed, and an honest status. The receipt is the point.</p>
+    </div>
+    <div class="receipt" role="group" aria-label="Verification receipt">
+      <div class="receipt__head">
+        <div class="receipt__status">
+          <span class="receipt__seal" aria-hidden="true">&#10003;</span>
+          <span class="receipt__statusText">Optimal solution proven</span>
+        </div>
+        <p class="receipt__sub">production-plan &middot; continuous &middot; maximise</p>
+      </div>
+      <div class="receipt__body">
+        <div class="receipt__row"><span class="receipt__k">Objective</span><span class="receipt__v">profit = 1,760</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="receipt__row"><span class="receipt__k">Decisions</span><span class="receipt__v">A=20 B=40 C=6.67</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="receipt__row"><span class="receipt__k">Total hours</span><span class="receipt__v">100 <span class="mathsym">&#8804;</span> 100</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="receipt__row"><span class="receipt__k">Units of B</span><span class="receipt__v">40 <span class="mathsym">&#8804;</span> 40</span><span class="receipt__check" aria-hidden="true">&#10003;</span></div>
+      </div>
+      <div class="receipt__foot">Recalculated from your formulas in your browser &middot; nothing uploaded</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. CAPABILITIES MATRIX -->
+<section class="section section--paper2" id="capabilities" aria-labelledby="cap-title">
+  <div class="wrap">
+    <div class="section__label"><div><span class="eyebrow">Capabilities</span><h2 id="cap-title" style="margin-top:12px">What Plumline solves, and checks.</h2></div></div>
+    <div class="matrix-scroll" tabindex="0" role="region" aria-label="Capabilities matrix (scrolls horizontally on narrow screens)">
+      <table class="matrix matrix--min">
+        <thead><tr><th>Model type</th><th>Solved</th><th>Objective checked</th><th>Constraints checked</th></tr></thead>
+        <tbody>
+          <tr><td>Continuous</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Integer</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Binary</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Mixed-integer</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Non-linear</td><td class="no">Rejected, not guessed</td><td class="no">n/a</td><td class="no">n/a</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="stage-note" style="margin-top:16px">Objective and constraints must be linear. Non-linear terms are rejected rather than approximated silently.</p>
+  </div>
+</section>
+
+<!-- 9. SOLVER TOOLBAR (grouped by function; preview, not an operable toolbar) -->
+<section class="section" id="solver" aria-labelledby="tb-title">
+  <div class="wrap">
+    <div class="section__label"><div><span class="eyebrow">Solver &middot; preview</span><h2 id="tb-title" style="margin-top:12px">A toolbar organised by what you are doing.</h2></div><span class="seq__preview">Preview</span></div>
+    <!-- Static preview of a possible grouping, NOT an operable toolbar. The
+         children are non-interactive labels, so no role="toolbar" is used (that
+         would tell assistive tech an operable toolbar exists). It is a figure
+         with a caption. -->
+    <figure class="toolbar" aria-labelledby="tb-fig-cap">
+      <span class="tgroup"><span class="tgroup__label">Structure</span><span class="tbtn">Row +</span><span class="tbtn">Col +</span></span>
+      <span class="tgroup"><span class="tgroup__label">Import</span><span class="tbtn">Paste</span><span class="tbtn">CSV</span></span>
+      <span class="tgroup"><span class="tgroup__label">Variables</span><span class="tbtn">Types</span><span class="tbtn">Bounds</span></span>
+      <span class="tgroup"><span class="tgroup__label">History</span><span class="tbtn">Undo</span></span>
+      <span class="tgroup"><span class="tgroup__label">View</span><span class="tbtn">Fit</span></span>
+      <span class="tgroup"><span class="tgroup__label">Solve</span><span class="tbtn tbtn--solve">Solve &amp; check</span></span>
+    </figure>
+    <figcaption id="tb-fig-cap" class="stage-note" style="margin-top:12px">Grouping only, shown as a static preview. No new solver behaviour is introduced in this prototype.</figcaption>
+  </div>
+</section>
+
+<!-- 10+11. STATES: optimal proven + search incomplete -->
+<section class="section section--paper2" aria-labelledby="st-title">
+  <div class="wrap">
+    <div class="section__label"><div><span class="eyebrow">Solve status</span><h2 id="st-title" style="margin-top:12px">A status that means something.</h2></div></div>
+    <div class="states">
+      <article class="state state--ok" aria-label="Status: optimal solution proven">
+        <div class="state__top"><span class="state__band" aria-hidden="true"></span><span class="state__name">Optimal solution proven</span><span class="state__mark">Optimal</span></div>
+        <div class="state__body">
+          <p class="state__meaning">The best allocation within every limit, and the optimality was proven, not estimated.</p>
+          <p class="state__next"><b>Next:</b> export the result, or change a number and solve again.</p>
+          <p class="state__evidence">objective 1,760 &middot; hours 100&#8804;100 &middot; B 40&#8804;40</p>
+        </div>
+      </article>
+      <article class="state state--incomplete" aria-label="Status: search incomplete">
+        <div class="state__top"><span class="state__band" aria-hidden="true"></span><span class="state__name">Search incomplete</span><span class="state__mark">Incomplete</span></div>
+        <div class="state__body">
+          <p class="state__meaning">A feasible answer was found, but the search stopped before optimality could be proven within the limits.</p>
+          <p class="state__next"><b>Next:</b> simplify the model, or solve again to continue the search.</p>
+          <p class="state__evidence">best so far 1,712 &middot; gap not closed &middot; feasible</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 12. CTA -->
+<section class="section section--deep" aria-labelledby="cta-title">
+  <div class="wrap finalcta">
+    <span class="eyebrow" style="color:var(--brass-hi)">Start</span>
+    <h2 class="finalcta__title" id="cta-title" style="margin-top:12px">Put a number in front of your next decision.</h2>
+    <p class="finalcta__p">Free. The online solver runs in your browser and uploads nothing.</p>
+    <a class="btn btn--primary" href="#solver">Open the solver</a>
+  </div>
+</section>
+</main>
+
+<!-- 13. FOOTER -->
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="foot__col">
+      <span class="brand" style="color:var(--cream)"><span class="brand__mark" aria-hidden="true"></span> Plumline</span>
+      <p style="font-size:.82rem;max-width:30ch;margin-top:8px">Spreadsheet optimisation you can check. Runs in your browser.</p>
+    </div>
+    <!-- Footer column titles are labels, not document headings (no H4), so the
+         heading order stays H1 -> H2 with no skipped levels. -->
+    <div class="foot__col"><p class="foot__label">Use it</p><a href="#solver">Online solver</a><a href="#examples">Examples</a></div>
+    <div class="foot__col"><p class="foot__label">Learn</p><a href="#capabilities">Capabilities</a><a href="#examples">Examples</a></div>
+    <div class="foot__col"><p class="foot__label">On this prototype</p><span class="foot__note">Guide, About, Privacy and Terms are production pages, not part of this isolated prototype.</span></div>
+  </div>
+</footer>
+
+<style>.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}</style>
+<script src="./sequence.js"></script>
+</body>
+</html>
