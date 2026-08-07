@@ -22,7 +22,8 @@ const SUITES = [
   'tests_canonical_catalogue_negative',
   'tests_canonical_catalogue_needle_audit',
   'tests_f2_visual_nav',
-  'tests_f3a_hero', 'tests_f3b_home_sections', 'tests_f3c_home_sections', 'tests_f3c_home_sections_negative'
+  'tests_f3a_hero', 'tests_f3b_home_sections', 'tests_f3c_home_sections', 'tests_f3c_home_sections_negative',
+  'tests_f4a_visual_direction', 'tests_f4a_visual_direction_negative'
 ];
 
 module.exports = SUITES;
