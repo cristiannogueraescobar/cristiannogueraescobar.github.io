@@ -1,0 +1,43 @@
+/* ============================================================================
+   F4b showcase — ORGANISATIONAL CSS ONLY
+   ----------------------------------------------------------------------------
+   This file styles ONLY the laboratory scaffolding (section spacing, spec grid,
+   swatches, labels). Its contract is:
+     - it does NOT redefine any design-system token or component;
+     - it introduces NO brand colours (colours come from --pl-* semantic roles);
+     - it MAY use small local measurements (e.g. 1px, 56px, 240px) purely to lay
+       out the laboratory — these are scaffolding geometry, not design tokens;
+     - it does NOT duplicate any design-system component or decision.
+   All tokens and components come from the canonical source imported in the HTML:
+     ../../src/shared/design-system/index.css
+   ========================================================================== */
+
+.lab { padding-block:var(--pl-space-12); }
+.lab__header { border-bottom:1px solid var(--pl-color-border); padding-bottom:var(--pl-space-6); margin-bottom:var(--pl-space-10); }
+.lab__flag { font-family:var(--pl-font-family-data); font-size:var(--pl-size-tick);
+  letter-spacing:0.12em; text-transform:uppercase; color:var(--pl-color-process-text); }
+.lab__section { padding-block:var(--pl-space-10); border-top:1px solid var(--pl-color-border-subtle); }
+.lab__section-title { display:flex; align-items:baseline; gap:var(--pl-space-3); margin-bottom:var(--pl-space-6); }
+.lab__n { font-family:var(--pl-font-family-data); font-size:var(--pl-size-small); color:var(--pl-color-text-faint); }
+
+/* Spec grid — arranges specimens without imposing component styles. */
+.lab__grid { display:grid; gap:var(--pl-space-6); grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); }
+.lab__row { display:flex; flex-wrap:wrap; gap:var(--pl-space-4); align-items:center; }
+.lab__stack { display:flex; flex-direction:column; gap:var(--pl-space-4); }
+
+/* Swatch — a token colour chip for the colour-roles section. */
+.lab__swatch { display:flex; flex-direction:column; gap:6px; }
+.lab__chip { height:56px; border-radius:var(--pl-radius-control); border:1px solid var(--pl-color-border); }
+.lab__meta { font-family:var(--pl-font-family-data); font-size:var(--pl-size-tick); color:var(--pl-color-text-muted); }
+
+/* Spacing ruler — visualises the spacing scale. */
+.lab__bar { background:var(--pl-color-process-tint); height:16px; border-radius:2px; }
+
+/* Language stress table. */
+.lab__lang { width:100%; border-collapse:collapse; }
+.lab__lang th, .lab__lang td { text-align:left; padding:var(--pl-space-3); vertical-align:top;
+  border-bottom:1px solid var(--pl-color-border-subtle); font-size:var(--pl-size-small); }
+.lab__lang th { font-family:var(--pl-font-family-data); font-size:var(--pl-size-tick);
+  text-transform:uppercase; letter-spacing:0.06em; color:var(--pl-color-text-muted); }
+
+.lab__note { font-family:var(--pl-font-family-data); font-size:var(--pl-size-tick); color:var(--pl-color-text-faint); }

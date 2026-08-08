@@ -1,0 +1,33 @@
+/* ============================================================================
+   Plumline design system — 08 INSTRUMENT LANGUAGE
+   ----------------------------------------------------------------------------
+   Small, Plumline-specific "measurement instrument" details. Deliberately
+   SUBTLE — supporting marks, not a technical blueprint on every section. Used
+   sparingly to reinforce the "editorial decision instrument" identity.
+   ========================================================================== */
+
+/* Measurement label — a mono eyebrow that reads like a gauge reading. */
+.pl-measure-label { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  letter-spacing:var(--pl-text-tracking-label); text-transform:uppercase; color:var(--pl-color-process-text);
+  display:inline-flex; align-items:center; gap:8px; }
+.pl-measure-label::before { content:""; width:18px; height:1px; background:var(--pl-color-process); flex:none; }
+
+/* Calibration marks — a thin ruled strip (decorative, aria-hidden in use). */
+.pl-calibration { height:8px; background-image:repeating-linear-gradient(
+  to right, var(--pl-color-border) 0 1px, transparent 1px 8px); }
+.pl-calibration--fine { background-image:repeating-linear-gradient(
+  to right, var(--pl-color-border-subtle) 0 1px, transparent 1px 5px); }
+
+/* Plumb rule / divider — a vertical hairline with a weight at the bottom. */
+.pl-plumb { position:relative; padding-left:var(--pl-pad-inset); }
+.pl-plumb::before { content:""; position:absolute; left:0; top:0; bottom:14px; width:1px; background:var(--pl-color-border-strong); }
+.pl-plumb::after { content:""; position:absolute; left:-3px; bottom:0; width:7px; height:11px;
+  background:var(--pl-color-process); clip-path:polygon(50% 100%,0 0,100% 0); }
+
+/* Figure identifier — "Fig. 01" style caption tag. */
+.pl-figure-id { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  letter-spacing:0.08em; text-transform:uppercase; color:var(--pl-color-text-faint); }
+
+/* Technical annotation — a small mono note tied to a figure/value. */
+.pl-annotation { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  color:var(--pl-color-text-faint); border-left:2px solid var(--pl-color-process-tint); padding-left:8px; }

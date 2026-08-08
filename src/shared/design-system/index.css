@@ -1,0 +1,34 @@
+/* ============================================================================
+   Plumline design system — CANONICAL ENTRY POINT
+   ----------------------------------------------------------------------------
+   This is the SINGLE canonical source of the Plumline design system. Import
+   THIS file (or the individual layers, in this order) to get the whole system.
+   The showcase (design-review/f4b/) imports these same files; production will
+   import them in F9/F10. There is no second copy anywhere.
+
+   Dependency direction (never circular):
+     01 primitives   — raw values, depend on nothing
+     02 semantic     — aliases/compositions derived from primitives
+     05 fonts        — @font-face (self-hosted), depend on nothing
+     03 base         — scoped reset + type roles, consume semantic roles
+     04 layout       — layout primitives; consume semantic roles, plus the
+                       primitive layout MEASUREMENTS directly (documented exception)
+     06 components   — consume semantic roles (no direct primitive tokens, no raw
+                       brand colour); small local geometry may stay local
+     07 forms        — consume semantic roles (same policy as components)
+     08 instrument   — consume semantic roles (same policy as components)
+     09 utilities    — consume semantic roles (same policy as components)
+
+   F4b scope: tokens + reusable components. NOT motion (F4c), NOT the Home
+   redesign (F9), NOT the public/internal page redesign (F10).
+   ========================================================================== */
+
+@import url('./01-primitives.css');
+@import url('./02-semantic.css');
+@import url('./05-fonts.css');
+@import url('./03-base.css');
+@import url('./04-layout.css');
+@import url('./06-components.css');
+@import url('./07-forms.css');
+@import url('./08-instrument.css');
+@import url('./09-utilities.css');

@@ -1,0 +1,21 @@
+/* ============================================================================
+   Plumline design system — 09 UTILITIES
+   ----------------------------------------------------------------------------
+   A tiny set of utilities. No sprawling utility framework. The most important
+   one is .pl-mathsym: the technical operators (≤ ≥ →) are NOT in the Newsreader/
+   Manrope subsets, so any element carrying them must render from the mono/system
+   stack, never from an accidental fallback.
+   ========================================================================== */
+
+/* Technical operators (≤ ≥ →) from the mono/system stack — deliberate. */
+.pl-mathsym { font-family:var(--pl-font-family-data); }
+
+/* Screen-reader-only (visually hidden but accessible). */
+.pl-visually-hidden { position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
+/* Inline tabular numerals for aligned figures. */
+.pl-tnum { font-variant-numeric:tabular-nums; }
+
+/* A hairline divider following the flat, structural aesthetic. */
+.pl-divider { height:1px; background:var(--pl-color-border); border:0; margin:0; }

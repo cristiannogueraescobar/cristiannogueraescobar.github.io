@@ -1,0 +1,131 @@
+/* ============================================================================
+   Plumline design system — 01 PRIMITIVE TOKENS
+   ----------------------------------------------------------------------------
+   Raw, context-free values. These are the ONLY place literal colours, sizes and
+   scales are defined. Nothing in the system should use a hex/rgb value that is
+   not declared here. Components must NOT consume these directly — they consume
+   the SEMANTIC tokens in 02-semantic.css, which derive aliases/compositions from
+   these.
+
+   Namespace: --pl-*  (avoids collision with the legacy assets/plumline.css
+   tokens, which keep their own names and are untouched by F4b).
+
+   Palette is the approved Plumline identity (cream / deep green / brass /
+   verification green), refined to meet WCAG AA at the semantic layer.
+   ========================================================================== */
+
+:root {
+  /* ---- Cream / paper scale (editorial ground) --------------------------- */
+  --pl-cream-50:#FBF9F4;
+  --pl-cream-100:#F5F2EB;   /* canonical paper */
+  --pl-cream-200:#EFEBE0;
+  --pl-cream-300:#E9E5DA;
+  --pl-cream-400:#D8D4C7;
+
+  /* ---- Deep green scale (authority) ------------------------------------- */
+  --pl-green-900:#12211A;   /* deep field: hero / footer / inverse ground */
+  --pl-green-800:#1B3026;
+  --pl-green-700:#2A3F34;
+  --pl-green-600:#1E7A54;   /* verification green base */
+  --pl-green-500:#2FA06E;   /* verification green bright */
+  --pl-green-100:#E2F0E8;   /* verification tint */
+
+  /* ---- Brass scale (the instrument: process / measurement / selection) --- */
+  --pl-brass-700:#7A5518;   /* AA brass text on light grounds (>=4.9:1) */
+  --pl-brass-500:#B5822E;   /* brass base (fills, marks) */
+  --pl-brass-300:#D8A94A;   /* brass highlight (on dark) */
+  --pl-brass-100:#F2E7CF;   /* brass tint */
+
+  /* ---- Neutral ink scale ------------------------------------------------ */
+  --pl-ink-900:#14170F;     /* primary ink */
+  --pl-ink-700:#3B3F33;     /* secondary ink */
+  --pl-ink-500:#5A5E50;     /* muted ink */
+  --pl-ink-400:#68695E;     /* faint ink */
+
+  /* ---- Warning (honest, not alarmist) — amber --------------------------- */
+  --pl-amber-700:#8E5A14;   /* AA amber text on amber tint */
+  --pl-amber-100:#F6ECD9;   /* amber tint */
+
+  /* ---- Error — used only where a real error state needs it -------------- */
+  --pl-red-700:#8C2A1E;     /* AA red text on red tint */
+  --pl-red-600:#B23B2C;     /* red base */
+  --pl-red-100:#F7EEEB;     /* red tint */
+
+  /* ---- Pure ------------------------------------------------------------- */
+  --pl-white:#FFFFFF;
+
+  /* ---- Type: families --------------------------------------------------- */
+  /* Editorial serif = Newsreader (see 05-fonts.css); body/UI = Manrope;
+     data/formulas/technical operators = the existing system mono stack. The
+     stacks name the webfont first, then the metric-matched fallback, then the
+     platform stack. */
+  --pl-family-serif:'Newsreader','Newsreader Fallback',ui-serif,Georgia,'Times New Roman',serif;
+  --pl-family-sans:'Manrope','Manrope Fallback',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --pl-family-mono:ui-monospace,'SF Mono','Cascadia Mono','Segoe UI Mono','Roboto Mono',Menlo,Consolas,monospace;
+
+  /* ---- Type: weights (variable-font axis values) ------------------------ */
+  --pl-weight-regular:420;
+  --pl-weight-medium:500;
+  --pl-weight-semibold:560;
+  --pl-weight-bold:640;
+
+  /* ---- Type: size ramp (clamp() where fluid helps; rem otherwise) ------- */
+  --pl-size-display:clamp(2.4rem,1.8rem + 2.6vw,3.6rem);
+  --pl-size-h1:clamp(2.0rem,1.5rem + 1.8vw,2.8rem);
+  --pl-size-h2:clamp(1.4rem,1.2rem + 0.85vw,1.8rem);
+  --pl-size-h3:clamp(1.1rem,1.02rem + 0.35vw,1.26rem);
+  --pl-size-body:1rem;
+  --pl-size-compact:0.9375rem;
+  --pl-size-small:0.875rem;
+  --pl-size-label:0.75rem;
+  --pl-size-tick:0.6875rem;
+
+  /* ---- Type: line-height & tracking ------------------------------------- */
+  --pl-leading-tight:1.06;
+  --pl-leading-heading:1.2;
+  --pl-leading-body:1.6;
+  --pl-tracking-display:-0.028em;
+  --pl-tracking-heading:-0.018em;
+  --pl-tracking-label:0.08em;
+  --pl-tracking-eyebrow:0.16em;
+
+  /* ---- Spacing scale (4px base) ----------------------------------------- */
+  --pl-space-0:0;
+  --pl-space-1:4px;
+  --pl-space-2:8px;
+  --pl-space-3:12px;
+  --pl-space-4:16px;
+  --pl-space-5:20px;
+  --pl-space-6:24px;
+  --pl-space-8:32px;
+  --pl-space-10:40px;
+  --pl-space-12:48px;
+  --pl-space-16:64px;
+  --pl-space-20:80px;
+
+  /* ---- Border widths ---------------------------------------------------- */
+  --pl-border-hairline:1px;
+  --pl-border-strong:2px;
+
+  /* ---- Radii (small set — Plumline stays flat, not floating) ------------ */
+  --pl-radius-sm:6px;
+  --pl-radius-md:10px;
+  --pl-radius-pill:999px;
+
+  /* ---- Shadows (very controlled; structure over elevation) -------------- */
+  --pl-shadow-none:none;
+  --pl-shadow-card:0 1px 2px rgba(18,33,26,.05),0 10px 26px -18px rgba(18,33,26,.22);
+
+  /* ---- Layout measurements ---------------------------------------------- */
+  --pl-width-edge:1200px;       /* wide content edge */
+  --pl-width-reading:68ch;      /* comfortable prose measure */
+  --pl-width-data:960px;        /* product/data blocks */
+  --pl-rail:44px;               /* page gutter (desktop) */
+  --pl-rail-sm:20px;            /* page gutter (mobile) */
+  --pl-tap-min:44px;            /* WCAG 2.2 comfortable target */
+  --pl-tap-min-strict:24px;     /* WCAG 2.2 minimum target */
+
+  /* ---- Opacity ---------------------------------------------------------- */
+  --pl-opacity-muted:78%;       /* muted-on-inverse text mix amount (color-mix) */
+  --pl-opacity-disabled:.55;    /* disabled controls */
+}
