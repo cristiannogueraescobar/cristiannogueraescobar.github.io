@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumline — F4b design system (component laboratory, not published)</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- CANONICAL SOURCE: the showcase consumes the real design system, it does not
+     duplicate it. Only showcase.css below is showcase-specific scaffolding. -->
+<link rel="stylesheet" href="../../src/shared/design-system/index.css">
+<link rel="stylesheet" href="./showcase.css">
+</head>
+<body class="pl-root">
+<div class="pl-container">
+<header class="lab lab__header">
+  <p class="lab__flag">Plumline · F4b · design system component laboratory · not a production page</p>
+  <h1 class="pl-display">The Plumline component system.</h1>
+  <p class="pl-body pl-text-secondary" style="max-width:60ch;margin-top:12px">Every specimen below is rendered from the single canonical source in <span class="pl-mono">src/shared/design-system/</span>. This page is a laboratory, not a landing page: it exists to prove the tokens and components are reusable, accessible and responsive before any public page adopts them.</p>
+</header>
+
+<main class="pl-stack pl-stack--loose">
+
+<!-- 1. TYPOGRAPHY -->
+<section class="lab__section" aria-labelledby="s1">
+  <div class="lab__section-title"><span class="lab__n">01</span><h2 class="pl-h2" id="s1">Typography</h2></div>
+  <div class="lab__stack">
+    <p class="pl-display">Answers you can check</p>
+    <p class="pl-h1">Turn a spreadsheet into a checked answer</p>
+    <p class="pl-h2">The answer arrives with its receipt</p>
+    <p class="pl-h3">Objective, constraints, verification</p>
+    <p class="pl-body">Body text (Manrope): Plumline finds the best allocation it can prove, then checks it against your own formulas and reports the status in plain words.</p>
+    <p class="pl-compact">Compact UI text for dense controls and secondary information.</p>
+    <p class="pl-small pl-text-muted">Small muted metadata: production-plan · continuous · maximise.</p>
+    <p class="pl-label pl-text-muted">Label / eyebrow</p>
+    <p class="pl-mono">mono/data: objective = 1,760 · hours 100 <span class="pl-mathsym">&#8804;</span> 100 · B 40 <span class="pl-mathsym">&#8804;</span> 40</p>
+  </div>
+</section>
+
+<!-- 2. COLOUR ROLES -->
+<section class="lab__section" aria-labelledby="s2">
+  <div class="lab__section-title"><span class="lab__n">02</span><h2 class="pl-h2" id="s2">Colour roles</h2></div>
+  <div class="lab__grid">
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-bg-canvas)"></div><span class="lab__meta">bg-canvas</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-bg-surface)"></div><span class="lab__meta">bg-surface</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-bg-inverse)"></div><span class="lab__meta">bg-inverse</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-action-primary)"></div><span class="lab__meta">action-primary (brass)</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-verified)"></div><span class="lab__meta">verified</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-warning)"></div><span class="lab__meta">warning</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-error)"></div><span class="lab__meta">error</span></div>
+    <div class="lab__swatch"><div class="lab__chip" style="background:var(--pl-color-process-tint)"></div><span class="lab__meta">process-tint</span></div>
+  </div>
+</section>
+
+<!-- 3. SPACING / RHYTHM -->
+<section class="lab__section" aria-labelledby="s3">
+  <div class="lab__section-title"><span class="lab__n">03</span><h2 class="pl-h2" id="s3">Spacing &amp; rhythm</h2></div>
+  <div class="lab__stack">
+    <div class="lab__bar" style="width:var(--pl-space-2)"></div>
+    <div class="lab__bar" style="width:var(--pl-space-4)"></div>
+    <div class="lab__bar" style="width:var(--pl-space-6)"></div>
+    <div class="lab__bar" style="width:var(--pl-space-8)"></div>
+    <div class="lab__bar" style="width:var(--pl-space-12)"></div>
+    <div class="lab__bar" style="width:var(--pl-space-16)"></div>
+    <p class="lab__note">4px base scale: 8 · 16 · 24 · 32 · 48 · 64</p>
+  </div>
+</section>
+
+<!-- 4. BORDERS / RADII -->
+<section class="lab__section" aria-labelledby="s4">
+  <div class="lab__section-title"><span class="lab__n">04</span><h2 class="pl-h2" id="s4">Borders &amp; radii</h2></div>
+  <div class="lab__row">
+    <div class="pl-surface pl-surface--flat" style="padding:16px">flat hairline surface</div>
+    <div class="pl-surface pl-surface--raised" style="padding:16px">raised (controlled shadow)</div>
+    <div class="pl-surface pl-surface--sub" style="padding:16px;border-radius:var(--pl-radius-control)">radius sm</div>
+    <div class="pl-surface" style="padding:16px;border-radius:var(--pl-radius-surface)">radius md</div>
+  </div>
+  <p class="lab__note" style="margin-top:12px">Plumline stays flat and structural: hairlines, two radii, one controlled shadow. No glassmorphism.</p>
+</section>
+
+<!-- 5. LAYOUT PRIMITIVES -->
+<section class="lab__section" aria-labelledby="s5">
+  <div class="lab__section-title"><span class="lab__n">05</span><h2 class="pl-h2" id="s5">Layout primitives</h2></div>
+  <div class="pl-stack">
+    <div class="pl-split pl-split--editorial">
+      <div class="pl-surface pl-surface--sub" style="padding:16px">split · editorial (1 : 1.1)</div>
+      <div class="pl-surface pl-surface--sub" style="padding:16px">product / data area</div>
+    </div>
+    <div class="pl-grid" style="--pl-grid-min:160px">
+      <div class="pl-surface pl-surface--sub" style="padding:12px">grid auto-fit</div>
+      <div class="pl-surface pl-surface--sub" style="padding:12px">grid auto-fit</div>
+      <div class="pl-surface pl-surface--sub" style="padding:12px">grid auto-fit</div>
+    </div>
+    <div class="pl-cluster">
+      <span class="pl-chip">Container</span><span class="pl-chip">Stack</span><span class="pl-chip">Cluster</span>
+      <span class="pl-chip">Split</span><span class="pl-chip">Grid</span><span class="pl-chip">Rail</span><span class="pl-chip">Bleed</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6. BUTTONS -->
+<section class="lab__section" aria-labelledby="s6">
+  <div class="lab__section-title"><span class="lab__n">06</span><h2 class="pl-h2" id="s6">Buttons</h2></div>
+  <div class="lab__row">
+    <button class="pl-button pl-button--primary" type="button">Open the solver</button>
+    <button class="pl-button pl-button--secondary" type="button">Explore examples</button>
+    <button class="pl-button pl-button--ghost" type="button">Learn more</button>
+    <button class="pl-button pl-button--primary" type="button" disabled>Solving…</button>
+  </div>
+</section>
+
+<!-- 7. LINKS -->
+<section class="lab__section" aria-labelledby="s7">
+  <div class="lab__section-title"><span class="lab__n">07</span><h2 class="pl-h2" id="s7">Links</h2></div>
+  <div class="lab__stack">
+    <p class="pl-body">An <a class="pl-link" href="#s1">inline link</a> inside body text.</p>
+    <a class="pl-action-link" href="../../solver.html">Open solver</a>
+    <div class="pl-inverse" style="padding:16px;border-radius:var(--pl-radius-surface)"><a class="pl-link" href="#s2">Inverse link on deep ground</a></div>
+  </div>
+</section>
+
+<!-- 8. FORM CONTROLS -->
+<section class="lab__section" aria-labelledby="s8">
+  <div class="lab__section-title"><span class="lab__n">08</span><h2 class="pl-h2" id="s8">Form controls</h2></div>
+  <div class="pl-grid" style="--pl-grid-min:240px">
+    <div class="pl-field">
+      <label class="pl-field__label" for="f-name">Model name</label>
+      <input class="pl-input" id="f-name" type="text" placeholder="production-plan" aria-describedby="f-name-help">
+      <span class="pl-field__help" id="f-name-help">Used to label the verification receipt.</span>
+    </div>
+    <div class="pl-field">
+      <label class="pl-field__label" for="f-search">Search examples</label>
+      <div class="pl-search"><span class="pl-search__icon" aria-hidden="true"></span><input class="pl-input" id="f-search" type="search" placeholder="Search examples"></div>
+    </div>
+    <div class="pl-field">
+      <label class="pl-field__label" for="f-type">Objective</label>
+      <select class="pl-select" id="f-type"><option>Maximise</option><option>Minimise</option></select>
+    </div>
+    <div class="pl-field">
+      <label class="pl-field__label" for="f-err">Step limit</label>
+      <input class="pl-input" id="f-err" type="text" value="abc" aria-invalid="true" aria-describedby="f-err-msg">
+      <span class="pl-field__error" id="f-err-msg">Enter a whole number.</span>
+    </div>
+    <div class="pl-field">
+      <span class="pl-field__label" id="varlabel">Variable type</span>
+      <div class="lab__row" role="group" aria-labelledby="varlabel">
+        <label class="pl-check"><input type="radio" name="vtype" checked> Continuous</label>
+        <label class="pl-check"><input type="radio" name="vtype"> Integer</label>
+        <label class="pl-check"><input type="radio" name="vtype"> Binary</label>
+      </div>
+    </div>
+    <div class="pl-field">
+      <span class="pl-field__label">Options</span>
+      <label class="pl-check"><input type="checkbox" checked> Recalculate from my formulas</label>
+      <label class="pl-check"><input type="checkbox" disabled> Upload to server (disabled)</label>
+    </div>
+  </div>
+</section>
+
+<!-- 9. METADATA CHIPS -->
+<section class="lab__section" aria-labelledby="s9">
+  <div class="lab__section-title"><span class="lab__n">09</span><h2 class="pl-h2" id="s9">Metadata chips</h2></div>
+  <div class="lab__row">
+    <span class="pl-chip">Continuous</span><span class="pl-chip">Integer</span><span class="pl-chip">Binary</span>
+    <span class="pl-chip">Mixed</span><span class="pl-chip--process pl-chip">Maximise</span><span class="pl-chip">Minimise</span>
+    <span class="pl-difficulty" aria-label="Difficulty 1 of 3"><span class="pl-difficulty__pip" data-on="true"></span><span class="pl-difficulty__pip"></span><span class="pl-difficulty__pip"></span></span>
+  </div>
+</section>
+
+<!-- 10. STATUS BADGES -->
+<section class="lab__section" aria-labelledby="s10">
+  <div class="lab__section-title"><span class="lab__n">10</span><h2 class="pl-h2" id="s10">Status badges</h2></div>
+  <div class="lab__row">
+    <span class="pl-badge pl-badge--proven">Optimal proven</span>
+    <span class="pl-badge pl-badge--feasible">Feasible</span>
+    <span class="pl-badge pl-badge--incomplete">Incomplete</span>
+    <span class="pl-badge pl-badge--infeasible">Infeasible</span>
+    <span class="pl-badge pl-badge--unbounded">Unbounded</span>
+    <span class="pl-badge pl-badge--neutral">Not run</span>
+  </div>
+  <p class="lab__note" style="margin-top:12px">Each badge carries a distinct shape marker, so status is never conveyed by colour alone.</p>
+</section>
+
+<!-- 11. EXAMPLE CARD STANDARD -->
+<section class="lab__section" aria-labelledby="s11">
+  <div class="lab__section-title"><span class="lab__n">11</span><h2 class="pl-h2" id="s11">Example card — standard</h2></div>
+  <div class="pl-grid" style="--pl-grid-min:260px">
+    <article class="pl-example-card">
+      <div class="pl-example-card__meta"><span class="pl-chip">Integer</span><span class="pl-chip--process pl-chip">Minimise</span>
+        <span class="pl-difficulty" aria-label="Difficulty 2 of 3"><span class="pl-difficulty__pip" data-on="true"></span><span class="pl-difficulty__pip" data-on="true"></span><span class="pl-difficulty__pip"></span></span></div>
+      <h3 class="pl-example-card__title">Workforce scheduling</h3>
+      <p class="pl-example-card__question">How few staff can cover every shift's demand?</p>
+      <div class="pl-example-card__foot"><a class="pl-action-link" href="../../solver.html">Open solver</a></div>
+    </article>
+    <article class="pl-example-card">
+      <div class="pl-example-card__meta"><span class="pl-chip">Binary</span><span class="pl-chip--process pl-chip">Maximise</span></div>
+      <h3 class="pl-example-card__title">Project selection</h3>
+      <p class="pl-example-card__question">Which projects give the best return under a budget?</p>
+      <div class="pl-example-card__foot"><a class="pl-action-link" href="../../solver.html">Open solver</a></div>
+    </article>
+  </div>
+</section>
+
+<!-- 12. EXAMPLE CARD FEATURED -->
+<section class="lab__section" aria-labelledby="s12">
+  <div class="lab__section-title"><span class="lab__n">12</span><h2 class="pl-h2" id="s12">Example card — featured</h2></div>
+  <article class="pl-example-card pl-example-card--featured" style="max-width:520px">
+    <div class="pl-example-card__meta"><span class="pl-chip--process pl-chip">Continuous · Maximise</span>
+      <span class="pl-difficulty" aria-label="Difficulty 1 of 3"><span class="pl-difficulty__pip" data-on="true"></span><span class="pl-difficulty__pip"></span><span class="pl-difficulty__pip"></span></span></div>
+    <h3 class="pl-example-card__title">Production plan</h3>
+    <p class="pl-example-card__question">Maximise profit within available production hours.</p>
+    <table class="pl-sheet" aria-label="Production plan preview">
+      <tbody>
+        <tr><td>Product</td><td class="pl-sheet__num">Profit</td><td class="pl-sheet__num">Hours</td></tr>
+        <tr><td>A</td><td class="pl-sheet__num">30</td><td class="pl-sheet__num">2</td></tr>
+        <tr><td>B</td><td class="pl-sheet__num">20</td><td class="pl-sheet__num">1</td></tr>
+        <tr><td>C</td><td class="pl-sheet__num">48</td><td class="pl-sheet__num">3</td></tr>
+      </tbody>
+    </table>
+    <div class="pl-example-card__foot"><a class="pl-action-link" href="../../solver.html">Open solver</a></div>
+  </article>
+</section>
+
+<!-- 13. VERIFICATION RECEIPT -->
+<section class="lab__section" aria-labelledby="s13">
+  <div class="lab__section-title"><span class="lab__n">13</span><h2 class="pl-h2" id="s13">Verification receipt</h2></div>
+  <div class="pl-split pl-split--editorial">
+    <div class="pl-receipt" role="group" aria-label="Verification receipt (light)">
+      <div class="pl-receipt__head">
+        <div class="pl-receipt__status"><span class="pl-receipt__seal" aria-hidden="true">&#10003;</span><span class="pl-receipt__title">Optimal solution proven</span></div>
+        <p class="pl-receipt__sub">production-plan · continuous · maximise</p>
+      </div>
+      <div class="pl-receipt__body">
+        <div class="pl-receipt__row"><span class="pl-receipt__k">Objective</span><span class="pl-receipt__v">profit = 1,760</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="pl-receipt__row"><span class="pl-receipt__k">Decisions</span><span class="pl-receipt__v">A=20 B=40 C=6.67</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="pl-receipt__row"><span class="pl-receipt__k">Total hours</span><span class="pl-receipt__v">100 <span class="pl-mathsym">&#8804;</span> 100</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+        <div class="pl-receipt__row"><span class="pl-receipt__k">Units of B</span><span class="pl-receipt__v">40 <span class="pl-mathsym">&#8804;</span> 40</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+      </div>
+      <div class="pl-receipt__foot">Recalculated from your formulas in your browser · nothing uploaded</div>
+    </div>
+    <div class="pl-inverse" style="padding:20px;border-radius:var(--pl-radius-surface)">
+      <div class="pl-receipt pl-receipt--inverse" role="group" aria-label="Verification receipt (inverse)">
+        <div class="pl-receipt__head">
+          <div class="pl-receipt__status"><span class="pl-receipt__seal" aria-hidden="true">&#10003;</span><span class="pl-receipt__title">Optimal solution proven</span></div>
+          <p class="pl-receipt__sub">production-plan · continuous · maximise</p>
+        </div>
+        <div class="pl-receipt__body">
+          <div class="pl-receipt__row"><span class="pl-receipt__k">Objective</span><span class="pl-receipt__v">1,760</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+          <div class="pl-receipt__row"><span class="pl-receipt__k">Total hours</span><span class="pl-receipt__v">100 <span class="pl-mathsym">&#8804;</span> 100</span><span class="pl-receipt__check" aria-hidden="true">&#10003;</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 14. SPREADSHEET / MODEL SURFACE -->
+<section class="lab__section" aria-labelledby="s14">
+  <div class="lab__section-title"><span class="lab__n">14</span><h2 class="pl-h2" id="s14">Spreadsheet / model surface</h2></div>
+  <div class="pl-matrix-scroll" tabindex="0" role="region" aria-label="Model surface (scrolls on narrow screens)">
+    <table class="pl-sheet" style="min-width:520px" aria-label="Production plan model">
+      <thead><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th></tr></thead>
+      <tbody>
+        <tr><td class="pl-sheet__num">1</td><td>Product</td><td>Units</td><td>Profit</td><td>Contribution</td><td>Hours</td><td></td></tr>
+        <tr><td class="pl-sheet__num">2</td><td>A</td><td class="pl-sheet__decision">20</td><td class="pl-sheet__num">30</td><td class="pl-sheet__formula">=B2*C2</td><td class="pl-sheet__num">2</td><td></td></tr>
+        <tr><td class="pl-sheet__num">3</td><td>B</td><td class="pl-sheet__decision">40</td><td class="pl-sheet__num">20</td><td class="pl-sheet__formula">=B3*C3</td><td class="pl-sheet__num">1</td><td></td></tr>
+        <tr class="pl-sheet__total"><td class="pl-sheet__num">6</td><td>Total profit</td><td></td><td></td><td class="pl-sheet__formula">=SUM(D2:D4)</td><td></td><td class="pl-sheet__num">1,760</td></tr>
+        <tr class="pl-sheet__total"><td class="pl-sheet__num">7</td><td>Total hours</td><td></td><td></td><td class="pl-sheet__formula">=SUMPRODUCT(B2:B4,E2:E4)</td><td class="pl-mathsym">&#8804;</td><td class="pl-sheet__num">100</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 15. TECHNICAL DATA LIST -->
+<section class="lab__section" aria-labelledby="s15">
+  <div class="lab__section-title"><span class="lab__n">15</span><h2 class="pl-h2" id="s15">Technical data list</h2></div>
+  <dl class="pl-data-list" style="max-width:420px">
+    <dt>Objective</dt><dd>1,760 (maximise)</dd>
+    <dt>Variables</dt><dd>3 continuous</dd>
+    <dt>Constraints</dt><dd>2 satisfied</dd>
+    <dt>Status</dt><dd>optimal, proven</dd>
+    <dt>Solve time</dt><dd>12 ms</dd>
+  </dl>
+</section>
+
+<!-- 16. CAPABILITY MATRIX -->
+<section class="lab__section" aria-labelledby="s16">
+  <div class="lab__section-title"><span class="lab__n">16</span><h2 class="pl-h2" id="s16">Capability matrix</h2></div>
+  <div class="pl-matrix-scroll" tabindex="0" role="region" aria-label="Capabilities matrix (scrolls on narrow screens)">
+    <table class="pl-matrix pl-matrix--min">
+      <thead><tr><th>Model type</th><th>Solved</th><th>Objective checked</th><th>Constraints checked</th></tr></thead>
+      <tbody>
+        <tr><td>Continuous</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td></tr>
+        <tr><td>Integer</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td></tr>
+        <tr><td>Binary</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td></tr>
+        <tr><td>Mixed-integer</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td><td class="pl-matrix__yes">Yes</td></tr>
+        <tr><td>Non-linear</td><td class="pl-matrix__no">Rejected, not guessed</td><td class="pl-matrix__no">n/a</td><td class="pl-matrix__no">n/a</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 17. STATUS PANELS -->
+<section class="lab__section" aria-labelledby="s17">
+  <div class="lab__section-title"><span class="lab__n">17</span><h2 class="pl-h2" id="s17">Status panels</h2></div>
+  <div class="pl-grid" style="--pl-grid-min:280px">
+    <div class="pl-panel pl-panel--proven"><span class="pl-panel__band" aria-hidden="true"></span><div class="pl-panel__body">
+      <div class="pl-panel__head"><span class="pl-panel__name">Optimal solution proven</span><span class="pl-badge pl-badge--proven">Optimal</span></div>
+      <p class="pl-panel__meaning">The best allocation within every limit, and the optimality was proven.</p>
+      <p class="pl-panel__next"><strong>Next:</strong> export the result, or change a number and solve again.</p>
+      <p class="pl-panel__evidence">objective 1,760 · hours 100<span class="pl-mathsym">&#8804;</span>100</p>
+    </div></div>
+    <div class="pl-panel pl-panel--incomplete"><span class="pl-panel__band" aria-hidden="true"></span><div class="pl-panel__body">
+      <div class="pl-panel__head"><span class="pl-panel__name">Search incomplete</span><span class="pl-badge pl-badge--incomplete">Incomplete</span></div>
+      <p class="pl-panel__meaning">A feasible answer was found, but optimality was not proven within the limits.</p>
+      <p class="pl-panel__next"><strong>Next:</strong> simplify the model and solve again.</p>
+      <p class="pl-panel__evidence">best so far 1,712 · gap not closed</p>
+    </div></div>
+    <div class="pl-panel pl-panel--error"><span class="pl-panel__band" aria-hidden="true"></span><div class="pl-panel__body">
+      <div class="pl-panel__head"><span class="pl-panel__name">Model not supported</span><span class="pl-badge pl-badge--infeasible">Rejected</span></div>
+      <p class="pl-panel__meaning">The model has a non-linear term, which Plumline rejects rather than approximating.</p>
+      <p class="pl-panel__next"><strong>Next:</strong> linearise the term, then solve.</p>
+    </div></div>
+    <div class="pl-panel pl-panel--info"><span class="pl-panel__band" aria-hidden="true"></span><div class="pl-panel__body">
+      <div class="pl-panel__head"><span class="pl-panel__name">Ready to solve</span><span class="pl-badge pl-badge--neutral">Idle</span></div>
+      <p class="pl-panel__meaning">The model is loaded. Nothing has been solved yet.</p>
+    </div></div>
+  </div>
+</section>
+
+<!-- 18. INSTRUMENT LANGUAGE -->
+<section class="lab__section" aria-labelledby="s18">
+  <div class="lab__section-title"><span class="lab__n">18</span><h2 class="pl-h2" id="s18">Instrument language</h2></div>
+  <div class="pl-stack">
+    <span class="pl-measure-label">Calculated, then checked</span>
+    <div class="pl-calibration" aria-hidden="true"></div>
+    <div class="pl-plumb"><p class="pl-body" style="max-width:44ch">A plumb rule marks a true vertical: the verification receipt is Plumline's plumb line for a decision.</p></div>
+    <p class="pl-figure-id">Fig. 01 — production plan</p>
+    <p class="pl-annotation">Annotation: objective recalculated from =SUM(D2:D4).</p>
+  </div>
+</section>
+
+<!-- 19. CTA SURFACE -->
+<section class="lab__section" aria-labelledby="s19">
+  <div class="lab__section-title"><span class="lab__n">19</span><h2 class="pl-h2" id="s19">CTA surface</h2></div>
+  <div class="pl-inverse" style="padding:32px;border-radius:var(--pl-radius-surface)">
+    <div class="pl-cta">
+      <p class="pl-label" style="color:var(--pl-color-process-hi)">Start</p>
+      <h3 class="pl-cta__title pl-text-inverse">Put a number in front of your next decision.</h3>
+      <p class="pl-cta__copy">Free. The online solver runs in your browser and uploads nothing.</p>
+      <div class="pl-cta__actions">
+        <button class="pl-button pl-button--primary" type="button">Open the solver</button>
+        <button class="pl-button pl-button--ghost" type="button">Explore examples</button>
+      </div>
+      <p class="pl-cta__note">Runs in your browser · no account · your model stays on your device</p>
+    </div>
+  </div>
+</section>
+
+<!-- 20. RESPONSIVE + LANGUAGE STRESS -->
+<section class="lab__section" aria-labelledby="s20">
+  <div class="lab__section-title"><span class="lab__n">20</span><h2 class="pl-h2" id="s20">Responsive &amp; language stress</h2></div>
+  <p class="pl-small pl-text-muted" style="margin-bottom:16px">Real strings in en / es / pt / de / fr (no Italian). Checks long headings, long buttons, metadata, status, form labels, accented glyphs, German compound wrapping and French/Portuguese diacritics.</p>
+  <div class="pl-matrix-scroll" tabindex="0" role="region" aria-label="Language stress matrix">
+  <table class="lab__lang" style="min-width:520px">
+    <thead><tr><th>Lang</th><th>Heading</th><th>Button</th><th>Status</th><th>Form label</th></tr></thead>
+    <tbody>
+      <tr><td>en</td><td class="pl-h3">Turn decisions into checked answers</td><td><button class="pl-button pl-button--primary" type="button">Open the solver</button></td><td><span class="pl-badge pl-badge--proven">Optimal proven</span></td><td>Variable type</td></tr>
+      <tr><td>es</td><td class="pl-h3">Convierte decisiones en pruebas</td><td><button class="pl-button pl-button--primary" type="button">Abrir el solucionador</button></td><td><span class="pl-badge pl-badge--incomplete">Búsqueda incompleta</span></td><td>Tipo de variable</td></tr>
+      <tr><td>pt</td><td class="pl-h3">Transforme decisões em provas</td><td><button class="pl-button pl-button--primary" type="button">Abrir o solucionador</button></td><td><span class="pl-badge pl-badge--proven">Ótimo comprovado</span></td><td>Tipo de variável</td></tr>
+      <tr><td>de</td><td class="pl-h3">Entscheidungen in überprüfbare Antworten verwandeln</td><td><button class="pl-button pl-button--primary" type="button">Den Löser öffnen</button></td><td><span class="pl-badge pl-badge--incomplete">Suche unvollständig</span></td><td>Variablentyp</td></tr>
+      <tr><td>fr</td><td class="pl-h3">Transformez vos décisions en preuves vérifiables</td><td><button class="pl-button pl-button--primary" type="button">Ouvrir le solveur</button></td><td><span class="pl-badge pl-badge--proven">Optimum prouvé</span></td><td>Type de variable</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+</main>
+
+<footer class="lab__section">
+  <p class="lab__note">Plumline · F4b design system · single canonical source in src/shared/design-system/ · no motion (F4c) · production untouched · Home is F9 · public pages are F10</p>
+</footer>
+</div>
+</body>
+</html>

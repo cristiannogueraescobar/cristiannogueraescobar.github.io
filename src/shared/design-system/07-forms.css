@@ -1,0 +1,42 @@
+/* ============================================================================
+   Plumline design system — 07 FORMS
+   ----------------------------------------------------------------------------
+   Accessible form primitives built on NATIVE HTML controls (no custom-JS
+   replacements). Base for F6 (examples search/filter) and F8 (grid UX). Every
+   field pairs a real <label>; help and error text are associable via aria.
+   ========================================================================== */
+
+.pl-field { display:flex; flex-direction:column; gap:6px; }
+.pl-field__label { font:var(--pl-font-label); text-transform:none; letter-spacing:0;
+  font-weight:var(--pl-text-weight-strong); color:var(--pl-color-text-primary); }
+.pl-field__help { font-size:var(--pl-text-size-small); color:var(--pl-color-text-muted); }
+.pl-field__error { font-size:var(--pl-text-size-small); color:var(--pl-color-error); font-weight:var(--pl-text-weight-medium); }
+
+.pl-input, .pl-select, .pl-textarea {
+  font:var(--pl-font-body); font-size:var(--pl-text-size-compact); color:var(--pl-color-text-primary);
+  background:var(--pl-color-bg-surface); border:var(--pl-border-width) solid var(--pl-color-border);
+  border-radius:var(--pl-radius-control); padding:0 var(--pl-pad-control); min-height:var(--pl-target-comfortable);
+  width:100%;
+}
+.pl-textarea { padding:var(--pl-pad-control); min-height:calc(var(--pl-target-comfortable) * 2); resize:vertical; }
+.pl-input::placeholder, .pl-textarea::placeholder { color:var(--pl-color-text-muted); }
+.pl-input:focus-visible, .pl-select:focus-visible, .pl-textarea:focus-visible {
+  outline:2px solid var(--pl-color-focus); outline-offset:1px; border-color:var(--pl-color-process); }
+.pl-input[aria-invalid="true"], .pl-select[aria-invalid="true"], .pl-textarea[aria-invalid="true"] {
+  border-color:var(--pl-color-error); }
+.pl-input:disabled, .pl-select:disabled, .pl-textarea:disabled {
+  opacity:var(--pl-disabled-opacity); cursor:not-allowed; background:var(--pl-color-bg-surface-2); }
+
+/* Search input: a field with a mono affordance. */
+.pl-search { position:relative; display:flex; align-items:center; }
+.pl-search .pl-input { padding-left:calc(var(--pl-pad-control) * 2 + 10px); }
+.pl-search__icon { position:absolute; left:var(--pl-pad-control); width:12px; height:12px; flex:none;
+  border:1.5px solid var(--pl-color-text-muted); border-radius:50%; pointer-events:none; }
+.pl-search__icon::after { content:""; position:absolute; right:-3px; bottom:-3px; width:5px; height:1.5px;
+  background:var(--pl-color-text-muted); transform:rotate(45deg); }
+
+/* Checkbox / radio: native, sized for touch, with a visible focus ring. */
+.pl-check { display:inline-flex; align-items:center; gap:var(--pl-gap-control);
+  min-height:var(--pl-target-comfortable); font-size:var(--pl-text-size-compact); }
+.pl-check input { width:18px; height:18px; accent-color:var(--pl-color-process); flex:none; }
+.pl-check input:focus-visible { outline:2px solid var(--pl-color-focus); outline-offset:2px; }

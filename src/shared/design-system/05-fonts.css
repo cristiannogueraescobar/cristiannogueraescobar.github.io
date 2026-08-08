@@ -1,0 +1,77 @@
+/* ============================================================================
+   Plumline design system — 05 FONTS (self-hosted, production-ready)
+   ----------------------------------------------------------------------------
+   Newsreader (editorial headings) + Manrope (UI/body), both SIL OFL 1.1,
+   variable weight, latin + latin-ext subsets. Self-hosted, never remote. No
+   third webfont. The existing system monospace stack handles data/formulas and
+   the technical operators the webfonts do not contain (see below).
+
+   IMPORTANT (F4b): these declarations are production-READY but NOT production-
+   WIRED. No public page imports this file, so production rendering is unchanged.
+   Wiring them into the Home is F9; the rest of the pages is F10.
+
+   Fallback metric overrides are DERIVED FROM THE REAL FONT METRICS (unitsPerEm,
+   typo ascender/descender/line-gap read from the woff2 OS/2 table), not copied
+   from elsewhere, to reduce CLS when the fallback shows before the webfont:
+     Newsreader: upm 2000, typoAsc 1470, typoDesc -530, typoGap 0
+                 -> ascent 73.50%, descent 26.50%, line-gap 0%
+     Manrope:    upm 2000, typoAsc 2132, typoDesc -600, typoGap 0
+                 -> ascent 106.60%, descent 30.00%, line-gap 0%
+   size-adjust is left at its default (100%): deriving it correctly needs the
+   x-height of the specific OS fallback face, which is not measurable in a
+   deterministic build, so we do not invent a value.
+   ========================================================================== */
+
+/* ---- Newsreader (editorial) ---------------------------------------------- */
+@font-face {
+  font-family:'Newsreader';
+  src:url('./fonts/newsreader-latin-wght-normal.woff2') format('woff2');
+  font-weight:200 800; font-style:normal; font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family:'Newsreader';
+  src:url('./fonts/newsreader-latin-ext-wght-normal.woff2') format('woff2');
+  font-weight:200 800; font-style:normal; font-display:swap;
+  unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* Metric-matched fallback for Newsreader (derived overrides). */
+@font-face {
+  font-family:'Newsreader Fallback';
+  src:local('Georgia'),local('Times New Roman'),local('serif');
+  ascent-override:73.50%; descent-override:26.50%; line-gap-override:0%;
+}
+
+/* ---- Manrope (UI / body) ------------------------------------------------- */
+@font-face {
+  font-family:'Manrope';
+  src:url('./fonts/manrope-latin-wght-normal.woff2') format('woff2');
+  font-weight:200 800; font-style:normal; font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family:'Manrope';
+  src:url('./fonts/manrope-latin-ext-wght-normal.woff2') format('woff2');
+  font-weight:200 800; font-style:normal; font-display:swap;
+  unicode-range:U+0100-024F,U+0259,U+1E00-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+/* Metric-matched fallback for Manrope (derived overrides). */
+@font-face {
+  font-family:'Manrope Fallback';
+  src:local('Segoe UI'),local('Roboto'),local('Helvetica Neue'),local('Arial'),local('sans-serif');
+  ascent-override:106.60%; descent-override:30.00%; line-gap-override:0%;
+}
+
+/* ----------------------------------------------------------------------------
+   GLYPH COVERAGE (verified against the real cmaps of these woff2 subsets):
+     covered:      Latin text of en/es/pt/de/fr, accents, = , ×
+     NOT covered:  ≤  ≥  →
+   The technical operators (≤ ≥ →) are therefore rendered from the mono/system
+   stack via the .pl-mathsym utility (see 09-utilities.css) and never left to an
+   accidental fallback. Do not claim these webfonts cover ≤ ≥ →.
+
+   PRELOAD STRATEGY (documented, applied by the consuming page in F9/F10, not
+   here): the two latin (non-ext) woff2 are the critical subset for en; a page
+   that adopts the fonts should <link rel="preload" as="font" type="font/woff2"
+   crossorigin> the two latin files only, letting latin-ext load on demand.
+   ------------------------------------------------------------------------- */

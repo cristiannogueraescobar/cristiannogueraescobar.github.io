@@ -1,0 +1,149 @@
+/* ============================================================================
+   Plumline design system — 02 SEMANTIC TOKENS
+   ----------------------------------------------------------------------------
+   Meaning, not values. Every token here is derived from a PRIMITIVE (--pl-*) in
+   01-primitives.css — either a direct alias (--x: var(--prim)) or a stable
+   COMPOSITION of primitives (e.g. a translucent cream built from the cream RGB
+   channels, or a font shorthand built from primitive family/weight/size). It is
+   NOT a simple 1:1 alias table: some roles are compositions, and that is stated
+   where it happens.
+
+   Consumer layers (03/04/06/07/08/09) consume THESE semantic roles, never the
+   primitives directly — with one deliberate, documented exception: 04-layout
+   consumes the primitive LAYOUT MEASUREMENTS (widths, rails) directly, because a
+   structural page measure is not a re-themable colour/spacing decision. That
+   exception is enforced by the token-policy test, which allows only the layout
+   layer to reference only the layout-measurement primitives.
+
+   Colour pairings used for small text are contrast-checked to WCAG AA (>= 4.5:1);
+   see docs/checkpoint-f4b-design-system-components.md section 22.
+   ========================================================================== */
+
+:root {
+  /* ---- Background / surface roles --------------------------------------- */
+  --pl-color-bg-canvas:var(--pl-cream-100);      /* dominant editorial ground */
+  --pl-color-bg-surface:var(--pl-white);         /* raised panels / cards */
+  --pl-color-bg-surface-2:var(--pl-cream-50);    /* subtly raised on cream */
+  --pl-color-bg-inverse:var(--pl-green-900);     /* deep field: hero/footer */
+  --pl-color-bg-inverse-2:var(--pl-green-800);
+
+  /* ---- Text roles ------------------------------------------------------- */
+  --pl-color-text-primary:var(--pl-ink-900);
+  --pl-color-text-secondary:var(--pl-ink-700);
+  --pl-color-text-muted:var(--pl-ink-500);
+  --pl-color-text-faint:var(--pl-ink-400);
+  --pl-color-text-inverse:var(--pl-cream-100);
+  /* COMPOSITION from the SINGLE canonical cream-100: a translucent cream derived
+     with color-mix() so it tracks a cream re-theme with no duplicated RGB sibling
+     to keep in sync. color-mix(in srgb, C X%, transparent) yields C at X% alpha.
+     Verified in the project's Chromium 141 (color-mix ships in Chromium 111+):
+     color-mix(in srgb, #F5F2EB 78%, transparent) == rgba(245,242,235,.78), so the
+     approved colour is unchanged (~9.5:1 on inverse). */
+  --pl-color-text-inverse-muted:color-mix(in srgb, var(--pl-cream-100) var(--pl-opacity-muted), transparent);
+  --pl-color-text-on-brass:var(--pl-green-900);  /* text over brass fill */
+
+  /* ---- Border roles ----------------------------------------------------- */
+  --pl-color-border-subtle:var(--pl-cream-300);
+  --pl-color-border:var(--pl-cream-400);
+  --pl-color-border-strong:var(--pl-green-700);
+  --pl-color-border-inverse:var(--pl-green-700);
+
+  /* ---- Action roles ----------------------------------------------------- */
+  --pl-color-action-primary:var(--pl-brass-500);       /* primary fill = brass */
+  --pl-color-action-primary-hover:var(--pl-brass-300);
+  --pl-color-action-text:var(--pl-brass-700);          /* action links on light */
+  --pl-color-action-text-inverse:var(--pl-brass-300);  /* action on dark */
+
+  /* ---- Instrument roles (process / measurement / selection) ------------- */
+  --pl-color-process:var(--pl-brass-500);        /* marks, selection, ticks */
+  --pl-color-process-text:var(--pl-brass-700);   /* process text on light (AA) */
+  --pl-color-process-tint:var(--pl-brass-100);
+  --pl-color-process-hi:var(--pl-brass-300);     /* process highlight on dark */
+
+  /* ---- Status roles: verification green is RESERVED for correctness ----- */
+  --pl-color-verified:var(--pl-green-600);
+  --pl-color-verified-bright:var(--pl-green-500);
+  --pl-color-verified-tint:var(--pl-green-100);
+  --pl-color-warning:var(--pl-amber-700);        /* incomplete / not proven */
+  --pl-color-warning-tint:var(--pl-amber-100);
+  --pl-color-error:var(--pl-red-700);            /* real error / infeasible */
+  --pl-color-error-tint:var(--pl-red-100);
+  --pl-color-info:var(--pl-green-800);           /* neutral information */
+  --pl-color-info-tint:var(--pl-green-100);
+
+  /* ---- Focus ------------------------------------------------------------ */
+  --pl-color-focus:var(--pl-brass-500);
+
+  /* ---- Typographic SIZE roles (alias the primitive ramp by meaning) ------ */
+  --pl-text-size-display:var(--pl-size-display);
+  --pl-text-size-h1:var(--pl-size-h1);
+  --pl-text-size-h2:var(--pl-size-h2);
+  --pl-text-size-h3:var(--pl-size-h3);
+  --pl-text-size-body:var(--pl-size-body);
+  --pl-text-size-compact:var(--pl-size-compact);
+  --pl-text-size-small:var(--pl-size-small);
+  --pl-text-size-label:var(--pl-size-label);
+  --pl-text-size-tick:var(--pl-size-tick);
+
+  /* ---- Typographic WEIGHT roles ----------------------------------------- */
+  --pl-text-weight-body:var(--pl-weight-regular);
+  --pl-text-weight-medium:var(--pl-weight-medium);
+  --pl-text-weight-strong:var(--pl-weight-semibold);
+  --pl-text-weight-heading:var(--pl-weight-bold);
+
+  /* ---- Typographic TRACKING roles --------------------------------------- */
+  --pl-text-tracking-display:var(--pl-tracking-display);
+  --pl-text-tracking-heading:var(--pl-tracking-heading);
+  --pl-text-tracking-label:var(--pl-tracking-label);
+  --pl-text-leading-snug:var(--pl-leading-heading);
+
+  /* ---- Typography shorthands (COMPOSITION of family/weight/size/leading) - */
+  --pl-font-display:var(--pl-weight-medium) var(--pl-size-display)/var(--pl-leading-tight) var(--pl-family-serif);
+  --pl-font-h1:var(--pl-weight-semibold) var(--pl-size-h1)/var(--pl-leading-tight) var(--pl-family-serif);
+  --pl-font-h2:var(--pl-weight-semibold) var(--pl-size-h2)/var(--pl-leading-heading) var(--pl-family-serif);
+  --pl-font-h3:var(--pl-weight-semibold) var(--pl-size-h3)/var(--pl-leading-heading) var(--pl-family-serif);
+  --pl-font-body:var(--pl-weight-regular) var(--pl-size-body)/var(--pl-leading-body) var(--pl-family-sans);
+  --pl-font-compact:var(--pl-weight-regular) var(--pl-size-compact)/1.5 var(--pl-family-sans);
+  --pl-font-small:var(--pl-weight-regular) var(--pl-size-small)/1.5 var(--pl-family-sans);
+  --pl-font-label:var(--pl-weight-semibold) var(--pl-size-label)/1.3 var(--pl-family-sans);
+  --pl-font-mono:var(--pl-weight-regular) var(--pl-size-small)/1.5 var(--pl-family-mono);
+
+  /* Family roles. */
+  --pl-font-family-editorial:var(--pl-family-serif);
+  --pl-font-family-ui:var(--pl-family-sans);
+  --pl-font-family-data:var(--pl-family-mono);
+
+  /* ---- Spacing roles ---------------------------------------------------- */
+  --pl-gap-micro:var(--pl-space-1);
+  --pl-gap-control:var(--pl-space-2);
+  --pl-gap-inline:var(--pl-space-3);
+  --pl-pad-control:var(--pl-space-3);
+  --pl-pad-field:var(--pl-space-4);
+  --pl-pad-inset:var(--pl-space-5);
+  --pl-pad-component:var(--pl-space-6);
+  --pl-gap-layout:var(--pl-space-5);
+  --pl-gap-block:var(--pl-space-8);
+  --pl-gap-wide:var(--pl-space-12);
+  --pl-rhythm-section:var(--pl-space-20);
+
+  /* ---- Border roles ----------------------------------------------------- */
+  --pl-border-width:var(--pl-border-hairline);
+  --pl-border-width-strong:var(--pl-border-strong);
+
+  /* ---- Shape roles ------------------------------------------------------ */
+  --pl-radius-control:var(--pl-radius-sm);
+  --pl-radius-surface:var(--pl-radius-md);
+  --pl-radius-round:var(--pl-radius-pill);
+
+  /* ---- Target size roles ------------------------------------------------ */
+  --pl-target-comfortable:var(--pl-tap-min);
+  --pl-target-min:var(--pl-tap-min-strict);
+
+  /* ---- Elevation roles -------------------------------------------------- */
+  --pl-elevation-flat:var(--pl-shadow-none);
+  --pl-elevation-raised:var(--pl-shadow-card);
+
+  /* ---- Interaction ------------------------------------------------------ */
+  --pl-focus-ring:0 0 0 2px var(--pl-color-bg-canvas),0 0 0 4px var(--pl-color-focus);
+  --pl-disabled-opacity:var(--pl-opacity-disabled);
+}

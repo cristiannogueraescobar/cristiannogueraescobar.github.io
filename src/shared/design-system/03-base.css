@@ -1,0 +1,62 @@
+/* ============================================================================
+   Plumline design system — 03 BASE
+   ----------------------------------------------------------------------------
+   A SCOPED base. It does NOT style bare element selectors globally (that could
+   alter legacy/public pages just by existing in the repo). Everything is scoped
+   under .pl-root, the design-system boundary. A page opts in by adding class
+   "pl-root" to a container; production pages do not, so they are untouched.
+   ========================================================================== */
+
+.pl-root, .pl-root *, .pl-root *::before, .pl-root *::after { box-sizing:border-box; }
+
+.pl-root {
+  background:var(--pl-color-bg-canvas);
+  color:var(--pl-color-text-primary);
+  font:var(--pl-font-body);
+  letter-spacing:-0.003em;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* Typography roles as classes (no bare h1/h2 restyle to avoid leaking). */
+.pl-display { font:var(--pl-font-display); letter-spacing:var(--pl-text-tracking-display); margin:0; color:var(--pl-color-text-primary); }
+.pl-h1 { font:var(--pl-font-h1); letter-spacing:var(--pl-text-tracking-heading); margin:0; color:var(--pl-color-text-primary); }
+.pl-h2 { font:var(--pl-font-h2); letter-spacing:var(--pl-text-tracking-heading); margin:0; color:var(--pl-color-text-primary); }
+.pl-h3 { font:var(--pl-font-h3); margin:0; color:var(--pl-color-text-primary); }
+.pl-body { font:var(--pl-font-body); margin:0; }
+.pl-compact { font:var(--pl-font-compact); margin:0; }
+.pl-small { font:var(--pl-font-small); margin:0; }
+.pl-label { font:var(--pl-font-label); text-transform:uppercase; letter-spacing:var(--pl-text-tracking-label); margin:0; }
+.pl-mono { font-family:var(--pl-font-family-data); font-variant-numeric:tabular-nums; }
+.pl-numeric { font-variant-numeric:tabular-nums; }
+
+/* Text colour helpers (role-based, not value-based). */
+.pl-text-secondary { color:var(--pl-color-text-secondary); }
+.pl-text-muted { color:var(--pl-color-text-muted); }
+.pl-text-faint { color:var(--pl-color-text-faint); }
+.pl-text-inverse { color:var(--pl-color-text-inverse); }
+
+/* Inverse region (deep-green ground): flips text roles for contrast. */
+.pl-inverse {
+  background:var(--pl-color-bg-inverse);
+  color:var(--pl-color-text-inverse);
+}
+.pl-inverse .pl-display,
+.pl-inverse .pl-h1,
+.pl-inverse .pl-h2,
+.pl-inverse .pl-h3 { color:var(--pl-color-text-inverse); }
+.pl-inverse .pl-text-secondary,
+.pl-inverse .pl-text-muted { color:var(--pl-color-text-inverse-muted); }
+
+/* Focus-visible: one consistent, accessible ring for every interactive DS
+   element. Never remove an outline without this replacement. */
+.pl-root :focus-visible {
+  outline:2px solid var(--pl-color-focus);
+  outline-offset:2px;
+  border-radius:2px;
+}
+
+/* Links. */
+.pl-link { color:var(--pl-color-action-text); text-decoration:underline; text-underline-offset:3px; text-decoration-thickness:1px; }
+.pl-link:hover { text-decoration-thickness:2px; }
+.pl-inverse .pl-link { color:var(--pl-color-action-text-inverse); }

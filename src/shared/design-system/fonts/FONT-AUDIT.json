@@ -1,0 +1,91 @@
+{
+  "audit_note": "Metadata audited on the REAL font binaries with fonttools during checkpoint F4b; the exact audited assets are pinned by the SHA-256 below. The test suite re-computes these SHA-256 from the shipped woff2 (no fonttools, no external process) so the audited metadata is cryptographically bound to the exact files inspected.",
+  "language_coverage": "latin + latin-ext subsets cover the Latin text of en/es/pt/de/fr (accents included).",
+  "technical_symbol_coverage": "= and × are present in the latin subsets. The operators ≤ ≥ → are NOT present in any subset and are rendered from the mono/system stack via .pl-mathsym.",
+  "fallback_overrides": {
+    "Newsreader": {
+      "ascent": "73.50%",
+      "descent": "26.50%",
+      "line_gap": "0%"
+    },
+    "Manrope": {
+      "ascent": "106.60%",
+      "descent": "30.00%",
+      "line_gap": "0%"
+    }
+  },
+  "fonts": [
+    {
+      "filename": "newsreader-latin-wght-normal.woff2",
+      "bytes": 58084,
+      "sha256": "62981321d9a3cc7a61a73792729043703fd6112da86e8ec848bb57f088578757",
+      "family": "Newsreader",
+      "coverage": "latin",
+      "upm": 2000,
+      "wght_min": 200,
+      "wght_max": 800,
+      "typo_ascender": 1470,
+      "typo_descender": -530,
+      "typo_linegap": 0,
+      "has_eq": true,
+      "has_times": true,
+      "has_le": false,
+      "has_ge": false,
+      "has_arrow": false
+    },
+    {
+      "filename": "newsreader-latin-ext-wght-normal.woff2",
+      "bytes": 36244,
+      "sha256": "ac6fa9ed533278f4c8fd3ae44a1fc78c7df736040237ab86fc1160d020af0af2",
+      "family": "Newsreader",
+      "coverage": "latin-ext",
+      "upm": 2000,
+      "wght_min": 200,
+      "wght_max": 800,
+      "typo_ascender": 1470,
+      "typo_descender": -530,
+      "typo_linegap": 0,
+      "has_eq": false,
+      "has_times": false,
+      "has_le": false,
+      "has_ge": false,
+      "has_arrow": false
+    },
+    {
+      "filename": "manrope-latin-wght-normal.woff2",
+      "bytes": 24836,
+      "sha256": "a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972",
+      "family": "Manrope",
+      "coverage": "latin",
+      "upm": 2000,
+      "wght_min": 200,
+      "wght_max": 800,
+      "typo_ascender": 2132,
+      "typo_descender": -600,
+      "typo_linegap": 0,
+      "has_eq": true,
+      "has_times": true,
+      "has_le": false,
+      "has_ge": false,
+      "has_arrow": false
+    },
+    {
+      "filename": "manrope-latin-ext-wght-normal.woff2",
+      "bytes": 15120,
+      "sha256": "3911b66d9f2e005a4b989223405d0e5032619c668597ba467cc76a23c8fffcfb",
+      "family": "Manrope",
+      "coverage": "latin-ext",
+      "upm": 2000,
+      "wght_min": 200,
+      "wght_max": 800,
+      "typo_ascender": 2132,
+      "typo_descender": -600,
+      "typo_linegap": 0,
+      "has_eq": false,
+      "has_times": false,
+      "has_le": false,
+      "has_ge": false,
+      "has_arrow": false
+    }
+  ]
+}

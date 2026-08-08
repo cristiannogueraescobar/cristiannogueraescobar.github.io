@@ -1,0 +1,54 @@
+/* ============================================================================
+   Plumline design system — 04 LAYOUT PRIMITIVES
+   ----------------------------------------------------------------------------
+   A small, deliberate set of composable layout primitives. Each does ONE thing
+   and takes its rhythm from spacing tokens. These are the primitives F6/F8/F9/
+   F10 compose with, so they never assume a specific page or identical cards.
+   ========================================================================== */
+
+/* Container — width cap + responsive gutter. Modifiers pick the measure. */
+.pl-container { width:100%; max-width:var(--pl-width-edge); margin-inline:auto; padding-inline:var(--pl-rail); }
+.pl-container--reading { max-width:var(--pl-width-reading); }
+.pl-container--data { max-width:var(--pl-width-data); }
+
+/* Stack — vertical flow with a configurable gap (default = layout gap). */
+.pl-stack { display:flex; flex-direction:column; gap:var(--pl-gap-layout); }
+.pl-stack--tight { gap:var(--pl-gap-control); }
+.pl-stack--loose { gap:var(--pl-gap-block); }
+.pl-stack--section { gap:var(--pl-rhythm-section); }
+
+/* Cluster — inline wrap for controls, metadata, actions. */
+.pl-cluster { display:flex; flex-wrap:wrap; align-items:center; gap:var(--pl-gap-control); }
+.pl-cluster--between { justify-content:space-between; }
+.pl-cluster--baseline { align-items:baseline; }
+
+/* Split — two areas in an editorial/product relationship. Collapses to one
+   column below the split breakpoint. */
+.pl-split { display:grid; grid-template-columns:1fr 1fr; gap:var(--pl-gap-wide); align-items:start; }
+.pl-split--editorial { grid-template-columns:1fr 1.1fr; }
+.pl-split--data { grid-template-columns:1.1fr 1fr; }
+@media (max-width:900px){
+  .pl-split, .pl-split--editorial, .pl-split--data { grid-template-columns:1fr; gap:var(--pl-gap-block); }
+}
+
+/* Grid — reusable auto-fit grid that does NOT assume identical cards; the
+   min column width is set with a custom property. */
+.pl-grid { display:grid; gap:var(--pl-gap-layout); grid-template-columns:repeat(auto-fill,minmax(var(--pl-grid-min,240px),1fr)); }
+
+/* Rail / sidebar — content + a narrow technical rail (docs, filters). */
+.pl-rail-layout { display:grid; grid-template-columns:1fr; gap:var(--pl-gap-block); }
+@media (min-width:900px){
+  .pl-rail-layout { grid-template-columns:minmax(0,1fr) 260px; }
+  .pl-rail-layout--left { grid-template-columns:260px minmax(0,1fr); }
+}
+
+/* Bleed — a technical zone that breaks the editorial measure to full width. */
+.pl-bleed { width:100vw; margin-inline:calc(50% - 50vw); }
+
+/* Section — vertical rhythm between page zones. */
+.pl-section { padding-block:var(--pl-rhythm-section); }
+.pl-section--tight { padding-block:var(--pl-gap-wide); }
+
+@media (max-width:720px){
+  .pl-container { padding-inline:var(--pl-rail-sm); }
+}

@@ -1,0 +1,178 @@
+/* ============================================================================
+   Plumline design system — 06 COMPONENTS
+   ----------------------------------------------------------------------------
+   Reusable component primitives for the pieces approved in F4a. Every value
+   here is a SEMANTIC token (--pl-color-*, --pl-space-*, etc). No raw brand hex.
+   No motion (F4c owns transitions/keyframes/reveal). Static interaction states
+   only (hover/active/focus colour changes are allowed; animation is not).
+   ========================================================================== */
+
+/* ---- 06.1 Buttons -------------------------------------------------------- */
+.pl-button {
+  display:inline-flex; align-items:center; justify-content:center; gap:var(--pl-gap-control);
+  font:var(--pl-font-label); text-transform:none; letter-spacing:0;
+  font-size:var(--pl-text-size-compact); font-weight:var(--pl-text-weight-strong);
+  min-height:var(--pl-target-comfortable); padding:0 var(--pl-pad-inset);
+  border:var(--pl-border-width) solid transparent; border-radius:var(--pl-radius-control);
+  cursor:pointer; text-decoration:none;
+}
+.pl-button--primary { background:var(--pl-color-action-primary); color:var(--pl-color-text-on-brass); }
+.pl-button--primary:hover { background:var(--pl-color-action-primary-hover); }
+.pl-button--secondary { background:var(--pl-color-bg-inverse); color:var(--pl-color-text-inverse); }
+.pl-button--secondary:hover { background:var(--pl-color-bg-inverse-2); }
+.pl-button--ghost { background:transparent; color:var(--pl-color-text-primary); border-color:var(--pl-color-border); }
+.pl-button--ghost:hover { border-color:var(--pl-color-border-strong); }
+.pl-inverse .pl-button--ghost { color:var(--pl-color-text-inverse); border-color:var(--pl-color-border-inverse); }
+.pl-button:disabled, .pl-button[aria-disabled="true"] { opacity:var(--pl-disabled-opacity); cursor:not-allowed; }
+
+/* ---- 06.2 Links ---------------------------------------------------------- */
+.pl-action-link { display:inline-flex; align-items:center; gap:6px;
+  font-weight:var(--pl-text-weight-strong); font-size:var(--pl-text-size-small);
+  color:var(--pl-color-action-text); text-decoration:none; }
+.pl-action-link::after { content:"\2192"; font-family:var(--pl-font-family-data); } /* arrow from mono (not in webfont) */
+.pl-action-link:hover { text-decoration:underline; text-underline-offset:3px; }
+.pl-inverse .pl-action-link { color:var(--pl-color-action-text-inverse); }
+
+/* ---- 06.3 Status badges (differ by more than colour) --------------------- */
+.pl-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  letter-spacing:var(--pl-text-tracking-label); text-transform:uppercase;
+  padding:2px 8px; border-radius:var(--pl-radius-round); border:var(--pl-border-width) solid;
+}
+.pl-badge::before { content:""; width:6px; height:6px; flex:none; } /* shape marker, not colour-only */
+.pl-badge--proven { color:var(--pl-color-verified); background:var(--pl-color-verified-tint); border-color:var(--pl-color-verified); }
+.pl-badge--proven::before { border-radius:50%; background:var(--pl-color-verified); }
+.pl-badge--feasible { color:var(--pl-color-info); background:var(--pl-color-info-tint); border-color:var(--pl-color-info); }
+.pl-badge--feasible::before { border-radius:50%; border:1.5px solid var(--pl-color-info); background:transparent; }
+.pl-badge--incomplete { color:var(--pl-color-warning); background:var(--pl-color-warning-tint); border-color:var(--pl-color-warning); }
+.pl-badge--incomplete::before { width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid var(--pl-color-warning);border-radius:0; }
+.pl-badge--infeasible { color:var(--pl-color-error); background:var(--pl-color-error-tint); border-color:var(--pl-color-error); }
+.pl-badge--infeasible::before { background:var(--pl-color-error); border-radius:1px; transform:rotate(45deg); }
+.pl-badge--unbounded { color:var(--pl-color-process-text); background:var(--pl-color-process-tint); border-color:var(--pl-color-process); }
+.pl-badge--unbounded::before { width:3px;height:8px;background:var(--pl-color-process); clip-path:polygon(0 100%,100% 100%,100% 35%,50% 0,0 35%); border-radius:0; }
+.pl-badge--neutral { color:var(--pl-color-text-muted); background:var(--pl-color-bg-surface-2); border-color:var(--pl-color-border); }
+.pl-badge--neutral::before { background:transparent; border:1.5px solid var(--pl-color-text-muted); border-radius:1px; }
+
+/* ---- 06.4 Metadata chips (recede; support text, not compete) ------------- */
+.pl-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  letter-spacing:0.06em; text-transform:uppercase; color:var(--pl-color-text-muted);
+  border:var(--pl-border-width) solid var(--pl-color-border); border-radius:var(--pl-radius-round);
+  padding:2px 8px;
+}
+.pl-chip--process { color:var(--pl-color-process-text); border-color:var(--pl-color-process-tint); background:var(--pl-color-process-tint); }
+
+/* Difficulty indicator (pips; not colour-only — count is the meaning). */
+.pl-difficulty { display:inline-flex; gap:3px; align-items:center; }
+.pl-difficulty__pip { width:6px; height:6px; border-radius:50%; background:var(--pl-color-border); }
+.pl-difficulty__pip[data-on="true"] { background:var(--pl-color-process); }
+
+/* ---- 06.5 Surfaces / cards ---------------------------------------------- */
+.pl-surface {
+  background:var(--pl-color-bg-surface); border:var(--pl-border-width) solid var(--pl-color-border);
+  border-radius:var(--pl-radius-surface); padding:var(--pl-pad-component);
+}
+.pl-surface--flat { box-shadow:var(--pl-elevation-flat); }
+.pl-surface--raised { box-shadow:var(--pl-elevation-raised); }
+.pl-surface--sub { background:var(--pl-color-bg-surface-2); }
+
+/* ---- 06.6 Example card (standard + featured) ----------------------------- */
+.pl-example-card { display:flex; flex-direction:column; gap:var(--pl-gap-control);
+  background:var(--pl-color-bg-surface); border:var(--pl-border-width) solid var(--pl-color-border);
+  border-radius:var(--pl-radius-surface); padding:var(--pl-pad-component); }
+.pl-example-card__title { font:var(--pl-font-h3); }
+.pl-example-card__question { color:var(--pl-color-text-muted); font-size:var(--pl-text-size-small); }
+.pl-example-card__meta { display:flex; flex-wrap:wrap; gap:var(--pl-gap-control); align-items:center; }
+.pl-example-card__foot { margin-top:auto; }
+.pl-example-card--featured { box-shadow:var(--pl-elevation-raised);
+  background:linear-gradient(180deg,var(--pl-color-bg-surface),var(--pl-color-bg-surface-2)); }
+.pl-example-card--featured .pl-example-card__title { font:var(--pl-font-h2); }
+
+/* ---- 06.7 Verification receipt ------------------------------------------- */
+.pl-receipt { background:var(--pl-color-bg-surface); border:var(--pl-border-width) solid var(--pl-color-border);
+  border-radius:var(--pl-radius-surface); overflow:hidden; box-shadow:var(--pl-elevation-raised); }
+.pl-receipt__head { background:var(--pl-color-bg-inverse); color:var(--pl-color-text-inverse); padding:var(--pl-pad-inset) var(--pl-pad-component); }
+.pl-receipt__status { display:flex; align-items:center; gap:var(--pl-gap-control); }
+.pl-receipt__seal { width:34px; height:34px; flex:none; border-radius:50%;
+  border:var(--pl-border-width-strong) solid var(--pl-color-verified-bright); color:var(--pl-color-verified-bright);
+  display:grid; place-items:center; font-weight:var(--pl-text-weight-heading); }
+.pl-receipt__title { font:var(--pl-font-h3); color:var(--pl-color-text-inverse); }
+.pl-receipt__sub { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-small);
+  color:var(--pl-color-text-inverse-muted); margin-top:6px; }
+.pl-receipt__body { padding:var(--pl-pad-inset) var(--pl-pad-component); }
+.pl-receipt__row { display:grid; grid-template-columns:auto 1fr auto; gap:var(--pl-pad-field);
+  align-items:baseline; padding:var(--pl-pad-control) 0; border-bottom:1px dotted var(--pl-color-border); }
+.pl-receipt__row:last-child { border-bottom:none; }
+.pl-receipt__k { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-label);
+  letter-spacing:0.06em; text-transform:uppercase; color:var(--pl-color-text-muted); }
+.pl-receipt__v { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-small);
+  color:var(--pl-color-text-primary); font-variant-numeric:tabular-nums; }
+.pl-receipt__check { color:var(--pl-color-verified); font-weight:var(--pl-text-weight-heading); }
+.pl-receipt__foot { padding:var(--pl-pad-control) var(--pl-pad-component); background:var(--pl-color-bg-surface-2);
+  border-top:var(--pl-border-width) solid var(--pl-color-border-subtle);
+  font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick); color:var(--pl-color-text-faint); }
+/* Inverse variant: receipt on a dark ground. */
+.pl-receipt--inverse { border-color:var(--pl-color-border-inverse); }
+.pl-receipt--inverse .pl-receipt__body { background:var(--pl-color-bg-inverse-2); }
+.pl-receipt--inverse .pl-receipt__k { color:var(--pl-color-text-inverse-muted); }
+.pl-receipt--inverse .pl-receipt__v { color:var(--pl-color-text-inverse); }
+
+/* ---- 06.8 Spreadsheet / model surface ------------------------------------ */
+.pl-sheet { width:100%; border-collapse:collapse; font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-small); }
+.pl-sheet th, .pl-sheet td { border:var(--pl-border-width) solid var(--pl-color-border-subtle);
+  padding:6px 9px; text-align:left; font-variant-numeric:tabular-nums; }
+.pl-sheet th { background:var(--pl-color-bg-surface-2); color:var(--pl-color-text-muted);
+  font-size:var(--pl-text-size-tick); letter-spacing:0.04em; text-transform:uppercase; font-weight:var(--pl-text-weight-strong); }
+.pl-sheet td.pl-sheet__num { text-align:right; }
+.pl-sheet .pl-sheet__formula { color:var(--pl-color-process-text); }
+.pl-sheet .pl-sheet__decision { background:var(--pl-color-process-tint); color:var(--pl-color-process-text); font-weight:var(--pl-text-weight-strong); }
+.pl-sheet tr.pl-sheet__total td { background:var(--pl-color-bg-surface-2); font-weight:var(--pl-text-weight-strong); color:var(--pl-color-text-primary); }
+
+/* ---- 06.9 Technical data list -------------------------------------------- */
+.pl-data-list { display:grid; grid-template-columns:auto 1fr; gap:var(--pl-gap-control) var(--pl-pad-inset);
+  font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-small); }
+.pl-data-list dt { color:var(--pl-color-text-muted); font-size:var(--pl-text-size-tick);
+  letter-spacing:0.06em; text-transform:uppercase; }
+.pl-data-list dd { margin:0; color:var(--pl-color-text-primary); font-variant-numeric:tabular-nums; }
+
+/* ---- 06.10 Capability matrix wrapper (accessible local scroll) ----------- */
+.pl-matrix-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.pl-matrix-scroll:focus-visible { outline:2px solid var(--pl-color-focus); outline-offset:2px; }
+.pl-matrix { width:100%; border-collapse:collapse; }
+.pl-matrix--min { min-width:520px; }
+.pl-matrix th, .pl-matrix td { text-align:left; padding:var(--pl-pad-control) var(--pl-pad-field);
+  border-bottom:var(--pl-border-width) solid var(--pl-color-border-subtle); font-size:var(--pl-text-size-small); }
+.pl-matrix thead th { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-label);
+  letter-spacing:0.08em; text-transform:uppercase; color:var(--pl-color-text-muted);
+  border-bottom:var(--pl-border-width) solid var(--pl-color-border); }
+.pl-matrix td:first-child { font-weight:var(--pl-text-weight-strong); color:var(--pl-color-text-primary); }
+.pl-matrix .pl-matrix__yes { color:var(--pl-color-verified); font-weight:var(--pl-text-weight-strong); }
+.pl-matrix .pl-matrix__no { color:var(--pl-color-text-faint); }
+
+/* ---- 06.11 Status / message panel ---------------------------------------- */
+.pl-panel { display:grid; grid-template-columns:4px 1fr; overflow:hidden;
+  background:var(--pl-color-bg-surface); border:var(--pl-border-width) solid var(--pl-color-border);
+  border-radius:var(--pl-radius-surface); }
+.pl-panel__band { grid-row:1/-1; }
+.pl-panel__body { padding:var(--pl-pad-field) var(--pl-pad-inset); display:flex; flex-direction:column; gap:var(--pl-pad-control); }
+.pl-panel__head { display:flex; align-items:center; gap:var(--pl-pad-control); flex-wrap:wrap; }
+.pl-panel__name { font:var(--pl-font-h3); }
+.pl-panel__meaning { font-size:var(--pl-text-size-small); color:var(--pl-color-text-secondary); }
+.pl-panel__next { font-size:var(--pl-text-size-small); }
+.pl-panel__evidence { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick);
+  color:var(--pl-color-text-faint); border-top:1px dotted var(--pl-color-border); padding-top:var(--pl-pad-control); }
+.pl-panel--proven .pl-panel__band { background:var(--pl-color-verified); }
+.pl-panel--incomplete .pl-panel__band { background:var(--pl-color-warning); }
+.pl-panel--error .pl-panel__band { background:var(--pl-color-error); }
+.pl-panel--info .pl-panel__band { background:var(--pl-color-info); }
+
+/* ---- 06.12 CTA / editorial action surface -------------------------------- */
+.pl-cta { display:flex; flex-direction:column; gap:var(--pl-pad-field); }
+.pl-cta__title { font:var(--pl-font-h1); max-width:16ch; }
+.pl-cta__copy { color:var(--pl-color-text-secondary); max-width:44ch; }
+.pl-inverse .pl-cta__copy { color:var(--pl-color-text-inverse-muted); }
+.pl-cta__actions { display:flex; gap:var(--pl-gap-control); flex-wrap:wrap; }
+.pl-cta__note { font-family:var(--pl-font-family-data); font-size:var(--pl-text-size-tick); color:var(--pl-color-text-faint); }
+.pl-inverse .pl-cta__note { color:var(--pl-color-text-inverse-muted); }
