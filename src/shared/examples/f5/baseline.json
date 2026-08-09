@@ -1,0 +1,105 @@
+{
+  "note": "F5 independent baseline: pre-F5 legacy model hash + public slug + expected MATHEMATICAL result (status/objective/tolerance) for the nine migrated examples. The result POLICY is owned by the canonical metadata, NOT duplicated here. The engine RECALCULATES and compares; expected values are NOT copied from the solver.",
+  "schemaVersion": 1,
+  "examples": [
+    {
+      "key": "production",
+      "slug": "production-plan",
+      "legacyCategory": "start",
+      "modelHash": "7dd7ec0766ce966dc1958005e8f8dafc8c25a7e407e6dd504938ca5ad8d8bdd1",
+      "expected": {
+        "status": "optimal",
+        "objective": 1760,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "workshop",
+      "slug": "workshop-chart",
+      "legacyCategory": "start",
+      "modelHash": "60a4add5cfd50699a432a1688f02b37dae118a062173a5a2a99d1a4ba7ac34fe",
+      "expected": {
+        "status": "optimal",
+        "objective": 900,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "blend",
+      "slug": "cheapest-feed-blend",
+      "legacyCategory": "start",
+      "modelHash": "ac40092540e7a5b2b47a89c0fa1811053ad3915c1ccb475c1ca36bf39361f33b",
+      "expected": {
+        "status": "optimal",
+        "objective": 27.352941176470587,
+        "tolerance": 1e-8
+      }
+    },
+    {
+      "key": "marketing",
+      "slug": "marketing-budget",
+      "legacyCategory": "business",
+      "modelHash": "51ad79e2086b9952ca1ab974a99f6c85be24a8afa19041475e0bbdc17cd7cf63",
+      "expected": {
+        "status": "optimal",
+        "objective": 21350,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "workforce",
+      "slug": "workforce-scheduling",
+      "legacyCategory": "business",
+      "modelHash": "b9d46d25b65feae28b1eaf7e9224cddafa0c9dfb47dea9bda5e5de353295fd85",
+      "expected": {
+        "status": "optimal",
+        "objective": 23,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "shipping",
+      "slug": "shipping-plan",
+      "legacyCategory": "business",
+      "modelHash": "dea0f116f8de9c27322b10f099122e434ae3ec5a0b1e949a11627f9d191a788b",
+      "expected": {
+        "status": "optimal",
+        "objective": 450,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "project",
+      "slug": "project-selection",
+      "legacyCategory": "binary",
+      "modelHash": "237515c8d1e306ac4b15868ff58583cc55534c49a7429052bcbbc5b61cdb00d3",
+      "expected": {
+        "status": "optimal",
+        "objective": 125,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "delivery",
+      "slug": "delivery-load",
+      "legacyCategory": "binary",
+      "modelHash": "2955e364b6fd0614621ee76d8015ea6fcf6fb7eefe50142f5f52ff854d90e72d",
+      "expected": {
+        "status": "optimal",
+        "objective": 240,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "supplier",
+      "slug": "supplier-activation",
+      "legacyCategory": "binary",
+      "modelHash": "0be9cc7cbc5e1fc03065fc5fc4027b1f6aa7bb38270eefe72bf5a393390210cc",
+      "expected": {
+        "status": "optimal",
+        "objective": 830,
+        "tolerance": null
+      }
+    }
+  ]
+}
