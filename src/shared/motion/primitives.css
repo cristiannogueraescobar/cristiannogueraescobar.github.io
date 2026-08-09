@@ -1,0 +1,180 @@
+/* ============================================================================
+   Plumline motion system — MOTION PRIMITIVES (CSS)
+   ----------------------------------------------------------------------------
+   Reusable, opt-in motion built ONLY on the canonical tokens in tokens.css.
+   Rules enforced by the F4c contract:
+     - no `transition: all`;
+     - animate compositor-friendly properties (transform, opacity); small state
+       feedback on color/background-color/border-color is allowed and measured;
+     - no layout geometry animated (width/height/top/left/right/bottom/margin/
+       padding/grid-template/filter/large shadow);
+     - no `animation-iteration-count: infinite` and no `infinite` keyword;
+     - every @keyframes has a real consumer and a reduced-motion handling block;
+     - no will-change (no profiling has shown a need); certainly none global.
+
+   PROGRESSIVE ENHANCEMENT — FEATURE-SPECIFIC GATES (no global coupling):
+   A start-state (opacity:0 / offset) is applied ONLY to an element that its OWN
+   controller has explicitly armed, via a per-element flag the controller owns:
+     - reveal  arms a target with `.pl-reveal-armed`;
+     - state   arms a surface with `.pl-motion-state-armed`.
+   There is NO global `.pl-motion` gate. A feature never changes another feature's
+   visibility, and destroy (which removes the armed flag) always leaves content
+   visible. Without JS, nothing is armed, so all content is fully visible.
+   ========================================================================== */
+
+/* ------------------------------------------------------------------ */
+/* Interaction feedback: extremely small, in-place, causal.           */
+/* ------------------------------------------------------------------ */
+.pl-motion-press {
+  transition: transform var(--pl-motion-duration-instant) var(--pl-motion-ease-standard);
+}
+.pl-motion-press:active {
+  transform: translateY(var(--pl-motion-distance-tiny));
+}
+
+/* Small state feedback on colour (justified, measured — not layout). */
+.pl-motion-feedback {
+  transition:
+    background-color var(--pl-motion-duration-fast) var(--pl-motion-ease-standard),
+    border-color var(--pl-motion-duration-fast) var(--pl-motion-ease-standard),
+    color var(--pl-motion-duration-fast) var(--pl-motion-ease-standard);
+}
+
+/* ------------------------------------------------------------------ */
+/* State transition: presentation of a logical state change.          */
+/* The logical state (class/attribute/text) changes FIRST; this only  */
+/* animates the visual settle. Compositor-friendly only.              */
+/* The enter start-state applies ONLY when the state controller has    */
+/* armed the surface (`.pl-motion-state-armed`); without JS the surface */
+/* is fully visible.                                                   */
+/* ------------------------------------------------------------------ */
+.pl-motion-state {
+  transition:
+    opacity var(--pl-motion-duration-normal) var(--pl-motion-ease-standard),
+    transform var(--pl-motion-duration-normal) var(--pl-motion-ease-settle);
+}
+.pl-motion-state-enter.pl-motion-state-armed {
+  opacity: 0;
+  transform: translateY(var(--pl-motion-distance-small));
+}
+.pl-motion-state-enter.pl-motion-state-armed.pl-motion-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reveal: opt-in, one-shot. The start-state applies ONLY to a target  */
+/* the reveal controller has ARMED (`.pl-reveal-armed`). Without JS,   */
+/* or after destroy (armed removed), the content is fully visible.     */
+/* Small offset, short.                                                */
+/* ------------------------------------------------------------------ */
+.pl-reveal.pl-reveal-armed {
+  opacity: 0;
+  transform: translateY(var(--pl-motion-distance-small));
+  transition:
+    opacity var(--pl-motion-duration-deliberate) var(--pl-motion-ease-enter),
+    transform var(--pl-motion-duration-deliberate) var(--pl-motion-ease-enter);
+}
+.pl-reveal.pl-reveal-armed.pl-reveal-in {
+  opacity: 1;
+  transform: none;
+}
+/* Staggered reveal: capped at --pl-motion-stagger-max items via :nth-child. */
+.pl-reveal-group > .pl-reveal-armed:nth-child(1) { transition-delay: 0ms; }
+.pl-reveal-group > .pl-reveal-armed:nth-child(2) { transition-delay: var(--pl-motion-stagger-step); }
+.pl-reveal-group > .pl-reveal-armed:nth-child(3) { transition-delay: calc(var(--pl-motion-stagger-step) * 2); }
+.pl-reveal-group > .pl-reveal-armed:nth-child(4) { transition-delay: calc(var(--pl-motion-stagger-step) * 3); }
+.pl-reveal-group > .pl-reveal-armed:nth-child(5) { transition-delay: calc(var(--pl-motion-stagger-step) * 4); }
+/* 6th item onward: no stagger delay (hard cap; larger lists animate the
+   container, not each item — see list policy). */
+.pl-reveal-group > .pl-reveal-armed:nth-child(n+6) { transition-delay: 0ms; }
+
+/* ------------------------------------------------------------------ */
+/* Product sequence: single-stage view once enhanced. Without JS the  */
+/* stages are a stacked, readable list AND the interactive controls    */
+/* are hidden (they only work after enhancement). When enhanced, the    */
+/* stage that becomes visible fades in — a REAL one-shot opacity        */
+/* keyframe, because switching stages toggles the `hidden` attribute    */
+/* (display:none), so a plain opacity TRANSITION could not interpolate  */
+/* from display:none. No layout/geometry, no movement, opacity only.    */
+/* ------------------------------------------------------------------ */
+@keyframes pl-seq-stage-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* Only under enhancement, and only for the currently-visible stage. The
+   keyframe re-runs each time a different stage loses `hidden`. Without JS
+   there is no `.pl-seq--enhanced`, so no enter animation runs and all
+   stages are simply visible. */
+.pl-seq--enhanced .pl-seq__stage:not([hidden]) {
+  animation: pl-seq-stage-in var(--pl-motion-duration-normal) var(--pl-motion-ease-enter) both;
+}
+/* Interactive controls are hidden by default; the sequence controller
+   reveals them by adding `.pl-seq--enhanced`. The stages (content) stay
+   visible without JS. */
+.pl-seq__steps,
+.pl-seq__controls {
+  display: none;
+}
+.pl-seq--enhanced .pl-seq__steps { display: flex; }
+.pl-seq--enhanced .pl-seq__controls { display: flex; }
+
+/* ------------------------------------------------------------------ */
+/* Instrument motion: subtle "settle" for the plumb/measure identity.  */
+/* One-shot, short, no bounce, no perpetual loop. Gated by the run     */
+/* class the lab/controller adds; static (no motion) otherwise.        */
+/* ------------------------------------------------------------------ */
+@keyframes pl-plumb-settle {
+  from { transform: translateY(calc(var(--pl-motion-distance-small) * -1)); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+.pl-plumb-settle.pl-plumb-run {
+  animation: pl-plumb-settle var(--pl-motion-duration-deliberate) var(--pl-motion-ease-settle) both;
+}
+
+@keyframes pl-measure-reveal {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.pl-measure-reveal.pl-measure-run {
+  transform-origin: left center;
+  animation: pl-measure-reveal var(--pl-motion-duration-deliberate) var(--pl-motion-ease-settle) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Reduced-motion: REPLACE spatial motion with a short, non-spatial    */
+/* equivalent that conveys the SAME information. Not a blanket kill.   */
+/*   - remove translate offsets (no vestibular trigger);               */
+/*   - keep a brief opacity change so "something changed" still reads;  */
+/*   - instrument keyframes collapse to an instant, static end state.   */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .pl-motion-press { transition: none; }
+  .pl-motion-press:active { transform: none; }
+
+  .pl-motion-state {
+    transition: opacity var(--pl-motion-duration-fast) var(--pl-motion-ease-standard);
+  }
+  .pl-motion-state-enter.pl-motion-state-armed { transform: none; } /* no spatial offset */
+
+  /* Sequence stage enter: no animation under reduced motion. The stage that
+     becomes visible is simply shown (still fully readable), no fade needed. */
+  .pl-seq--enhanced .pl-seq__stage:not([hidden]) {
+    animation: none;
+    opacity: 1;
+  }
+
+  .pl-reveal.pl-reveal-armed {
+    transform: none;
+    transition: opacity var(--pl-motion-duration-fast) var(--pl-motion-ease-standard);
+  }
+  .pl-reveal-group > .pl-reveal-armed { transition-delay: 0ms; } /* no stagger */
+
+  /* Instrument keyframes: no spatial/scaling motion; land on the end state. */
+  .pl-plumb-settle.pl-plumb-run,
+  .pl-measure-reveal.pl-measure-run {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+}

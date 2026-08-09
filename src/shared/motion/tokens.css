@@ -1,0 +1,48 @@
+/* ============================================================================
+   Plumline motion system — MOTION TOKENS (single canonical source)
+   ----------------------------------------------------------------------------
+   Namespace: --pl-motion-*. This is the ONE place durations, easings, distances
+   and stagger are defined. Motion primitives and the motion lab consume THESE
+   tokens; they never write a raw duration/easing/cubic-bezier of their own.
+   (Small local geometric values that are not a system decision may stay local;
+   see docs/motion-system.md, "no raw motion values".)
+
+   These tokens live OUTSIDE the F4b design system (src/shared/design-system/) so
+   motion has its own ownership and F4b stays byte-identical.
+
+   Principle (calm while working, precise while changing, deliberate while
+   explaining): short, controlled, causal, compositor-friendly (transform /
+   opacity). No spring, no bounce, no elastic, no perpetual motion.
+   ========================================================================== */
+
+:root {
+  /* ---- Duration: ONE small scale (five steps) --------------------------- */
+  --pl-motion-duration-instant:80ms;     /* immediate interaction feedback */
+  --pl-motion-duration-fast:140ms;       /* small state / hover / selection */
+  --pl-motion-duration-normal:220ms;     /* a normal state transition */
+  --pl-motion-duration-deliberate:320ms; /* an explaining, deliberate change */
+  --pl-motion-duration-sequence:2600ms;  /* one autoplay step dwell (demo only) */
+
+  /* ---- Easing: a few clearly distinct curves ---------------------------- */
+  /* standard: symmetric, for in-place state changes */
+  --pl-motion-ease-standard:cubic-bezier(0.4, 0, 0.2, 1);
+  /* enter: decelerate, for something arriving/appearing */
+  --pl-motion-ease-enter:cubic-bezier(0, 0, 0.2, 1);
+  /* exit: accelerate, for something leaving */
+  --pl-motion-ease-exit:cubic-bezier(0.4, 0, 1, 1);
+  /* settle: a controlled arrival for instrument/measurement motion (no
+     overshoot, no bounce — just a firm deceleration into place) */
+  --pl-motion-ease-settle:cubic-bezier(0.2, 0.6, 0.2, 1);
+
+  /* ---- Distance: a very small spatial set ------------------------------- */
+  --pl-motion-distance-tiny:2px;    /* confirmation nudge / calibration mark */
+  --pl-motion-distance-small:8px;   /* a reveal offset / step transition */
+  --pl-motion-distance-medium:16px; /* the largest allowed system offset */
+
+  /* ---- Stagger: tokenised, short, and capped ---------------------------- */
+  --pl-motion-stagger-step:60ms;    /* delay between staggered items */
+  --pl-motion-stagger-max:5;        /* HARD cap: never stagger more than 5 items.
+                                       Larger collections (F6) animate the
+                                       container or a small first group, never
+                                       each of N items. See list policy. */
+}
