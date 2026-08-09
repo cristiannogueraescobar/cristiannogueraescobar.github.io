@@ -1,0 +1,18 @@
+/* ============================================================================
+   Plumline motion system — CANONICAL CSS ENTRY POINT
+   ----------------------------------------------------------------------------
+   The single canonical source of Plumline motion CSS. Import THIS (or the two
+   layers in order). The F4c motion lab imports these same files; production will
+   import them in F9/F10. There is no second copy anywhere. Motion lives OUTSIDE
+   the F4b design system so F4b stays byte-identical.
+
+   Dependency direction (never circular):
+     tokens.css      — raw motion values (durations, easings, distances, stagger)
+     primitives.css  — reusable motion primitives, consume ONLY the tokens
+
+   F4c scope: motion system (tokens + primitives + controllers + lab). NOT wiring
+   motion into public pages. Home is F9; the rest of the public pages is F10.
+   ========================================================================== */
+
+@import url('./tokens.css');
+@import url('./primitives.css');

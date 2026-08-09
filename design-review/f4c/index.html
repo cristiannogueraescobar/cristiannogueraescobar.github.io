@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plumline — F4c motion system (motion laboratory, not published)</title>
+<meta name="robots" content="noindex, nofollow">
+<!-- CANONICAL SOURCES: the lab consumes the REAL F4b design system AND the REAL
+     F4c motion system. It duplicates neither. Only lab.css below is lab-specific
+     scaffolding (documentation layout), and it defines no design-system or motion
+     tokens and no components. -->
+<link rel="stylesheet" href="../../src/shared/design-system/index.css">
+<link rel="stylesheet" href="../../src/shared/motion/index.css">
+<link rel="stylesheet" href="./lab.css">
+</head>
+<body class="pl-root">
+<div class="pl-container">
+
+<header class="lab lab__header">
+  <p class="lab__flag">Plumline · F4c · motion system laboratory · not a production page</p>
+  <h1 class="pl-display">The Plumline motion system.</h1>
+  <p class="pl-body pl-text-secondary" style="max-width:62ch;margin-top:12px">Every specimen below is driven by the single canonical motion source in <span class="pl-mono">src/shared/motion/</span>, layered on the F4b design system in <span class="pl-mono">src/shared/design-system/</span>. This is a laboratory, not a landing page: it exists to prove the motion primitives are reusable, accessible, progressively enhanced and easy to clean up before any public page adopts them. Calm while working, precise while changing, deliberate while explaining.</p>
+  <nav class="lab__toc" aria-label="Motion lab sections">
+    <a class="pl-action-link" href="#s1">Tokens</a>
+    <a class="pl-action-link" href="#s2">Interaction</a>
+    <a class="pl-action-link" href="#s3">State</a>
+    <a class="pl-action-link" href="#s4">Reveal</a>
+    <a class="pl-action-link" href="#s5">Sequence</a>
+    <a class="pl-action-link" href="#s6">Receipt</a>
+    <a class="pl-action-link" href="#s7">Instrument</a>
+  </nav>
+</header>
+
+<!-- 1. Motion tokens ---------------------------------------------------- -->
+<section class="lab__section" id="s1">
+  <h2 class="pl-h2">1 &nbsp;Motion tokens</h2>
+  <p class="pl-body pl-text-secondary">One canonical scale. Durations, easings and distances are tokens; primitives never write raw values.</p>
+  <div class="lab__grid">
+    <div class="lab__spec"><span class="pl-measure-label">Duration</span><p class="pl-mono pl-text-small">instant 80 · fast 140 · normal 220 · deliberate 320 · sequence 2600</p></div>
+    <div class="lab__spec"><span class="pl-measure-label">Easing</span><p class="pl-mono pl-text-small">standard · enter · exit · settle</p></div>
+    <div class="lab__spec"><span class="pl-measure-label">Distance</span><p class="pl-mono pl-text-small">tiny 2 · small 8 · medium 16</p></div>
+    <div class="lab__spec"><span class="pl-measure-label">Stagger</span><p class="pl-mono pl-text-small">step 60ms · max 5 items (hard cap)</p></div>
+  </div>
+</section>
+
+<!-- 2. Interaction feedback --------------------------------------------- -->
+<section class="lab__section" id="s2">
+  <h2 class="pl-h2">2 &nbsp;Interaction feedback</h2>
+  <p class="pl-body pl-text-secondary">Immediate, tiny, in-place. A press settles by two pixels; selection gives a small colour feedback. No hover spectacle.</p>
+  <div class="lab__row">
+    <button class="pl-button pl-button--primary pl-motion-press" type="button">Solve</button>
+    <button class="pl-button pl-button--secondary pl-motion-press" type="button">Check formulas</button>
+    <button class="pl-button pl-button--ghost pl-motion-press pl-motion-feedback" type="button">Toggle</button>
+    <a class="pl-action-link" href="../../solver.html">Open solver</a>
+  </div>
+</section>
+
+<!-- 3. State transition ------------------------------------------------- -->
+<section class="lab__section" id="s3">
+  <h2 class="pl-h2">3 &nbsp;State transition</h2>
+  <p class="pl-body pl-text-secondary">The logical state changes first (text + badge + colour); motion only settles the change. Compositor-friendly (opacity + small transform).</p>
+  <div class="lab__row">
+    <div class="pl-surface pl-motion-state" data-demo-state>
+      <span class="pl-badge pl-badge--proven">Optimal proven</span>
+      <p class="pl-body">processing &rarr; optimal</p>
+    </div>
+    <div class="pl-surface pl-motion-state" data-demo-state>
+      <span class="pl-badge pl-badge--incomplete">Incomplete</span>
+      <p class="pl-body">processing &rarr; incomplete</p>
+    </div>
+  </div>
+  <button class="pl-button pl-button--ghost pl-motion-press" type="button" data-demo-state-run data-lab-jsonly hidden>Replay state settle</button>
+</section>
+
+<!-- 4. Reveal ----------------------------------------------------------- -->
+<section class="lab__section" id="s4">
+  <h2 class="pl-h2">4 &nbsp;Reveal</h2>
+  <p class="pl-body pl-text-secondary">Opt-in, one-shot, progressive enhancement. Without JS this content is fully visible; with JS it reveals once when it becomes relevant. No parallax, no big movement, capped stagger.</p>
+  <div class="pl-reveal-group lab__row">
+    <div class="pl-surface pl-reveal"><p class="pl-body">Model detected</p></div>
+    <div class="pl-surface pl-reveal"><p class="pl-body">Result calculated</p></div>
+    <div class="pl-surface pl-reveal"><p class="pl-body">Formulas checked</p></div>
+  </div>
+  <button class="pl-button pl-button--ghost pl-motion-press" type="button" data-reveal-reset data-lab-jsonly hidden>Reset reveal (lab only)</button>
+</section>
+
+<!-- 5. Product sequence ------------------------------------------------- -->
+<section class="lab__section" id="s5">
+  <h2 class="pl-h2">5 &nbsp;Product sequence</h2>
+  <p class="pl-body pl-text-secondary">A demonstration of the production-plan flow. Not the engine. Without JS, all five steps are readable as a list. With JavaScript and normal motion, one step shows at a time with a pauseable demonstration; reduced motion disables autoplay. Autoplay stops at the last step and never loops. This is the reusable primitive F9 will consume.</p>
+
+  <div class="pl-seq" data-seq data-seq-autoplay="true">
+    <ol class="pl-seq__steps" aria-label="Production plan steps">
+      <li><button class="pl-seq__step" type="button">1 &nbsp;Spreadsheet model</button></li>
+      <li><button class="pl-seq__step" type="button">2 &nbsp;Model detected</button></li>
+      <li><button class="pl-seq__step" type="button">3 &nbsp;Result calculated</button></li>
+      <li><button class="pl-seq__step" type="button">4 &nbsp;Formulas checked</button></li>
+      <li><button class="pl-seq__step" type="button">5 &nbsp;Status reported</button></li>
+    </ol>
+
+    <div class="pl-seq__stages">
+      <div class="pl-seq__stage"><p class="pl-h3">Spreadsheet model</p><p class="pl-body pl-text-secondary">You keep your own spreadsheet. Plumline reads the numbers and the formulas you already wrote.</p></div>
+      <div class="pl-seq__stage"><p class="pl-h3">Model detected</p><p class="pl-body pl-text-secondary">Plumline detects the decision variables, the limits and the objective from the sheet.</p></div>
+      <div class="pl-seq__stage"><p class="pl-h3">Result calculated</p><p class="pl-body pl-text-secondary">Plumline finds the best allocation it can prove within every limit.</p></div>
+      <div class="pl-seq__stage"><p class="pl-h3">Formulas checked</p><p class="pl-body pl-text-secondary">The result is checked back against your own formulas, cell by cell.</p></div>
+      <div class="pl-seq__stage"><p class="pl-h3">Status reported</p><p class="pl-body pl-text-secondary">The status is reported in plain words: optimal proven, incomplete, or infeasible.</p></div>
+    </div>
+
+    <div class="pl-seq__controls">
+      <button class="pl-button pl-button--secondary" type="button" data-seq-toggle data-label-play="Play" data-label-pause="Pause">Pause</button>
+      <button class="pl-button pl-button--ghost" type="button" data-seq-restart>Restart</button>
+      <p class="pl-seq__status pl-text-small pl-text-muted" data-seq-status data-status-reduced="Autoplay off (reduced motion). Step through manually." data-status-manual="Step through manually." data-status-complete="Sequence complete. Restart to replay." role="status" aria-live="polite"></p>
+      <div class="pl-seq__dots" aria-hidden="false">
+        <button class="pl-seq__dot" type="button" aria-label="Go to step 1"></button>
+        <button class="pl-seq__dot" type="button" aria-label="Go to step 2"></button>
+        <button class="pl-seq__dot" type="button" aria-label="Go to step 3"></button>
+        <button class="pl-seq__dot" type="button" aria-label="Go to step 4"></button>
+        <button class="pl-seq__dot" type="button" aria-label="Go to step 5"></button>
+      </div>
+    </div>
+    <p class="pl-text-small pl-text-muted">Demonstration / preview of the production-plan flow. Plumline does not run the engine here.</p>
+  </div>
+</section>
+
+<!-- 6. Verification receipt --------------------------------------------- -->
+<section class="lab__section" id="s6">
+  <h2 class="pl-h2">6 &nbsp;Verification receipt</h2>
+  <p class="pl-body pl-text-secondary">Evidence settles into place; it is not a celebration. The check appears and the receipt reads as a verified result summary.</p>
+  <div class="pl-receipt pl-motion-state" data-demo-state>
+    <div class="pl-receipt__head"><span class="pl-badge pl-badge--proven">Optimal solution proven</span><span class="pl-mono pl-text-small">production-plan · continuous · maximise</span></div>
+    <div class="pl-data-list">
+      <div class="pl-data-list__row"><span class="pl-measure-label">Objective</span><span class="pl-mono">profit = 1,760</span><span class="pl-mathsym pl-verified-mark">&check;</span></div>
+      <div class="pl-data-list__row"><span class="pl-measure-label">Total hours</span><span class="pl-mono">100 &le; 100</span><span class="pl-mathsym pl-verified-mark">&check;</span></div>
+    </div>
+    <p class="pl-text-small pl-text-muted">Recalculated from your formulas in your browser · nothing uploaded</p>
+  </div>
+</section>
+
+<!-- 7. Instrument motion ------------------------------------------------ -->
+<section class="lab__section" id="s7">
+  <h2 class="pl-h2">7 &nbsp;Instrument motion</h2>
+  <p class="pl-body pl-text-secondary">The Plumline identity: a plumb line that settles and a measure that reveals along its length. Subtle, one-shot, no bounce, no perpetual loop.</p>
+  <div class="lab__row">
+    <div class="pl-surface"><div class="pl-plumb-settle" data-plumb><span class="pl-measure-label">Plumb settle</span><p class="pl-mono pl-text-small">aligned</p></div></div>
+    <div class="pl-surface"><div class="pl-measure-reveal" data-measure><span class="pl-measure-label">Measure reveal</span></div></div>
+  </div>
+  <button class="pl-button pl-button--ghost pl-motion-press" type="button" data-instrument-run data-lab-jsonly hidden>Replay instrument (lab only)</button>
+</section>
+
+<footer class="lab lab__footer">
+  <p class="lab__note">Plumline · F4c motion system · single canonical source in src/shared/motion/ · consumes F4b design system · no production wiring · no perpetual motion · reduced-motion honoured · Home is F9 · public pages are F10</p>
+</footer>
+
+</div>
+
+<!-- Motion controllers. Classic scripts (no bundler assumption). Order:
+     lifecycle + preference first, then reveal + sequence, then the lab wiring. -->
+<script src="../../src/shared/motion/preference.js"></script>
+<script src="../../src/shared/motion/lifecycle.js"></script>
+<script src="../../src/shared/motion/reveal.js"></script>
+<script src="../../src/shared/motion/sequence.js"></script>
+<script src="../../src/shared/motion/index.js"></script>
+<script src="./lab.js"></script>
+</body>
+</html>

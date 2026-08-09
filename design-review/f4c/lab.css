@@ -1,0 +1,48 @@
+/* ============================================================================
+   F4c motion lab — ORGANISATIONAL CSS ONLY
+   ----------------------------------------------------------------------------
+   This file styles ONLY the laboratory scaffolding (section spacing, doc grid,
+   spec rows). Its contract:
+     - it does NOT define any design-system or motion token;
+     - it does NOT redefine any component or motion primitive;
+     - it introduces NO brand colours (colours come from --pl-* semantic roles);
+     - it MAY use small local measurements purely to lay out the lab.
+   All tokens, components and motion come from the canonical sources imported in
+   the HTML head.
+   ========================================================================== */
+
+/* JS-only lab controls start `hidden`; make sure the attribute wins over the
+   design-system button display so they are not visible-but-dead without JS.
+   lab.js removes `hidden` only after wiring each button's handler. */
+[data-lab-jsonly][hidden] { display: none !important; }
+
+.lab__section { padding: 40px 0; border-top: 1px solid var(--pl-color-border-subtle); }
+.lab__header { padding: 8px 0 24px; }
+.lab__footer { padding: 32px 0; border-top: 1px solid var(--pl-color-border-subtle); }
+.lab__flag { font: var(--pl-font-label); color: var(--pl-color-process-text); letter-spacing: var(--pl-text-tracking-label); text-transform: uppercase; }
+.lab__note { font: var(--pl-font-small); color: var(--pl-color-text-muted); }
+.lab__toc { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; }
+
+.lab__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+.lab__row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 16px; }
+.lab__spec { padding: 12px 0; }
+
+/* Lab surfaces are just boxes to demonstrate primitives; they borrow the
+   design-system surface role, they do not redefine it. */
+.lab__row .pl-surface { min-width: 180px; padding: var(--pl-pad-inset); }
+
+/* Sequence lab layout (structure only; motion comes from the primitives). */
+.pl-seq__steps { list-style: none; margin: 16px 0; padding: 0; flex-wrap: wrap; gap: 8px; }
+.pl-seq__step { font: var(--pl-font-small); padding: 6px 12px; border: 1px solid var(--pl-color-border); border-radius: var(--pl-radius-control); background: var(--pl-color-bg-surface); color: var(--pl-color-text-secondary); cursor: pointer; min-height: var(--pl-target-min); }
+.pl-seq__step[aria-current="step"] { border-color: var(--pl-color-process); color: var(--pl-color-text-primary); }
+.pl-seq__stages { min-height: 96px; padding: var(--pl-pad-inset) 0; }
+.pl-seq__controls { flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 8px; }
+.pl-seq__dots { display: flex; gap: 8px; }
+.pl-seq__dot { width: 12px; height: 12px; min-width: var(--pl-target-min); min-height: var(--pl-target-min); border: 1px solid var(--pl-color-border); border-radius: var(--pl-radius-round); background: var(--pl-color-bg-surface); position: relative; cursor: pointer; }
+.pl-seq__dot::before { content: ""; position: absolute; inset: 50% auto auto 50%; width: 8px; height: 8px; transform: translate(-50%, -50%); border-radius: 50%; background: var(--pl-color-border); }
+.pl-seq__dot[aria-current="step"]::before { background: var(--pl-color-process); }
+
+/* Lab-only lifecycle evidence panel (debug; never shipped to production). */
+.lab__debug { margin-top: 16px; padding: 12px; border: 1px dashed var(--pl-color-border); border-radius: var(--pl-radius-control); font: var(--pl-font-mono); color: var(--pl-color-text-muted); }
+
+.pl-verified-mark { color: var(--pl-color-verified); }
