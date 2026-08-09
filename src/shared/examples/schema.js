@@ -27,6 +27,30 @@ var TRANSLATION_KEYS = ['title', 'desc'];
 function isFiniteNumber(n) { return typeof n === 'number' && isFinite(n); }
 function isPlainObject(o) { return o && typeof o === 'object' && !Array.isArray(o); }
 
+// Strict lowercase kebab-case grammar for stable identifiers (slugs, tags):
+// one or more [a-z0-9] groups joined by single hyphens. Rejects spaces,
+// uppercase, underscores, leading/trailing hyphens and double hyphens.
+var KEBAB_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+// Localized content hygiene for F1 translations.title/desc. These strings are
+// consumed by examples.html cards and (in F6) the library/search UI, so they must
+// be clean, trimmed plain text — never a placeholder, a raw field name, or markup.
+// This is the SAME contract the F5 content.question/goal fields already enforce;
+// it lives here because title/desc are F1-owned (F1 must not depend on F5).
+var PLACEHOLDER_RE = /\b(?:todo|fixme|lorem\s+ipsum|xxx)\b/i;
+var HTML_RE = /<[^>]+>/;                         // any angle-bracket tag
+var JS_URI_RE = /javascript:/i;                  // javascript: URIs
+var EVENT_HANDLER_RE = /\bon[a-z]+\s*=/i;        // inline event handlers (onclick=, onload=)
+function checkContentHygiene(value, label, where, errors) {
+  if (typeof value !== 'string' || !value) { errors.push(where + ': empty ' + label); return; }
+  if (value !== value.trim()) errors.push(where + ': ' + label + ' must be trimmed (no leading/trailing whitespace)');
+  if (HTML_RE.test(value)) errors.push(where + ': ' + label + ' must be plain text (no HTML tags)');
+  if (JS_URI_RE.test(value) || EVENT_HANDLER_RE.test(value)) errors.push(where + ': ' + label + ' must not contain script/event content');
+  if (PLACEHOLDER_RE.test(value)) errors.push(where + ': ' + label + ' looks like placeholder text (TODO/FIXME/lorem ipsum)');
+  var trimmed = value.trim();
+  if (trimmed === label || trimmed === 'title' || trimmed === 'desc') errors.push(where + ': ' + label + ' must not be the raw field name "' + trimmed + '"');
+}
+
 function validateRecord(rec, index, errors) {
   var where = 'record[' + index + ']' + (rec && rec.key ? ' (' + rec.key + ')' : '');
 
@@ -43,8 +67,16 @@ function validateRecord(rec, index, errors) {
     if (isPlainObject(node)) { Object.keys(node).forEach(function (k) { scan(node[k], path + '.' + k); }); }
   })(rec, where);
 
-  if (typeof rec.key !== 'string' || !rec.key) errors.push(where + ': key must be a non-empty string');
-  if (typeof rec.slug !== 'string' || !rec.slug) errors.push(where + ': slug must be a non-empty string');
+  if (typeof rec.key !== 'string' || !rec.key) {
+    errors.push(where + ': key must be a non-empty string');
+  } else if (!KEBAB_RE.test(rec.key)) {
+    errors.push(where + ': key "' + rec.key + '" must be lowercase kebab-case (^[a-z0-9]+(?:-[a-z0-9]+)*$): stable machine ID, no spaces, uppercase, underscores, leading/trailing or double hyphens');
+  }
+  if (typeof rec.slug !== 'string' || !rec.slug) {
+    errors.push(where + ': slug must be a non-empty string');
+  } else if (!KEBAB_RE.test(rec.slug)) {
+    errors.push(where + ': slug "' + rec.slug + '" must be lowercase kebab-case (^[a-z0-9]+(?:-[a-z0-9]+)*$): no spaces, uppercase, underscores, leading/trailing or double hyphens');
+  }
   if (VALID_CATEGORIES.indexOf(rec.category) === -1) errors.push(where + ': invalid category "' + rec.category + '"');
   if (VALID_TYPES.indexOf(rec.type) === -1) errors.push(where + ': invalid type "' + rec.type + '"');
   if (VALID_SENSES.indexOf(rec.sense) === -1) errors.push(where + ': invalid sense "' + rec.sense + '"');
@@ -59,8 +91,8 @@ function validateRecord(rec, index, errors) {
       Object.keys(t).forEach(function (k) {
         if (TRANSLATION_KEYS.indexOf(k) === -1) errors.push(where + ': unknown translation field "' + k + '" in ' + lang);
       });
-      if (typeof t.title !== 'string' || !t.title) errors.push(where + ': empty title in ' + lang);
-      if (typeof t.desc !== 'string' || !t.desc) errors.push(where + ': empty description in ' + lang);
+      checkContentHygiene(t.title, 'title', where + ' [' + lang + ']', errors);
+      checkContentHygiene(t.desc, 'desc', where + ' [' + lang + ']', errors);
     });
     Object.keys(rec.translations).forEach(function (lang) {
       if (LANGS.indexOf(lang) === -1) errors.push(where + ': extra language "' + lang + '"');
@@ -120,8 +152,28 @@ function validateRecord(rec, index, errors) {
     });
     if (VALID_STATUSES.indexOf(rec.expected.status) === -1) errors.push(where + ': invalid expected status "' + rec.expected.status + '"');
     if (VALID_MODEL_TYPES.indexOf(rec.expected.modelType) === -1) errors.push(where + ': invalid expected modelType "' + rec.expected.modelType + '"');
-    if (!isFiniteNumber(rec.expected.objective)) errors.push(where + ': expected objective must be finite');
-    if (rec.expected.tolerance !== undefined && !(isFiniteNumber(rec.expected.tolerance) && rec.expected.tolerance > 0)) {
+    // Expected objective is STATUS-AWARE. Solution-bearing statuses (optimal/feasible)
+    // require a finite numeric objective. No-solution statuses (infeasible/unbounded)
+    // have no incumbent, so the objective is canonically null or absent — a numeric
+    // objective is rejected. The nine existing records are all 'optimal' with finite
+    // objectives, so they stay byte-identical.
+    var noSolutionStatus = rec.expected.status === 'infeasible' || rec.expected.status === 'unbounded';
+    if (noSolutionStatus) {
+      if (rec.expected.objective !== null && rec.expected.objective !== undefined) {
+        errors.push(where + ': a no-solution status (' + rec.expected.status + ') must not pin an objective (use null or omit it)');
+      }
+    } else {
+      if (!isFiniteNumber(rec.expected.objective)) errors.push(where + ': expected objective must be finite');
+    }
+    // Tolerance is STATUS-AWARE at the structural level (F1 owns structure only; the
+    // F5 layer owns the MIN/MAX quality band). No-solution statuses are status-only:
+    // they must not carry a tolerance any more than an objective. Solution-bearing
+    // statuses may carry a tolerance, and when present it must be finite and positive.
+    if (noSolutionStatus) {
+      if (rec.expected.tolerance !== undefined) {
+        errors.push(where + ': a no-solution status (' + rec.expected.status + ') must not carry a tolerance (status-only)');
+      }
+    } else if (rec.expected.tolerance !== undefined && !(isFiniteNumber(rec.expected.tolerance) && rec.expected.tolerance > 0)) {
       errors.push(where + ': tolerance must be finite and positive when present');
     }
   }

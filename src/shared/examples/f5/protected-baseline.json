@@ -1,0 +1,317 @@
+{
+  "note": "F5 protected baseline: files F5 must NOT change, as an INDEPENDENT exact-set hash contract. The positive suite pins expectedPaths + expectedCounts separately and asserts no missing/extra/duplicate, so removing an entry from this manifest is itself detected.",
+  "expectedCounts": {
+    "public": 12,
+    "infra": 3,
+    "f4": 27,
+    "engine_core": 6
+  },
+  "expectedPaths": {
+    "public": [
+      "about.html",
+      "assets/examples-data.js",
+      "assets/i18n.js",
+      "assets/plumline.css",
+      "assets/product-capabilities.js",
+      "capabilities.html",
+      "examples.html",
+      "guide.html",
+      "index.html",
+      "privacy.html",
+      "solver.html",
+      "terms.html"
+    ],
+    "infra": [
+      "package-lock.json",
+      "package.json",
+      "vite.config.mjs"
+    ],
+    "f4": [
+      "docs/design-system-components.md",
+      "docs/motion-system.md",
+      "src/shared/design-system/01-primitives.css",
+      "src/shared/design-system/02-semantic.css",
+      "src/shared/design-system/03-base.css",
+      "src/shared/design-system/04-layout.css",
+      "src/shared/design-system/05-fonts.css",
+      "src/shared/design-system/06-components.css",
+      "src/shared/design-system/07-forms.css",
+      "src/shared/design-system/08-instrument.css",
+      "src/shared/design-system/09-utilities.css",
+      "src/shared/design-system/fonts/FONT-AUDIT.json",
+      "src/shared/design-system/fonts/Manrope-OFL.txt",
+      "src/shared/design-system/fonts/Newsreader-OFL.txt",
+      "src/shared/design-system/fonts/manrope-latin-ext-wght-normal.woff2",
+      "src/shared/design-system/fonts/manrope-latin-wght-normal.woff2",
+      "src/shared/design-system/fonts/newsreader-latin-ext-wght-normal.woff2",
+      "src/shared/design-system/fonts/newsreader-latin-wght-normal.woff2",
+      "src/shared/design-system/index.css",
+      "src/shared/motion/index.css",
+      "src/shared/motion/index.js",
+      "src/shared/motion/lifecycle.js",
+      "src/shared/motion/preference.js",
+      "src/shared/motion/primitives.css",
+      "src/shared/motion/reveal.js",
+      "src/shared/motion/sequence.js",
+      "src/shared/motion/tokens.css"
+    ],
+    "engine_core": [
+      "engine/engine.js",
+      "engine/fragments/solver-ui/solve-worker-client.js",
+      "engine/generate-engine-mirror.js",
+      "engine/source/engine-platform-adapter.json",
+      "engine/source/plumline-engine.js",
+      "src/shared/compose-solver.js"
+    ]
+  },
+  "sets": {
+    "public": [
+      {
+        "path": "about.html",
+        "bytes": 5011,
+        "sha256": "feb4a30f9184e8cf4245b923824cc80d7507efc09407ee8e9811f4410024f11c"
+      },
+      {
+        "path": "assets/examples-data.js",
+        "bytes": 2644,
+        "sha256": "651ba403f377ee1935235a01e42fd953ef4c7711659f31ed6d8cbf7e2ffabea0"
+      },
+      {
+        "path": "assets/i18n.js",
+        "bytes": 284501,
+        "sha256": "b2835aeaa393aeedf95eb94ce2d5bb3473c9ab4cc11511460a8481d35059afba"
+      },
+      {
+        "path": "assets/plumline.css",
+        "bytes": 58492,
+        "sha256": "4c743aed3f36104b10015369e4cbe116b3e1c19fb8a38f784da8de31bfe862b4"
+      },
+      {
+        "path": "assets/product-capabilities.js",
+        "bytes": 23079,
+        "sha256": "6fb056b80d3a2673a790268a72b4042be9447e3b6a7cecd01d8cbbd3777ea476"
+      },
+      {
+        "path": "capabilities.html",
+        "bytes": 15957,
+        "sha256": "4b372fd3d72e42c61d299a9a57c26c7c5ad6ee11cff88e19bae4e8078b125b67"
+      },
+      {
+        "path": "examples.html",
+        "bytes": 8748,
+        "sha256": "d9c3909cc9d120412b92ed8f38f9f406f9704a0ff5e627e16c66a0ded6ecaa00"
+      },
+      {
+        "path": "guide.html",
+        "bytes": 15285,
+        "sha256": "d0c76e3420a865484f3ae80a4a035abd625dd5fc85d0df6fb8369c9daf039d78"
+      },
+      {
+        "path": "index.html",
+        "bytes": 30346,
+        "sha256": "f55be895046840bdf8c262079b43287af7515d581ab2122882891f353b5b4fe1"
+      },
+      {
+        "path": "privacy.html",
+        "bytes": 6332,
+        "sha256": "57fbc6cad548b1f854c0493d3576c5af447abd1a58351f17aff22c8da5a4e1d0"
+      },
+      {
+        "path": "solver.html",
+        "bytes": 34947,
+        "sha256": "b373fa24d8dcd9f59db0b4171abdb1bf42ef9a87315bfad8602aff8753f68b41"
+      },
+      {
+        "path": "terms.html",
+        "bytes": 4737,
+        "sha256": "52d606ed9be4268fa79b963dc993531ce0532a064020b6c1d448bc7f45f66648"
+      }
+    ],
+    "infra": [
+      {
+        "path": "package-lock.json",
+        "bytes": 53262,
+        "sha256": "1fc85b4e1b25e9a55beb3f67e3b6ddf8be37c724128c774f3e7ddf7a86f38c88"
+      },
+      {
+        "path": "package.json",
+        "bytes": 897,
+        "sha256": "17793a8220d8ba32611ac9329e9c851af82aea2f11c1a6faea07ea49ad3210d8"
+      },
+      {
+        "path": "vite.config.mjs",
+        "bytes": 8658,
+        "sha256": "2d232594254e76c0268245350a0c255b94b129dc2feecfaba01721c9e7eba1f1"
+      }
+    ],
+    "f4": [
+      {
+        "path": "docs/design-system-components.md",
+        "bytes": 8442,
+        "sha256": "934c0d72c060b89c1e4ff6d06e1b140c4a70a656e8f8e3fef07cffedca1b0c49"
+      },
+      {
+        "path": "docs/motion-system.md",
+        "bytes": 7845,
+        "sha256": "d708cb8e64b27f7258619258bb7c8b695fc8ea10cb9115d75f28ef5e1cbb57c7"
+      },
+      {
+        "path": "src/shared/design-system/01-primitives.css",
+        "bytes": 5774,
+        "sha256": "4c89237d0bd4332b8256f0125ac98612e24dbcebe32575711966936e994b8c15"
+      },
+      {
+        "path": "src/shared/design-system/02-semantic.css",
+        "bytes": 8132,
+        "sha256": "20bea1e9014352b5dcd3357a44755144fe5f20016fa13420b7b64826bb7ac2a9"
+      },
+      {
+        "path": "src/shared/design-system/03-base.css",
+        "bytes": 3077,
+        "sha256": "b0a21c322e17406e5c252b67686a63787163196d416c8ba42391b47bb76aa93a"
+      },
+      {
+        "path": "src/shared/design-system/04-layout.css",
+        "bytes": 2856,
+        "sha256": "b2361218b7e46a2aa27383de8a983fc98ed8cc74fe248d8b195b89b5e8a8247c"
+      },
+      {
+        "path": "src/shared/design-system/05-fonts.css",
+        "bytes": 4371,
+        "sha256": "d79d80a0e272e74575aeb2cc4fafd09c74faeaec5ee17e72f6e82a0b02f92f3f"
+      },
+      {
+        "path": "src/shared/design-system/06-components.css",
+        "bytes": 13845,
+        "sha256": "56650daef89db35636995bde56fc51bdcd12f894fcd6c17c6db4636b8821237d"
+      },
+      {
+        "path": "src/shared/design-system/07-forms.css",
+        "bytes": 3023,
+        "sha256": "3175b67cca4162a1b9cc3572fd22b5d315c45f49988261e29865e1e76e8007cc"
+      },
+      {
+        "path": "src/shared/design-system/08-instrument.css",
+        "bytes": 2304,
+        "sha256": "89f2c81f10649777669a9cbc05e99947de732cbef4e59f1a6cd41b693f8fdacf"
+      },
+      {
+        "path": "src/shared/design-system/09-utilities.css",
+        "bytes": 1188,
+        "sha256": "531dafaf0a358411b21b2bb9dc9bec322c75708ede3c9c56165a7e838b645b78"
+      },
+      {
+        "path": "src/shared/design-system/fonts/FONT-AUDIT.json",
+        "bytes": 2901,
+        "sha256": "ce9c8045ae711b4d510cbb70d9d9be01cc725e8f1b00bd29a971b215d467865a"
+      },
+      {
+        "path": "src/shared/design-system/fonts/Manrope-OFL.txt",
+        "bytes": 4383,
+        "sha256": "d826ab6583b12c26807d8716a545bdbbb672df04f48608a364ba9efdbe501c30"
+      },
+      {
+        "path": "src/shared/design-system/fonts/Newsreader-OFL.txt",
+        "bytes": 4520,
+        "sha256": "26028ec4e13b650065fa525a09532176f8a668b76ff849ea01c564a7480f91e7"
+      },
+      {
+        "path": "src/shared/design-system/fonts/manrope-latin-ext-wght-normal.woff2",
+        "bytes": 15120,
+        "sha256": "3911b66d9f2e005a4b989223405d0e5032619c668597ba467cc76a23c8fffcfb"
+      },
+      {
+        "path": "src/shared/design-system/fonts/manrope-latin-wght-normal.woff2",
+        "bytes": 24836,
+        "sha256": "a30ddcd349703aff7464c34bef3fffdff405ee50c113440d7c8693c02d210972"
+      },
+      {
+        "path": "src/shared/design-system/fonts/newsreader-latin-ext-wght-normal.woff2",
+        "bytes": 36244,
+        "sha256": "ac6fa9ed533278f4c8fd3ae44a1fc78c7df736040237ab86fc1160d020af0af2"
+      },
+      {
+        "path": "src/shared/design-system/fonts/newsreader-latin-wght-normal.woff2",
+        "bytes": 58084,
+        "sha256": "62981321d9a3cc7a61a73792729043703fd6112da86e8ec848bb57f088578757"
+      },
+      {
+        "path": "src/shared/design-system/index.css",
+        "bytes": 1890,
+        "sha256": "2bfcb2cd8a5f7da6f5a45819ad41f8845bec748568667bbcc27d185ad08fb504"
+      },
+      {
+        "path": "src/shared/motion/index.css",
+        "bytes": 1021,
+        "sha256": "d28811260cc94d9e1107148a05a5a6b04d8cc9d9e4143365f30a48551f27a2de"
+      },
+      {
+        "path": "src/shared/motion/index.js",
+        "bytes": 2343,
+        "sha256": "325024015501d86aa3612d6c959d50a5edb2e31726d2e5fde24c17628bc1d2a7"
+      },
+      {
+        "path": "src/shared/motion/lifecycle.js",
+        "bytes": 4671,
+        "sha256": "69272288bc053c330cfdca13ac0dcf661217b82936e165b1d77c32d73e5e2c89"
+      },
+      {
+        "path": "src/shared/motion/preference.js",
+        "bytes": 2547,
+        "sha256": "3003c118e74fc1809eceed3f7e63f69ef39c30066b4adb25000d56fd71305a9a"
+      },
+      {
+        "path": "src/shared/motion/primitives.css",
+        "bytes": 8873,
+        "sha256": "113b4359ad46cee7e165ecb9dc2ac390de7e307a81a46f5a09ddc7f018835e51"
+      },
+      {
+        "path": "src/shared/motion/reveal.js",
+        "bytes": 3471,
+        "sha256": "3785857d24e77abc2287b24b457ef8a8d9cab5992b916d379d03635c47fbcd02"
+      },
+      {
+        "path": "src/shared/motion/sequence.js",
+        "bytes": 12594,
+        "sha256": "0b750ac2c689543c1664eabf56dc16cce9d5ae4449f10a06b9b41beafb5ab11f"
+      },
+      {
+        "path": "src/shared/motion/tokens.css",
+        "bytes": 2918,
+        "sha256": "2e9abad821cd33dc377f5fe71b3436ea2d70f6adedc1d5fe5d3b6306620c8d68"
+      }
+    ],
+    "engine_core": [
+      {
+        "path": "engine/engine.js",
+        "bytes": 84242,
+        "sha256": "faabb2c240951bb9c2e90bb0d1762a3cf29409f12cf02d4958a0fcb5c77a39a6"
+      },
+      {
+        "path": "engine/fragments/solver-ui/solve-worker-client.js",
+        "bytes": 4551,
+        "sha256": "121dfb653cd89c8633f00cbfda7823b42d3cb6f38587919435e1b3d2cd239f49"
+      },
+      {
+        "path": "engine/generate-engine-mirror.js",
+        "bytes": 5938,
+        "sha256": "c563560df07dcd7ce0b30ac5d75351febfdcee5fddeebc4895c70accf89b35b6"
+      },
+      {
+        "path": "engine/source/engine-platform-adapter.json",
+        "bytes": 6266,
+        "sha256": "3e592a8e8452fec480539023c3bbb022ec076e301eb1dd4b92f11810769a2935"
+      },
+      {
+        "path": "engine/source/plumline-engine.js",
+        "bytes": 82697,
+        "sha256": "5d68ed17d44a02700dce2cc6df862dfd13d3bf97e3a3bb7af1242651266cd3cf"
+      },
+      {
+        "path": "src/shared/compose-solver.js",
+        "bytes": 20827,
+        "sha256": "04c301bd8b2e66e5429b6980484f8e97bebd6d9c042b9fd101468a1c6a96543f"
+      }
+    ]
+  }
+}

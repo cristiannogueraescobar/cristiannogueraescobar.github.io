@@ -103,8 +103,8 @@
     },
     {
       "path": "src/shared/examples/schema.js",
-      "bytes": 8921,
-      "sha256": "7f5186a565e77bd935e41e6d1e2b17500bba3cda32b5c4708aaab5c70a9983a9"
+      "bytes": 12505,
+      "sha256": "62474a09319947a5a982277c8ddcd6f239d9a5c05257492d1d70907ebc476035"
     },
     {
       "path": "src/shared/examples/serialize.js",

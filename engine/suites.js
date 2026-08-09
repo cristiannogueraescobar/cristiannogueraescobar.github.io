@@ -25,7 +25,8 @@ const SUITES = [
   'tests_f3a_hero', 'tests_f3b_home_sections', 'tests_f3c_home_sections', 'tests_f3c_home_sections_negative',
   'tests_f4a_visual_direction', 'tests_f4a_visual_direction_negative',
   'tests_f4b_design_system', 'tests_f4b_design_system_negative',
-  'tests_f4c_motion_system', 'tests_f4c_motion_system_negative', 'tests_f4c_motion_behavioural'
+  'tests_f4c_motion_system', 'tests_f4c_motion_system_negative', 'tests_f4c_motion_behavioural',
+  'tests_f5_examples_architecture', 'tests_f5_examples_behavioural', 'tests_f5_examples_architecture_negative', 'tests_f5_real_loader'
 ];
 
 module.exports = SUITES;
