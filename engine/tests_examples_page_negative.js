@@ -52,18 +52,18 @@ function negative(label, mutate, mentions) {
 
 // 1. Remove a card.
 negative('N1 (remove a card)', function (d) {
-  writeF(ep(d), readF(ep(d)).replace(/<a href="solver\.html\?ex=production-plan"[^>]*>[\s\S]*?<\/a>/, ''));
+  writeF(ep(d), readF(ep(d)).replace(/<article class="lib-card" data-ex-id="production"[\s\S]*?<\/article>/, ''));
 }, 'examples: <main> SHA-256');
 // 2. Duplicate a card.
 negative('N2 (duplicate a card)', function (d) {
-  const s = readF(ep(d)); const m = s.match(/<a href="solver\.html\?ex=production-plan"[^>]*>[\s\S]*?<\/a>/);
+  const s = readF(ep(d)); const m = s.match(/<article class="lib-card" data-ex-id="production"[\s\S]*?<\/article>/);
   writeF(ep(d), s.replace(m[0], m[0] + m[0]));
-}, 'examples: card count');
+}, 'examples: <main> SHA-256');
 // 3. Reorder cards (swap first two cards in <main>).
 negative('N3 (reorder cards)', function (d) {
   let s = readF(ep(d));
   const main = s.match(/<main\b[^>]*>[\s\S]*?<\/main>/)[0];
-  const cards = main.match(/<a href="solver\.html\?ex=[^"]+"[^>]*>[\s\S]*?<\/a>/g);
+  const cards = main.match(/<article class="lib-card" data-ex-id="[^"]+"[\s\S]*?<\/article>/g);
   let newMain = main.replace(cards[0], '\u0000A\u0000').replace(cards[1], '\u0000B\u0000');
   newMain = newMain.replace('\u0000A\u0000', cards[1]).replace('\u0000B\u0000', cards[0]);
   writeF(ep(d), s.replace(main, newMain));
@@ -95,7 +95,7 @@ negative('N8 (change a category)', function (d) {
 // 9. Break a solver link (bad format).
 negative('N9 (break a solver link)', function (d) {
   writeF(ep(d), readF(ep(d)).replace('href="solver.html?ex=production-plan"', 'href="solver.html?example=production-plan"'));
-}, 'examples: card count');
+}, 'examples: <main> SHA-256');
 // 10. Add a public example in data missing from HTML.
 negative('N10 (data example missing from HTML)', function (d) {
   const s = readF(ed(d));
@@ -116,12 +116,12 @@ negative('N11 (internal/pending category exposed)', function (d) {
 // stays independent of solver's math; see docs/checkpoint-c3-examples.md.
 // 12. Remove a script.
 negative('N12 (remove a script)', function (d) {
-  writeF(ep(d), readF(ep(d)).replace(/<script src="assets\/i18n\.js\?v=82"><\/script>\s*/, ''));
+  writeF(ep(d), readF(ep(d)).replace(/<script src="assets\/i18n\.js\?v=83"><\/script>\s*/, ''));
 }, 'examples: script src set');
 // 13. Change an asset version.
 negative('N13 (change asset version)', function (d) {
-  writeF(ep(d), readF(ep(d)).replace('i18n.js?v=82', 'i18n.js?v=81'));
-}, 'examples: script src set');
+  writeF(ep(d), readF(ep(d)).replace('i18n.js?v=83', 'i18n.js?v=82'));
+}, 'examples: asset versions');
 // 14. Change canonical.
 negative('N14 (change canonical)', function (d) {
   writeF(ep(d), readF(ep(d)).replace('<link rel="canonical" href="https://plumline.online/examples.html">',
@@ -137,10 +137,11 @@ negative('N16 (remove a data-i18n)', function (d) {
   const s = readF(ep(d)); const m = s.match(/ data-i18n="[^"]+"/);
   writeF(ep(d), s.replace(m[0], ''));
 }, 'examples: data-i18n key set');
-// 17. Change the inline style.
-negative('N17 (change inline style)', function (d) {
-  writeF(ep(d), readF(ep(d)).replace('<style>', '<style>/* x */'));
-}, 'examples: inline <style> SHA-256');
+// 17. Change the page CSS link (F6 has no inline <style>; its page CSS is the
+//     external assets/examples-library.css, whose version is part of the golden).
+negative('N17 (change the page CSS link)', function (d) {
+  writeF(ep(d), readF(ep(d)).replace('assets/examples-library.css?v=1', 'assets/examples-library.css?v=2'));
+}, 'examples: <head> SHA-256');
 // 18. Add fetch('examples-section.html').
 negative('N18 (fetch content)', function (d) {
   writeF(ep(d), readF(ep(d)).replace('</body>', "<script>fetch('examples-section.html')</script></body>"));
@@ -149,7 +150,7 @@ negative('N18 (fetch content)', function (d) {
 //     AND set main's innerHTML) — the static catalog must be present.
 negative('N19 (catalog built via innerHTML, static cards removed)', function (d) {
   let s = readF(ep(d));
-  s = s.replace(/<a href="solver\.html\?ex=[^"]+"[^>]*>[\s\S]*?<\/a>/g, ''); // strip all static cards
+  s = s.replace(/<article class="lib-card" data-ex-id="[^"]+"[\s\S]*?<\/article>/g, ''); // strip all static cards
   writeF(ep(d), s);
 }, 'examples: card count');
 // 20. Add an engine reference.
@@ -171,7 +172,7 @@ negative('N23 (examples source partial appears)', function (d) {
 }, 'examples: no examples source partial directory');
 // 24. Duplicate an ID.
 negative('N24 (duplicate an id)', function (d) {
-  writeF(ep(d), readF(ep(d)).replace('id="exCatalog"', 'id="exCatalog"></div><div id="exCatalog"'));
+  writeF(ep(d), readF(ep(d)).replace('id="libRoot"', 'id="libRoot"></div><div id="libRoot"'));
 }, 'examples: no duplicate IDs');
 // 25. Modify solver.html (add stray content) AND mutate an examples slug: the
 //     Examples checker must trip on the EXAMPLES-side mutation and must NOT depend

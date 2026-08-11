@@ -1,0 +1,31 @@
+{
+  "note": "Checkpoint F6 (Examples library UI) protected baseline. Pins, by SHA-256 + byte length, the F6-OWNED UI, runtime logic, view-model projector and generator that F7 (expand 9->60 examples) MUST NOT redesign: examples-library.css, examples-library.ui.js, examples-library-core.js, src/shared/examples/f6/library.js and engine/generate-examples-library.js. It deliberately does NOT pin two DATA-bearing outputs, which are protected differently:\n - examples.html: pinned to its F6 state by the F4b and F5 protected baselines (it is a pre-existing page those baselines already track); its data-bearing regions are regenerated from the F5 canonical between LIBRARY-GENERATED markers.\n - assets/examples-library.js: this is a NEW generated payload, NOT pinned by F4b/F5 (it did not exist at F4b/F5). It is protected instead by deterministic canonical generation (engine/generate-examples-library.js), the generator --check gate (stale output fails the build), and the F6 projection tests — not by a byte hash here.\nThis split is what makes \"F7 adds data without changing the F6 UI\" enforceable: F7 adds catalogue records and regenerates the two data-bearing outputs, while every file pinned in this baseline stays byte-identical.",
+  "expectedCount": 5,
+  "files": [
+    {
+      "path": "assets/examples-library.css",
+      "sha256": "bb23d82b6b47fa7b008ca93d22a46c0a23e0c4c0bcba6bed493359078d69ad09",
+      "bytes": 9795
+    },
+    {
+      "path": "assets/examples-library.ui.js",
+      "sha256": "f947c80356b4a1b7881e3852aace1a29333124b432232cb41377e3c4000c266f",
+      "bytes": 7734
+    },
+    {
+      "path": "assets/examples-library-core.js",
+      "sha256": "0920beb02f01c3a95630d5abe25e52d6e843b5f02af47adef3a5d9eb4e53b837",
+      "bytes": 8415
+    },
+    {
+      "path": "src/shared/examples/f6/library.js",
+      "sha256": "dd5bfdaa50c8ebc5a520d3ec286a1e54dff9b859e68afc3ca4bf0f7f61e02e23",
+      "bytes": 5014
+    },
+    {
+      "path": "engine/generate-examples-library.js",
+      "sha256": "36fefa3330b9a3d7232df8823ed34cc79580afb35f07325602edfe0bb053bed5",
+      "bytes": 14007
+    }
+  ]
+}

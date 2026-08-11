@@ -116,21 +116,32 @@ ok('solve button hover does not lighten to --true-hi (solver)',
 ok('status-list uses a defined token (--soft, not --muted)',
    /\.status-list span\{color:var\(--soft\)\}/.test(css) && !/var\(--muted\)/.test(css));
 
-// examples.html uses inline styles the stylesheet guards above don't see. Its
-// card tags and open-link must use the AA-safe tokens (small text on white).
-ok('example card tags use --brass-text',
-   /\.xcard \.xtags\{[^}]*color:var\(--brass-text\)/.test(examples),
-   'xtags should be brass-text');
-ok('example open link uses --true',
-   /\.xcard \.xopen\{[^}]*color:var\(--true\)/.test(examples),
-   'xopen should be --true');
-ok('examples.html no longer references the undefined --green token',
-   !/var\(--green/.test(examples));
-// Confirm those tokens actually clear AA on the white card ground.
-ok('contrast >= 4.5: example tags (brass-text) on white', ratio(P['brass-text'], '#FFFFFF') >= 4.5,
+// F6 (Examples library UI): examples.html is styled by assets/examples-library.css
+// (external, not inline). Its readable text uses AA-safe tokens on the white card /
+// cream page ground. We run the REAL contrast checker on the exact F6 combinations
+// (not just assert selector names), and confirm the tokens resolve.
+const libCss = fs.readFileSync(path.join(siteDir, 'assets', 'examples-library.css'), 'utf8');
+// Readable-text tokens actually used by the library, each on its lightest ground.
+ok('F6 library card title uses --brass-text', /\.lib-title-link\{[^}]*color:\s*var\(--brass-text/.test(libCss.replace(/\s+/g, ' ')) ||
+   /color:\s*var\(--brass-text/.test(libCss));
+ok('F6 library metadata uses --faint', /color:\s*var\(--faint/.test(libCss));
+ok('F6 library fact values use --ink', /\.lib-fact-n\{[^}]*color:\s*var\(--ink/.test(libCss.replace(/\s+/g, ' ')) ||
+   /color:\s*var\(--ink/.test(libCss));
+ok('F6 library CTA uses --brass-text', /\.lib-cta\{[^}]*color:\s*var\(--brass-text/.test(libCss.replace(/\s+/g, ' ')) ||
+   /color:\s*var\(--brass-text/.test(libCss));
+ok('examples-library.css references no undefined --green token', !/var\(--green/.test(libCss));
+// Real AA checks on the white card ground (#fff) and the cream page ground.
+const CREAM = P['cream'] || '#F5F2EB';
+ok('contrast >= 4.5: F6 title/CTA (brass-text) on white card', ratio(P['brass-text'], '#FFFFFF') >= 4.5,
    ratio(P['brass-text'], '#FFFFFF').toFixed(2) + ':1');
-ok('contrast >= 4.5: example open link (true) on white', ratio(P['true'], '#FFFFFF') >= 4.5,
-   ratio(P['true'], '#FFFFFF').toFixed(2) + ':1');
+ok('contrast >= 4.5: F6 metadata (faint) on white card', ratio(P['faint'], '#FFFFFF') >= 4.5,
+   ratio(P['faint'], '#FFFFFF').toFixed(2) + ':1');
+ok('contrast >= 4.5: F6 fact value (ink) on white card', ratio(P['ink'], '#FFFFFF') >= 4.5,
+   ratio(P['ink'], '#FFFFFF').toFixed(2) + ':1');
+ok('contrast >= 4.5: F6 title/CTA (brass-text) on cream page', ratio(P['brass-text'], CREAM) >= 4.5,
+   ratio(P['brass-text'], CREAM).toFixed(2) + ':1');
+ok('contrast >= 4.5: F6 metadata (faint) on cream page', ratio(P['faint'], CREAM) >= 4.5,
+   ratio(P['faint'], CREAM).toFixed(2) + ':1');
 
 // The build badge must not carry a reduced opacity: it already inherits the
 // footer's translucent cream (.62), so an extra opacity:.6 would compound the

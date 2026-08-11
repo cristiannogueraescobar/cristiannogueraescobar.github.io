@@ -1,0 +1,215 @@
+/* Plumline Examples library (F6) — page-specific styles.
+ *
+ * Built on the F4 design system: it consumes the existing Plumline tokens/variables
+ * (cream paper, deep green, brass, Newsreader/Manrope/mono, lines) rather than
+ * introducing a parallel system or hardcoded colours. Only layout/skin specific to
+ * the library lives here. Enhancement-only controls are hidden until <html> gets the
+ * `js-lib` class, so the no-JS base list stays clean.
+ *
+ * Token fallbacks mirror the existing page variables (var(--line), var(--faint),
+ * var(--brass), var(--brass-text), var(--true), var(--mono), var(--card,#fff)) that
+ * plumline.css already defines site-wide, with F4 primitives as ultimate fallback.
+ */
+
+/* ---- enhancement gating: controls appear only when JS runs ---- */
+.lib-enh { display: none; }
+.js-lib .lib-enh { display: block; }
+.js-lib .lib-nojs { display: none; }
+
+/* ---- library index header (compact, not a hero) ---- */
+.lib-head { padding: 40px 0 28px; }
+.lib-eyebrow {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--brass-text, #7A5518); margin: 0 0 10px;
+}
+.lib-head h1 { max-width: 22ch; margin: 0; }
+.lib-head .lead { margin-top: 18px; max-width: 62ch; }
+.lib-head-meta {
+  margin-top: 18px; font-family: var(--mono, ui-monospace, monospace);
+  font-size: 12px; letter-spacing: .04em; color: var(--faint, #5b6660);
+  display: flex; align-items: center; gap: 10px;
+}
+.lib-head-meta .lib-tick { color: var(--brass, #B5822E); }
+
+/* ---- discovery controls ---- */
+.lib-controls { margin: 6px 0 26px; }
+.lib-search { position: relative; margin-bottom: 16px; }
+.lib-search label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: var(--faint, #5b6660); margin-bottom: 6px;
+}
+.lib-search input {
+  width: 100%; box-sizing: border-box;
+  font-family: var(--pl-family-sans, inherit); font-size: 16px;
+  padding: 12px 14px; border: 1px solid var(--line, #d9d3c6); border-radius: 10px;
+  background: var(--card, #fff); color: inherit; min-height: 44px;
+}
+.lib-search input:focus-visible {
+  outline: 2px solid var(--brass, #B5822E); outline-offset: 2px; border-color: var(--brass, #B5822E);
+}
+
+.lib-facets { border: 0; padding: 0; margin: 0; }
+.lib-facets > summary {
+  cursor: pointer; font-size: 13px; font-weight: 600; color: var(--faint, #5b6660);
+  padding: 8px 0; list-style: none; display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px;
+}
+.lib-facets > summary::-webkit-details-marker { display: none; }
+.lib-facets > summary::before { content: "+"; font-family: var(--mono, monospace); color: var(--brass, #B5822E); }
+.lib-facets[open] > summary::before { content: "\2212"; }
+.lib-facet-groups {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px 24px; padding: 12px 0 4px;
+}
+.lib-facet-group > .lib-facet-legend {
+  font-family: var(--mono, monospace); font-size: 11px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--brass-text, #7A5518); margin: 0 0 8px;
+}
+.lib-facet-opt {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0;
+  font-size: 14px; cursor: pointer; min-height: 32px;
+}
+.lib-facet-opt input { width: 17px; height: 17px; accent-color: var(--brass, #B5822E); }
+.lib-facet-opt input:focus-visible { outline: 2px solid var(--brass, #B5822E); outline-offset: 2px; }
+.lib-facet-count {
+  font-family: var(--mono, monospace); font-size: 11px; color: var(--faint, #5b6660);
+  margin-left: auto;
+}
+
+.lib-status {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding: 8px 0 4px;
+  border-top: 1px solid var(--line, #d9d3c6); margin-top: 8px;
+}
+.lib-count {
+  font-family: var(--mono, monospace); font-size: 13px; color: var(--faint, #5b6660);
+  letter-spacing: .03em;
+}
+.lib-clear {
+  font-size: 13px; font-weight: 600; color: var(--brass-text, #7A5518);
+  background: none; border: 0; cursor: pointer; padding: 8px; min-height: 44px;
+}
+.lib-clear:focus-visible { outline: 2px solid var(--brass, #B5822E); outline-offset: 2px; border-radius: 6px; }
+
+/* ---- card grid (scales to 60) ---- */
+.lib-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px; margin: 8px 0 40px;
+}
+.lib-card {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--line, #d9d3c6); border-radius: 12px;
+  background: var(--card, #fff); padding: 18px 18px 16px;
+  position: relative;
+}
+.lib-card[hidden] { display: none; }
+.lib-card-top {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;
+}
+.lib-ref {
+  font-family: var(--mono, monospace); font-size: 11px; letter-spacing: .06em;
+  color: var(--brass, #B5822E);
+}
+.lib-cat {
+  font-family: var(--mono, monospace); font-size: 11px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--faint, #5b6660);
+}
+.lib-title { margin: 0 0 8px; font-size: 19px; line-height: 1.25; }
+.lib-title-link { color: inherit; text-decoration: none; }
+.lib-title-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.lib-title-link:focus-visible { outline: 2px solid var(--brass, #B5822E); outline-offset: 3px; border-radius: 3px; }
+.lib-q { margin: 0 0 14px; color: var(--faint, #4b544e); font-size: 14px; line-height: 1.5; flex: 1; }
+
+.lib-meta { margin: 0 0 12px; display: grid; gap: 3px; }
+.lib-meta-row { display: flex; gap: 8px; font-size: 12px; }
+.lib-meta-row dt { color: var(--faint, #5b6660); min-width: 84px; }
+.lib-meta-row dd { margin: 0; font-weight: 500; }
+.lib-mono { font-family: var(--mono, monospace); font-size: 11.5px; letter-spacing: .02em; }
+
+.lib-facts {
+  font-family: var(--mono, monospace); font-size: 11.5px; color: var(--faint, #5b6660);
+  letter-spacing: .02em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.lib-fact-n { color: var(--ink, #12211A); font-weight: 600; }
+.lib-fact-sep { color: var(--line, #d9d3c6); }
+
+.lib-cta {
+  align-self: flex-start; font-size: 14px; font-weight: 600;
+  color: var(--brass-text, #7A5518); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px; min-height: 32px;
+}
+.lib-cta:hover { text-decoration: underline; text-underline-offset: 3px; }
+.lib-cta:focus-visible { outline: 2px solid var(--brass, #B5822E); outline-offset: 3px; border-radius: 4px; }
+
+/* ---- empty state ---- */
+.lib-empty {
+  border: 1px dashed var(--line, #d9d3c6); border-radius: 12px;
+  padding: 32px 24px; text-align: center; margin: 8px 0 40px;
+}
+.lib-empty h2 { margin: 0 0 8px; font-size: 20px; }
+.lib-empty p { margin: 0 0 16px; color: var(--faint, #5b6660); max-width: 46ch; margin-inline: auto; }
+
+/* ---- how-it-works footer strip ---- */
+.lib-how { border-top: 1px solid var(--line, #d9d3c6); padding: 28px 0 8px; margin-top: 8px; }
+.lib-how h2 { font-size: 15px; margin: 0 0 16px; color: var(--faint, #5b6660); font-weight: 600; }
+.lib-how-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; }
+.lib-how-step { display: flex; gap: 12px; align-items: flex-start; }
+.lib-how-n {
+  font-family: var(--mono, monospace); font-size: 12px; color: var(--brass, #B5822E);
+  border: 1px solid var(--line, #d9d3c6); border-radius: 50%;
+  width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; flex: none;
+}
+.lib-how-step h3 { margin: 2px 0 2px; font-size: 14px; }
+.lib-how-step p { margin: 0; font-size: 13px; color: var(--faint, #5b6660); }
+
+/* ---- responsive ---- */
+@media (max-width: 900px) {
+  .lib-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+@media (max-width: 640px) {
+  .lib-head { padding: 28px 0 20px; }
+  .lib-grid { grid-template-columns: 1fr; gap: 14px; }
+  .lib-facet-groups { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 380px) {
+  .lib-facet-groups { grid-template-columns: 1fr; }
+  .lib-card { padding: 16px 14px 14px; }
+}
+
+/* ---- reduced motion: nothing animates, but be explicit ---- */
+@media (prefers-reduced-motion: reduce) {
+  .lib-card, .lib-cta, .lib-title-link { transition: none; }
+}
+
+/* ---- visually-hidden (accessible headings that stay off-screen) ---- */
+.pl-visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ---- no-JS shared-header fallback (Examples-scoped) -----------------------
+   This rule lives in the Examples-only stylesheet (examples-library.css loads on
+   examples.html and nowhere else), so it fixes the shared header on THIS page without
+   taking ownership of, or re-versioning, the global assets/plumline.css.
+
+   Problem it solves: with JavaScript disabled, nav-menu.js never adds .nav-menu-ready,
+   so the primary nav links + language control stay inline in the mast. On narrow screens
+   they compressed and were clipped past the viewport edge (About and the language <select>
+   ended up off-screen) even though the document reported no horizontal overflow.
+
+   Fix: below 560px, when the drawer has NOT been wired (:root:not(.nav-menu-ready)), let
+   the mast and nav WRAP so every control stays inside the viewport and tappable. Once JS
+   builds the drawer, .nav-menu-ready is present, this rule stops applying, and the
+   JS-enabled header (drawer + toggle) is unchanged. */
+@media (max-width: 560px) {
+  :root:not(.nav-menu-ready) .mast { flex-wrap: wrap; row-gap: 10px; }
+  :root:not(.nav-menu-ready) .nav {
+    flex-wrap: wrap; gap: 12px 14px; justify-content: flex-start;
+    width: 100%; padding-top: 4px;
+  }
+  :root:not(.nav-menu-ready) .nav a {
+    padding: 6px 0; min-height: 32px; display: inline-flex; align-items: center;
+  }
+  :root:not(.nav-menu-ready) .mast .lang { min-height: 36px; }
+}

@@ -24,7 +24,13 @@ const path = require('path');
 
 const PAGES = ['index', 'solver', 'guide', 'examples', 'capabilities', 'about', 'privacy', 'terms'];
 const INFORMATIONAL = ['index', 'guide', 'capabilities', 'about', 'privacy', 'terms'];
-const PAGES_WITH_INLINE_STYLE = ['solver', 'examples'];
+// F6 (Examples library UI): examples.html no longer carries an inline <style>; its
+// page-specific CSS lives in assets/examples-library.css (owned + protected by F6).
+// solver.html keeps its inline <style>.
+const PAGES_WITH_INLINE_STYLE = ['solver'];
+// examples.html is allowed exactly one extra page-specific stylesheet besides the
+// shared sheet: assets/examples-library.css. No other page may load a second CSS.
+const PAGE_EXTRA_CSS = { examples: 'assets/examples-library.css' };
 // Grid / results / charts / Variable-Settings selectors that must never appear in
 // the SHARED stylesheet. (The pre-existing .exports responsive override is part of
 // the approved cascade and is frozen by the CSS golden hash instead.)
@@ -40,27 +46,41 @@ function checkCssStructure(siteDir) {
   function read(p) { return fs.readFileSync(path.join(siteDir, p + '.html'), 'utf8'); }
   const css = fs.readFileSync(path.join(siteDir, 'assets', 'plumline.css'), 'utf8');
 
-  // Each page loads exactly one external stylesheet: plumline.css?v=21.
+  // Each page loads the shared stylesheet plumline.css?v=21. Every page loads exactly
+  // one stylesheet EXCEPT examples.html, which additionally loads its F6 page-specific
+  // sheet (assets/examples-library.css). No page loads any other CSS.
   PAGES.forEach(function (p) {
     const html = read(p);
     const links = html.match(/<link[^>]*rel="stylesheet"[^>]*>/g) || [];
-    check(p + '.html loads exactly one external stylesheet', links.length === 1);
-    check(p + '.html stylesheet is plumline.css?v=21',
-      links.length === 1 && /assets\/plumline\.css\?v=21/.test(links[0]));
-    // No second external CSS file (no other .css href).
+    const extra = PAGE_EXTRA_CSS[p];
+    const expectedCount = extra ? 2 : 1;
+    check(p + '.html loads the expected number of stylesheets', links.length === expectedCount);
+    check(p + '.html loads the shared plumline.css?v=21',
+      links.some(function (l) { return /assets\/plumline\.css\?v=21/.test(l); }));
+    // Every referenced CSS is either the shared sheet or the page's approved extra.
     const cssHrefs = (html.match(/href="[^"]*\.css[^"]*"/g) || []);
-    check(p + '.html references no CSS file other than plumline.css',
-      cssHrefs.every(function (h) { return h.indexOf('plumline.css') !== -1; }));
+    check(p + '.html references no CSS beyond plumline.css + its approved page CSS',
+      cssHrefs.every(function (h) { return h.indexOf('plumline.css') !== -1 || (extra && h.indexOf(extra) !== -1); }));
+    if (extra) {
+      check(p + '.html loads its approved page-specific CSS (' + extra + ')',
+        cssHrefs.some(function (h) { return h.indexOf(extra) !== -1; }));
+    }
   });
 
-  // Inline <style>: only solver and examples have one; the six informational none.
+  // The F6 page-specific CSS must not leak into any other page.
+  PAGES.forEach(function (p) {
+    if (PAGE_EXTRA_CSS[p]) return;
+    check(p + '.html does not load examples-library.css', read(p).indexOf('examples-library.css') === -1);
+  });
+
+  // Inline <style>: only solver has one; every other page (incl. examples) has none.
   PAGES.forEach(function (p) {
     const n = (read(p).match(/<style\b/g) || []).length;
     if (PAGES_WITH_INLINE_STYLE.indexOf(p) !== -1) check(p + '.html has exactly one inline <style>', n === 1);
     else check(p + '.html has no inline <style>', n === 0);
   });
 
-  // The link comes before the inline <style> on the two pages that have both
+  // The link comes before the inline <style> on the page that has both
   // (so the inline variant wins the cascade, as approved).
   PAGES_WITH_INLINE_STYLE.forEach(function (p) {
     const html = read(p);

@@ -62,19 +62,13 @@ function checkExamplesPage(siteDir) {
   check('examples: <main> SHA-256 matches golden', main !== null && sha256(main) === exp.main_sha256);
   check('examples: <main> byte length matches golden', main !== null && Buffer.byteLength(main, 'utf8') === exp.main_bytes);
 
-  // Inline <style> matches the B3 golden (inner content). B3 owns the CSS; here
-  // we only assert it has NOT drifted (SHA + bytes), we do not re-freeze it.
-  const styleInner = innerRegion(html, 'style');
-  check('examples: inline <style> SHA-256 matches golden (B3)', styleInner !== null && sha256(styleInner) === exp.style_sha256);
-  check('examples: inline <style> byte length matches golden (B3)', styleInner !== null && Buffer.byteLength(styleInner, 'utf8') === exp.style_bytes);
-
   // JSON-LD present + unchanged.
   const jsonld = (html.match(/<script type="application\/ld\+json">[\s\S]*?<\/script>/) || [])[0];
   check('examples: JSON-LD present', exp.jsonld_present ? !!jsonld : true);
   check('examples: JSON-LD matches golden', !exp.jsonld_present || (jsonld && sha256(jsonld) === exp.jsonld_sha256));
 
   // Card catalog: order + count of solver links in <main>.
-  const cardSlugs = allMatch(/href="solver\.html\?ex=([^"]+)"/g, main || '');
+  const cardSlugs = allMatch(/href="solver\.html\?ex=([^"]+)"/g, main || '').filter(function (v, i, a) { return a.indexOf(v) === i; });
   check('examples: card count matches golden (' + exp.card_count + ')', cardSlugs.length === exp.card_count);
   check('examples: card slug order matches golden', eqArr(cardSlugs, exp.card_slugs_in_order));
 
@@ -86,17 +80,17 @@ function checkExamplesPage(siteDir) {
   check('examples: every solver link uses the approved ?ex=<slug> format',
     solverLinks.every(function (l) { return /^solver\.html\?ex=[a-z-]+$/.test(l); }));
 
-  // IDs (exact set, no duplicates).
-  const rawIds = allMatch(/\bid="([^"]+)"/g, html);
+  // IDs (exact set, no duplicates). Only real id="..." attributes (not data-*-id).
+  const rawIds = allMatch(/(?:^|[\s"'])id="([^"]+)"/g, html);
   check('examples: id set matches golden', eqArr(rawIds.slice().sort(), exp.ids));
   check('examples: no duplicate IDs', rawIds.length === new Set(rawIds).size);
 
   // data-i18n set, scripts, asset versions, canonical, OG/Twitter.
-  const keys = allMatch(/data-i18n="([^"]+)"/g, html).slice().sort();
+  const keys = Array.from(new Set(allMatch(/data-i18n="([^"]+)"/g, html))).sort();
   check('examples: data-i18n key set matches golden', eqArr(keys, exp.data_i18n_keys));
   const scripts = Array.from(new Set(allMatch(/<script\b[^>]*src="([^"]+)"/g, html))).sort();
   check('examples: script src set matches golden', eqArr(scripts, exp.scripts));
-  const versions = Array.from(new Set(allMatch(/(assets\/[a-z-]+\.(?:js|css)\?v=\d+)/g, html))).sort();
+  const versions = Array.from(new Set(allMatch(/(assets\/[a-z0-9.-]+\.(?:js|css)\?v=[0-9a-z]+)/g, html))).sort();
   check('examples: asset versions match golden', eqArr(versions, exp.asset_versions));
   const canon = (html.match(/rel="canonical"\s+href="([^"]+)"/) || [])[1];
   check('examples: canonical matches golden', canon === exp.canonical);

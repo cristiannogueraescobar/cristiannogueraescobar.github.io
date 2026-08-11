@@ -1,5 +1,5 @@
 {
-  "note": "Baseline SHA-256 of the post-F4a production/infra files F4b must NOT change. The F4b positive suite requires each to EXIST and match; the negative suite mutates one and expects a specific failure. Paths are relative to the repo root.",
+  "note": "Baseline SHA-256 of the post-F4a production/infra files F4b must NOT change. The F4b positive suite requires each to EXIST and match; the negative suite mutates one and expects a specific failure. Paths are relative to the repo root. | F6 (Examples library UI) re-pin: exactly THREE entries evolve — examples.html and assets/i18n.js (F6-owned outputs) and vite.config.mjs (F6 build-tooling: closeBundle now deletes the orphan per-entry CSS bundle Vite emits for a page with an external page stylesheet). All other protected paths/hashes/bytes are preserved unchanged.",
   "files": [
     {
       "path": "index.html",
@@ -13,8 +13,8 @@
     },
     {
       "path": "examples.html",
-      "bytes": 8748,
-      "sha256": "d9c3909cc9d120412b92ed8f38f9f406f9704a0ff5e627e16c66a0ded6ecaa00"
+      "bytes": 28477,
+      "sha256": "9be7a77ec9788aeb25fa9652079dfe76138449f713dd6378d3f3b5d8d5fef465"
     },
     {
       "path": "capabilities.html",
@@ -48,8 +48,8 @@
     },
     {
       "path": "assets/i18n.js",
-      "bytes": 284501,
-      "sha256": "b2835aeaa393aeedf95eb94ce2d5bb3473c9ab4cc11511460a8481d35059afba"
+      "bytes": 289888,
+      "sha256": "3eef0c0334c8d239e583e86f6404fbb33247437fba69a39a901129de73219a28"
     },
     {
       "path": "assets/examples-data.js",
@@ -63,8 +63,8 @@
     },
     {
       "path": "vite.config.mjs",
-      "bytes": 8658,
-      "sha256": "2d232594254e76c0268245350a0c255b94b129dc2feecfaba01721c9e7eba1f1"
+      "bytes": 9628,
+      "sha256": "e77b05aebd9165fa262281f3dc9e42b0a6001e911d5be443d35c5bd86ee3313f"
     },
     {
       "path": "package.json",

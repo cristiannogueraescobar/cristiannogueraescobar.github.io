@@ -147,7 +147,7 @@ structureNegative('N-informational-style (about.html gains an inline <style>)', 
 structureNegative('N-new-sheet (index.html adds a second external CSS)', function (dir) {
   const f = path.join(dir, 'index.html');
   writeF(f, readF(f).replace('</head>', '<link rel="stylesheet" href="assets/extra.css"></head>'));
-}, 'index.html loads exactly one external stylesheet');
+}, 'index.html loads the expected number of stylesheets');
 
 // 20. CSS fetched at runtime (in a shared module).
 structureNegative('N-css-fetch (nav-menu.js fetches a .css)', function (dir) {

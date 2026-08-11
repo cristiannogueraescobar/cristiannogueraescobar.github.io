@@ -11,34 +11,36 @@
 const fs = require('fs');
 const path = require('path');
 const { composedHtml } = require('./composed-html.js');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const siteDir = path.join(__dirname, '..');
 let pass = 0, fail = 0;
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('  FAIL:', name, detail || ''); } }
 
+// Validate a JS file's syntax by spawning THIS Node with --check on the file path.
+// Uses execFileSync + process.execPath (no shell string), so it is Windows-safe and
+// works with paths that contain spaces.
+function nodeCheck(filePath) {
+  try { execFileSync(process.execPath, ['--check', filePath], { stdio: 'pipe' }); return { ok: true, err: '' }; }
+  catch (e) { return { ok: false, err: String(e.stderr || e.message) }; }
+}
+
 // 1. i18n.js parses as JS (node --check throws on a syntax error).
 (function () {
-  let good = true, err = '';
-  try { execSync('node --check ' + JSON.stringify(path.join(siteDir, 'assets', 'i18n.js')), { stdio: 'pipe' }); }
-  catch (e) { good = false; err = String(e.stderr || e.message); }
-  ok('assets/i18n.js is valid JavaScript', good, err.split('\n')[0]);
+  const r = nodeCheck(path.join(siteDir, 'assets', 'i18n.js'));
+  ok('assets/i18n.js is valid JavaScript', r.ok, r.err.split('\n')[0]);
 })();
 
 // 1b. nav-menu.js parses as JS (the accessible mobile drawer behavior).
 (function () {
-  let good = true, err = '';
-  try { execSync('node --check ' + JSON.stringify(path.join(siteDir, 'assets', 'nav-menu.js')), { stdio: 'pipe' }); }
-  catch (e) { good = false; err = String(e.stderr || e.message); }
-  ok('assets/nav-menu.js is valid JavaScript', good, err.split('\n')[0]);
+  const r = nodeCheck(path.join(siteDir, 'assets', 'nav-menu.js'));
+  ok('assets/nav-menu.js is valid JavaScript', r.ok, r.err.split('\n')[0]);
 })();
 
 // 1c. cap-lightbox.js parses as JS (the capability image lightbox).
 (function () {
-  let good = true, err = '';
-  try { execSync('node --check ' + JSON.stringify(path.join(siteDir, 'assets', 'cap-lightbox.js')), { stdio: 'pipe' }); }
-  catch (e) { good = false; err = String(e.stderr || e.message); }
-  ok('assets/cap-lightbox.js is valid JavaScript', good, err.split('\n')[0]);
+  const r = nodeCheck(path.join(siteDir, 'assets', 'cap-lightbox.js'));
+  ok('assets/cap-lightbox.js is valid JavaScript', r.ok, r.err.split('\n')[0]);
 })();
 
 // 2. i18n.js actually defines the Plumline.i18n API when evaluated.
@@ -115,14 +117,20 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; console.log('
   });
 
   // The composed dist HTML must keep the new versions (build must not rewrite
-  // them). composedHtml() is what dist is built from.
+  // them). composedHtml() is what dist is built from. i18n.js has a per-page expected
+  // version (examples.html on v83, all other pages on v82 — see check_asset_versions).
+  function expectedNew(spec, page) {
+    if (spec.perPage && Object.prototype.hasOwnProperty.call(spec.perPage, page)) return spec.perPage[page];
+    return spec.neu;
+  }
   PAGES.forEach(function (p) {
     const composed = composedHtml(siteDir, p + '.html');
     Object.keys(ASSETS).forEach(function (name) {
       const spec = ASSETS[name];
-      const reNew = new RegExp('assets/' + name.replace('.', '\\.') + '\\?v=' + spec.neu + '\\b', 'g');
+      const wantNew = expectedNew(spec, p);
+      const reNew = new RegExp('assets/' + name.replace('.', '\\.') + '\\?v=' + wantNew + '\\b', 'g');
       const reOld = new RegExp('assets/' + name.replace('.', '\\.') + '\\?v=' + spec.old + '\\b', 'g');
-      ok('composed ' + p + '.html keeps ' + name + '?v=' + spec.neu, (composed.match(reNew) || []).length === 1);
+      ok('composed ' + p + '.html keeps ' + name + '?v=' + wantNew, (composed.match(reNew) || []).length === 1);
       ok('composed ' + p + '.html has no ' + name + '?v=' + spec.old, (composed.match(reOld) || []).length === 0);
     });
   });

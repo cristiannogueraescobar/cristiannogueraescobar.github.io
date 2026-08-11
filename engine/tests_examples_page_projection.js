@@ -45,9 +45,18 @@ function checkExamplesPageProjection(dir) {
 
   // Every projected ListItem position/name/url present in order in the JSON-LD.
   // (Redundant with the byte check, but catches an out-of-order catalogue.)
+  // F6 (Examples library UI) renders the no-JS catalogue as semantic cards, so the
+  // old flat `href="..">Name</a>` markup no longer exists verbatim. The equivalent-
+  // or-stronger contract: for every projected example, the base HTML must contain a
+  // solver anchor with the exact projected href AND the projected (localized-en)
+  // title text somewhere in its card, and the JSON-LD stays byte-identical to the
+  // projection (checked above).
   const links = serialize.examplesNoJsLinks(catalogue);
   links.forEach(function (l, i) {
-    if (source.indexOf('href="' + l.href + '">' + l.name + '</a>') === -1) failuresLocal.push('nojs-link-' + i);
+    var hasHref = source.indexOf('href="' + l.href + '"') !== -1;
+    var hasName = source.indexOf('>' + l.name + '</a>') !== -1;
+    if (!hasHref) failuresLocal.push('nojs-href-' + i);
+    if (!hasName) failuresLocal.push('nojs-title-' + i);
   });
 
   // Exactly nine ListItem entries and nine no-JS links.
@@ -105,7 +114,7 @@ expectTrip('N4 translation divergent', dir => wr(catPath(dir), rd(catPath(dir)).
 // 5. URL divergent (catalogue slug changed -> JSON-LD url mismatch).
 expectTrip('N5 url divergent', dir => wr(catPath(dir), rd(catPath(dir)).replace('"slug": "production-plan"', '"slug": "prod-plan"')));
 // 6. no-JS fallback stale (href changed in page only).
-expectTrip('N6 no-JS fallback stale', dir => wr(exPath(dir), rd(exPath(dir)).replace('href="solver.html?ex=production-plan">Production plan</a>', 'href="solver.html?ex=WRONG">Production plan</a>')));
+expectTrip('N6 no-JS fallback stale', dir => wr(exPath(dir), rd(exPath(dir)).split('href="solver.html?ex=production-plan"').join('href="solver.html?ex=WRONG"')));
 // 7. JSON-LD stale (position changed in page only).
 expectTrip('N7 json-ld stale', dir => wr(exPath(dir), rd(exPath(dir)).replace('"position":1,', '"position":99,')));
 // 8. Position incorrect (name/position mismatch in page).

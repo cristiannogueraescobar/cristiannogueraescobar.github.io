@@ -18,23 +18,11 @@
 <meta name="twitter:title" content="Plumline optimisation examples">
 <meta name="twitter:description" content="Ready-to-solve models covering continuous, integer, binary and mixed-integer optimisation.">
 <link rel="canonical" href="https://plumline.online/examples.html">
+<!--LIBRARY-GENERATED:JSONLD START-->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"ItemList","name":"Plumline optimisation examples","itemListElement":[{"@type":"ListItem","position":1,"url":"https://plumline.online/solver.html?ex=production-plan","name":"Production plan"},{"@type":"ListItem","position":2,"url":"https://plumline.online/solver.html?ex=workshop-chart","name":"Workshop chart"},{"@type":"ListItem","position":3,"url":"https://plumline.online/solver.html?ex=cheapest-feed-blend","name":"Cheapest feed blend"},{"@type":"ListItem","position":4,"url":"https://plumline.online/solver.html?ex=marketing-budget","name":"Marketing budget"},{"@type":"ListItem","position":5,"url":"https://plumline.online/solver.html?ex=workforce-scheduling","name":"Workforce scheduling"},{"@type":"ListItem","position":6,"url":"https://plumline.online/solver.html?ex=shipping-plan","name":"Shipping plan"},{"@type":"ListItem","position":7,"url":"https://plumline.online/solver.html?ex=project-selection","name":"Project selection"},{"@type":"ListItem","position":8,"url":"https://plumline.online/solver.html?ex=delivery-load","name":"Delivery load"},{"@type":"ListItem","position":9,"url":"https://plumline.online/solver.html?ex=supplier-activation","name":"Supplier activation"}]}</script>
+<!--LIBRARY-GENERATED:JSONLD END-->
 <link rel="stylesheet" href="assets/plumline.css?v=21">
-<style>
-  .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:18px}
-  .ex-cat{margin-top:40px}
-  .ex-cat h2{font-size:20px;margin:0 0 4px}
-  .ex-cat .cat-note{color:var(--faint);font-size:14px;margin:0}
-  .xcard{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;
-    background:var(--card,#fff);padding:16px 16px 14px;text-decoration:none;color:inherit;
-    transition:border-color .15s,transform .05s}
-  .xcard:hover{border-color:var(--brass)}
-  .xcard:active{transform:translateY(1px)}
-  .xcard .xn{font-weight:600;font-size:16px;margin-bottom:4px}
-  .xcard .xd{color:var(--faint);font-size:14px;flex:1;margin-bottom:12px}
-  .xcard .xtags{font-family:var(--mono);font-size:11px;color:var(--brass-text);letter-spacing:.03em;margin-bottom:12px}
-  .xcard .xopen{font-size:13px;font-weight:600;color:var(--true)}
-</style>
+<link rel="stylesheet" href="assets/examples-library.css?v=1">
 </head>
 <body data-page="examples">
 <a class="skip-link" href="#content" data-i18n="skipToContent">Skip to content</a>
@@ -48,29 +36,305 @@
 <main id="content">
 <div class="field-deep">
   <div class="plumb">
-    <section class="section" style="padding:40px 0 56px">
-      <p class="eyebrow" data-i18n="examplesEyebrow">Examples</p>
-      <h1 style="max-width:20ch" data-i18n="examplesPageTitle">Ready-to-solve models.</h1>
-      <p class="lead" style="margin-top:22px;max-width:60ch" data-i18n="examplesPageLead">Each example opens in the solver with its objective, variable types and limits already set. They cover the main shapes of optimisation: continuous, integer, binary and mixed-integer. Open one, solve it, then change the numbers to fit your own problem.</p>
-    </section>
+    <div class="section lib-head">
+      <p class="lib-eyebrow" data-i18n="libEyebrow">Model library</p>
+      <h1 data-i18n="libIntroTitle">A library of ready-to-solve models.</h1>
+      <p class="lead" data-i18n="libIntroLead">Browse worked optimisation models by the decision they answer. Each one opens in the solver already configured — objective, variable types and limits set — so you can solve it, then change the numbers to fit your own problem.</p>
+      <p class="lib-head-meta"><span class="lib-tick" aria-hidden="true">|</span> <span class="lib-count-total"><!--LIBRARY-GENERATED:TOTAL-->9<!--/LIBRARY-GENERATED:TOTAL--></span> <span data-i18n="libLibraryCount">models</span></p>
+    </div>
   </div>
 </div>
 
 <div class="plumb">
-  <section class="section" id="exCatalog">
+  <section class="section" id="libRoot" aria-labelledby="libIntroHeading" data-visible-count="9">
+    <h2 id="libIntroHeading" class="pl-visually-hidden" data-i18n="libEyebrow">Model library</h2>
+
+    <div class="lib-controls lib-enh">
+      <div class="lib-search">
+        <label for="libSearch" data-i18n="libSearchLabel">Search the library</label>
+        <input type="search" id="libSearch" autocomplete="off" spellcheck="false"
+               placeholder="Search by decision, sector or model type…" data-i18n-ph="libSearchPlaceholder"
+               aria-describedby="libCount">
+      </div>
+      <details class="lib-facets">
+        <summary data-i18n="libFilters">Filters</summary>
+        <div class="lib-facet-groups">
+          <fieldset class="lib-facet-group">
+            <legend class="lib-facet-legend" data-i18n="libCategory">Category</legend>
+          <!-- LIBRARY-GENERATED:CATEGORY-FILTERS START (populated categories + counts, from the F5 canonical catalogue) -->
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="production-operations"><span class="lib-facet-label" data-cat-label="production-operations">Production &amp; operations</span> <span class="lib-facet-count" data-cat-count="production-operations">2</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="workforce-scheduling"><span class="lib-facet-label" data-cat-label="workforce-scheduling">Workforce &amp; scheduling</span> <span class="lib-facet-count" data-cat-count="workforce-scheduling">1</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="purchasing-suppliers"><span class="lib-facet-label" data-cat-label="purchasing-suppliers">Purchasing &amp; suppliers</span> <span class="lib-facet-count" data-cat-count="purchasing-suppliers">1</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="logistics-transport"><span class="lib-facet-label" data-cat-label="logistics-transport">Logistics &amp; transport</span> <span class="lib-facet-count" data-cat-count="logistics-transport">2</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="marketing-finance"><span class="lib-facet-label" data-cat-label="marketing-finance">Marketing &amp; finance</span> <span class="lib-facet-count" data-cat-count="marketing-finance">2</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="category" data-value="blending-formulation"><span class="lib-facet-label" data-cat-label="blending-formulation">Blending &amp; formulation</span> <span class="lib-facet-count" data-cat-count="blending-formulation">1</span></label>
+                    <!-- LIBRARY-GENERATED:CATEGORY-FILTERS END -->
+          </fieldset>
+          <fieldset class="lib-facet-group">
+            <legend class="lib-facet-legend" data-i18n="libModelType">Model type</legend>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="type" data-value="continuous"><span data-i18n="mt_continuous">continuous</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="type" data-value="integer"><span data-i18n="mt_integer">integer</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="type" data-value="binary"><span data-i18n="mt_binary">binary</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="type" data-value="mixed"><span data-i18n="mt_mixed">mixed</span></label>
+          </fieldset>
+          <fieldset class="lib-facet-group">
+            <legend class="lib-facet-legend" data-i18n="libDifficulty">Difficulty</legend>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="difficulty" data-value="beginner"><span data-i18n="diff_beginner">beginner</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="difficulty" data-value="intermediate"><span data-i18n="diff_intermediate">intermediate</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="difficulty" data-value="advanced"><span data-i18n="diff_advanced">advanced</span></label>
+          </fieldset>
+          <fieldset class="lib-facet-group">
+            <legend class="lib-facet-legend" data-i18n="libGoal">Goal</legend>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="goal" data-value="maximise"><span data-i18n="goal_maximise">maximise</span></label>
+          <label class="lib-facet-opt"><input type="checkbox" data-facet="goal" data-value="minimise"><span data-i18n="goal_minimise">minimise</span></label>
+          </fieldset>
+        </div>
+      </details>
+      <div class="lib-status">
+        <p class="lib-count" id="libCount" aria-live="polite" role="status"><!--LIBRARY-GENERATED:COUNT-->9<!--/LIBRARY-GENERATED:COUNT--> <span data-i18n="libResultsMany">models</span> <span class="lib-count-shown" data-i18n="libResultsShown">shown</span></p>
+        <button type="button" class="lib-clear" id="libClear" hidden data-i18n="libClearAll">Clear all</button>
+      </div>
+    </div>
+
     <noscript>
-      <ul>
-        <li><a href="solver.html?ex=production-plan">Production plan</a> — maximise profit within available production hours (continuous)</li>
-        <li><a href="solver.html?ex=workshop-chart">Workshop chart</a> — two products on a feasible-region chart (continuous)</li>
-        <li><a href="solver.html?ex=cheapest-feed-blend">Cheapest feed blend</a> — minimise cost meeting nutrient minimums (continuous)</li>
-        <li><a href="solver.html?ex=marketing-budget">Marketing budget</a> — allocate spend with per-channel limits (continuous)</li>
-        <li><a href="solver.html?ex=workforce-scheduling">Workforce scheduling</a> — minimise staff covering daily demand (integer)</li>
-        <li><a href="solver.html?ex=shipping-plan">Shipping plan</a> — ship from factories to destinations at least cost (integer)</li>
-        <li><a href="solver.html?ex=project-selection">Project selection</a> — pick projects under budget and hours (binary)</li>
-        <li><a href="solver.html?ex=delivery-load">Delivery load</a> — choose orders by weight and volume (binary)</li>
-        <li><a href="solver.html?ex=supplier-activation">Supplier activation</a> — activate suppliers and set quantities (mixed integer)</li>
-      </ul>
+      <p class="lib-nojs-note" style="margin:8px 0 18px;color:var(--faint)">The full library is below. Enable JavaScript to search and filter it.</p>
     </noscript>
+
+    <h2 class="pl-visually-hidden" data-i18n="libReadyToSolve">Ready to solve</h2>
+    <div class="lib-grid" role="list">
+      <!-- LIBRARY-GENERATED:CARDS START (generated by engine/generate-examples-library.js from the F5 canonical catalogue; do not edit by hand) -->
+      <article class="lib-card" data-ex-id="production"
+               data-category="production-operations" data-type="continuous"
+               data-difficulty="beginner" data-goal="maximise">
+        <div class="lib-card-top">
+          <span class="lib-ref">01</span>
+          <span class="lib-cat" data-cat-label="production-operations">Production &amp; operations</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=production-plan" data-ex-title="production">Production plan</a></h3>
+        <p class="lib-q" data-ex-q="production">How many units of each product should we make to maximise profit within our hours?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_continuous">continuous</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_maximise">Maximise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_beginner">beginner</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">3</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">2</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">5</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=production-plan"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="workshop"
+               data-category="production-operations" data-type="continuous"
+               data-difficulty="beginner" data-goal="maximise">
+        <div class="lib-card-top">
+          <span class="lib-ref">02</span>
+          <span class="lib-cat" data-cat-label="production-operations">Production &amp; operations</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=workshop-chart" data-ex-title="workshop">Workshop chart</a></h3>
+        <p class="lib-q" data-ex-q="workshop">With two products and two resources, what mix maximises profit — and what does the feasible region look like?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_continuous">continuous</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_maximise">Maximise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_beginner">beginner</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">2</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">2</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">6</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=workshop-chart"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="blend"
+               data-category="blending-formulation" data-type="continuous"
+               data-difficulty="intermediate" data-goal="minimise">
+        <div class="lib-card-top">
+          <span class="lib-ref">03</span>
+          <span class="lib-cat" data-cat-label="blending-formulation">Blending &amp; formulation</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=cheapest-feed-blend" data-ex-title="blend">Cheapest feed blend</a></h3>
+        <p class="lib-q" data-ex-q="blend">What is the cheapest blend of feeds that still meets every nutritional requirement?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_continuous">continuous</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_minimise">Minimise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_intermediate">intermediate</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">3</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">3</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">8</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=cheapest-feed-blend"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="marketing"
+               data-category="marketing-finance" data-type="continuous"
+               data-difficulty="intermediate" data-goal="maximise">
+        <div class="lib-card-top">
+          <span class="lib-ref">04</span>
+          <span class="lib-cat" data-cat-label="marketing-finance">Marketing &amp; finance</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=marketing-budget" data-ex-title="marketing">Marketing budget</a></h3>
+        <p class="lib-q" data-ex-q="marketing">How should a fixed budget be split across channels to maximise total return within per-channel limits?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_continuous">continuous</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_maximise">Maximise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_intermediate">intermediate</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">3</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">1</span> <span data-i18n="libLimitsOne">limit</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">7</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=marketing-budget"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="workforce"
+               data-category="workforce-scheduling" data-type="integer"
+               data-difficulty="advanced" data-goal="minimise">
+        <div class="lib-card-top">
+          <span class="lib-ref">05</span>
+          <span class="lib-cat" data-cat-label="workforce-scheduling">Workforce &amp; scheduling</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=workforce-scheduling" data-ex-title="workforce">Workforce scheduling</a></h3>
+        <p class="lib-q" data-ex-q="workforce">How few staff can we schedule and still cover every day's demand?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_integer">integer</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_minimise">Minimise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_advanced">advanced</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">7</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">7</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">10</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=workforce-scheduling"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="shipping"
+               data-category="logistics-transport" data-type="integer"
+               data-difficulty="advanced" data-goal="minimise">
+        <div class="lib-card-top">
+          <span class="lib-ref">06</span>
+          <span class="lib-cat" data-cat-label="logistics-transport">Logistics &amp; transport</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=shipping-plan" data-ex-title="shipping">Shipping plan</a></h3>
+        <p class="lib-q" data-ex-q="shipping">How should whole units be shipped across routes to meet demand at least total cost?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_integer">integer</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_minimise">Minimise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_advanced">advanced</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">6</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">5</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">10</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=shipping-plan"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="project"
+               data-category="marketing-finance" data-type="binary"
+               data-difficulty="intermediate" data-goal="maximise">
+        <div class="lib-card-top">
+          <span class="lib-ref">07</span>
+          <span class="lib-cat" data-cat-label="marketing-finance">Marketing &amp; finance</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=project-selection" data-ex-title="project">Project selection</a></h3>
+        <p class="lib-q" data-ex-q="project">Which projects should we pick to maximise value without exceeding the budget?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_binary">binary</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_maximise">Maximise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_intermediate">intermediate</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">4</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">2</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">7</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=project-selection"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="delivery"
+               data-category="logistics-transport" data-type="binary"
+               data-difficulty="intermediate" data-goal="maximise">
+        <div class="lib-card-top">
+          <span class="lib-ref">08</span>
+          <span class="lib-cat" data-cat-label="logistics-transport">Logistics &amp; transport</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=delivery-load" data-ex-title="delivery">Delivery load</a></h3>
+        <p class="lib-q" data-ex-q="delivery">Which items should go on the vehicle to maximise value without exceeding its capacity?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_binary">binary</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_maximise">Maximise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_intermediate">intermediate</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">5</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">2</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">7</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=delivery-load"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+
+      <article class="lib-card" data-ex-id="supplier"
+               data-category="purchasing-suppliers" data-type="mixed"
+               data-difficulty="advanced" data-goal="minimise">
+        <div class="lib-card-top">
+          <span class="lib-ref">09</span>
+          <span class="lib-cat" data-cat-label="purchasing-suppliers">Purchasing &amp; suppliers</span>
+        </div>
+        <h3 class="lib-title"><a class="lib-title-link" href="solver.html?ex=supplier-activation" data-ex-title="supplier">Supplier activation</a></h3>
+        <p class="lib-q" data-ex-q="supplier">Which suppliers should we activate, and how much to buy from each, to meet demand at least cost?</p>
+        <dl class="lib-meta">
+          <div class="lib-meta-row"><dt data-i18n="libModelType">Model type</dt><dd><span class="lib-mono" data-i18n="mt_mixed">mixed</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libGoal">Goal</dt><dd><span class="lib-mono" data-i18n="goal_minimise">Minimise</span></dd></div>
+          <div class="lib-meta-row"><dt data-i18n="libDifficulty">Difficulty</dt><dd data-i18n="diff_advanced">advanced</dd></div>
+        </dl>
+        <div class="lib-facts">
+          <span class="lib-fact"><span class="lib-fact-n">6</span> <span data-i18n="libDecisions">decisions</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">4</span> <span data-i18n="libLimits">limits</span></span>
+          <span class="lib-fact-sep" aria-hidden="true">·</span>
+          <span class="lib-fact"><span class="lib-fact-n">12</span> <span data-i18n="libMinutes">min</span></span>
+        </div>
+        <a class="lib-cta" href="solver.html?ex=supplier-activation"><span data-i18n="libOpenSolver">Open in solver</span> <span aria-hidden="true">&rarr;</span></a>
+      </article>
+      <!-- LIBRARY-GENERATED:CARDS END -->
+    </div>
+
+    <div class="lib-empty lib-enh" id="libEmpty" hidden role="status">
+      <h2 data-i18n="libNoResultsTitle">No matching models</h2>
+      <p data-i18n="libNoResultsBody">No models match your search and filters. Try fewer filters or a different term.</p>
+      <button type="button" class="lib-clear" data-i18n="libClearFilters">Clear filters</button>
+    </div>
+
+    <section class="lib-how">
+      <h2 data-i18n="libHowToTitle">How an example works</h2>
+      <div class="lib-how-steps">
+        <div class="lib-how-step"><span class="lib-how-n" aria-hidden="true">1</span><div><h3 data-i18n="libHowOpen">Open</h3><p data-i18n="libHowOpenBody">The model opens in the solver, already configured.</p></div></div>
+        <div class="lib-how-step"><span class="lib-how-n" aria-hidden="true">2</span><div><h3 data-i18n="libHowSolve">Solve</h3><p data-i18n="libHowSolveBody">Run it to see the verified optimal answer.</p></div></div>
+        <div class="lib-how-step"><span class="lib-how-n" aria-hidden="true">3</span><div><h3 data-i18n="libHowChange">Change</h3><p data-i18n="libHowChangeBody">Edit the numbers to fit your own problem.</p></div></div>
+      </div>
+    </section>
   </section>
 </div>
 
@@ -78,58 +342,12 @@
 
 <!-- PLUMLINE:FOOTER -->
 
-<script src="assets/examples-data.js?v=1"></script>
-<script src="assets/i18n.js?v=82"></script>
-  <script src="assets/nav-menu.js?v=6" defer></script>
-<script>
-  // The catalog is driven by the SHARED metadata (assets/examples-data.js), the
-  // same source the solver's drawer uses, so the two can never drift. Display
-  // text comes from the shared i18n keys (exName_*, exDesc_*).
-  var CATALOG=(window.PL_EXAMPLE_META||[]).map(function(m){
-    return { key:m.key, slug:m.slug, cat:m.category, type:m.type, sense:m.sense };
-  });
-  var CATEGORY_ORDER=window.PL_CATEGORY_ORDER||['start','business','binary'];
-
-  function tt(key){ return Plumline.i18n.t(document.documentElement.lang||'en','examples',key); }
-
-  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-
-  function typeLabel(t){ return tt({continuous:'typeContinuous',integer:'typeInteger',binary:'typeBinary',mixed:'sdMixed'}[t]||t); }
-  function senseLabel(s){ return tt(s==='min'?'senseMin':'senseMax'); }
-
-  function renderCatalog(){
-    var root=document.getElementById('exCatalog'); if(!root) return;
-    var lang=document.documentElement.lang||'en';
-    var params=new URLSearchParams(location.search);
-    var langQ=params.get('lang')?('&lang='+encodeURIComponent(params.get('lang'))):'';
-    var html='';
-    CATEGORY_ORDER.forEach(function(cat){
-      var items=CATALOG.filter(function(x){return x.cat===cat;});
-      if(!items.length) return;
-      html+='<div class="ex-cat"><h2>'+esc(tt('exCat_'+cat))+'</h2>'+
-            '<p class="cat-note">'+esc(tt('exCatNote_'+cat))+'</p><div class="ex-grid">';
-      items.forEach(function(x){
-        var href='solver.html?ex='+encodeURIComponent(x.slug)+langQ;
-        var tags=[ typeLabel(x.type).toUpperCase(), senseLabel(x.sense).toUpperCase() ].join(' &middot; ');
-        html+='<a class="xcard" href="'+href+'">'+
-                '<div class="xn">'+esc(tt('exName_'+x.key))+'</div>'+
-                '<div class="xd">'+esc(tt('exDesc_'+x.key))+'</div>'+
-                '<div class="xtags">'+tags+'</div>'+
-                '<div class="xopen">'+esc(tt('openInSolver'))+' &rarr;</div>'+
-              '</a>';
-      });
-      html+='</div></div>';
-    });
-    root.innerHTML=html;
-  }
-
-  Plumline.i18n.init('examples');
-  renderCatalog();
-  // Re-render cards when the language changes (the select rebuilds text nodes,
-  // but our cards are built here, so refresh them too).
-  var langSel=document.getElementById('lang');
-  if(langSel) langSel.addEventListener('change', function(){ setTimeout(renderCatalog, 0); });
-</script>
+<script src="assets/i18n.js?v=83"></script>
+<script src="assets/nav-menu.js?v=6" defer></script>
+<!--LIBRARY-GENERATED:PAYLOAD-SCRIPT (src + cache-bust version generated by engine/generate-examples-library.js from the payload content digest; do not edit by hand)--><script src="assets/examples-library.js?v=377371efca4b"></script><!--/LIBRARY-GENERATED:PAYLOAD-SCRIPT-->
+<script src="assets/examples-library-core.js?v=1" defer></script>
+<script src="assets/examples-library.ui.js?v=1" defer></script>
+<script>Plumline.i18n.init('examples');</script>
 <script src="assets/build-badge.js?v=2"></script>
 </body>
 </html>

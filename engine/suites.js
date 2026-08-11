@@ -26,7 +26,10 @@ const SUITES = [
   'tests_f4a_visual_direction', 'tests_f4a_visual_direction_negative',
   'tests_f4b_design_system', 'tests_f4b_design_system_negative',
   'tests_f4c_motion_system', 'tests_f4c_motion_system_negative', 'tests_f4c_motion_behavioural',
-  'tests_f5_examples_architecture', 'tests_f5_examples_behavioural', 'tests_f5_examples_architecture_negative', 'tests_f5_real_loader'
+  'tests_f5_examples_architecture', 'tests_f5_examples_behavioural', 'tests_f5_examples_architecture_negative', 'tests_f5_real_loader',
+  'tests_f6_examples_library', 'tests_f6_examples_library_behavioural', 'tests_f6_examples_library_negative',
+  'tests_f6_protected_baseline', 'tests_canonical_10_end_to_end', 'tests_f6_audit_regression',
+  'tests_f6_payload_cachebust', 'tests_f6_nojs_header', 'tests_f6_clear_filters'
 ];
 
 module.exports = SUITES;

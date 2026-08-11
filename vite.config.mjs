@@ -109,6 +109,23 @@ function plumlineBuild() {
       // (b) Copy the whole assets/ tree verbatim (structure + stable names).
       cpSync(join(root, 'assets'), distAssets, { recursive: true });
 
+      // (b2) Remove orphan per-entry CSS bundles Vite/Rollup emits for pages whose
+      //      page-specific stylesheet is authored as a real external file (e.g.
+      //      examples.html links assets/examples-library.css). Rollup names the
+      //      entry's CSS chunk after the entry (assets/examples.css) even though the
+      //      restored source HTML links the real stylesheet, leaving the chunk
+      //      unreferenced. Any dist/assets/*.css that does NOT exist in source is
+      //      such an orphan; the real source sheets were just copied verbatim in (b),
+      //      so this only deletes generated bundles and is fully deterministic.
+      if (existsSync(distAssets)) {
+        const srcAssetSet = new Set(readdirSync(join(root, 'assets')));
+        for (const f of readdirSync(distAssets)) {
+          if (f.endsWith('.css') && !srcAssetSet.has(f)) {
+            rmSync(join(distAssets, f), { force: true });
+          }
+        }
+      }
+
       // (c) Copy root public files.
       for (const f of ROOT_PUBLIC) {
         const s = join(root, f);
