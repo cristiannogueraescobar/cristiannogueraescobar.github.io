@@ -15,12 +15,25 @@ const fs = require('fs');
 const path = require('path');
 
 const PAGES = ['index', 'solver', 'guide', 'examples', 'capabilities', 'about', 'privacy', 'terms'];
-// asset base name -> { expected new version, forbidden old version }
+// asset base name -> { expected new version, forbidden old version }.
+// F6 (Examples library UI) modified assets/i18n.js: it ADDED the 40 Examples-library
+// keys (lib*, mt_*, diff_*, goal_*) and removed dead legacy-catalogue keys. Only
+// examples.html consumes the added keys, so ONLY examples.html re-references the asset
+// at the new ?v=83; every other page keeps ?v=82 and stays byte-identical (a page that
+// does not read the new keys must not be forced to re-download, and re-versioning it
+// would change a protected non-F6 hash). i18n.js therefore has a per-page expected
+// version; nav-menu.js / build-badge.js remain uniform across all pages.
 const ASSETS = {
-  'i18n.js': { neu: 82, old: 81 },
+  'i18n.js': { neu: 82, old: 81, perPage: { examples: 83 } },
   'nav-menu.js': { neu: 6, old: 5 },
   'build-badge.js': { neu: 2, old: 1 }
 };
+// Expected "new" version for a given page + asset (honours per-page overrides).
+function expectedNew(name, page) {
+  const spec = ASSETS[name];
+  if (spec.perPage && Object.prototype.hasOwnProperty.call(spec.perPage, page)) return spec.perPage[page];
+  return spec.neu;
+}
 
 // Count occurrences of a specific `assets/<name>?v=<n>` reference in a string.
 function countRef(html, name, version) {
@@ -37,14 +50,15 @@ function checkAssetVersions(siteDir) {
 
   function readPage(p) { return fs.readFileSync(path.join(siteDir, p + '.html'), 'utf8'); }
 
-  // 1-5. Each page references exactly the new version once, and never the old one.
+  // 1-5. Each page references its expected version exactly once, and never the old one.
   PAGES.forEach(function (p) {
     const html = readPage(p);
     Object.keys(ASSETS).forEach(function (name) {
       const spec = ASSETS[name];
-      const newCount = countRef(html, name, spec.neu);
+      const wantNew = expectedNew(name, p);
+      const newCount = countRef(html, name, wantNew);
       const oldCount = countRef(html, name, spec.old);
-      check(p + '.html references ' + name + '?v=' + spec.neu + ' exactly once', newCount === 1);
+      check(p + '.html references ' + name + '?v=' + wantNew + ' exactly once', newCount === 1);
       check(p + '.html has no reference to ' + name + '?v=' + spec.old + ' (old version)', oldCount === 0);
     });
   });

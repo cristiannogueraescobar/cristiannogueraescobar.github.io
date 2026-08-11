@@ -81,13 +81,18 @@ function checkCssGolden(siteDir) {
     check('breakpoint ' + bp + ' present in plumline.css', css.indexOf(bp) !== -1);
   });
 
-  // 5. Solver variant and Examples inline blocks unchanged (hash + bytes).
+  // 5. Solver variant inline block unchanged (hash + bytes).
   const solverStyle = inlineStyle(fs.readFileSync(path.join(siteDir, 'solver.html'), 'utf8'));
-  const examplesStyle = inlineStyle(fs.readFileSync(path.join(siteDir, 'examples.html'), 'utf8'));
   check('solver variant <style> matches golden hash', solverStyle !== null && sha256(solverStyle) === golden.solver_variant_style_sha256);
   check('solver variant <style> byte length matches golden', solverStyle !== null && Buffer.byteLength(solverStyle, 'utf8') === golden.solver_variant_style_bytes);
-  check('examples <style> matches golden hash', examplesStyle !== null && sha256(examplesStyle) === golden.examples_style_sha256);
-  check('examples <style> byte length matches golden', examplesStyle !== null && Buffer.byteLength(examplesStyle, 'utf8') === golden.examples_style_bytes);
+  // F6 (Examples library UI): examples.html no longer carries an inline <style>; its
+  // page-specific CSS lives in assets/examples-library.css and is frozen by the F6
+  // protected baseline (engine/f6-protected-baseline.json). Here we assert the inline
+  // block is gone and the external sheet is linked — an equivalent-or-stronger
+  // contract than hashing an inline block (the whole file is now hash-pinned by F6).
+  const examplesHtml = fs.readFileSync(path.join(siteDir, 'examples.html'), 'utf8');
+  check('examples.html has no inline <style> (F6 uses external CSS)', inlineStyle(examplesHtml) === null);
+  check('examples.html links assets/examples-library.css', /href="assets\/examples-library\.css/.test(examplesHtml));
 
   return { pass: pass, fail: fail, failures: failures };
 }

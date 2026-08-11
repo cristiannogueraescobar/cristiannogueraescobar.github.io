@@ -106,13 +106,21 @@ Object.keys(EXAMPLES).forEach(function (key) {
 (function () {
   const exHtml = fs.readFileSync(path.join(__dirname, '..', 'examples.html'), 'utf8');
   const metaSlugs = SHARED.META.map(m => m.slug);
-  const noscriptMatch = exHtml.match(/<noscript>([\s\S]*?)<\/noscript>/);
-  ok('examples.html has a noscript block', !!noscriptMatch);
-  if (noscriptMatch) {
-    const hrefs = [...noscriptMatch[1].matchAll(/solver\.html\?ex=([a-z-]+)/g)].map(m => m[1]);
-    ok('noscript has 9 example links', hrefs.length === 9, 'got ' + hrefs.length);
-    metaSlugs.forEach(function (slug) { ok('noscript includes ' + slug, hrefs.indexOf(slug) >= 0); });
-  }
+  // F6 (Examples library UI): the nine examples are now rendered as visible base-HTML
+  // cards that are usable with NO JavaScript (a strict improvement over the old
+  // <noscript>-only link list — the links are no longer hidden behind <noscript>).
+  // Contract: the nine solver links must be present as real anchors in the base HTML
+  // (outside any <script>), each exactly once, and usable without JS.
+  const baseHtml = exHtml.replace(/<script[\s\S]*?<\/script>/g, '');
+  const baseHrefs = [...baseHtml.matchAll(/solver\.html\?ex=([a-z0-9-]+)/g)].map(m => m[1]);
+  metaSlugs.forEach(function (slug) {
+    const n = baseHrefs.filter(function (s) { return s === slug; }).length;
+    ok('base HTML has a no-JS solver link for ' + slug, n >= 1, 'count ' + n);
+  });
+  // Each example appears as a semantic card entry exactly once.
+  const cardIds = [...exHtml.matchAll(/data-ex-id="([a-z0-9-]+)"/g)].map(m => m[1]);
+  ok('base HTML renders nine example cards', cardIds.length === 9, 'got ' + cardIds.length);
+  ok('no duplicate example cards', new Set(cardIds).size === cardIds.length);
   const ldMatch = exHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   ok('examples.html has JSON-LD', !!ldMatch);
   if (ldMatch) {

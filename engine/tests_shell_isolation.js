@@ -91,8 +91,17 @@ function checkShellIsolation(siteDir) {
   check('i18n.js loads on all 8 pages', loaders('i18n.js').length === 8);
   check('nav-menu.js loads on all 8 pages', loaders('nav-menu.js').length === 8);
   check('build-badge.js loads on all 8 pages', loaders('build-badge.js').length === 8);
-  check('examples-data.js loads on exactly solver + examples',
-    loaders('examples-data.js').join(',') === ['examples', 'solver'].sort().join(','));
+  // F6 (Examples library UI): examples.html now renders its catalogue from the F5-derived
+  // library projection (assets/examples-library.js + examples-library-core.js +
+  // examples-library.ui.js), not from examples-data.js. The shared metadata module
+  // examples-data.js remains the solver's deep-link source, so it now loads on solver
+  // ONLY. The equivalent-or-stronger contract: examples-data.js is page-specific to
+  // solver, and examples.html loads exactly the three F6 library scripts (and no other
+  // page does).
+  check('examples-data.js loads on exactly solver', loaders('examples-data.js').join(',') === 'solver');
+  ['examples-library.js?v=', 'examples-library-core.js?v=', 'examples-library.ui.js?v='].forEach(function (scriptName) {
+    check(scriptName + ' loads on exactly examples', loaders(scriptName).join(',') === 'examples');
+  });
   check('cap-lightbox.js loads on capabilities only',
     loaders('cap-lightbox.js').join(',') === 'capabilities');
 

@@ -178,7 +178,7 @@ isolationNegative('N8 (solver-only script in index.html)', function (dir) {
   const f = path.join(dir, 'index.html');
   writeFile(f, readFile(f).replace('</head>',
     '<script src="assets/examples-data.js?v=1"></script></head>'));
-}, 'examples-data.js loads on exactly solver + examples');
+}, 'examples-data.js loads on exactly solver');
 
 // N9. Cache-busting version: revert one page to an OLD asset version and prove
 //     the OFFICIAL checkAssetVersions() checker fails, naming the page and asset.
@@ -190,7 +190,8 @@ isolationNegative('N8 (solver-only script in index.html)', function (dir) {
     const before = checkAssetVersions(dir);
     ok('N9: clean temp tree passes the official version checker', before.fail === 0,
        'failures=' + before.failures.join('; '));
-    // Revert guide.html's i18n version from ?v=82 back to the old ?v=81.
+    // Revert guide.html's i18n version from its expected ?v=82 back to old ?v=81.
+    // (guide is a non-examples page; only examples.html rides the F6 ?v=83 bump.)
     const f = path.join(dir, 'guide.html');
     fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace('assets/i18n.js?v=82', 'assets/i18n.js?v=81'));
     const after = checkAssetVersions(dir);

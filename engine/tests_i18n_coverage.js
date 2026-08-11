@@ -81,7 +81,14 @@ const prodSrc = prodFiles.map(function (f) { return fs.readFileSync(path.join(si
 // on even though the app never renders them. Keep this list tiny and justified.
 // (capOpenExample: tests_capabilities.js asserts the generic "open example" label
 //  is NOT repeated on the page; the label must exist to check its absence.)
-const TEST_FIXTURES = new Set(['capabilities.capOpenExample']);
+// (examples.libDecisionsOne: F6 renders "N decisions" / "1 decision" and "N limits"
+//  / "1 limit" from the F5-derived facet counts. Of the nine current examples one has
+//  a single limit (libLimitsOne IS rendered) but none has a single decision, so the
+//  symmetric singular libDecisionsOne is not emitted yet. It is a reserved plural
+//  form that MUST exist for correctness the moment a one-decision example is added in
+//  F7; dropping it would silently regress pluralisation. Kept as a documented fixture,
+//  NOT as a way to hide a genuinely dead key.)
+const TEST_FIXTURES = new Set(['capabilities.capOpenExample', 'examples.libDecisionsOne']);
 
 // Every defined key, as namespace.key (never collapsed to a bare name — two
 // namespaces may share a key name and one must not mask the other's dead copy).
@@ -161,10 +168,60 @@ function idUsed(ns, key) {
   return false;
 }
 
+// F6 (Examples library UI) reconciliation — GENERATED canonical i18n keys.
+// The exName_<key> / exDesc_<key> sub-sections in the `examples` and `solver`
+// namespaces are NOT hand-authored dictionary entries: they are a DETERMINISTIC
+// PROJECTION of the F5 canonical catalogue, regenerated in place by
+// engine/generate-examples.js and verified byte-for-byte by its --check mode
+// (which run_all.js runs, and tests_canonical_catalogue_positive.js re-checks).
+// Before F6 they were also reachable from HTML via the old examples.html catalogue
+// script; F6 renders its catalogue from the F5 LIBRARY projection instead, so some
+// of these generated rows are no longer read at runtime — but they remain a
+// first-class, contract-owned OUTPUT of the F5 generator and must stay in sync with
+// the nine catalogue keys. Deleting them would break the generator (it requires two
+// 9-key blocks per language) and desynchronise the canonical projection.
+//
+// This is an equivalent-or-STRONGER contract, not a weakening: instead of "some
+// production HTML references this key", we assert the generated set is EXACTLY the
+// nine canonical keys — no missing row, no stray extra row — in the two namespaces
+// that own them. Any other orphan (a genuinely dead hand-authored key in any
+// namespace) is still reported.
+const CANON_KEYS = (function () {
+  try {
+    const idx = require(path.join(siteDir, 'src', 'shared', 'examples', 'index.js'));
+    const loaded = idx.loadAndValidateCatalogue(siteDir);
+    return loaded.catalogue.map(function (r) { return r.key; });
+  } catch (e) { return []; }
+})();
+const GENERATED_PREFIXES = ['exName_', 'exDesc_'];
+const GENERATED_NS = ['examples', 'solver'];
+function isGeneratedCanonicalKey(ns, key) {
+  if (GENERATED_NS.indexOf(ns) === -1) return false;
+  for (const pre of GENERATED_PREFIXES) {
+    if (key.indexOf(pre) === 0 && CANON_KEYS.indexOf(key.slice(pre.length)) !== -1) return true;
+  }
+  return false;
+}
+// STRONGER guard: for each generated namespace, exName_/exDesc_ must be EXACTLY the
+// nine canonical keys (catches a dropped or stray generated row that the generator
+// contract also protects, so the two agree).
+GENERATED_NS.forEach(function (ns) {
+  GENERATED_PREFIXES.forEach(function (pre) {
+    const present = Object.keys(DICT.en[ns] || {})
+      .filter(function (k) { return k.indexOf(pre) === 0; })
+      .map(function (k) { return k.slice(pre.length); }).sort();
+    const expected = CANON_KEYS.slice().sort();
+    ok('i18n generated block ' + ns + '.' + pre + '* equals the nine canonical keys',
+       present.length === expected.length && present.every(function (k, i) { return k === expected[i]; }),
+       'present=' + present.join(',') + ' expected=' + expected.join(','));
+  });
+});
+
 const orphans = definedIds.filter(function (id) {
   const ns = id.split('.')[0];
   const key = id.split('.').slice(1).join('.');
   if (TEST_FIXTURES.has(id)) return false;
+  if (isGeneratedCanonicalKey(ns, key)) return false;
   return !idUsed(ns, key);
 });
 ok('i18n orphans: no dictionary key is unused by production code', orphans.length === 0,
