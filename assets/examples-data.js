@@ -18,7 +18,22 @@
     { key: 'shipping',   slug: 'shipping-plan',        category: 'business', type: 'integer',    sense: 'min' },
     { key: 'project',    slug: 'project-selection',    category: 'binary',   type: 'binary',     sense: 'max' },
     { key: 'delivery',   slug: 'delivery-load',        category: 'binary',   type: 'binary',     sense: 'max' },
-    { key: 'supplier',   slug: 'supplier-activation',  category: 'binary',   type: 'mixed',      sense: 'min' }
+    { key: 'supplier',   slug: 'supplier-activation',  category: 'binary',   type: 'mixed',      sense: 'min' },
+    { key: 'bakery-mix', slug: 'bakery-production-mix', category: 'start',   type: 'continuous', sense: 'max' },
+    { key: 'factory-batches', slug: 'factory-batch-plan', category: 'start', type: 'integer',    sense: 'max' },
+    { key: 'clinic-staffing', slug: 'clinic-staffing-plan', category: 'business', type: 'integer', sense: 'min' },
+    { key: 'call-centre', slug: 'call-centre-shift-plan', category: 'business', type: 'integer', sense: 'min' },
+    { key: 'purchase-split', slug: 'purchase-order-split', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'ingredient-sourcing', slug: 'ingredient-sourcing-plan', category: 'binary', type: 'mixed', sense: 'min' },
+    { key: 'fleet-assignment', slug: 'fleet-assignment-plan', category: 'binary', type: 'binary', sense: 'min' },
+    { key: 'media-mix',  slug: 'media-channel-mix',    category: 'start',    type: 'continuous', sense: 'max' },
+    { key: 'fertiliser-blend', slug: 'fertiliser-blend-plan', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'scholarships', slug: 'scholarship-allocation', category: 'start', type: 'integer',   sense: 'max' },
+    { key: 'food-bank',  slug: 'food-bank-allocation', category: 'start',    type: 'integer',    sense: 'max' },
+    { key: 'renewable-mix', slug: 'renewable-energy-mix', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'microgrid-capacity', slug: 'microgrid-capacity-plan', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'hotel-rooms', slug: 'hotel-room-allocation', category: 'start',  type: 'integer',    sense: 'max' },
+    { key: 'lp-basics',  slug: 'linear-optimisation-basics', category: 'start', type: 'continuous', sense: 'max' }
   ];
   var CATEGORY_ORDER = ['start', 'business', 'binary'];
 

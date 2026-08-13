@@ -54,7 +54,21 @@ if (require.main === module) {
 // ---- Positive: live tree ------------------------------------------------------
 (function () {
   const r = checkI18nProjection(SITE);
-  ok('180 occurrences projected: exactly 90 literals x 2', r.total === 90, 'literals=' + r.total);
+  const catalogue = loadCatalogue(SITE);
+  // Generic (count-agnostic): the projection emits one literal per (record x field x locale), i.e.
+  // catalogue.length * 2 fields (exName/exDesc) * 5 locales. Holds for any catalogue size.
+  ok('i18n literal count == catalogue.length * 2 * 5', r.total === catalogue.length * 2 * LANGS.length,
+    'literals=' + r.total + ' catalogue=' + catalogue.length);
+  // F7a checkpoint: 24 * 2 * 5 = 240 distinct literals.
+  ok('F7a: i18n literals == 240', r.total === 240, 'literals=' + r.total);
+  // Physical occurrences: i18n.js repeats each literal in TWO physical sub-sections (the exName_ and
+  // exDesc_ blocks are each emitted once per locale, and the projection writes both), so the total
+  // PHYSICAL occurrence count is literals * 2 = catalogue.length * 2 * 5 * 2. Documented separately
+  // from the literal count so the two namespaces are not conflated.
+  const occ = loadSerialize(SITE).i18nExpectedOccurrences(catalogue, LANGS);
+  const physical = occ.reduce((s, o) => s + o.expected, 0);
+  ok('i18n physical occurrences == literals * 2 subsections', physical === r.total * 2, 'physical=' + physical);
+  ok('F7a: i18n physical occurrences == 480', physical === 480, 'physical=' + physical);
   ok('live i18n.js is a faithful projection of the catalogue', r.ok,
     r.mismatches.slice(0, 3).map(m => m.literal.slice(0, 40) + ' exp ' + m.expected + ' got ' + m.found).join('; '));
 })();

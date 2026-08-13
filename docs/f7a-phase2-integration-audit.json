@@ -1,0 +1,797 @@
+{
+  "environment": {
+    "node": "v22.22.2",
+    "note": "Phase-2 working environment; final acceptance requires Node 24.15.0"
+  },
+  "summary": {
+    "catalogueTotal": 24,
+    "historical": 9,
+    "new": 15,
+    "phase1CanonicalMatch": "15/15",
+    "allChecksPass": true,
+    "exactPolicies": [
+      "bakery-mix",
+      "fertiliser-blend",
+      "lp-basics",
+      "purchase-split"
+    ]
+  },
+  "checks": [
+    {
+      "name": "loadCanonical(expectCount:24) returns 24",
+      "pass": true,
+      "detail": "24"
+    },
+    {
+      "name": "catalogue is exactly 24",
+      "pass": true,
+      "detail": "24"
+    },
+    {
+      "name": "9 historical present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "15 F7a present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "unique keys 24",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "unique slugs 24",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "no #25 (exactly 24)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "Phase-1 -> canonical match 15/15",
+      "pass": true,
+      "detail": "15/15"
+    },
+    {
+      "name": "exact policy for the 4 confirmed-unique",
+      "pass": true,
+      "detail": "bakery-mix,fertiliser-blend,lp-basics,purchase-split"
+    },
+    {
+      "name": "15 slugs resolve to correct example",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "15/15 title search (5 locales)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "15/15 question search (5 locales)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "15/15 tag search",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "5 locales complete (all 24)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "examples.html has 24 cards",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "examples.html has 24 JSON-LD ListItems",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "generated category counts match derived counts",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "all 10 categories populated",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "payload digest == sha256(examples-library.js)[:12]",
+      "pass": true,
+      "detail": "6c4f65550533 vs 6c4f65550533"
+    }
+  ],
+  "fullCatalogueDistributions": {
+    "categories": {
+      "production-operations": 4,
+      "blending-formulation": 2,
+      "marketing-finance": 3,
+      "workforce-scheduling": 3,
+      "logistics-transport": 3,
+      "purchasing-suppliers": 3,
+      "education-social": 2,
+      "energy-sustainability": 2,
+      "hospitality-retail": 1,
+      "learning-engine": 1
+    },
+    "modelTypes": {
+      "continuous": 11,
+      "integer": 8,
+      "binary": 3,
+      "mixed": 2
+    },
+    "directions": {
+      "max": 12,
+      "min": 12
+    },
+    "difficulty": {
+      "beginner": 5,
+      "intermediate": 13,
+      "advanced": 6
+    }
+  },
+  "f7aAdditions": {
+    "categories": {
+      "production-operations": 2,
+      "workforce-scheduling": 2,
+      "purchasing-suppliers": 2,
+      "logistics-transport": 1,
+      "marketing-finance": 1,
+      "blending-formulation": 1,
+      "education-social": 2,
+      "energy-sustainability": 2,
+      "hospitality-retail": 1,
+      "learning-engine": 1
+    },
+    "count": 15
+  },
+  "models": [
+    {
+      "key": "bakery-mix",
+      "slug": "bakery-production-mix",
+      "primaryCategory": "production-operations",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "max",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "production",
+        "bakery",
+        "capacity",
+        "mix"
+      ],
+      "status": "optimal",
+      "objective": 375,
+      "resultPolicy": "exact",
+      "decisionsExact": {
+        "B2": 150,
+        "B3": 150,
+        "B4": 0
+      },
+      "vector1": {
+        "Loaves": 150,
+        "Rolls": 150,
+        "Pastries": 0
+      },
+      "vector2": {
+        "Loaves": 150,
+        "Rolls": 150,
+        "Pastries": 0
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "factory-batches",
+      "slug": "factory-batch-plan",
+      "primaryCategory": "production-operations",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "max",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "production",
+        "batches",
+        "integer",
+        "capacity"
+      ],
+      "status": "optimal",
+      "objective": 2370,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Widgets": 10,
+        "Gadgets": 3,
+        "Gizmos": 6
+      },
+      "vector2": {
+        "Widgets": 10,
+        "Gadgets": 3,
+        "Gizmos": 6
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "clinic-staffing",
+      "slug": "clinic-staffing-plan",
+      "primaryCategory": "workforce-scheduling",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "min",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "staffing",
+        "shifts",
+        "coverage",
+        "healthcare"
+      ],
+      "status": "optimal",
+      "objective": 2200,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Morning (08-14)": 5,
+        "Midday (11-17)": 4,
+        "Evening (14-20)": 4
+      },
+      "vector2": {
+        "Morning (08-14)": 5,
+        "Midday (11-17)": 4,
+        "Evening (14-20)": 4
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "call-centre",
+      "slug": "call-centre-shift-plan",
+      "primaryCategory": "workforce-scheduling",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "min",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "staffing",
+        "shifts",
+        "scheduling",
+        "coverage"
+      ],
+      "status": "optimal",
+      "objective": 4650,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "06:00 (8h)": 6,
+        "10:00 (8h)": 8,
+        "14:00 (8h)": 7,
+        "18:00 (6h)": 3
+      },
+      "vector2": {
+        "06:00 (8h)": 6,
+        "10:00 (8h)": 8,
+        "14:00 (8h)": 7,
+        "18:00 (6h)": 3
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 4,
+        "constraintCount": 5
+      },
+      "match": true
+    },
+    {
+      "key": "purchase-split",
+      "slug": "purchase-order-split",
+      "primaryCategory": "purchasing-suppliers",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "min",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "suppliers",
+        "procurement",
+        "sourcing",
+        "cost"
+      ],
+      "status": "optimal",
+      "objective": 4165,
+      "resultPolicy": "exact",
+      "decisionsExact": {
+        "B2": 250,
+        "B3": 200,
+        "B4": 50
+      },
+      "vector1": {
+        "Supplier A": 250,
+        "Supplier B": 200,
+        "Supplier C": 50
+      },
+      "vector2": {
+        "Supplier A": 250,
+        "Supplier B": 200,
+        "Supplier C": 50
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "ingredient-sourcing",
+      "slug": "ingredient-sourcing-plan",
+      "primaryCategory": "purchasing-suppliers",
+      "canonicalModelType": "mixed",
+      "derivedModelType": "mixed",
+      "intendedType": "mixed",
+      "direction": "min",
+      "difficulty": "advanced",
+      "minutes": 11,
+      "tags": [
+        "suppliers",
+        "sourcing",
+        "activation",
+        "blend"
+      ],
+      "status": "optimal",
+      "objective": 5135,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Use Farm": 1,
+        "Use Mill": 1,
+        "Use Coop": 0,
+        "Qty Farm (t)": 41.25,
+        "Qty Mill (t)": 36.25,
+        "Qty Coop (t)": 0
+      },
+      "vector2": {
+        "Use Farm": 1,
+        "Use Mill": 1,
+        "Use Coop": 0,
+        "Qty Farm (t)": 41.25,
+        "Qty Mill (t)": 36.25,
+        "Qty Coop (t)": 0
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": true,
+        "functionsUsed": [
+          "SUM",
+          "SUMPRODUCT"
+        ],
+        "decisionCount": 6,
+        "constraintCount": 5
+      },
+      "match": true
+    },
+    {
+      "key": "fleet-assignment",
+      "slug": "fleet-assignment-plan",
+      "primaryCategory": "logistics-transport",
+      "canonicalModelType": "binary",
+      "derivedModelType": "binary",
+      "intendedType": "binary",
+      "direction": "min",
+      "difficulty": "advanced",
+      "minutes": 9,
+      "tags": [
+        "fleet",
+        "logistics",
+        "selection",
+        "capacity"
+      ],
+      "status": "optimal",
+      "objective": 355,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Van 1": 0,
+        "Van 2": 1,
+        "Truck 1": 1,
+        "Truck 2": 0,
+        "Truck 3": 1
+      },
+      "vector2": {
+        "Van 1": 0,
+        "Van 2": 1,
+        "Truck 1": 1,
+        "Truck 2": 0,
+        "Truck 3": 1
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": true,
+        "functionsUsed": [
+          "SUM",
+          "SUMPRODUCT"
+        ],
+        "decisionCount": 5,
+        "constraintCount": 1
+      },
+      "match": true
+    },
+    {
+      "key": "media-mix",
+      "slug": "media-channel-mix",
+      "primaryCategory": "marketing-finance",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "max",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "campaign",
+        "budget",
+        "allocation",
+        "reach"
+      ],
+      "status": "optimal",
+      "objective": 416,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Search": 40,
+        "Social": 30,
+        "TV": 30,
+        "Radio": 0
+      },
+      "vector2": {
+        "Search": 40,
+        "Social": 30,
+        "TV": 30,
+        "Radio": 0
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [
+          "SUM"
+        ],
+        "decisionCount": 4,
+        "constraintCount": 5
+      },
+      "match": true
+    },
+    {
+      "key": "fertiliser-blend",
+      "slug": "fertiliser-blend-plan",
+      "primaryCategory": "blending-formulation",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "min",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "blend",
+        "nutrients",
+        "formulation",
+        "cost"
+      ],
+      "status": "optimal",
+      "objective": 47.602739726,
+      "resultPolicy": "exact",
+      "decisionsExact": {
+        "B2": 34.931506849,
+        "B3": 2.739726027,
+        "B4": 16.438356164
+      },
+      "vector1": {
+        "Blend X": 34.931506849,
+        "Blend Y": 2.739726027,
+        "Blend Z": 16.438356164
+      },
+      "vector2": {
+        "Blend X": 34.931506849,
+        "Blend Y": 2.739726027,
+        "Blend Z": 16.438356164
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [
+          "SUM",
+          "SUMPRODUCT"
+        ],
+        "decisionCount": 3,
+        "constraintCount": 3
+      },
+      "match": true
+    },
+    {
+      "key": "scholarships",
+      "slug": "scholarship-allocation",
+      "primaryCategory": "education-social",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "max",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "education",
+        "allocation",
+        "budget",
+        "funding"
+      ],
+      "status": "optimal",
+      "objective": 45,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Undergraduate": 15,
+        "Vocational": 25,
+        "Postgraduate": 5
+      },
+      "vector2": {
+        "Undergraduate": 15,
+        "Vocational": 25,
+        "Postgraduate": 5
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 6
+      },
+      "match": true
+    },
+    {
+      "key": "food-bank",
+      "slug": "food-bank-allocation",
+      "primaryCategory": "education-social",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "max",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "allocation",
+        "community",
+        "distribution",
+        "capacity"
+      ],
+      "status": "optimal",
+      "objective": 711,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "North": 300,
+        "East": 167,
+        "South": 244
+      },
+      "vector2": {
+        "North": 300,
+        "East": 167,
+        "South": 244
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [
+          "SUM",
+          "SUMPRODUCT"
+        ],
+        "decisionCount": 3,
+        "constraintCount": 5
+      },
+      "match": true
+    },
+    {
+      "key": "renewable-mix",
+      "slug": "renewable-energy-mix",
+      "primaryCategory": "energy-sustainability",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "min",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "energy",
+        "renewable",
+        "cost",
+        "demand"
+      ],
+      "status": "optimal",
+      "objective": 41500,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Solar": 100,
+        "Wind": 500,
+        "Grid": 400
+      },
+      "vector2": {
+        "Solar": 100,
+        "Wind": 500,
+        "Grid": 400
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [
+          "SUM"
+        ],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "microgrid-capacity",
+      "slug": "microgrid-capacity-plan",
+      "primaryCategory": "energy-sustainability",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "min",
+      "difficulty": "advanced",
+      "minutes": 10,
+      "tags": [
+        "energy",
+        "capacity",
+        "planning",
+        "resilience"
+      ],
+      "status": "optimal",
+      "objective": 23126.315789474,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Solar": 80,
+        "Battery": 48.421052632,
+        "Backup": 128.421052632
+      },
+      "vector2": {
+        "Solar": 80,
+        "Battery": 48.421052632,
+        "Backup": 128.421052632
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [
+          "SUM",
+          "SUMPRODUCT"
+        ],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "hotel-rooms",
+      "slug": "hotel-room-allocation",
+      "primaryCategory": "hospitality-retail",
+      "canonicalModelType": "integer",
+      "derivedModelType": "integer",
+      "intendedType": "integer",
+      "direction": "max",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "hotel",
+        "revenue",
+        "allocation",
+        "channels"
+      ],
+      "status": "optimal",
+      "objective": 9150,
+      "resultPolicy": "objective-feasible",
+      "vector1": {
+        "Direct": 45,
+        "OTA": 10,
+        "Corporate": 25
+      },
+      "vector2": {
+        "Direct": 45,
+        "OTA": 10,
+        "Corporate": 25
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": false,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 3,
+        "constraintCount": 4
+      },
+      "match": true
+    },
+    {
+      "key": "lp-basics",
+      "slug": "linear-optimisation-basics",
+      "primaryCategory": "learning-engine",
+      "canonicalModelType": "continuous",
+      "derivedModelType": "continuous",
+      "intendedType": "continuous",
+      "direction": "max",
+      "difficulty": "beginner",
+      "minutes": 3,
+      "tags": [
+        "learning",
+        "basics",
+        "two-variables",
+        "chart"
+      ],
+      "status": "optimal",
+      "objective": 430,
+      "resultPolicy": "exact",
+      "decisionsExact": {
+        "B2": 10,
+        "B3": 9
+      },
+      "vector1": {
+        "Tables": 10,
+        "Chairs": 9
+      },
+      "vector2": {
+        "Tables": 10,
+        "Chairs": 9
+      },
+      "deterministic": true,
+      "derivedFacts": {
+        "chartEligible": true,
+        "hasBounds": false,
+        "functionsUsed": [],
+        "decisionCount": 2,
+        "constraintCount": 2
+      },
+      "match": true
+    }
+  ]
+}

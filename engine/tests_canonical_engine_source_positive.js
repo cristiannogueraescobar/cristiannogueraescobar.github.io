@@ -15,6 +15,8 @@ const os = require('os');
 const crypto = require('crypto');
 const { checkCanonicalEngineSource } = require('./tests_canonical_engine_source.js');
 const { composeSolverInterface, findEngineRegion } = require('../src/shared/compose-solver.js');
+const { canonicaliseSolverExamplesRegion } = require('../src/shared/solver-ui-canonical.js');
+const CANON = require('./fixtures/single-engine/engine-e1-source.json').composed.canonical;
 const { copyCatalogueTree } = require('./copy-catalogue-tree.js');
 
 const SITE = path.join(__dirname, '..');
@@ -39,7 +41,7 @@ const src = fs.readFileSync(path.join(SITE, 'solver.html'), 'utf8');
 const composedA = composeSolverInterface(src, SITE);
 const composedB = composeSolverInterface(src, SITE);
 ok('composition deterministic and independent of dist', composedA === composedB &&
-  Buffer.byteLength(composedA, 'utf8') === 215613);
+  Buffer.byteLength(canonicaliseSolverExamplesRegion(composedA), 'utf8') === CANON.composed_solver_bytes);
 
 // 4. Composed engine bytes are exactly the approved engine.
 const region = findEngineRegion(composedA);
@@ -75,7 +77,7 @@ ok('engine/source not published to dist',
     }
     copyCatalogueTree(SITE, base);
     const c = composeSolverInterface(fs.readFileSync(path.join(base, 'solver.html'), 'utf8'), base);
-    ok('composition works from a spaced path', Buffer.byteLength(c, 'utf8') === 215613);
+    ok('composition works from a spaced path', Buffer.byteLength(canonicaliseSolverExamplesRegion(c), 'utf8') === CANON.composed_solver_bytes);
   } finally { fs.rmSync(base, { recursive: true, force: true }); }
 })();
 

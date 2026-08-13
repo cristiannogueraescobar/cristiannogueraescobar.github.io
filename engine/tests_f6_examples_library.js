@@ -44,13 +44,13 @@ var E = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'enums.js'));
 var CATS = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'categories.js')).CATEGORIES;
 var loadCanonical = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'index.js')).loadCanonical;
 
-var canonical = loadCanonical(SITE, { expectCount: 9 }).canonical;
+var canonical = loadCanonical(SITE).canonical;
 var payload = library.libraryPayload(canonical);
 var records = payload.examples;
 
 // ---------------------------------------------------------------- ARCHITECTURE
 (function () {
-  ok('ARCH: exactly nine real examples', records.length === 9, String(records.length));
+  ok('ARCH: F7a: exactly 24 real examples', records.length === 24, String(records.length));
   ok('ARCH: payload locales are the five F5 locales', JSON.stringify(payload.locales) === JSON.stringify(E.LOCALES.slice()));
   ok('ARCH: payload categories are the ten canonical categories', payload.categories.length === CATS.length);
   // The record data equals what the F5 projectors produce (no re-stored parallel data).
@@ -68,9 +68,12 @@ var records = payload.examples;
       ok('ARCH: ' + c.key + '/' + loc + ' question from F5', rec.locales[loc].question === d.question);
     });
   });
-  // Metadata-only payload: no grids, expected vectors, domains or baselines.
+  // Metadata-only payload: no grid/expected/domains/baseline FIELDS. Match JSON keys ("grid":),
+  // not free words, so a description that merely contains "grid" (e.g. renewable-mix's "solar, wind
+  // and grid") does not trip this.
   var json = JSON.stringify(payload);
-  ok('ARCH: payload carries no grid/expected/domains/baseline', !/\bgrid\b|expected|domains|baseline/.test(json));
+  ok('ARCH: payload carries no grid/expected/domains/baseline field',
+    !/"(grid|expected|domains|baseline)":/.test(json));
   // Solver URL derives from the canonical slug.
   records.forEach(function (r) {
     ok('ARCH: ' + r.id + ' solver URL derives from slug', r.solverUrl === 'solver.html?ex=' + encodeURIComponent(r.slug));
@@ -82,7 +85,7 @@ var records = payload.examples;
   var html = read(path.join(SITE, 'examples.html'));
   // Nine article cards, each with a data-ex-id and a solver link.
   var ids = (html.match(/data-ex-id="([a-z0-9-]+)"/g) || []).map(function (m) { return m.replace(/.*"([^"]+)".*/, '$1'); });
-  ok('HTML: nine card entries in base HTML', ids.length === 9, String(ids.length));
+  ok('HTML: F7a: 24 card entries in base HTML', ids.length === 24, String(ids.length));
   ok('HTML: card ids are the nine keys', JSON.stringify(ids.slice().sort()) === JSON.stringify(records.map(function (r) { return r.id; }).sort()));
   // Nine correct solver links present as anchors in the base HTML.
   records.forEach(function (r) {
@@ -98,7 +101,7 @@ var records = payload.examples;
   // No inline event handlers.
   ok('HTML: no inline onclick handlers', !/\son[a-z]+\s*=\s*"/.test(html.replace(/data-i18n[^=]*=/g, '')));
   // JSON-LD ItemList preserved (position/name/url for the nine).
-  ok('HTML: ItemList JSON-LD preserved', /"@type":"ItemList"/.test(html) && (html.match(/"@type":"ListItem"/g) || []).length === 9);
+  ok('HTML: F7a: ItemList JSON-LD has 24 items', /"@type":"ItemList"/.test(html) && (html.match(/"@type":"ListItem"/g) || []).length === 24);
   // Canonical + title/meta preserved.
   ok('HTML: canonical link preserved', /rel="canonical"[^>]*examples\.html/.test(html));
 })();
@@ -112,14 +115,14 @@ var records = payload.examples;
   function slugsFor(q, loc) { return core.filterExamples(records, { q: q }, loc).map(function (r) { return r.slug; }); }
   ok('SEARCH/en: title term "shipping"', slugsFor('shipping', 'en').indexOf('shipping-plan') !== -1);
   ok('SEARCH/en: question term "budget"', slugsFor('budget', 'en').indexOf('marketing-budget') !== -1);
-  ok('SEARCH/es: "proveedores" -> supplier', slugsFor('proveedores', 'es').join(',') === 'supplier-activation');
+  ok('SEARCH/es: F7a: "proveedores" -> purchasing/supplier records', slugsFor('proveedores', 'es').sort().join(',') === ['supplier-activation','purchase-order-split','ingredient-sourcing-plan'].sort().join(','));
   ok('SEARCH/es: diacritic "produccion" -> production', slugsFor('produccion', 'es').indexOf('production-plan') !== -1);
   ok('SEARCH/pt: "mistura" -> blend', slugsFor('mistura', 'pt').indexOf('cheapest-feed-blend') !== -1);
   ok('SEARCH/de: "personal" -> workforce', slugsFor('personal', 'de').indexOf('workforce-scheduling') !== -1);
   ok('SEARCH/fr: "fournisseurs" -> supplier', slugsFor('fournisseurs', 'fr').indexOf('supplier-activation') !== -1);
   ok('SEARCH: category id term matches', slugsFor('logistics', 'en').length >= 2);
   ok('SEARCH: no-match query returns none', slugsFor('zzzznotpresent', 'en').length === 0);
-  ok('SEARCH: empty query returns all', slugsFor('', 'en').length === 9);
+  ok('SEARCH: empty query returns all', slugsFor('', 'en').length === records.length);
 })();
 
 // ---------------------------------------------------------------- FILTERS
@@ -130,7 +133,7 @@ var records = payload.examples;
     var expected = records.filter(function (r) { return r.modelType === mt; }).map(function (r) { return r.slug; });
     ok('FILTER: type ' + mt, JSON.stringify(slugs({ type: [mt] })) === JSON.stringify(expected), expected.join(','));
   });
-  ok('FILTER: mixed is exactly supplier-activation', JSON.stringify(slugs({ type: ['mixed'] })) === '["supplier-activation"]');
+  ok('FILTER: F7a: mixed is supplier-activation + ingredient-sourcing-plan', slugs({ type: ['mixed'] }).sort().join(',') === ['supplier-activation','ingredient-sourcing-plan'].sort().join(','));
   // Goal.
   ok('FILTER: maximise subset', JSON.stringify(slugs({ goal: ['maximise'] })) === JSON.stringify(records.filter(function (r) { return r.direction === 'max'; }).map(function (r) { return r.slug; })));
   ok('FILTER: minimise subset', JSON.stringify(slugs({ goal: ['minimise'] })) === JSON.stringify(records.filter(function (r) { return r.direction === 'min'; }).map(function (r) { return r.slug; })));
@@ -146,7 +149,7 @@ var records = payload.examples;
     ok('FILTER: category ' + cat, JSON.stringify(slugs({ category: [cat] })) === JSON.stringify(expected));
   });
   // OR within a facet, AND across facets.
-  ok('FILTER: OR within facet (integer OR binary)', slugs({ type: ['integer', 'binary'] }).length === 4);
+  ok('FILTER: F7a: OR within facet (integer OR binary) === 11', slugs({ type: ['integer', 'binary'] }).length === 11);
   ok('FILTER: AND across facets (logistics AND integer)', JSON.stringify(slugs({ category: ['logistics-transport'], type: ['integer'] })) === '["shipping-plan"]');
   ok('FILTER: combined zero match', slugs({ category: ['blending-formulation'], type: ['binary'] }).length === 0);
 })();
@@ -250,21 +253,25 @@ var records = payload.examples;
 //     not a substitute for, the end-to-end integration test above.
 // -------------------------------------------------------------------------------------
 (function () {
-  // SYNTHETIC view-model #10: a single hand-made record in an empty category, fed to the
-  // core directly (NOT the canonical pipeline — see tests_canonical_10_end_to_end.js for
-  // that). Proves the core counts/filters/searches a 10th record with no UI code change.
-  var tenth = {
-    id: 'future10', slug: 'future-example-10', category: 'energy-sustainability',
+  // SYNTHETIC view-model: a single hand-made record added to the core directly (NOT the canonical
+  // pipeline — see tests_canonical_10_end_to_end.js for that). Proves the core counts/filters/
+  // searches an added record with no UI code change. Count-agnostic: the target category need not be
+  // empty; we assert its count increments by one and the record becomes filterable/searchable.
+  var TARGET = 'energy-sustainability';
+  var beforeInCat = core.countByCategory(records)[TARGET] || 0;
+  var extra = {
+    id: 'future-syn', slug: 'future-example-syn', category: TARGET,
     modelType: 'continuous', direction: 'max', difficulty: 'beginner', minutes: 4,
     decisions: 2, limits: 1, chartEligible: false, capabilities: ['maximise'],
-    solverUrl: 'solver.html?ex=future-example-10',
+    solverUrl: 'solver.html?ex=future-example-syn',
     locales: (function () { var o = {}; E.LOCALES.forEach(function (l) { o[l] = { title: 'Solar sizing', description: 'x', question: 'How much solar to install?' }; }); return o; })(),
   };
-  var withTen = records.concat([tenth]);
-  ok('SCALE/#10 (synthetic view-model): appears in an empty category filter', core.filterExamples(withTen, { category: ['energy-sustainability'] }, 'en').length === 1);
-  ok('SCALE/#10 (synthetic view-model): category count updates', core.countByCategory(withTen)['energy-sustainability'] === 1);
-  ok('SCALE/#10 (synthetic view-model): search finds it', core.filterExamples(withTen, { q: 'solar' }, 'en').map(function (r) { return r.id; }).indexOf('future10') !== -1);
-  ok('SCALE/#10 (synthetic view-model): solver URL derived', tenth.solverUrl === 'solver.html?ex=' + tenth.slug);
+  var withExtra = records.concat([extra]);
+  var inCat = core.filterExamples(withExtra, { category: [TARGET] }, 'en');
+  ok('SCALE/synthetic: added record appears in its category filter', inCat.map(function (r) { return r.id; }).indexOf('future-syn') !== -1);
+  ok('SCALE/synthetic: category count increments by one', core.countByCategory(withExtra)[TARGET] === beforeInCat + 1);
+  ok('SCALE/synthetic: search finds it', core.filterExamples(withExtra, { q: 'solar' }, 'en').map(function (r) { return r.id; }).indexOf('future-syn') !== -1);
+  ok('SCALE/synthetic: solver URL derived', extra.solverUrl === 'solver.html?ex=' + extra.slug);
 
   // SYNTHETIC 60-record view-model fixture — deformations of the nine, fed to the core.
   // A performance/scalability probe of the pure logic, NOT a canonical or engine-run set.

@@ -19,8 +19,12 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { composeSolverInterface } = require('../src/shared/compose-solver.js');
+const { canonicaliseSolverExamplesRegion } = require('../src/shared/solver-ui-canonical.js');
 
 const sha = t => crypto.createHash('sha256').update(t, 'utf8').digest('hex');
+// Canonicalise the catalogue-owned region before hashing (see tests_solver_grid.js).
+const shaCanon = t => sha(canonicaliseSolverExamplesRegion(t));
+const bytesCanon = t => Buffer.byteLength(canonicaliseSolverExamplesRegion(t), 'utf8');
 const bytesOf = t => Buffer.byteLength(t, 'utf8');
 const ENGINE_START = '/* ENGINE_START */';
 const ENGINE_END = '/* ENGINE_END */';
@@ -49,13 +53,14 @@ function checkSolverDetectionInterface(siteDir) {
   catch (err) { ok('composition succeeds', false, String(err && err.message || err)); return { pass, fail, failures }; }
 
   // 1-3. Composed byte-identical + deterministic + head/body.
-  ok('composed total sha matches golden', sha(composed) === golden.composed_total.sha256);
-  ok('composed total bytes match golden', bytesOf(composed) === golden.composed_total.bytes);
+  // composed_total contains the EXAMPLES catalogue -> canonical comparison against historical authority.
+  ok('composed total canonical sha matches golden', shaCanon(composed) === golden.canonical.composed_total.sha256);
+  ok('composed total canonical bytes match golden', bytesCanon(composed) === golden.canonical.composed_total.bytes);
   ok('composition deterministic', composeSolverInterface(src, siteDir) === composed);
   const headM = composed.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
   const bodyM = composed.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i);
   ok('composed head matches golden', headM && sha(headM[0]) === golden.head.sha256);
-  ok('composed body matches golden', bodyM && sha(bodyM[0]) === golden.body.sha256);
+  ok('composed body canonical matches golden', bodyM && shaCanon(bodyM[0]) === golden.canonical.body.sha256);
 
   // 4. Engine region byte-identical + canonical.
   const s = composed.indexOf(ENGINE_START), e = composed.indexOf(ENGINE_END);
@@ -66,12 +71,12 @@ function checkSolverDetectionInterface(siteDir) {
 
   // 5. Inline script + UI pre/post regions byte-identical.
   const big = bigInlineScript(composed);
-  ok('inline script matches golden', big && sha(big[2]) === golden.inline_script.sha256);
+  ok('inline script canonical matches golden', big && shaCanon(big[2]) === golden.canonical.inline_script.sha256);
   if (big) {
     const uiPre = big[2].slice(0, big[2].indexOf(ENGINE_START));
     const uiPost = big[2].slice(big[2].indexOf(ENGINE_END) + ENGINE_END.length);
     ok('UI pre-engine matches golden', sha(uiPre) === golden.ui_pre_engine.sha256);
-    ok('UI post-engine matches golden', sha(uiPost) === golden.ui_post_engine.sha256);
+    ok('UI post-engine canonical matches golden', shaCanon(uiPost) === golden.canonical.ui_post_engine.sha256);
   }
 
   // 6. Both fragments verbatim, in order; sha + first/last fn.
@@ -170,11 +175,16 @@ function checkSolverDetectionInterface(siteDir) {
   // Type-option select integrity: each option value must appear the pinned number of
   // times, so renaming even one occurrence trips a specific contract (not just the
   // global hash).
-  if (golden.type_option_counts) {
-    Object.keys(golden.type_option_counts).forEach(opt => {
+  // The model-type literals ('continuous'/'integer'/'binary') also appear inside the EXAMPLES
+  // catalogue (each record's modelType), so a raw count grows with the catalogue. Count over the
+  // canonicalised composed text (EXAMPLES replaced by the sentinel) so this contract protects the
+  // Solver UI's own type options count-agnostically, against the historical canonical authority.
+  if (golden.canonical && golden.canonical.type_option_counts) {
+    const composedCanon = canonicaliseSolverExamplesRegion(composed);
+    Object.keys(golden.canonical.type_option_counts).forEach(opt => {
       const re = new RegExp("'" + opt + "'", 'g');
-      ok('type option "' + opt + '" count intact',
-        (composed.match(re) || []).length === golden.type_option_counts[opt]);
+      ok('type option "' + opt + '" count intact (canonical)',
+        (composedCanon.match(re) || []).length === golden.canonical.type_option_counts[opt]);
     });
   }
   // data-i18n coverage: total count pinned; removing one attribute trips this, and a

@@ -1,5 +1,5 @@
 {
-  "note": "F5 independent baseline: pre-F5 legacy model hash + public slug + expected MATHEMATICAL result (status/objective/tolerance) for the nine migrated examples. The result POLICY is owned by the canonical metadata, NOT duplicated here. The engine RECALCULATES and compares; expected values are NOT copied from the solver.",
+  "note": "F5 independent baseline: pre-F5 legacy model hash + public slug + expected MATHEMATICAL result (status/objective/tolerance) for the nine migrated examples. The result POLICY is owned by the canonical metadata, NOT duplicated here. The engine RECALCULATES and compares; expected values are NOT copied from the solver. F7a: the 15 appended entries carry expected status/objective from the independent Phase-1 engine audit (docs/f7a-phase1-engine-audit.json, approved), not from the composer under test.",
   "schemaVersion": 1,
   "examples": [
     {
@@ -98,6 +98,171 @@
       "expected": {
         "status": "optimal",
         "objective": 830,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "bakery-mix",
+      "slug": "bakery-production-mix",
+      "legacyCategory": "start",
+      "modelHash": "f7e7d1c3641b50fa1a16672b82eddb9a6238f8ff1f6e2c9539965811e75bb38e",
+      "expected": {
+        "status": "optimal",
+        "objective": 375,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "factory-batches",
+      "slug": "factory-batch-plan",
+      "legacyCategory": "start",
+      "modelHash": "a6b34b2672303d99257d6edf3e88858b659919552f516d7e99f7c0b754755c5a",
+      "expected": {
+        "status": "optimal",
+        "objective": 2370,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "clinic-staffing",
+      "slug": "clinic-staffing-plan",
+      "legacyCategory": "business",
+      "modelHash": "9b2a0c95d5f2761d776f0587507c0a10b1109171b9dff38f71061f701052f89f",
+      "expected": {
+        "status": "optimal",
+        "objective": 2200,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "call-centre",
+      "slug": "call-centre-shift-plan",
+      "legacyCategory": "business",
+      "modelHash": "5308b13374027c5ebcb2621b4565395abba259de2ebda37b0c5eb9416abac62d",
+      "expected": {
+        "status": "optimal",
+        "objective": 4650,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "purchase-split",
+      "slug": "purchase-order-split",
+      "legacyCategory": "business",
+      "modelHash": "9c298c24a9253f605af02e3100542c3111ebb841902e81d840c0888d5e1e456f",
+      "expected": {
+        "status": "optimal",
+        "objective": 4165,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "ingredient-sourcing",
+      "slug": "ingredient-sourcing-plan",
+      "legacyCategory": "binary",
+      "modelHash": "c187ccb21c09eb50780e4fa7c2cf1b411e68d1441149792b7073919b60bc01fe",
+      "expected": {
+        "status": "optimal",
+        "objective": 5135,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "fleet-assignment",
+      "slug": "fleet-assignment-plan",
+      "legacyCategory": "binary",
+      "modelHash": "925a8a0b8be800b1ca5ba642e6540b733b3665b82c2e4693e6c3d4f9216c5a71",
+      "expected": {
+        "status": "optimal",
+        "objective": 355,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "media-mix",
+      "slug": "media-channel-mix",
+      "legacyCategory": "start",
+      "modelHash": "12c7d61b22e269c5c418d5902fe41fcd55c5863ebabd52532dab01f5135063a6",
+      "expected": {
+        "status": "optimal",
+        "objective": 416,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "fertiliser-blend",
+      "slug": "fertiliser-blend-plan",
+      "legacyCategory": "business",
+      "modelHash": "4abab8cc23bbd0d0034f2d3289a4033c4dd22ad69c10420dd853b740ebb8a39e",
+      "expected": {
+        "status": "optimal",
+        "objective": 47.602739726,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "scholarships",
+      "slug": "scholarship-allocation",
+      "legacyCategory": "start",
+      "modelHash": "61d10c0c1d80924e2dba880762f4207956fe43e7e4497f66af415434dd8559b1",
+      "expected": {
+        "status": "optimal",
+        "objective": 45,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "food-bank",
+      "slug": "food-bank-allocation",
+      "legacyCategory": "start",
+      "modelHash": "c229fee58a9e65700af74dc4d62e2fa2057b87f9a71e808729d15093caeee0a9",
+      "expected": {
+        "status": "optimal",
+        "objective": 711,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "renewable-mix",
+      "slug": "renewable-energy-mix",
+      "legacyCategory": "business",
+      "modelHash": "add8fe4f7fe2fbb0d2ff960edaf9b47264ed5cef61d81f8a097f440dd8362d13",
+      "expected": {
+        "status": "optimal",
+        "objective": 41500,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "microgrid-capacity",
+      "slug": "microgrid-capacity-plan",
+      "legacyCategory": "business",
+      "modelHash": "a519edcc7e7a81f7e1e1c7156ab53feb81f1c167c9bec42a004eb08df9491cb2",
+      "expected": {
+        "status": "optimal",
+        "objective": 23126.315789474,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "hotel-rooms",
+      "slug": "hotel-room-allocation",
+      "legacyCategory": "start",
+      "modelHash": "2eabd821fb8a528c61532523bab7c0e6479980bda1b867b188be1dabedc25720",
+      "expected": {
+        "status": "optimal",
+        "objective": 9150,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "lp-basics",
+      "slug": "linear-optimisation-basics",
+      "legacyCategory": "start",
+      "modelHash": "15052598db3c58d57302427264046c5feaf3e59ca94c144f13a98a3d6794a906",
+      "expected": {
+        "status": "optimal",
+        "objective": 430,
         "tolerance": null
       }
     }

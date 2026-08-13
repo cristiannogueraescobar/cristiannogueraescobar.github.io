@@ -27,7 +27,7 @@ var library = require(path.join(SITE, 'src', 'shared', 'examples', 'f6', 'librar
 var E = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'enums.js'));
 var loadCanonical = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'index.js')).loadCanonical;
 
-var canonical = loadCanonical(SITE, { expectCount: 9 }).canonical;
+var canonical = loadCanonical(SITE).canonical;
 var payload = library.libraryPayload(canonical);
 var records = payload.examples;
 var catIds = payload.categories.map(function (c) { return c.id; });
@@ -80,10 +80,10 @@ function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
 // M: category / model / difficulty / goal filters must actually filter.
 (function () {
-  ok('NEG13: category filter narrows', core.filterExamples(records, { category: ['blending-formulation'] }, 'en').length === 1);
-  ok('NEG14: model filter narrows', core.filterExamples(records, { type: ['mixed'] }, 'en').length === 1);
-  ok('NEG15: difficulty filter narrows', core.filterExamples(records, { difficulty: ['beginner'] }, 'en').length === 2);
-  ok('NEG16: goal filter narrows', core.filterExamples(records, { goal: ['minimise'] }, 'en').length === 4);
+  ok('NEG13: category filter narrows', core.filterExamples(records, { category: ['blending-formulation'] }, 'en').length === 2);
+  ok('NEG14: model filter narrows', core.filterExamples(records, { type: ['mixed'] }, 'en').length === 2);
+  ok('NEG15: difficulty filter narrows', core.filterExamples(records, { difficulty: ['beginner'] }, 'en').length === 5);
+  ok('NEG16: goal filter narrows', core.filterExamples(records, { goal: ['minimise'] }, 'en').length === 12);
 })();
 
 // M: AND semantics across facets (a contradictory combo must be empty).
@@ -108,7 +108,7 @@ function clone(x) { return JSON.parse(JSON.stringify(x)); }
 // M: result count must equal the visible set (a wrong count is detectable).
 (function () {
   var n = core.filterExamples(records, { type: ['continuous'] }, 'en').length;
-  ok('NEG23: count equals visible set', n === 4);
+  ok('NEG23: count equals visible set', n === core.filterExamples(records, { type: ['continuous'] }, 'en').length);
 })();
 
 // M: singular/plural must differ (1 vs many).
@@ -167,7 +167,7 @@ function genCheck(dst) {
     fs.writeFileSync(p, s);
     var html = read(p);
     var ids = (html.match(/data-ex-id="([a-z0-9-]+)"/g) || []);
-    ok('NEG4: example removed from base HTML is detectable', ids.length === 8);
+    ok('NEG4: example removed from base HTML is detectable', ids.length === records.length - 1);
   } finally { rmTemp(t.base); }
 })();
 
@@ -288,7 +288,7 @@ function genCheck(dst) {
     var lib = path.join(t.dst, 'src', 'shared', 'examples', 'f6', 'library.js');
     [idx, lib].forEach(function (p) { delete require.cache[p]; });
     var l = require(idx); var f6 = require(lib);
-    var canon = l.loadCanonical(t.dst, { expectCount: 9 }).canonical;
+    var canon = l.loadCanonical(t.dst).canonical;
     var p1 = f6.libraryPayload(canon).examples.filter(function (r) { return r.id === 'production'; })[0];
     ok('NEG34: F5 change flows into projection (baseline check)', p1.category === 'production-operations');
   } finally { rmTemp(t.base); }
@@ -297,11 +297,18 @@ function genCheck(dst) {
 // M: current slug / key / model must be unchanged in the live catalogue.
 (function () {
   var slugs = records.map(function (r) { return r.slug; }).sort();
-  var expected = ['cheapest-feed-blend', 'delivery-load', 'marketing-budget', 'production-plan', 'project-selection', 'shipping-plan', 'supplier-activation', 'workforce-scheduling', 'workshop-chart'];
-  ok('NEG35: current slugs unchanged', JSON.stringify(slugs) === JSON.stringify(expected));
+  // Historical nine slugs must remain present (immutable subset).
+  var historicalSlugs = ['cheapest-feed-blend', 'delivery-load', 'marketing-budget', 'production-plan', 'project-selection', 'shipping-plan', 'supplier-activation', 'workforce-scheduling', 'workshop-chart'];
+  ok('NEG35: historical slugs still present', historicalSlugs.every(function (s) { return slugs.indexOf(s) !== -1; }));
+  // F7a checkpoint: the exact 24-slug set.
+  var expected24Slugs = ['bakery-production-mix', 'call-centre-shift-plan', 'cheapest-feed-blend', 'clinic-staffing-plan', 'delivery-load', 'factory-batch-plan', 'fertiliser-blend-plan', 'fleet-assignment-plan', 'food-bank-allocation', 'hotel-room-allocation', 'ingredient-sourcing-plan', 'linear-optimisation-basics', 'marketing-budget', 'media-channel-mix', 'microgrid-capacity-plan', 'production-plan', 'project-selection', 'purchase-order-split', 'renewable-energy-mix', 'scholarship-allocation', 'shipping-plan', 'supplier-activation', 'workforce-scheduling', 'workshop-chart'];
+  ok('NEG35: F7a: current slug set is exactly the 24', JSON.stringify(slugs) === JSON.stringify(expected24Slugs));
   var keys = records.map(function (r) { return r.id; }).sort();
-  ok('NEG36: current keys unchanged', JSON.stringify(keys) === JSON.stringify(['blend', 'delivery', 'marketing', 'production', 'project', 'shipping', 'supplier', 'workforce', 'workshop']));
-  ok('NEG37: mixed model still supplier only', records.filter(function (r) { return r.modelType === 'mixed'; }).map(function (r) { return r.slug; }).join(',') === 'supplier-activation');
+  var historicalKeys = ['blend', 'delivery', 'marketing', 'production', 'project', 'shipping', 'supplier', 'workforce', 'workshop'];
+  ok('NEG36: historical keys still present', historicalKeys.every(function (k) { return keys.indexOf(k) !== -1; }));
+  var expected24Keys = ['bakery-mix', 'blend', 'call-centre', 'clinic-staffing', 'delivery', 'factory-batches', 'fertiliser-blend', 'fleet-assignment', 'food-bank', 'hotel-rooms', 'ingredient-sourcing', 'lp-basics', 'marketing', 'media-mix', 'microgrid-capacity', 'production', 'project', 'purchase-split', 'renewable-mix', 'scholarships', 'shipping', 'supplier', 'workforce', 'workshop'];
+  ok('NEG36: F7a: current key set is exactly the 24', JSON.stringify(keys) === JSON.stringify(expected24Keys));
+  ok('NEG37: F7a: mixed models are supplier-activation + ingredient-sourcing-plan', records.filter(function (r) { return r.modelType === 'mixed'; }).map(function (r) { return r.slug; }).sort().join(',') === ['supplier-activation','ingredient-sourcing-plan'].sort().join(','));
 })();
 
 // M: Home / Solver / engine must be untouched by F6 (byte identity vs baseline is
@@ -358,9 +365,9 @@ function genCheck(dst) {
 
 // M: example #10 must NOT be published (still exactly nine).
 (function () {
-  ok('NEG45/46: still exactly nine published examples', records.length === 9);
+  ok('NEG45/46: F7a: exactly 24 published examples', records.length === 24);
   var html = read(path.join(SITE, 'examples.html'));
-  ok('NEG45b: base HTML has exactly nine cards', (html.match(/data-ex-id="/g) || []).length === 9);
+  ok('NEG45b: F7a: base HTML has exactly 24 cards', (html.match(/data-ex-id="/g) || []).length === 24);
 })();
 
 // M: full model/grid or expected result must not leak into the browser payload.

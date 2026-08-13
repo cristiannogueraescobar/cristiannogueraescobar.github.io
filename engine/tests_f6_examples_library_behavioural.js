@@ -20,7 +20,7 @@ var library = require(path.join(SITE, 'src', 'shared', 'examples', 'f6', 'librar
 var E = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'enums.js'));
 var loadCanonical = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'index.js')).loadCanonical;
 
-var canonical = loadCanonical(SITE, { expectCount: 9 }).canonical;
+var canonical = loadCanonical(SITE).canonical;
 var payload = library.libraryPayload(canonical);
 var records = payload.examples;
 var catIds = payload.categories.map(function (c) { return c.id; });
@@ -59,7 +59,7 @@ function makeHarness(initialUrl, locale) {
 (function () {
   var h = makeHarness('examples.html', 'en');
   var r = h.apply();
-  ok('BEH: initial shows all nine', r.count === 9 && !r.empty);
+  ok('BEH: F7a: initial shows all 24', r.count === 24 && !r.empty);
 })();
 
 // ---- search cycle ----
@@ -67,7 +67,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html', 'en');
   h.setState({ q: 'supplier', category: [], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: search supplier -> one', r.count === 1 && r.ids[0] === 'supplier');
+  ok('BEH: F7a: search supplier -> supplier + purchasing records', r.count === 3 && r.ids.indexOf('supplier') !== -1);
   ok('BEH: search writes q to URL', h.getUrl().indexOf('q=supplier') !== -1);
 })();
 
@@ -76,7 +76,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html', 'en');
   h.setState({ q: '', category: ['production-operations'], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: category production-operations -> two', r.count === 2);
+  ok('BEH: F7a: category production-operations -> four', r.count === 4);
   ok('BEH: category in URL', h.getUrl().indexOf('category=production-operations') !== -1);
 })();
 
@@ -101,7 +101,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html?q=foo&type=integer&lang=es', 'en');
   h.setState({ q: '', category: [], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: reset restores all nine', r.count === 9);
+  ok('BEH: F7a: reset restores all 24', r.count === 24);
   ok('BEH: reset preserves lang', h.getUrl().indexOf('lang=es') !== -1);
   ok('BEH: reset removes q + facets', h.getUrl().indexOf('q=') === -1 && h.getUrl().indexOf('type=') === -1);
 })();
@@ -138,17 +138,20 @@ function makeHarness(initialUrl, locale) {
 
 // ---- future #10 temp fixture: full cycle ----
 (function () {
-  var tenth = {
-    id: 'future10', slug: 'future-example-10', category: 'hospitality-retail',
+  var TARGET = 'hospitality-retail';
+  var beforeInCat = core.countByCategory(records)[TARGET] || 0;
+  var extra = {
+    id: 'future-syn', slug: 'future-example-syn', category: TARGET,
     modelType: 'integer', direction: 'max', difficulty: 'intermediate', minutes: 5,
     decisions: 3, limits: 2, chartEligible: false, capabilities: ['maximise'],
-    solverUrl: 'solver.html?ex=future-example-10',
+    solverUrl: 'solver.html?ex=future-example-syn',
     locales: (function () { var o = {}; E.LOCALES.forEach(function (l) { o[l] = { title: 'Table mix', description: 'x', question: 'Which tables to seat?' }; }); return o; })(),
   };
-  var withTen = records.concat([tenth]);
-  ok('BEH/#10: filter finds it in a previously-empty category', core.filterExamples(withTen, { category: ['hospitality-retail'] }, 'en').map(function (r) { return r.id; }).join(',') === 'future10');
-  ok('BEH/#10: search finds it', core.filterExamples(withTen, { q: 'tables' }, 'en').map(function (r) { return r.id; }).indexOf('future10') !== -1);
-  ok('BEH/#10: counted in category counts', core.countByCategory(withTen)['hospitality-retail'] === 1);
+  var withExtra = records.concat([extra]);
+  ok('BEH/synthetic: added record is filterable in its category',
+    core.filterExamples(withExtra, { category: [TARGET] }, 'en').map(function (r) { return r.id; }).indexOf('future-syn') !== -1);
+  ok('BEH/synthetic: search finds it', core.filterExamples(withExtra, { q: 'tables' }, 'en').map(function (r) { return r.id; }).indexOf('future-syn') !== -1);
+  ok('BEH/synthetic: category count increments by one', core.countByCategory(withExtra)[TARGET] === beforeInCat + 1);
 })();
 
 // ---- 60-record library: full behaviour ----

@@ -182,9 +182,11 @@ expectCheckFail('N25 worker glue modified', dir => {
 expectCheckFail('N26 golden tampered', dir => {
   const gp = path.join(dir, FIX_REL, 'solver-interface-d5-final.json');
   const g = JSON.parse(fs.readFileSync(gp, 'utf8'));
-  g.composed_total.sha256 = '0'.repeat(64);
+  // composed_total is now compared canonically against golden.canonical.* (historical authority),
+  // so tampering must target the authoritative canonical field the live check reads.
+  g.canonical.composed_total.sha256 = '0'.repeat(64);
   fs.writeFileSync(gp, JSON.stringify(g, null, 2) + '\n');
-}, 'composed total sha matches golden');
+}, 'composed total canonical sha matches golden');
 
 // 27. Runs from a path containing a space.
 (function () {

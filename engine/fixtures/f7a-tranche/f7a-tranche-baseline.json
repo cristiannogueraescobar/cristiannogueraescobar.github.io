@@ -1,0 +1,424 @@
+{
+  "note": "F7a tranche protected baseline — PER-RECORD contracts for the 15 F7a examples. Freezes: model hash, slug, model type, result policy, fieldOrder, objective, category, difficulty, minutes, tags, authoring direction/status, translations + content (SHA-256), and exact decision vectors where policy=exact. NOT a whole-catalogue pin: each record is guarded independently, so F7b/F7c growth does not require re-pinning F7a, and F7b must NOT re-pin these. Values/hashes trace to the independent Phase-1 audit + approved F7a metadata; this baseline adds no new golden authority over approved goldens.",
+  "schemaVersion": 2,
+  "tranche": "F7a",
+  "records": [
+    {
+      "key": "bakery-mix",
+      "slug": "bakery-production-mix",
+      "modelType": "continuous",
+      "resultPolicy": "exact",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 375,
+      "category": "production-operations",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "production",
+        "bakery",
+        "capacity",
+        "mix"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "57aa501b898e2375d59bed6b6f934c850862366a0cf2df85f1573e2635b06df4",
+      "contentSha256": "be30fa3c17d39ab8df10c6b89c3e5efba2058848d8088f35a66f4fa100c2a240",
+      "modelHash": "f7e7d1c3641b50fa1a16672b82eddb9a6238f8ff1f6e2c9539965811e75bb38e",
+      "exactDecisions": {
+        "B2": 150,
+        "B3": 150,
+        "B4": 0
+      },
+      "metadataSha256": "e7170303982eefea0f73f042eaa6fcb58ea585be50e290b04d29921116d11829"
+    },
+    {
+      "key": "factory-batches",
+      "slug": "factory-batch-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 2370,
+      "category": "production-operations",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "production",
+        "batches",
+        "integer",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "7404665431f6e8c20f845da0d43a675a0feb4b7a8b35fdb44fd525cf676b34bd",
+      "contentSha256": "ce08965d531d41887b32ca51ba9541860a7cf3a5a289b3405a7ecc2520b26db7",
+      "modelHash": "a6b34b2672303d99257d6edf3e88858b659919552f516d7e99f7c0b754755c5a",
+      "metadataSha256": "0d7d207de12735d0ebeecdfd6b9ec0d43e38d58b2084ffea6828785c084e9394"
+    },
+    {
+      "key": "clinic-staffing",
+      "slug": "clinic-staffing-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 2200,
+      "category": "workforce-scheduling",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "staffing",
+        "shifts",
+        "coverage",
+        "healthcare"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "682dbce5f74be778261a6845847cdb997923fc7235225de7ff5668ff89808516",
+      "contentSha256": "a598a579a599a1aad00565a5059f27ea818aa2740a29f8ba636ad0abf2bfea1c",
+      "modelHash": "9b2a0c95d5f2761d776f0587507c0a10b1109171b9dff38f71061f701052f89f",
+      "metadataSha256": "a06be509fc21ebe5e67e08c054cf8ed5d901cfb73378b1bd59627e11bb5345df"
+    },
+    {
+      "key": "call-centre",
+      "slug": "call-centre-shift-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 4650,
+      "category": "workforce-scheduling",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "staffing",
+        "shifts",
+        "scheduling",
+        "coverage"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "f373c8efd01f7ee146df840ee32596440fd05702d19d952b6520d2b920e54d62",
+      "contentSha256": "4a27060836c03eb3ce9eba2264ed4ae78c5945adf6ae6e365fa418bdc106cef5",
+      "modelHash": "5308b13374027c5ebcb2621b4565395abba259de2ebda37b0c5eb9416abac62d",
+      "metadataSha256": "c156d7b003857849c8232a24f8eed65752f9770d374a2ae7de6940219ca7fb69"
+    },
+    {
+      "key": "purchase-split",
+      "slug": "purchase-order-split",
+      "modelType": "continuous",
+      "resultPolicy": "exact",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 4165,
+      "category": "purchasing-suppliers",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "suppliers",
+        "procurement",
+        "sourcing",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "0794f10292efbb236dd4829ca4043eaf759e55486cabd1ef9060a1ac531f520f",
+      "contentSha256": "870467753ebb4d2ffa6e7819c41c945c718dcb5487195733a32a555e4ec96226",
+      "modelHash": "9c298c24a9253f605af02e3100542c3111ebb841902e81d840c0888d5e1e456f",
+      "exactDecisions": {
+        "B2": 250,
+        "B3": 200,
+        "B4": 50
+      },
+      "metadataSha256": "fd71590b315b93f705358662bb52097f09e7542d40e34f65d4e481aa6891077a"
+    },
+    {
+      "key": "ingredient-sourcing",
+      "slug": "ingredient-sourcing-plan",
+      "modelType": "mixed",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "domains",
+        "expected"
+      ],
+      "objective": 5135,
+      "category": "purchasing-suppliers",
+      "difficulty": "advanced",
+      "minutes": 11,
+      "tags": [
+        "suppliers",
+        "sourcing",
+        "activation",
+        "blend"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "1cf6ce7619af342793661bf0323fdddb342aed13d6bd5217d2b9462468d3e9ea",
+      "contentSha256": "4f22b1ded24cce287f886195ed3ea4dc960259f1f5303e8fbfe069e043060b42",
+      "modelHash": "c187ccb21c09eb50780e4fa7c2cf1b411e68d1441149792b7073919b60bc01fe",
+      "metadataSha256": "4bf5bff85419596ad3243e06e773c6f0f64f6a6917f7a0d66fd6d044b523e69c"
+    },
+    {
+      "key": "fleet-assignment",
+      "slug": "fleet-assignment-plan",
+      "modelType": "binary",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "domains",
+        "expected"
+      ],
+      "objective": 355,
+      "category": "logistics-transport",
+      "difficulty": "advanced",
+      "minutes": 9,
+      "tags": [
+        "fleet",
+        "logistics",
+        "selection",
+        "capacity"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "c64f335362d21fa92407e1ce2ebfc52443aa41d9a26edf4f5057fab62e59c8cf",
+      "contentSha256": "00cb832fc03fb02ba30ee93e4c08a7c395649bacffb40e309f39b454d3958b02",
+      "modelHash": "925a8a0b8be800b1ca5ba642e6540b733b3665b82c2e4693e6c3d4f9216c5a71",
+      "metadataSha256": "646797321d1be0df6b3947bbadfc694a57aaa200e9785ac721b36be660231148"
+    },
+    {
+      "key": "media-mix",
+      "slug": "media-channel-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 416,
+      "category": "marketing-finance",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "campaign",
+        "budget",
+        "allocation",
+        "reach"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "7c193d9f6ee73100f4ebd915ecb843a0518bdf2e08b7294cc6433d153867b991",
+      "contentSha256": "ae16a6cf0e72890e25d7ba354e6e8112a121bb1da7801f8c816d500017661b69",
+      "modelHash": "12c7d61b22e269c5c418d5902fe41fcd55c5863ebabd52532dab01f5135063a6",
+      "metadataSha256": "806d5afe6cabe3722911d313ce81e1f343191cbeb4297d5bebb3ee858e6b662a"
+    },
+    {
+      "key": "fertiliser-blend",
+      "slug": "fertiliser-blend-plan",
+      "modelType": "continuous",
+      "resultPolicy": "exact",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 47.602739726,
+      "category": "blending-formulation",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "blend",
+        "nutrients",
+        "formulation",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "fda3a7f31139eab5e600f811162687aaf720c02debb4beaf3467b2788350090c",
+      "contentSha256": "0473fd3ddc5bc361a79e1883f29e1faba055b513050122cc994a4d1cb3c14f5c",
+      "modelHash": "4abab8cc23bbd0d0034f2d3289a4033c4dd22ad69c10420dd853b740ebb8a39e",
+      "exactDecisions": {
+        "B2": 34.931506849,
+        "B3": 2.739726027,
+        "B4": 16.438356164
+      },
+      "metadataSha256": "9ac6df70fac88ec104032f8cf0a95e3b8b03b80c12bdb70cd3cc6d16ffbcd8fc"
+    },
+    {
+      "key": "scholarships",
+      "slug": "scholarship-allocation",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 45,
+      "category": "education-social",
+      "difficulty": "intermediate",
+      "minutes": 7,
+      "tags": [
+        "education",
+        "allocation",
+        "budget",
+        "funding"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "6f554bf9f8eba60104939e1502317d60dcec8b7647f7c481adc4a86e9edbe8e1",
+      "contentSha256": "a12adbb6ac4c125ba57340293eb71d93663155812e889f6690331dac48f523f5",
+      "modelHash": "61d10c0c1d80924e2dba880762f4207956fe43e7e4497f66af415434dd8559b1",
+      "metadataSha256": "bab6e7e168a30df732d780f69391bdc1aebd2f9bfde65ec3b92d9ec6703bfa70"
+    },
+    {
+      "key": "food-bank",
+      "slug": "food-bank-allocation",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 711,
+      "category": "education-social",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "allocation",
+        "community",
+        "distribution",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "b72cafd1f871b808db2ea8cfcafd3f428dee59345c24658468e287a507262c69",
+      "contentSha256": "6214784b5d2c2dfa2d4730b9af2c16b31decf154cf06bd9e020c9d64c40377a8",
+      "modelHash": "c229fee58a9e65700af74dc4d62e2fa2057b87f9a71e808729d15093caeee0a9",
+      "metadataSha256": "37f3dfbb96c41e92fdc12e99260f20b9589056e487db2ac84cb0db502191fcd7"
+    },
+    {
+      "key": "renewable-mix",
+      "slug": "renewable-energy-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 41500,
+      "category": "energy-sustainability",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "energy",
+        "renewable",
+        "cost",
+        "demand"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "4dc46f8f928c97db982f78a72f798aa11b874c0244f283272afc2be5ea4602a6",
+      "contentSha256": "752d0e82cebf8801737a197d10af6766c63d74401e120f8d9614fdee62b86c79",
+      "modelHash": "add8fe4f7fe2fbb0d2ff960edaf9b47264ed5cef61d81f8a097f440dd8362d13",
+      "metadataSha256": "9e884ee2ae631a1a0dea4341b138def10b5d457616e95bb5b514358236ea84b4"
+    },
+    {
+      "key": "microgrid-capacity",
+      "slug": "microgrid-capacity-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 23126.315789474,
+      "category": "energy-sustainability",
+      "difficulty": "advanced",
+      "minutes": 10,
+      "tags": [
+        "energy",
+        "capacity",
+        "planning",
+        "resilience"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "0a266bb9ae4bbac9c05a1c51943b8c6db6c9f9b1bec24a6e04aa4371f4e4a536",
+      "contentSha256": "289dd24d1fa193e89b0ee84261f94dfe0510b32af60ca8ee49d147ca4546e8b3",
+      "modelHash": "a519edcc7e7a81f7e1e1c7156ab53feb81f1c167c9bec42a004eb08df9491cb2",
+      "metadataSha256": "89eee861203725c5b57fd06a7d572701d216122cbd4ee305c2cc901998f717f1"
+    },
+    {
+      "key": "hotel-rooms",
+      "slug": "hotel-room-allocation",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 9150,
+      "category": "hospitality-retail",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "hotel",
+        "revenue",
+        "allocation",
+        "channels"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "09570eb62b22e41d5b3767cbb45f685debb9d9baad310624b68eab5de23da030",
+      "contentSha256": "6d8e63ea6ea399287d611fb009bdbe2a4d6602a399258d0f1cf6116136a81219",
+      "modelHash": "2eabd821fb8a528c61532523bab7c0e6479980bda1b867b188be1dabedc25720",
+      "metadataSha256": "650d934b0c95d958068ba71765ebce56cbe35f8bbd5bae260d223016f4b24269"
+    },
+    {
+      "key": "lp-basics",
+      "slug": "linear-optimisation-basics",
+      "modelType": "continuous",
+      "resultPolicy": "exact",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 430,
+      "category": "learning-engine",
+      "difficulty": "beginner",
+      "minutes": 3,
+      "tags": [
+        "learning",
+        "basics",
+        "two-variables",
+        "chart"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "cdc57f2d4b1fa9477c4d271e3ac3dbf28ac429b7b085cb4f87ace312e9b5de78",
+      "contentSha256": "921e787b9730eb80a5268d9775280cfef287ac7414079d33b50656ff777fc22e",
+      "modelHash": "15052598db3c58d57302427264046c5feaf3e59ca94c144f13a98a3d6794a906",
+      "exactDecisions": {
+        "B2": 10,
+        "B3": 9
+      },
+      "metadataSha256": "75ebf4e710e425392df15366b9bc62fd95338f085f0e5b0a41428771d195b718"
+    }
+  ]
+}

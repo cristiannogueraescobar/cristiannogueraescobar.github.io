@@ -1,0 +1,44 @@
+{
+  "note": "Independent historical provenance for the count-agnostic Solver UI golden migration (F7a option c-2). This records the approved post-F6 / pre-F7a repository state used as the INDEPENDENT historical text source for deriving canonicalised UI golden SHAs. It is NOT generated from the F7a composer under test.",
+  "source": {
+    "state": "approved post-F6 / pre-F7a",
+    "artifact": "plumline.zip (user local repository, deliberately not updated with F7a work)",
+    "fileCount": 307
+  },
+  "catalogueCount": 9,
+  "catalogueKeys": [
+    "production",
+    "workshop",
+    "blend",
+    "marketing",
+    "workforce",
+    "shipping",
+    "project",
+    "delivery",
+    "supplier"
+  ],
+  "sourceSolverInputSha256": "b373fa24d8dcd9f59db0b4171abdb1bf42ef9a87315bfad8602aff8753f68b41",
+  "sourceSolverInputBytes": 34947,
+  "composedSolverSha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74",
+  "composedSolverBytes": 215613,
+  "composedSolverChars_jsStringLength": 215503,
+  "composer": "composeSolverInterface(solver.html, repoRoot) from src/shared/compose-solver.js",
+  "composerPath": "src/shared/compose-solver.js",
+  "nodeVersion": "v22.22.2",
+  "nodeVersionNote": "Phase-3 working environment. Final acceptance runtime required: Node 24.15.0.",
+  "timestampInformational": "2026-08-12T12:48:22.364Z",
+  "proofNoF7aFiles": {
+    "f7aCatalogueKeysPresent": [],
+    "f7aKeyCount": 0,
+    "indexJsHasOldCountDefault": true,
+    "projectorsHasOldNineRegen": true
+  },
+  "crossCheckAgainstExistingGolden": {
+    "goldenFile": "engine/fixtures/solver-ui-golden/solver-grid-d1.json",
+    "goldenComposedTotalSha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74",
+    "reproducedComposedSha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74",
+    "shaMatch": true,
+    "bytesMatch": true,
+    "charsNote": "golden chars field uses a different counting convention (215429) than JS string length (215503); SHA and bytes match exactly, so content is byte-identical."
+  }
+}

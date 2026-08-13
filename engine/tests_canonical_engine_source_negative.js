@@ -256,10 +256,12 @@ expectCheckFail('N33 fixture engine sha tampered', dir => {
   wr(dir, fixtureP, JSON.stringify(j, null, 2));
 }, 'canonical source sha256 == fixture');
 // 34. Fixture composed sha tampered.
-expectCheckFail('N34 fixture composed sha tampered', dir => {
-  const j = JSON.parse(rd(dir, fixtureP)); j.composed.composed_solver_sha256 = 'deadbeef';
+expectCheckFail('N34 fixture composed canonical sha tampered', dir => {
+  // composed_solver is compared canonically now (against g.composed.canonical), so tampering must
+  // target the authoritative canonical field the live check reads.
+  const j = JSON.parse(rd(dir, fixtureP)); j.composed.canonical.composed_solver_sha256 = 'deadbeef';
   wr(dir, fixtureP, JSON.stringify(j, null, 2));
-}, 'composed solver sha256 == fixture');
+}, 'composed solver canonical sha256 == fixture');
 
 // ---- Engine markers in composed output ----------------------------------------
 // 35. Composed output loses ENGINE_END (canonical gains a stray END so region breaks).

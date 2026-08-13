@@ -18,19 +18,27 @@ let pass = 0, fail = 0; const failures = [];
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push(name + (detail ? ' — ' + detail : '')); } }
 
 const { catalogue, serialize } = loadAndValidateCatalogue(SITE);
-const ORDER = ['production', 'workshop', 'blend', 'marketing', 'workforce', 'shipping', 'project', 'delivery', 'supplier'];
+// Historical 9 (immutable): the first nine keys, in canonical order, must never change.
+const HISTORICAL_ORDER = ['production', 'workshop', 'blend', 'marketing', 'workforce', 'shipping', 'project', 'delivery', 'supplier'];
+// F7a additions (this tranche): the exact 15 keys appended after the historical nine, in order.
+const F7A_ORDER = ['bakery-mix', 'factory-batches', 'clinic-staffing', 'call-centre', 'purchase-split',
+  'ingredient-sourcing', 'fleet-assignment', 'media-mix', 'fertiliser-blend', 'scholarships',
+  'food-bank', 'renewable-mix', 'microgrid-capacity', 'hotel-rooms', 'lp-basics'];
 const LANGS = ['en', 'es', 'pt', 'de', 'fr'];
 
-// 1. Single authority loads + validates.
-ok('1 catalogue authority loads and validates', catalogue.length === 9);
-// 2. Nine examples.
-ok('2 nine examples', catalogue.length === 9);
-// 3. Unique keys.
-ok('3 unique keys', new Set(catalogue.map(r => r.key)).size === 9);
-// 4. Unique slugs.
-ok('4 unique slugs', new Set(catalogue.map(r => r.slug)).size === 9);
-// 5. Canonical order.
-ok('5 canonical order', JSON.stringify(catalogue.map(r => r.key)) === JSON.stringify(ORDER));
+// 1. Single authority loads + validates (generic: whatever the catalogue size is, it loaded).
+ok('1 catalogue authority loads and validates', catalogue.length >= 9);
+// 2. F7a checkpoint: exactly 24 examples (the only place a total count is pinned).
+ok('2 F7a: exactly 24 examples', catalogue.length === 24);
+// 3. Unique keys (generic: over the whole catalogue).
+ok('3 unique keys', new Set(catalogue.map(r => r.key)).size === catalogue.length);
+// 4. Unique slugs (generic: over the whole catalogue).
+ok('4 unique slugs', new Set(catalogue.map(r => r.slug)).size === catalogue.length);
+// 5. Canonical order: historical nine intact as a PREFIX (immutable), then the exact F7a 15.
+ok('5 historical nine are the canonical prefix, in order',
+  JSON.stringify(catalogue.slice(0, 9).map(r => r.key)) === JSON.stringify(HISTORICAL_ORDER));
+ok('5b F7a fifteen follow the historical nine, in order',
+  JSON.stringify(catalogue.slice(9).map(r => r.key)) === JSON.stringify(F7A_ORDER));
 // 6. Five languages each.
 ok('6 five languages each', catalogue.every(r => LANGS.every(l => r.translations[l])));
 // 7. Non-empty titles.
@@ -45,10 +53,21 @@ ok('10 valid types', catalogue.every(r => ['continuous', 'integer', 'binary', 'm
 ok('11 valid senses', catalogue.every(r => ['max', 'min'].indexOf(r.sense) !== -1));
 // 12. Grids present + non-empty.
 ok('12 grids present', catalogue.every(r => Array.isArray(r.model.grid) && r.model.grid.length > 0));
-// 13. wholeNumbers only where declared (workforce, shipping).
-ok('13 wholeNumbers where declared', catalogue.filter(r => r.model.whole).map(r => r.key).sort().join(',') === 'shipping,workforce');
-// 14. domains only where declared.
-ok('14 domains where declared', catalogue.filter(r => r.model.domains).map(r => r.key).sort().join(',') === 'delivery,marketing,project,supplier');
+// 13. wholeNumbers only where declared. Historical (workforce, shipping) stay declared; F7a adds
+//     the integer/whole records. Generic: every declared value is boolean true. F7a: exact set.
+ok('13a wholeNumbers declared are boolean true',
+  catalogue.filter(r => r.model.whole).every(r => r.model.whole === true));
+ok('13b historical whole set intact (subset)',
+  ['shipping', 'workforce'].every(k => catalogue.find(r => r.key === k && r.model.whole === true)));
+ok('13c F7a: exact whole-declaring set',
+  catalogue.filter(r => r.model.whole).map(r => r.key).sort().join(',') ===
+  ['workforce', 'shipping', 'factory-batches', 'clinic-staffing', 'call-centre', 'scholarships', 'food-bank', 'hotel-rooms'].sort().join(','));
+// 14. domains only where declared. Historical set stays; F7a adds mixed/binary records with domains.
+ok('14a historical domains set intact (subset)',
+  ['delivery', 'marketing', 'project', 'supplier'].every(k => catalogue.find(r => r.key === k && r.model.domains)));
+ok('14b F7a: exact domains-declaring set',
+  catalogue.filter(r => r.model.domains).map(r => r.key).sort().join(',') ===
+  ['delivery', 'marketing', 'project', 'supplier', 'ingredient-sourcing', 'fleet-assignment'].sort().join(','));
 // 15. openVarSettings only where declared.
 ok('15 openVarSettings where declared', catalogue.filter(r => r.model.openVarSettings).length === catalogue.filter(r => r.model.openVarSettings === true).length);
 // 16. expected.status present.
@@ -61,17 +80,21 @@ ok('18 expected.objective numeric', catalogue.every(r => typeof r.expected.objec
 ok('19 tolerance positive where present', catalogue.every(r => r.expected.tolerance === undefined || r.expected.tolerance > 0));
 // 20. No pinned variable values.
 ok('20 no pinned variable values', catalogue.every(r => !('values' in r.expected) && !('variables' in r.expected)));
-// 21. Solver EXAMPLES projection = 6125 bytes.
-ok('21 solver EXAMPLES = 6125 bytes', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 6125);
-// 22. i18n projection: 180 occurrences.
+// 21. Solver EXAMPLES projection byte total. F7a checkpoint pins the exact value for this tranche;
+//     served==regenerated (count-agnostic) is asserted at 38 and by the projection contract.
+ok('21 F7a: solver EXAMPLES projection byte total', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 15760);
+// 22. i18n projection occurrences: 20 per record (exName + exDesc, each repeated in TWO subsections,
+//     across 5 locales = 2*2*5). Count-agnostic: catalogue.length * 20 (was 9*20=180; now 24*20=480).
 const occ = serialize.i18nExpectedOccurrences(catalogue, LANGS);
-ok('22 i18n 180 occurrences', occ.reduce((s, o) => s + o.expected, 0) === 180);
+ok('22 i18n occurrences == catalogue length * 20',
+  occ.reduce((s, o) => s + o.expected, 0) === catalogue.length * 20);
+ok('22b F7a: i18n occurrences == 480', occ.reduce((s, o) => s + o.expected, 0) === 480);
 // 23. examples-data META lines = 9.
-ok('23 examples-data META = 9 lines', serialize.examplesDataMetaLines(catalogue).length === 9);
+ok('23 examples-data META lines == catalogue length', serialize.examplesDataMetaLines(catalogue).length === catalogue.length);
 // 24. JSON-LD has 9 ListItems.
-ok('24 JSON-LD 9 ListItems', (serialize.examplesJsonLd(catalogue).match(/"@type":"ListItem"/g) || []).length === 9);
+ok('24 JSON-LD ListItems == catalogue length', (serialize.examplesJsonLd(catalogue).match(/"@type":"ListItem"/g) || []).length === catalogue.length);
 // 25. no-JS links = 9.
-ok('25 no-JS links = 9', serialize.examplesNoJsLinks(catalogue).length === 9);
+ok('25 no-JS links == catalogue length', serialize.examplesNoJsLinks(catalogue).length === catalogue.length);
 // 26. URL builder derives from slug.
 (function () {
   const mod = require(path.join(SITE, 'assets', 'examples-data.js'));
@@ -114,7 +137,7 @@ ok('25 no-JS links = 9', serialize.examplesNoJsLinks(catalogue).length === 9);
       (r.out.modelType || (r.model && r.model.modelType)) === rec.expected.modelType &&
       Math.abs(r.out.objective - rec.expected.objective) <= tol) parity++;
   });
-  ok('28 detection/solve parity all nine', parity === 9, 'parity=' + parity);
+  ok('28 detection/solve parity all records', parity === catalogue.length, 'parity=' + parity + ' of ' + catalogue.length);
 })();
 // 29. Deterministic serialization (two runs identical).
 ok('29 deterministic serialization', serialize.serializeSolverExamples(catalogue) === serialize.serializeSolverExamples(catalogue));
@@ -153,17 +176,17 @@ ok('37 domains reference real cells', catalogue.every(r => {
   if (!r.model.domains) return true;
   return Object.keys(r.model.domains).every(c => /^[A-Z]+[0-9]+$/.test(c));
 }));
-// 38. Solver EXAMPLES projection = 6125 bytes (the composed-solver byte total 215613
-//     is asserted by the solver-composition suites, which own the composer contract).
-ok('38 solver EXAMPLES projection = 6125 bytes', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 6125);
-// 39. i18n.js served byte-identical to source (no editable second copy). Size bumped
-//     by F6: it added the 40 Examples-library UI keys (lib*, mt_*, diff_*, goal_*)
-//     across five languages and removed the dead legacy-catalogue keys (exCat_*,
-//     exCatNote_*, examplesEyebrow/PageTitle/PageLead, openInSolver) that F6's F5-
-//     derived projection replaced. The generated exName_/exDesc_ blocks are unchanged.
-ok('39 i18n.js served as-is', fs.readFileSync(path.join(SITE, 'assets', 'i18n.js')).length === 289888);
-// 40. examples-data.js served byte size preserved.
-ok('40 examples-data.js size preserved', fs.readFileSync(path.join(SITE, 'assets', 'examples-data.js')).length === 2644);
+// 38. Solver EXAMPLES projection: count-agnostic served==regenerated is owned by the projection
+//     contract + composition suites. F7a checkpoint pins the exact byte total for THIS tranche.
+ok('38 F7a: solver EXAMPLES projection byte total',
+  Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 15760);
+// 39/40. i18n.js and examples-data.js are served byte-identical to what the generator projects from
+//     the current catalogue (no editable second copy). This is count-agnostic: it holds for any
+//     catalogue size, so 24->36 needs no edit here. The generator's --check compares served vs
+//     regenerated for exactly these files.
+const genCheck = require('./generate-examples.js').run(SITE, { check: true });
+ok('39 projected assets (i18n.js/examples-data.js/examples.html) served == regenerated', genCheck.ok === true,
+  'stale: ' + (genCheck.changed || []).join(', '));
 // 41. Works from the loaded siteDir (spaced paths validated separately in negatives).
 ok('41 checker returns structured result', typeof checkCanonicalExampleCatalogue(SITE).pass === 'number');
 

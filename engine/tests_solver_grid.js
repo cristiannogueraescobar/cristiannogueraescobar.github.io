@@ -18,8 +18,15 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { composeSolverInterface } = require('../src/shared/compose-solver.js');
+const { canonicaliseSolverExamplesRegion } = require('../src/shared/solver-ui-canonical.js');
 
 const sha = t => crypto.createHash('sha256').update(t, 'utf8').digest('hex');
+// Canonicalise the catalogue-owned region before hashing, so regions that CONTAIN the
+// var EXAMPLES={...} object (composed_total, body, inline_script, ui_post_engine) are compared
+// count-agnostically against golden.canonical.* (historical authority). Regions WITHOUT an
+// EXAMPLES object keep raw byte-identical comparison against the legacy golden fields.
+const shaCanon = t => sha(canonicaliseSolverExamplesRegion(t));
+const bytesCanon = t => Buffer.byteLength(canonicaliseSolverExamplesRegion(t), 'utf8');
 const bytesOf = t => Buffer.byteLength(t, 'utf8');
 const ENGINE_START = '/* ENGINE_START */';
 const ENGINE_END = '/* ENGINE_END */';
@@ -51,8 +58,9 @@ function checkSolverGridInterface(siteDir) {
   catch (err) { ok('composition succeeds', false, String(err && err.message || err)); return { pass, fail, failures }; }
 
   // 1. Composed output byte-identical to the golden baseline.
-  ok('composed total sha matches golden', sha(composed) === golden.composed_total.sha256);
-  ok('composed total bytes match golden', bytesOf(composed) === golden.composed_total.bytes);
+  // composed_total contains the EXAMPLES catalogue -> compare canonicalised against historical authority.
+  ok('composed total canonical sha matches golden', shaCanon(composed) === golden.canonical.composed_total.sha256);
+  ok('composed total canonical bytes match golden', bytesCanon(composed) === golden.canonical.composed_total.bytes);
 
   // 2. Deterministic.
   ok('composition deterministic', composeSolverInterface(src, siteDir) === composed);
@@ -61,7 +69,8 @@ function checkSolverGridInterface(siteDir) {
   const headM = composed.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
   const bodyM = composed.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i);
   ok('composed head matches golden', headM && sha(headM[0]) === golden.head.sha256);
-  ok('composed body matches golden', bodyM && sha(bodyM[0]) === golden.body.sha256);
+  // body contains the EXAMPLES catalogue -> canonical comparison.
+  ok('composed body canonical matches golden', bodyM && shaCanon(bodyM[0]) === golden.canonical.body.sha256);
 
   // 4. Engine region byte-identical + canonical length/sha.
   const s = composed.indexOf(ENGINE_START), e = composed.indexOf(ENGINE_END);
@@ -73,12 +82,14 @@ function checkSolverGridInterface(siteDir) {
 
   // 5. Inline script + UI pre/post regions byte-identical.
   const big = bigInlineScript(composed);
-  ok('inline script matches golden', big && sha(big[2]) === golden.inline_script.sha256);
+  // The big inline script carries the EXAMPLES object (after ENGINE_END) -> canonical comparison.
+  ok('inline script canonical matches golden', big && shaCanon(big[2]) === golden.canonical.inline_script.sha256);
   if (big) {
     const uiPre = big[2].slice(0, big[2].indexOf(ENGINE_START));
     const uiPost = big[2].slice(big[2].indexOf(ENGINE_END) + ENGINE_END.length);
+    // ui_pre_engine has no EXAMPLES -> raw byte-identical; ui_post_engine carries EXAMPLES -> canonical.
     ok('UI pre-engine region matches golden', sha(uiPre) === golden.ui_pre_engine.sha256);
-    ok('UI post-engine region matches golden', sha(uiPost) === golden.ui_post_engine.sha256);
+    ok('UI post-engine region canonical matches golden', shaCanon(uiPost) === golden.canonical.ui_post_engine.sha256);
   }
 
   // 6. Each fragment inserted verbatim, in order; fragment bytes match golden.

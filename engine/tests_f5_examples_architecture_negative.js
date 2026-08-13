@@ -81,7 +81,7 @@ function validateTemp(dst) {
   const cat = require(f1(dst, 'catalogue.js')).CATALOGUE;
   const meta = require(f5(dst, 'metadata.js')).METADATA;
   // clear caches so temp copies are read fresh
-  return V.validateMetadataCatalogue(cat, meta, { expectCount: 9 });
+  return V.validateMetadataCatalogue(cat, meta);
 }
 function freshValidate(dst) {
   // require fresh copies from the temp path
@@ -254,7 +254,7 @@ M('41. serializer nondeterminism (function in data)', 'function', function (dst)
 }, 'direct-serialize');
 M('42. canonical mutated through projected payload', 'canonical changed via projection', function (dst) {
   const script = 'const i=require(' + JSON.stringify(f5(dst, 'index.js')) + ');' +
-    'const r=i.loadCanonical(' + JSON.stringify(dst) + ',{expectCount:9});' +
+    'const r=i.loadCanonical(' + JSON.stringify(dst) + ');' +
     'const c=r.canonical[0];const clone=r.project.clonePayload(c);clone.grid[0][0]="X";' +
     'process.stdout.write(c.model.grid[0][0]==="X"?"MUTATED":"SAFE");';
   const out = execFileSync(process.execPath, ['-e', script], { encoding: 'utf8' });
@@ -277,13 +277,27 @@ M('44. public order changed', 'canonical order', function (dst) {
     wf(p, src.slice(0, prodStart) + work + prod + src.slice(blendStart));
   }
 }, 'order');
-M('45. current example removed', 'checkpoint expects exactly 9', function (dst) {
+M('45. current example removed', 'expected 24', function (dst) {
+  // Remove exactly ONE record (supplier) from BOTH the catalogue and its metadata, so the count
+  // drops to 23 consistently and trips the F7a checkpoint count (not a metadata/catalogue mismatch).
   const p = f1(dst, 'catalogue.js'); const src = rf(p);
   const supStart = src.indexOf('{\n    "key": "supplier"');
-  const end = src.lastIndexOf('];');
-  if (supStart > -1) wf(p, src.slice(0, src.lastIndexOf('},', supStart) + 1) + '\n' + src.slice(end));
+  if (supStart !== -1) {
+    const blockStart = src.lastIndexOf('  {', supStart);
+    const nextRec = src.indexOf('\n  {', supStart);
+    const cutEnd = nextRec !== -1 ? nextRec + 1 : src.lastIndexOf('\n  ]');
+    wf(p, src.slice(0, blockStart) + src.slice(cutEnd));
+  }
+  // Drop the supplier metadata entry too.
+  const mp = f5(dst, 'metadata.js'); const msrc = rf(mp);
+  const mStart = msrc.indexOf('\n  supplier: {');
+  if (mStart !== -1) {
+    // find the matching close '\n  },' for this metadata block
+    const mEnd = msrc.indexOf('\n  },', mStart);
+    if (mEnd !== -1) wf(mp, msrc.slice(0, mStart) + msrc.slice(mEnd + '\n  },'.length));
+  }
 }, 'count');
-M('46. tenth F5 example accidentally added', 'checkpoint expects exactly 9', function (dst) {
+M('46. F7a: extra example added (count 25)', 'expected 24', function (dst) {
   // add a tenth metadata entry AND catalogue record minimally -> count 10
   const c = f1(dst, 'catalogue.js'); const src = rf(c);
   const tenth = ',\n  { "key":"tenth","slug":"tenth-x","category":"start","type":"continuous","sense":"max","translations":{"en":{"title":"T","desc":"d"},"es":{"title":"T","desc":"d"},"pt":{"title":"T","desc":"d"},"de":{"title":"T","desc":"d"},"fr":{"title":"T","desc":"d"}},"model":{"grid":[["Item","Val","Coeff","Term"],["X","0","2","=B2*C2"],["Tot","","","=SUM(D2:D2)","<=","5"]]},"expected":{"status":"optimal","modelType":"continuous","objective":1}}\n];';
@@ -423,7 +437,7 @@ M('80. coupled category+contract mutation cannot bypass', 'frozen-contract-holds
 M('81. canonical catalogue push cannot alter result', 'frozen-array-holds', function (dst) {
   return { direct: (function () {
     const { loadCanonical } = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'index.js'));
-    const r = loadCanonical(SITE, { expectCount: 9 });
+    const r = loadCanonical(SITE);
     const n = r.canonical.length;
     try { r.canonical.push('BAD'); } catch (e) {}
     try { r.canonical[0] = 'X'; } catch (e) {}
@@ -514,8 +528,11 @@ M('99. defineExample bad key throws', 'machine ID', function () {}, 'define-bad-
 
 // --------------------------------------------------------------------------
 // Runners per mode.
+// The F7a checkpoint count is the live SITE catalogue length (24 today). Computed dynamically so the
+// checkpoint number lives in the catalogue, not hardcoded in this generic negative runner.
+const CHECKPOINT_COUNT = require(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js')).CATALOGUE.length;
 function runLoad(m, dst) {
-  const r = loadInChild(dst, 9);
+  const r = loadInChild(dst, CHECKPOINT_COUNT);
   // The load must FAIL and the failure text must mention the expected reason.
   // No unconditional-pass bypass: a failure for the wrong reason does NOT pass.
   if (!/ERR:|THROW:/.test(r.out)) return false;
@@ -578,8 +595,17 @@ function runOrder(m, dst) {
   return catOrder !== baseOrder;
 }
 function runCount(m, dst) {
-  const res = freshValidate(dst);
-  return !res.ok && res.errors.some(function (e) { return /exactly 9/.test(e); });
+  // Count mutations (add/remove a record) must be caught by the F7a checkpoint count. Validate the
+  // mutated temp catalogue against the live checkpoint count (CHECKPOINT_COUNT, from the SITE
+  // catalogue — not hardcoded here) and require the count error.
+  const V = require(f5(dst, 'validate.js'));
+  delete require.cache[f1(dst, 'catalogue.js')];
+  delete require.cache[f5(dst, 'metadata.js')];
+  const cat = require(f1(dst, 'catalogue.js')).CATALOGUE;
+  const meta = require(f5(dst, 'metadata.js')).METADATA;
+  const res = V.validateMetadataCatalogue(cat, meta, { expectCount: CHECKPOINT_COUNT });
+  const needle = 'expects exactly ' + CHECKPOINT_COUNT + ' examples';
+  return !res.ok && res.errors.some(function (e) { return e.indexOf(needle) !== -1; });
 }
 function runSlug(m, dst) {
   delete require.cache[f1(dst, 'catalogue.js')];
