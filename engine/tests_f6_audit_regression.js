@@ -23,7 +23,7 @@ var library = require(path.join(SITE, 'src', 'shared', 'examples', 'f6', 'librar
 var gen = require(path.join(SITE, 'engine', 'generate-examples-library.js'));
 var loadCanonical = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'index.js')).loadCanonical;
 
-var canonical = loadCanonical(SITE, { expectCount: 9 }).canonical;
+var canonical = loadCanonical(SITE).canonical;
 var payload = library.libraryPayload(canonical, { modelTypeLabels: gen.modelTypeLabels(SITE) });
 var records = payload.examples;
 function fresh() { records.forEach(function (r) { r.__hay = null; }); return records; }
@@ -90,14 +90,21 @@ function roundTrip(state, existing) {
      (wf.locales.en.title + ' ' + wf.locales.en.question).toLowerCase().indexOf('weekly') === -1);
 })();
 
-// ---- D. localized category-label search 5/5 (ALL members of the category) ----
+// ---- D. localized category-label search (ALL members of the category) ----
 (function () {
-  // production-operations = { production, workshop } in every language.
+  // The category label must surface EVERY member of production-operations, whatever the tranche
+  // size. Derive the expected member set from F5 metadata (not a hardcoded pair), so this holds at
+  // 9, 24, 36 without pinning a count in this generic assertion.
+  var meta = require(path.join(SITE, 'src', 'shared', 'examples', 'f5', 'metadata.js')).METADATA;
+  var expectedMembers = Object.keys(meta).filter(function (k) { return meta[k].primaryCategory === 'production-operations'; }).sort();
   var labelByLocale = { en: 'operations', es: 'operaciones', pt: 'operações', de: 'Betrieb', fr: 'opérations' };
   Object.keys(labelByLocale).forEach(function (loc) {
     var ids = search(labelByLocale[loc], loc).sort();
+    // The label must surface EVERY member of the category. Free-text search may also match the same
+    // word elsewhere (e.g. German "Betrieb" appears in other records' text), so this is a superset
+    // check, not equality: all members present.
     ok('D: category label "' + labelByLocale[loc] + '" (' + loc + ') returns ALL of production-operations',
-       ids.length === 2 && ids.indexOf('production') !== -1 && ids.indexOf('workshop') !== -1, ids.join(','));
+       expectedMembers.every(function (id) { return ids.indexOf(id) !== -1; }), ids.join(',') + ' vs ' + expectedMembers.join(','));
   });
 })();
 
@@ -123,19 +130,21 @@ function roundTrip(state, existing) {
   ok('F: canonical #10 end-to-end integration suite passed', e2e.fail === 0 && e2e.pass > 0, 'pass=' + e2e.pass + ' fail=' + e2e.fail);
 })();
 
-// ---- G. #10 populated category auto-appears (also covered e2e; assert the mechanism) ----
+// ---- G. filter options are derived from populated categories only (mechanism) ----
 (function () {
-  // With the real 9, energy-sustainability is empty and MUST NOT appear as a filter option.
   var html = read(path.join(SITE, 'examples.html'));
-  ok('G: an empty category does NOT appear as a filter option in the real 9',
-     html.indexOf('data-value="energy-sustainability"') === -1);
-  // The generator derives options from populated categories only, so gaining a member makes
-  // it appear (proven fully in the e2e suite). Here, assert the derivation is data-driven:
   var counts = {};
   payload.examples.forEach(function (r) { counts[r.category] = (counts[r.category] || 0) + 1; });
   var populated = payload.categories.filter(function (c) { return counts[c.id]; }).map(function (c) { return c.id; });
   var optionValues = (html.match(/data-facet="category" data-value="([^"]+)"/g) || []).map(function (m) { return m.match(/data-value="([^"]+)"/)[1]; });
+  // The option set is exactly the populated categories: data-driven, no empty category leaks in.
   ok('G: filter options == populated categories exactly', JSON.stringify(optionValues.slice().sort()) === JSON.stringify(populated.slice().sort()), optionValues.join(','));
+  // Mechanism check (count-agnostic): a category with zero members is never an option. Prove it by
+  // construction — any enum category NOT in the populated set must be absent from the options.
+  var allEnumCats = payload.categories.map(function (c) { return c.id; });
+  var unpopulated = allEnumCats.filter(function (id) { return !counts[id]; });
+  ok('G: no unpopulated category appears as a filter option',
+     unpopulated.every(function (id) { return optionValues.indexOf(id) === -1; }), 'unpopulated=' + unpopulated.join(','));
 })();
 
 // ---- H. no manual card dataset — cards are generator output between markers ----

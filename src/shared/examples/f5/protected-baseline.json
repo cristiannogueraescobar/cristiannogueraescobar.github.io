@@ -1,5 +1,5 @@
 {
-  "note": "F5 protected baseline: files F5 must NOT change, as an INDEPENDENT exact-set hash contract. The positive suite pins expectedPaths + expectedCounts separately and asserts no missing/extra/duplicate, so removing an entry from this manifest is itself detected. | F6 re-pin: THREE entries updated — examples.html and assets/i18n.js (F6-owned outputs) and vite.config.mjs (F6 build-tooling that removes the orphan per-entry CSS bundle); all other protected paths/hashes/bytes/counts preserved.",
+  "note": "F5 protected baseline: files F5 must NOT change, as an INDEPENDENT exact-set hash contract. The positive suite pins expectedPaths + expectedCounts separately and asserts no missing/extra/duplicate, so removing an entry from this manifest is itself detected. | F6 re-pin: THREE entries updated — examples.html and assets/i18n.js (F6-owned outputs) and vite.config.mjs (F6 build-tooling that removes the orphan per-entry CSS bundle); all other protected paths/hashes/bytes/counts preserved. F7a: examples-data.js/i18n.js/examples.html re-baselined for the 24-example catalogue (F5-derived projections regenerated).",
   "expectedCounts": {
     "public": 12,
     "infra": 3,
@@ -73,13 +73,13 @@
       },
       {
         "path": "assets/examples-data.js",
-        "bytes": 2644,
-        "sha256": "651ba403f377ee1935235a01e42fd953ef4c7711659f31ed6d8cbf7e2ffabea0"
+        "bytes": 4376,
+        "sha256": "2f945a5859888714b56fdee9c40f318b5d2c314c231ec80096c989c51becbaa6"
       },
       {
         "path": "assets/i18n.js",
-        "bytes": 289888,
-        "sha256": "3eef0c0334c8d239e583e86f6404fbb33247437fba69a39a901129de73219a28"
+        "bytes": 317272,
+        "sha256": "17644d75af6fc743244173165e75924ada4646148c7ea9bc8e57d1a1dfb3ee2a"
       },
       {
         "path": "assets/plumline.css",
@@ -98,8 +98,8 @@
       },
       {
         "path": "examples.html",
-        "bytes": 28477,
-        "sha256": "9be7a77ec9788aeb25fa9652079dfe76138449f713dd6378d3f3b5d8d5fef465"
+        "bytes": 60484,
+        "sha256": "44041496fc513eed6d53be92778e18dbe60a8392a7c4ddcabead45197a0a5d7b"
       },
       {
         "path": "guide.html",

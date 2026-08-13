@@ -64,7 +64,13 @@ function serExamplesField(f, rec, domainWrap) {
 function serExamplesRecord(rec, domainWrap) {
   var order = rec.model.fieldOrder;
   if (!Array.isArray(order)) throw new Error('serialize: record ' + rec.key + ' has no fieldOrder');
-  var out = '    ' + rec.key + ':{ ';
+  // A record key is emitted as a bare identifier only when it is identifier-safe. Appended catalogue
+  // keys may contain hyphens (e.g. bakery-mix), which are invalid as a bare object key and would make
+  // the projected EXAMPLES object a SyntaxError at runtime. Such keys are quoted; the runtime reads
+  // EXAMPLES via bracket notation, so quoting is transparent. Historical hyphen-free keys stay bare,
+  // preserving their existing bytes (same rule as i18nKey).
+  var keyOut = /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(rec.key) ? rec.key : q(rec.key);
+  var out = '    ' + keyOut + ':{ ';
   order.forEach(function (f, idx) {
     var sf = serExamplesField(f, rec, domainWrap);
     if (idx === 0) { if (f === 'whole') out += sf; else out += '\n      ' + sf; }
@@ -96,22 +102,33 @@ module.exports = {
  *
  * The example title/description translations live once in the catalogue. i18n.js
  * historically repeats each in TWO sub-sections per language ("examples" and
- * "solver"), giving 9 keys x 2 sub-sections x 5 languages = 90 exName + 90 exDesc =
- * 180 occurrences. These helpers derive the exact historical lines and the exact
- * expected occurrence count, so a stale guard can assert i18n.js is a faithful
+ * "solver"), giving catalogue.length keys x 2 sub-sections x 5 languages exName
+ * plus the same count of exDesc occurrences (the original F1/F5 baseline held 9
+ * records, i.e. 90 + 90 = 180; the count now follows catalogue.length). These
+ * helpers derive the exact historical lines and the exact expected occurrence
+ * count, so a stale guard can assert i18n.js is a faithful
  * projection of the single catalogue authority without editing i18n.js.
  */
 
 // The exact per-language exName_/exDesc_ lines for one sub-section (8-space indent,
 // single-quoted, apostrophes escaped as \'). Order: all exName_ (catalogue order),
 // then all exDesc_ (catalogue order) — the historical layout.
+// An i18n object key `exName_<key>` is a bare identifier only when <key> itself is identifier-safe.
+// Appended catalogue keys may contain hyphens (e.g. bakery-mix), which are invalid in a bare object
+// key, so such keys are quoted. The runtime already reads these via bracket notation
+// (DICT[lang][section][key]), so quoting changes nothing at lookup time. Historical hyphen-free
+// keys stay bare, preserving their existing bytes.
+function i18nKey(prefix, key) {
+  var full = prefix + key;
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(full) ? full : q(full);
+}
 function i18nExampleLines(catalogue, lang, indent) {
   indent = indent === undefined ? '        ' : indent;
   var names = catalogue.map(function (rec) {
-    return indent + 'exName_' + rec.key + ':' + q(rec.translations[lang].title) + ',';
+    return indent + i18nKey('exName_', rec.key) + ':' + q(rec.translations[lang].title) + ',';
   });
   var descs = catalogue.map(function (rec) {
-    return indent + 'exDesc_' + rec.key + ':' + q(rec.translations[lang].desc) + ',';
+    return indent + i18nKey('exDesc_', rec.key) + ':' + q(rec.translations[lang].desc) + ',';
   });
   return { names: names, descs: descs };
 }
@@ -173,8 +190,8 @@ function i18nExpectedOccurrences(catalogue, langs) {
   var out = [];
   langs.forEach(function (lang) {
     catalogue.forEach(function (rec) {
-      out.push({ literal: 'exName_' + rec.key + ':' + q(rec.translations[lang].title), expected: 2 });
-      out.push({ literal: 'exDesc_' + rec.key + ':' + q(rec.translations[lang].desc), expected: 2 });
+      out.push({ literal: i18nKey('exName_', rec.key) + ':' + q(rec.translations[lang].title), expected: 2 });
+      out.push({ literal: i18nKey('exDesc_', rec.key) + ':' + q(rec.translations[lang].desc), expected: 2 });
     });
   });
   return out;

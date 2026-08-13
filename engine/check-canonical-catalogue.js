@@ -28,14 +28,17 @@ function checkCanonicalExampleCatalogue(siteDir) {
   }
   const { catalogue, serialize, schema } = loaded;
 
-  // 2. Nine examples, unique keys + slugs, canonical order.
-  ok('nine examples', catalogue.length === 9, 'count=' + catalogue.length);
+  // 2. Unique keys + slugs; historical nine are the immutable canonical PREFIX (in order). This
+  //    checker is count-agnostic (generic infra reused by every catalogue size); it does NOT pin a
+  //    total — the F7a checkpoint (tests_canonical_catalogue_positive) owns the exact 24.
+  ok('at least the historical nine', catalogue.length >= 9, 'count=' + catalogue.length);
   const keys = catalogue.map(r => r.key);
   const slugs = catalogue.map(r => r.slug);
   ok('unique keys', new Set(keys).size === keys.length);
   ok('unique slugs', new Set(slugs).size === slugs.length);
-  const ORDER = ['production', 'workshop', 'blend', 'marketing', 'workforce', 'shipping', 'project', 'delivery', 'supplier'];
-  ok('canonical order', JSON.stringify(keys) === JSON.stringify(ORDER));
+  const HISTORICAL_ORDER = ['production', 'workshop', 'blend', 'marketing', 'workforce', 'shipping', 'project', 'delivery', 'supplier'];
+  ok('historical nine are the canonical prefix, in order',
+    JSON.stringify(keys.slice(0, 9)) === JSON.stringify(HISTORICAL_ORDER));
 
   // 3. Five languages, non-empty title + desc per record.
   const LANGS = ['en', 'es', 'pt', 'de', 'fr'];
@@ -54,9 +57,11 @@ function checkCanonicalExampleCatalogue(siteDir) {
     ok(rec.key + ' expected has no variable values', !('values' in rec.expected) && !('variables' in rec.expected));
   });
 
-  // 5. Solver EXAMPLES projection is exactly 6125 bytes.
+  // 5. Solver EXAMPLES projection is a single well-formed object (count-agnostic). The exact byte
+  //    total is pinned by the F7a checkpoint, not by this reusable checker.
   const solverEx = serialize.serializeSolverExamples(catalogue);
-  ok('solver EXAMPLES projection = 6125 bytes', Buffer.byteLength(solverEx, 'utf8') === 6125, 'bytes=' + Buffer.byteLength(solverEx, 'utf8'));
+  ok('solver EXAMPLES projection is a single object',
+    (solverEx.match(/var EXAMPLES=\{/g) || []).length === 1, 'bytes=' + Buffer.byteLength(solverEx, 'utf8'));
 
   // 6. Projection guards (reused, not re-implemented).
   try {
@@ -88,27 +93,34 @@ function checkCanonicalExampleCatalogue(siteDir) {
   const distExamples = path.join(siteDir, 'dist', 'src', 'shared', 'examples');
   ok('catalogue not published to dist', !fs.existsSync(distExamples));
 
-  // 9. Fixture parity: the pinned F1 fixture must still match the live projections
-  //    (catalogue count, keys/slugs/order, expected contracts, projection byte sizes,
-  //    public invariants). The fixture is historical: the checker reads it, never
-  //    regenerates it.
+  // 9. Fixture parity: the pinned F1 fixture is the HISTORICAL authority for the original examples
+  //    (F1 captured 9). The catalogue grows append-only, so the fixture must still match the live
+  //    projection as an immutable PREFIX — the first fx.catalogue.example_count records — never the
+  //    whole (grown) catalogue. The checker reads the fixture, never regenerates it.
   const fixturePath = path.join(siteDir, 'engine', 'fixtures', 'product', 'example-catalogue-f1.json');
   if (fs.existsSync(fixturePath)) {
     let fx;
     try { fx = JSON.parse(fs.readFileSync(fixturePath, 'utf8')); } catch (e) { fx = null; }
     if (!fx) { ok('fixture parses', false); }
     else {
-      ok('fixture example count matches', fx.catalogue.example_count === catalogue.length);
-      ok('fixture keys/slugs/order match', JSON.stringify(fx.examples.map(e => e.key)) === JSON.stringify(keys) &&
-        JSON.stringify(fx.examples.map(e => e.slug)) === JSON.stringify(slugs));
+      const n = fx.catalogue.example_count;
+      ok('fixture count is a historical prefix (<= live count)', n <= catalogue.length, n + ' vs ' + catalogue.length);
+      ok('fixture keys/slugs match the live prefix',
+        JSON.stringify(fx.examples.map(e => e.key)) === JSON.stringify(keys.slice(0, n)) &&
+        JSON.stringify(fx.examples.map(e => e.slug)) === JSON.stringify(slugs.slice(0, n)));
       const expOk = fx.examples.every((e, i) => {
         const r = catalogue[i];
         return e.expected.status === r.expected.status && e.expected.modelType === r.expected.modelType &&
           e.expected.objective === r.expected.objective &&
           (e.expected.tolerance === undefined ? r.expected.tolerance === undefined : e.expected.tolerance === r.expected.tolerance);
       });
-      ok('fixture expected contracts match', expOk);
-      ok('fixture solver projection bytes match', fx.projections.solver_examples.bytes === Buffer.byteLength(solverEx, 'utf8'));
+      ok('fixture expected contracts match the live prefix', expOk);
+      // The fixture's solver projection byte total is the HISTORICAL prefix projection; compare it to
+      // the projection of just the first n records, not the grown catalogue.
+      const prefixSolverEx = serialize.serializeSolverExamples(catalogue.slice(0, n));
+      ok('fixture solver projection bytes match the historical prefix',
+        fx.projections.solver_examples.bytes === Buffer.byteLength(prefixSolverEx, 'utf8'),
+        fx.projections.solver_examples.bytes + ' vs ' + Buffer.byteLength(prefixSolverEx, 'utf8'));
       ok('fixture public invariants unchanged (requests + languages)', fx.public_output.requests === 6 && fx.public_output.languages === 5);
       ok('fixture policy: catalogue not published', fx.policy.catalogue_published_to_dist === false);
     }

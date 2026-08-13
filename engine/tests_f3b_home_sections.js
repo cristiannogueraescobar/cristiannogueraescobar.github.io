@@ -264,7 +264,7 @@ function run(siteDir) {
   // Nine examples.
   // Separate, temporary published-catalogue contract: exactly nine examples in
   // this checkpoint (the projector logic above works for any valid length).
-  ok('E: nine canonical examples (current published contract)', catalogue.length === 9, String(catalogue.length));
+  ok('E: F7a: 24 canonical examples (current published contract)', catalogue.length === 24, String(catalogue.length));
 
   // ===== F. WINDOWS PORTABILITY =====
   // The F3b suites must not shell out to Unix-only executables; temp trees use

@@ -21,6 +21,7 @@ const {
   ENGINE_SOURCE_DIR, ENGINE_SOURCE_FILE,
 } = require('../src/shared/compose-solver.js');
 const { WORKER_GLUE } = require('./tests_engine_baseline.js');
+const { canonicaliseSolverExamplesRegion } = require('../src/shared/solver-ui-canonical.js');
 
 const ENGINE_START = '/* ENGINE_START */';
 const ENGINE_END = '/* ENGINE_END */';
@@ -110,9 +111,14 @@ function checkCanonicalEngineSource(siteDir) {
   ok('solver composes via official compositor', composeErr === null, composeErr ? composeErr.message : '');
   if (composed !== null) {
     ok('composition deterministic', composeSolverInterface(src, siteDir) === composed);
-    ok('composed solver bytes == fixture', Buffer.byteLength(composed, 'utf8') === g.composed.composed_solver_bytes,
-      'got ' + Buffer.byteLength(composed, 'utf8'));
-    ok('composed solver sha256 == fixture', sha(composed) === g.composed.composed_solver_sha256);
+    // composed_solver carries the growing EXAMPLES catalogue, so compare it count-agnostically:
+    // canonicalise the EXAMPLES region and match the historical-derived canonical authority. The
+    // legacy raw composed_solver_bytes/sha256 remain the historical 9-example authority (unchanged),
+    // asserted against the historical source by the E1 no-selfgen provenance below.
+    const composedCanon = canonicaliseSolverExamplesRegion(composed);
+    ok('composed solver canonical bytes == fixture', Buffer.byteLength(composedCanon, 'utf8') === g.composed.canonical.composed_solver_bytes,
+      'got ' + Buffer.byteLength(composedCanon, 'utf8'));
+    ok('composed solver canonical sha256 == fixture', sha(composedCanon) === g.composed.canonical.composed_solver_sha256);
   }
 
   // 5. findEngineRegion locates exactly one STRUCTURAL region; slice is verbatim.

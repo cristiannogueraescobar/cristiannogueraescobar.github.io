@@ -84,12 +84,14 @@ expectCheckerTrips('N10 invalid sense', dir => wr(CAT(dir), rd(CAT(dir)).replace
 expectCheckerTrips('N11 invalid grid cell (non-string)', dir => wr(CAT(dir), rd(CAT(dir)).replace('"Product",', '12345,')), 'grid');
 expectCheckerTrips('N12 invalid domain type', dir => wr(CAT(dir), rd(CAT(dir)).replace('"type": "binary"', '"type": "quantum"')), 'validation');
 expectCheckerTrips('N13 pinned variable value (unknown expected field)', dir => wr(CAT(dir), rd(CAT(dir)).replace('"objective": 1760', '"objective": 1760,\n        "values": [10, 20, 30]')), 'invented');
-expectCheckerTrips('N14 wrong expected count (extra example)', dir => {
+expectCheckerTrips('N14 extra example (duplicated record) is rejected', dir => {
   let s = rd(CAT(dir));
-  // duplicate the production record block to make 10
+  // Duplicate the production record block. The checker is count-agnostic (it pins no total — the
+  // F7a checkpoint owns "exactly 24"), so this is caught as a duplicate key/slug rather than a
+  // count mismatch. Either way the mutated catalogue must not pass.
   s = s.replace(/(\{\s*"key": "production"[\s\S]*?\n  \},\n)/, '$1$1');
   wr(CAT(dir), s);
-}, 'expected 9');
+}, 'duplicate');
 
 // ---- Projection staleness (each served projection) ----------------------------
 expectGeneratorStale('N15 i18n value changed in file', dir => wr(P(dir, 'assets/i18n.js'), rd(P(dir, 'assets/i18n.js')).replace("exName_production:'Production plan'", "exName_production:'X'")));

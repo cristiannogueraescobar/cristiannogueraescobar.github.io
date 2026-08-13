@@ -10,6 +10,16 @@
  *
  * It also asserts the golden actually declares its independent provenance and its
  * cross-checks against the pre-D baseline still hold.
+ *
+ * F7a count-agnostic migration: the golden also carries a `canonical` block — the UI
+ * authority for catalogue-owned regions (those containing the growing var EXAMPLES={...}
+ * object), each SHA taken AFTER the object is replaced by a fixed sentinel. Those SHAs
+ * were DERIVED from the independent historical post-F6 (9-example) composed solver text
+ * (solver-ui-golden-historical-source-f6.json), NOT from the composer under test. This
+ * suite keeps the two provenance paths separate: it proves the AUTHORITY side is
+ * independent (D5 canonical == D1/D2 phase-golden canonical; provenance artifact declares
+ * the 9-example source) — the CURRENT-implementation comparison (current composer ->
+ * canonicalise -> compare) lives in the D1-D5 checkers, never here.
  */
 'use strict';
 const fs = require('fs');
@@ -24,7 +34,12 @@ const goldenPath = path.join(siteDir, 'engine', 'fixtures', 'solver-ui-golden', 
 
 // PINNED SHA-256 of the D5 final golden. If the golden is regenerated (e.g. an
 // accidental self-capture from the composer), this hash changes and the build fails.
-const PINNED_SHA = 'cf96da32a1646741996371fc2f1efc6acab83ff1b907850d752bb5bae01dbf4a';
+// Updated once for the F7a count-agnostic migration: a `canonical` block (UI authority
+// for catalogue-owned regions, DERIVED from the independent historical post-F6 text —
+// see solver-ui-golden-historical-source-f6.json) and a class_4 provenance note were
+// ADDED. The legacy raw SHAs were NOT changed. This is a deliberate, reviewed change, so
+// the pin is advanced to the new file SHA; it remains an accidental-self-capture guard.
+const PINNED_SHA = 'a303dab5410508ec8298dfcf409fb5f075ed4f0a6d21127b4d21432501c99a91';
 
 const raw = fs.readFileSync(goldenPath);
 const actualSha = crypto.createHash('sha256').update(raw).digest('hex');
@@ -94,6 +109,64 @@ ok('aria.aria_attrs == D2 historical', golden.aria.aria_attrs === D2.aria.aria_a
 ok('aria.aria_attrs == D4 historical', golden.aria.aria_attrs === D4.aria.aria_attrs);
 ok('data_i18n_count == D2 historical', golden.data_i18n_count === D2.data_i18n_count);
 ok('data_i18n_count == D4 historical', golden.data_i18n_count === D4.data_i18n_count);
+
+// ---------------------------------------------------------------------------
+// Count-agnostic CANONICAL UI authority: independent-provenance guards.
+//
+// The canonical block (golden.canonical.*) holds the SHA of each catalogue-owned region AFTER the
+// EXAMPLES object is replaced by a fixed sentinel. Those SHAs were DERIVED from the independent
+// historical post-F6 (9-example) composed solver text — NOT from the F7a composer under test.
+// Two separate provenance paths must stay distinct (do not collapse into one):
+//   Historical authority: pre-F7a composed source -> canonicalise -> golden.canonical.* SHA.
+//   Current implementation: current composer -> canonicalise -> compared against golden.canonical.*
+//                           (that comparison lives in the D1-D5 checkers, not here).
+// This suite proves the AUTHORITY side is independent: D5's canonical SHAs equal the D1/D2 phase
+// goldens' canonical SHAs (each derived from the same historical text), and the provenance artifact
+// declares the 9-example source. No expected value is produced from the composer under test here.
+ok('golden declares canonical UI authority', !!golden.canonical &&
+  !!golden.provenance.class_4_canonical_ui_authority);
+ok('canonical block references historical provenance artifact',
+  (golden.canonical._provenance || '') === 'solver-ui-golden-historical-source-f6.json');
+
+// D5 canonical regions must equal the independent D1 phase golden's canonical regions (same
+// historical derivation), so the authority is cross-checked against an independent fixture.
+['composed_total', 'body', 'inline_script', 'ui_post_engine'].forEach(region => {
+  ok('canonical.' + region + '.sha256 == D1 historical canonical',
+    golden.canonical[region] && D1.canonical && D1.canonical[region] &&
+    golden.canonical[region].sha256 === D1.canonical[region].sha256);
+  ok('canonical.' + region + '.bytes == D1 historical canonical',
+    golden.canonical[region] && D1.canonical && D1.canonical[region] &&
+    golden.canonical[region].bytes === D1.canonical[region].bytes);
+});
+// type_option_counts is the independent D2 detection authority: D2 derives these counts from the
+// REAL composed solver text (see tests_solver_detection.js §13, which matches each model-type
+// literal against the composed page). Here we PIN that authority to the canonical independent
+// values with a genuine deep-equality comparison — not a mere existence check — so a self-
+// regenerated D2 that drifted the counts would be caught. The D5 final golden intentionally does
+// NOT carry this field (it lives only in D2), so the comparison is D2-authority vs canonical.
+const EXPECTED_TYPE_OPTION_COUNTS = { continuous: 13, integer: 9, binary: 17 };
+(function () {
+  const actual = D2.canonical && D2.canonical.type_option_counts;
+  const keysMatch = actual && JSON.stringify(Object.keys(actual).sort()) === JSON.stringify(Object.keys(EXPECTED_TYPE_OPTION_COUNTS).sort());
+  const valuesMatch = keysMatch && Object.keys(EXPECTED_TYPE_OPTION_COUNTS).every(function (k) { return actual[k] === EXPECTED_TYPE_OPTION_COUNTS[k]; });
+  ok('D2 canonical type_option_counts deep-equals the independent canonical values {continuous:13,integer:9,binary:17}',
+     !!valuesMatch, JSON.stringify(actual));
+})();
+
+// The provenance artifact must independently declare the 9-example historical source that anchors
+// the canonical derivation (catalogue count 9; composed SHA of the historical solver text).
+const provArtifactPath = path.join(base, 'solver-ui-golden-historical-source-f6.json');
+ok('historical provenance artifact exists', fs.existsSync(provArtifactPath));
+if (fs.existsSync(provArtifactPath)) {
+  const prov = JSON.parse(fs.readFileSync(provArtifactPath, 'utf8'));
+  ok('provenance artifact declares catalogue count 9', prov.catalogueCount === 9);
+  ok('provenance artifact records historical composed SHA',
+    typeof prov.composedSolverSha256 === 'string' && prov.composedSolverSha256.length === 64);
+  ok('provenance artifact proves no F7a files',
+    prov.proofNoF7aFiles && prov.proofNoF7aFiles.f7aKeyCount === 0);
+  ok('provenance artifact cross-checks against existing golden',
+    prov.crossCheckAgainstExistingGolden && prov.crossCheckAgainstExistingGolden.shaMatch === true);
+}
 
 console.log('NO-SELFGEN GOLDEN CONTRACT  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail) { failures.forEach(f => console.log('  FAIL:', f)); process.exit(1); }

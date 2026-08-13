@@ -1,0 +1,207 @@
+'use strict';
+// F7a — 15 new canonical models, Phase-1 (external-audit corrections applied).
+// Layout follows the engine's contiguous-block detection: decision cells in one contiguous
+// B-column block; objective as a formula (direct linear expr or =SUM of per-row =B*C terms) with
+// no relational operator; constraints carry term/operator/RHS in consecutive columns; composition
+// constraints use SUMPRODUCT over the FULL B-block (0 coeffs for non-participating vars).
+function pad(g){var w=Math.max.apply(null,g.map(function(r){return r.length;}));return g.map(function(r){var c=r.slice();while(c.length<w)c.push('');return c;});}
+
+module.exports = [
+// 10 — bakery-mix (unchanged; externally confirmed unique -> exact)
+{ key:'bakery-mix', slug:'bakery-production-mix', category:'production-operations', type:'continuous', sense:'max',
+  model:{ grid:pad([
+    ['Product','Units','Term','',''],
+    ['Loaves','0','','',''],['Rolls','0','','',''],['Pastries','0','','',''],
+    ['','','','',''],
+    ['Total contribution (GBP)','','=1.80*B2+0.70*B3+1.30*B4','',''],
+    ['Flour used (kg)','','=0.50*B2+0.12*B3+0.20*B4','<=','120'],
+    ['Labour used (min)','','=4*B2+2*B3+5*B4','<=','900'],
+    ['Oven used (min)','','=3*B2+1*B3+2*B4','<=','600'],
+    ['Max pastries','','=B4','<=','80'],
+  ]) } },
+// 11 — factory-batches (unchanged)
+{ key:'factory-batches', slug:'factory-batch-plan', category:'production-operations', type:'integer', sense:'max',
+  model:{ grid:pad([
+    ['Product','Batches','Term','',''],
+    ['Widgets','0','','',''],['Gadgets','0','','',''],['Gizmos','0','','',''],
+    ['','','','',''],
+    ['Total margin (GBP)','','=120*B2+90*B3+150*B4','',''],
+    ['Machine hours','','=3*B2+2*B3+4*B4','<=','60'],
+    ['Labour hours','','=2*B2+2*B3+3*B4','<=','44'],
+    ['Max widget batches','','=B2','<=','10'],
+    ['Max gizmo batches','','=B4','<=','8'],
+  ]), whole:true } },
+// 12 — clinic-staffing (unchanged)
+{ key:'clinic-staffing', slug:'clinic-staffing-plan', category:'workforce-scheduling', type:'integer', sense:'min',
+  model:{ grid:pad([
+    ['Shift pattern','Staff','Term','',''],
+    ['Morning (08-14)','0','','',''],['Midday (11-17)','0','','',''],['Evening (14-20)','0','','',''],
+    ['','','','',''],
+    ['Total cost (GBP)','','=160*B2+170*B3+180*B4','',''],
+    ['08-11 cover','','=B2','>=','5'],
+    ['11-14 cover','','=B2+B3','>=','9'],
+    ['14-17 cover','','=B3+B4','>=','8'],
+    ['17-20 cover','','=B4','>=','4'],
+  ]), whole:true } },
+// 13 — call-centre (FIXED: 14:00 shift is 8h so it honestly covers 14-18 and 18-22; 18:00 stays 6h)
+{ key:'call-centre', slug:'call-centre-shift-plan', category:'workforce-scheduling', type:'integer', sense:'min',
+  model:{ grid:pad([
+    ['Shift start','Agents','Term','',''],
+    ['06:00 (8h)','0','','',''],['10:00 (8h)','0','','',''],['14:00 (8h)','0','','',''],['18:00 (6h)','0','','',''],
+    ['','','','',''],
+    ['Total cost (GBP)','','=200*B2+200*B3+200*B4+150*B5','',''],
+    ['06-10 cover','','=B2','>=','6'],
+    ['10-14 cover','','=B2+B3','>=','12'],
+    ['14-18 cover','','=B3+B4','>=','15'],
+    ['18-22 cover','','=B4+B5','>=','10'],
+    ['22-24 cover','','=B5','>=','3'],
+  ]), whole:true } },
+// 14 — purchase-split (unchanged; externally confirmed unique -> exact)
+{ key:'purchase-split', slug:'purchase-order-split', category:'purchasing-suppliers', type:'continuous', sense:'min',
+  model:{ grid:pad([
+    ['Supplier','Units','Term','',''],
+    ['Supplier A','0','','',''],['Supplier B','0','','',''],['Supplier C','0','','',''],
+    ['','','','',''],
+    ['Total cost (GBP)','','=8.5*B2+7.9*B3+9.2*B4','',''],
+    ['Meet demand','','=B2+B3+B4','>=','500'],
+    ['Cap A','','=B2','<=','250'],
+    ['Cap B','','=B3','<=','200'],
+    ['Cap C','','=B4','<=','300'],
+  ]) } },
+// 15 — ingredient-sourcing (FIXED: composition FRACTIONS per tonne purchased; requirements scaled /4)
+{ key:'ingredient-sourcing', slug:'ingredient-sourcing-plan', category:'purchasing-suppliers', type:'mixed', sense:'min',
+  model:{ grid:pad([
+    ['Decision','Value','Coeff','Term','Wheat frac','Barley frac'],
+    ['Use Farm','0','900','=B2*C2','0','0'],
+    ['Use Mill','0','700','=B3*C3','0','0'],
+    ['Use Coop','0','1100','=B4*C4','0','0'],
+    ['Qty Farm (t)','0','40','=B5*C5','0.75','0.25'],
+    ['Qty Mill (t)','0','52','=B6*C6','0.25','0.75'],
+    ['Qty Coop (t)','0','35','=B7*C7','0.50','0.50'],
+    ['','','','','',''],
+    ['Total cost (GBP)','','','=SUM(D2:D7)','',''],
+    ['Wheat (t)','','','=SUMPRODUCT(B2:B7,E2:E7)','>=','40'],
+    ['Barley (t)','','','=SUMPRODUCT(B2:B7,F2:F7)','>=','37.5'],
+    ['Farm link','','','=B5-60*B2','<=','0'],
+    ['Mill link','','','=B6-60*B3','<=','0'],
+    ['Coop link','','','=B7-60*B4','<=','0'],
+  ]),
+  domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'},
+            B5:{type:'continuous',min:0,max:60}, B6:{type:'continuous',min:0,max:60}, B7:{type:'continuous',min:0,max:60} } } },
+// 16 — fleet-assignment (unchanged)
+{ key:'fleet-assignment', slug:'fleet-assignment-plan', category:'logistics-transport', type:'binary', sense:'min',
+  model:{ grid:pad([
+    ['Vehicle','Use','Cost','Term','Capacity'],
+    ['Van 1','0','80','=B2*C2','120'],
+    ['Van 2','0','95','=B3*C3','160'],
+    ['Truck 1','0','140','=B4*C4','300'],
+    ['Truck 2','0','170','=B5*C5','380'],
+    ['Truck 3','0','120','=B6*C6','250'],
+    ['','','','',''],
+    ['Total cost (GBP)','','','=SUM(D2:D6)',''],
+    ['Total capacity','','','=SUMPRODUCT(B2:B6,E2:E6)','>=','700'],
+  ]), domains:{ B2:{type:'binary'}, B3:{type:'binary'}, B4:{type:'binary'}, B5:{type:'binary'}, B6:{type:'binary'} } } },
+// 17 — media-mix (unchanged)
+{ key:'media-mix', slug:'media-channel-mix', category:'marketing-finance', type:'continuous', sense:'max',
+  model:{ grid:pad([
+    ['Channel','Spend','Reach','Term',''],
+    ['Search','0','5.0','=B2*C2',''],['Social','0','4.2','=B3*C3',''],['TV','0','3.0','=B4*C4',''],['Radio','0','2.5','=B5*C5',''],
+    ['','','','',''],
+    ['Total reach (000s)','','','=SUM(D2:D5)',''],
+    ['Total budget','','','=B2+B3+B4+B5','<=','100'],
+    ['Max Search','','','=B2','<=','40'],
+    ['Max Social','','','=B3','<=','35'],
+    ['Max TV','','','=B4','<=','50'],
+    ['Min traditional','','','=B4+B5','>=','30'],
+  ]) } },
+// 18 — fertiliser-blend (FIXED: nutrient FRACTIONS kg/kg; requirements scaled /100; externally confirmed unique -> exact)
+{ key:'fertiliser-blend', slug:'fertiliser-blend-plan', category:'blending-formulation', type:'continuous', sense:'min',
+  model:{ grid:pad([
+    ['Fertiliser','Kg','Cost','Term','N frac','P frac','K frac'],
+    ['Blend X','0','0.9','=B2*C2','0.12','0.08','0.06'],
+    ['Blend Y','0','1.1','=B3*C3','0.06','0.14','0.10'],
+    ['Blend Z','0','0.8','=B4*C4','0.10','0.05','0.16'],
+    ['','','','','','',''],
+    ['Total cost (GBP)','','','=SUM(D2:D4)','','',''],
+    ['Nitrogen (kg)','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','6'],
+    ['Phosphorus (kg)','','','=SUMPRODUCT(B2:B4,F2:F4)','>=','4'],
+    ['Potassium (kg)','','','=SUMPRODUCT(B2:B4,G2:G4)','>=','5'],
+  ]) } },
+// 19 — scholarships (FIXED: added programme-balance rule Vocational <= 2*Undergraduate)
+{ key:'scholarships', slug:'scholarship-allocation', category:'education-social', type:'integer', sense:'max',
+  model:{ grid:pad([
+    ['Scholarship','Count','Term',''],
+    ['Undergraduate','0','',''],['Vocational','0','',''],['Postgraduate','0','',''],
+    ['','','',''],
+    ['Total students','','=B2+B3+B4',''],
+    ['Budget (GBP)','','=3000*B2+2000*B3+5000*B4','<=','120000'],
+    ['Min undergraduate','','=B2','>=','8'],
+    ['Min vocational','','=B3','>=','8'],
+    ['Min postgraduate','','=B4','>=','5'],
+    ['Max postgraduate','','=B4','<=','12'],
+    ['Vocational capacity','','=B3-2*B2','<=','0'],
+  ]), whole:true } },
+// 20 — food-bank (FIXED: coeffs/caps so BOTH food and volunteers bind)
+{ key:'food-bank', slug:'food-bank-allocation', category:'education-social', type:'integer', sense:'max',
+  model:{ grid:pad([
+    ['Centre','Parcels','Served','Term','Food','Volunteers'],
+    ['North','0','1.0','=B2*C2','2','0.20'],
+    ['East','0','1.0','=B3*C3','4','0.10'],
+    ['South','0','1.0','=B4*C4','3','0.30'],
+    ['','','','','',''],
+    ['Households served','','','=SUM(D2:D4)','',''],
+    ['Food stock (kg)','','','=SUMPRODUCT(B2:B4,E2:E4)','<=','2000'],
+    ['Volunteer hours','','','=SUMPRODUCT(B2:B4,F2:F4)','<=','150'],
+    ['North capacity','','','=B2','<=','300'],
+    ['East capacity','','','=B3','<=','250'],
+    ['South capacity','','','=B4','<=','280'],
+  ]), whole:true } },
+// 21 — renewable-mix (FIXED: grid is cheapest so the renewable target genuinely binds)
+{ key:'renewable-mix', slug:'renewable-energy-mix', category:'energy-sustainability', type:'continuous', sense:'min',
+  model:{ grid:pad([
+    ['Source','MWh','Cost','Term','Renewable'],
+    ['Solar','0','55','=B2*C2','1'],['Wind','0','48','=B3*C3','1'],['Grid','0','30','=B4*C4','0'],
+    ['','','','',''],
+    ['Total cost (GBP)','','','=SUM(D2:D4)',''],
+    ['Meet demand','','','=B2+B3+B4','>=','1000'],
+    ['Min renewable','','','=0.4*B2+0.4*B3-0.6*B4','>=','0'],
+    ['Solar capacity','','','=B2','<=','450'],
+    ['Wind capacity','','','=B3','<=','500'],
+  ]) } },
+// 22 — microgrid-capacity (FIXED: constraint honestly named "Backup dependence": Backup <= Solar+Battery)
+{ key:'microgrid-capacity', slug:'microgrid-capacity-plan', category:'energy-sustainability', type:'continuous', sense:'min',
+  model:{ grid:pad([
+    ['Asset','kW','Cost','Term','Firm'],
+    ['Solar','0','70','=B2*C2','0.35'],
+    ['Battery','0','110','=B3*C3','0.9'],
+    ['Backup','0','95','=B4*C4','1.0'],
+    ['','','','',''],
+    ['Annualised cost (GBP)','','','=SUM(D2:D4)',''],
+    ['Firm capacity (kW)','','','=SUMPRODUCT(B2:B4,E2:E4)','>=','200'],
+    ['Backup dependence','','','=B4-B2-B3','<=','0'],
+    ['Min solar','','','=B2','>=','80'],
+    ['Max backup','','','=B4','<=','150'],
+  ]) } },
+// 23 — hotel-rooms (FIXED: Direct cap raised so the OTA commitment genuinely changes the decision)
+{ key:'hotel-rooms', slug:'hotel-room-allocation', category:'hospitality-retail', type:'integer', sense:'max',
+  model:{ grid:pad([
+    ['Channel','Rooms','Term',''],
+    ['Direct','0','',''],['OTA','0','',''],['Corporate','0','',''],
+    ['','','',''],
+    ['Total revenue (GBP)','','=110*B2+95*B3+130*B4',''],
+    ['Room inventory','','=B2+B3+B4','<=','80'],
+    ['Max direct','','=B2','<=','60'],
+    ['Max corporate','','=B4','<=','25'],
+    ['Min OTA','','=B3','>=','10'],
+  ]), whole:true } },
+// 24 — lp-basics (unchanged; externally confirmed unique -> exact; chart eligible)
+{ key:'lp-basics', slug:'linear-optimisation-basics', category:'learning-engine', type:'continuous', sense:'max',
+  model:{ grid:pad([
+    ['Product','Units','Term',''],
+    ['Tables','0','',''],['Chairs','0','',''],
+    ['','','',''],
+    ['Total profit (GBP)','','=25*B2+20*B3',''],
+    ['Wood (m2)','','=3*B2+2*B3','<=','48'],
+    ['Workshop hours','','=2*B2+4*B3','<=','56'],
+  ]) } },
+];

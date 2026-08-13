@@ -1,0 +1,958 @@
+{
+  "environment": {
+    "node": "v22.22.2",
+    "note": "Phase-1 working environment; final acceptance requires Node 24.15.0"
+  },
+  "summary": {
+    "total": 15,
+    "allOptimal": true,
+    "allTypeMatch": true,
+    "allVerified": true,
+    "allDeterministic": true
+  },
+  "models": [
+    {
+      "key": "bakery-mix",
+      "slug": "bakery-production-mix",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Loaves",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Rolls",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Pastries",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 10,
+      "gridCols": 5,
+      "gridCells": 50,
+      "status1": "optimal",
+      "objective1": 375,
+      "vector1": {
+        "Loaves": 150,
+        "Rolls": 150,
+        "Pastries": 0
+      },
+      "status2": "optimal",
+      "objective2": 375,
+      "vector2": {
+        "Loaves": 150,
+        "Rolls": 150,
+        "Pastries": 0
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 375,
+      "chartEligible": false
+    },
+    {
+      "key": "factory-batches",
+      "slug": "factory-batch-plan",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Widgets",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Gadgets",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Gizmos",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 10,
+      "gridCols": 5,
+      "gridCells": 50,
+      "status1": "optimal",
+      "objective1": 2370,
+      "vector1": {
+        "Widgets": 10,
+        "Gadgets": 3,
+        "Gizmos": 6
+      },
+      "status2": "optimal",
+      "objective2": 2370,
+      "vector2": {
+        "Widgets": 10,
+        "Gadgets": 3,
+        "Gizmos": 6
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 2370,
+      "chartEligible": false
+    },
+    {
+      "key": "clinic-staffing",
+      "slug": "clinic-staffing-plan",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Morning (08-14)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Midday (11-17)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Evening (14-20)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 10,
+      "gridCols": 5,
+      "gridCells": 50,
+      "status1": "optimal",
+      "objective1": 2200,
+      "vector1": {
+        "Morning (08-14)": 5,
+        "Midday (11-17)": 4,
+        "Evening (14-20)": 4
+      },
+      "status2": "optimal",
+      "objective2": 2200,
+      "vector2": {
+        "Morning (08-14)": 5,
+        "Midday (11-17)": 4,
+        "Evening (14-20)": 4
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 2200,
+      "chartEligible": false
+    },
+    {
+      "key": "call-centre",
+      "slug": "call-centre-shift-plan",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 4,
+      "constraints": 5,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "06:00 (8h)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "10:00 (8h)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "14:00 (8h)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B5",
+          "label": "18:00 (6h)",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 12,
+      "gridCols": 5,
+      "gridCells": 60,
+      "status1": "optimal",
+      "objective1": 4650,
+      "vector1": {
+        "06:00 (8h)": 6,
+        "10:00 (8h)": 8,
+        "14:00 (8h)": 7,
+        "18:00 (6h)": 3
+      },
+      "status2": "optimal",
+      "objective2": 4650,
+      "vector2": {
+        "06:00 (8h)": 6,
+        "10:00 (8h)": 8,
+        "14:00 (8h)": 7,
+        "18:00 (6h)": 3
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 4650,
+      "chartEligible": false
+    },
+    {
+      "key": "purchase-split",
+      "slug": "purchase-order-split",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Supplier A",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Supplier B",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Supplier C",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 10,
+      "gridCols": 5,
+      "gridCells": 50,
+      "status1": "optimal",
+      "objective1": 4165,
+      "vector1": {
+        "Supplier A": 250,
+        "Supplier B": 200,
+        "Supplier C": 50
+      },
+      "status2": "optimal",
+      "objective2": 4165,
+      "vector2": {
+        "Supplier A": 250,
+        "Supplier B": 200,
+        "Supplier C": 50
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 4165,
+      "chartEligible": false
+    },
+    {
+      "key": "ingredient-sourcing",
+      "slug": "ingredient-sourcing-plan",
+      "intendedType": "mixed",
+      "reservedType": "mixed",
+      "detectedType": "mixed",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 6,
+      "constraints": 5,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Use Farm",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B3",
+          "label": "Use Mill",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B4",
+          "label": "Use Coop",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B5",
+          "label": "Qty Farm (t)",
+          "type": "continuous",
+          "lower": 0,
+          "upper": 60
+        },
+        {
+          "cell": "B6",
+          "label": "Qty Mill (t)",
+          "type": "continuous",
+          "lower": 0,
+          "upper": 60
+        },
+        {
+          "cell": "B7",
+          "label": "Qty Coop (t)",
+          "type": "continuous",
+          "lower": 0,
+          "upper": 60
+        }
+      ],
+      "bounds": true,
+      "functionsUsed": [
+        "SUM",
+        "SUMPRODUCT"
+      ],
+      "gridRows": 14,
+      "gridCols": 6,
+      "gridCells": 84,
+      "status1": "optimal",
+      "objective1": 5135,
+      "vector1": {
+        "Use Farm": 1,
+        "Use Mill": 1,
+        "Use Coop": 0,
+        "Qty Farm (t)": 41.25,
+        "Qty Mill (t)": 36.25,
+        "Qty Coop (t)": 0
+      },
+      "status2": "optimal",
+      "objective2": 5135,
+      "vector2": {
+        "Use Farm": 1,
+        "Use Mill": 1,
+        "Use Coop": 0,
+        "Qty Farm (t)": 41.25,
+        "Qty Mill (t)": 36.25,
+        "Qty Coop (t)": 0
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 5135,
+      "chartEligible": false
+    },
+    {
+      "key": "fleet-assignment",
+      "slug": "fleet-assignment-plan",
+      "intendedType": "binary",
+      "reservedType": "binary",
+      "detectedType": "binary",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 5,
+      "constraints": 1,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Van 1",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B3",
+          "label": "Van 2",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B4",
+          "label": "Truck 1",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B5",
+          "label": "Truck 2",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        },
+        {
+          "cell": "B6",
+          "label": "Truck 3",
+          "type": "binary",
+          "lower": 0,
+          "upper": 1
+        }
+      ],
+      "bounds": true,
+      "functionsUsed": [
+        "SUM",
+        "SUMPRODUCT"
+      ],
+      "gridRows": 9,
+      "gridCols": 6,
+      "gridCells": 54,
+      "status1": "optimal",
+      "objective1": 355,
+      "vector1": {
+        "Van 1": 0,
+        "Van 2": 1,
+        "Truck 1": 1,
+        "Truck 2": 0,
+        "Truck 3": 1
+      },
+      "status2": "optimal",
+      "objective2": 355,
+      "vector2": {
+        "Van 1": 0,
+        "Van 2": 1,
+        "Truck 1": 1,
+        "Truck 2": 0,
+        "Truck 3": 1
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 355,
+      "chartEligible": false
+    },
+    {
+      "key": "media-mix",
+      "slug": "media-channel-mix",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 4,
+      "constraints": 5,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Search",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Social",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "TV",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B5",
+          "label": "Radio",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [
+        "SUM"
+      ],
+      "gridRows": 12,
+      "gridCols": 6,
+      "gridCells": 72,
+      "status1": "optimal",
+      "objective1": 416,
+      "vector1": {
+        "Search": 40,
+        "Social": 30,
+        "TV": 30,
+        "Radio": 0
+      },
+      "status2": "optimal",
+      "objective2": 416,
+      "vector2": {
+        "Search": 40,
+        "Social": 30,
+        "TV": 30,
+        "Radio": 0
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 416,
+      "chartEligible": false
+    },
+    {
+      "key": "fertiliser-blend",
+      "slug": "fertiliser-blend-plan",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 3,
+      "constraints": 3,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Blend X",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Blend Y",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Blend Z",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [
+        "SUM",
+        "SUMPRODUCT"
+      ],
+      "gridRows": 9,
+      "gridCols": 7,
+      "gridCells": 63,
+      "status1": "optimal",
+      "objective1": 47.602739726,
+      "vector1": {
+        "Blend X": 34.931506849,
+        "Blend Y": 2.739726027,
+        "Blend Z": 16.438356164
+      },
+      "status2": "optimal",
+      "objective2": 47.602739726,
+      "vector2": {
+        "Blend X": 34.931506849,
+        "Blend Y": 2.739726027,
+        "Blend Z": 16.438356164
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 47.602739725000006,
+      "chartEligible": false
+    },
+    {
+      "key": "scholarships",
+      "slug": "scholarship-allocation",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 3,
+      "constraints": 6,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Undergraduate",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Vocational",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Postgraduate",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 12,
+      "gridCols": 5,
+      "gridCells": 60,
+      "status1": "optimal",
+      "objective1": 45,
+      "vector1": {
+        "Undergraduate": 15,
+        "Vocational": 25,
+        "Postgraduate": 5
+      },
+      "status2": "optimal",
+      "objective2": 45,
+      "vector2": {
+        "Undergraduate": 15,
+        "Vocational": 25,
+        "Postgraduate": 5
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 45,
+      "chartEligible": false
+    },
+    {
+      "key": "food-bank",
+      "slug": "food-bank-allocation",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 3,
+      "constraints": 5,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "North",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "East",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "South",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [
+        "SUM",
+        "SUMPRODUCT"
+      ],
+      "gridRows": 11,
+      "gridCols": 6,
+      "gridCells": 66,
+      "status1": "optimal",
+      "objective1": 711,
+      "vector1": {
+        "North": 300,
+        "East": 167,
+        "South": 244
+      },
+      "status2": "optimal",
+      "objective2": 711,
+      "vector2": {
+        "North": 300,
+        "East": 167,
+        "South": 244
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 711,
+      "chartEligible": false
+    },
+    {
+      "key": "renewable-mix",
+      "slug": "renewable-energy-mix",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Solar",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Wind",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Grid",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [
+        "SUM"
+      ],
+      "gridRows": 10,
+      "gridCols": 6,
+      "gridCells": 60,
+      "status1": "optimal",
+      "objective1": 41500,
+      "vector1": {
+        "Solar": 100,
+        "Wind": 500,
+        "Grid": 400
+      },
+      "status2": "optimal",
+      "objective2": 41500,
+      "vector2": {
+        "Solar": 100,
+        "Wind": 500,
+        "Grid": 400
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 41500,
+      "chartEligible": false
+    },
+    {
+      "key": "microgrid-capacity",
+      "slug": "microgrid-capacity-plan",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "min",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Solar",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Battery",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Backup",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [
+        "SUM",
+        "SUMPRODUCT"
+      ],
+      "gridRows": 10,
+      "gridCols": 6,
+      "gridCells": 60,
+      "status1": "optimal",
+      "objective1": 23126.315789474,
+      "vector1": {
+        "Solar": 80,
+        "Battery": 48.421052632,
+        "Backup": 128.421052632
+      },
+      "status2": "optimal",
+      "objective2": 23126.315789474,
+      "vector2": {
+        "Solar": 80,
+        "Battery": 48.421052632,
+        "Backup": 128.421052632
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 23126.31578956,
+      "chartEligible": false
+    },
+    {
+      "key": "hotel-rooms",
+      "slug": "hotel-room-allocation",
+      "intendedType": "integer",
+      "reservedType": "integer",
+      "detectedType": "integer",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 3,
+      "constraints": 4,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Direct",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "OTA",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B4",
+          "label": "Corporate",
+          "type": "integer",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 10,
+      "gridCols": 5,
+      "gridCells": 50,
+      "status1": "optimal",
+      "objective1": 9150,
+      "vector1": {
+        "Direct": 45,
+        "OTA": 10,
+        "Corporate": 25
+      },
+      "status2": "optimal",
+      "objective2": 9150,
+      "vector2": {
+        "Direct": 45,
+        "OTA": 10,
+        "Corporate": 25
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 9150,
+      "chartEligible": false
+    },
+    {
+      "key": "lp-basics",
+      "slug": "linear-optimisation-basics",
+      "intendedType": "continuous",
+      "reservedType": "continuous",
+      "detectedType": "continuous",
+      "typeMatch": true,
+      "direction": "max",
+      "variables": 2,
+      "constraints": 2,
+      "effectiveDomains": [
+        {
+          "cell": "B2",
+          "label": "Tables",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        },
+        {
+          "cell": "B3",
+          "label": "Chairs",
+          "type": "continuous",
+          "lower": 0,
+          "upper": null
+        }
+      ],
+      "bounds": false,
+      "functionsUsed": [],
+      "gridRows": 7,
+      "gridCols": 5,
+      "gridCells": 35,
+      "status1": "optimal",
+      "objective1": 430,
+      "vector1": {
+        "Tables": 10,
+        "Chairs": 9
+      },
+      "status2": "optimal",
+      "objective2": 430,
+      "vector2": {
+        "Tables": 10,
+        "Chairs": 9
+      },
+      "deterministic": true,
+      "verified": true,
+      "verifyReasons": [],
+      "recomputedObjective": 430,
+      "chartEligible": true
+    }
+  ]
+}

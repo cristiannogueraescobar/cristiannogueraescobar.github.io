@@ -53,7 +53,13 @@
     "ui_post_engine_bytes": 102494,
     "ui_post_engine_sha256": "5bdd1b30c2c1cd4afb6e593a7a2ef416d79f7f9ef4ce8106e2e6dd11e0c17d19",
     "composed_solver_bytes": 215613,
-    "composed_solver_sha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74"
+    "composed_solver_sha256": "9cdda1e616434e0f51ef53e41962068566359c8620ecd2386bb2178e0271ce74",
+    "canonical": {
+      "_note": "Count-agnostic UI authority for the composed_solver field, which contains the growing var EXAMPLES={...} catalogue. SHA taken AFTER canonicaliseSolverExamplesRegion() replaces the EXAMPLES object with the fixed sentinel. DERIVED from the independent historical post-F6 (9-example) composed solver text (solver-ui-golden-historical-source-f6.json), NOT from the F7a composer under test. The legacy composed_solver_bytes/composed_solver_sha256 above remain the historical 9-example raw authority and are unchanged. Only composed_solver contains EXAMPLES; engine_slice / canonical_source / worker.* are engine-only and keep raw comparison.",
+      "_provenance": "solver-ui-golden-historical-source-f6.json",
+      "composed_solver_sha256": "c080e159f7ecbf7057f0a18fb6785d778ae381aec4df3f1057ce3cc7c6459c14",
+      "composed_solver_bytes": 209528
+    }
   },
   "dist_public": {
     "path": "dist/solver.html",

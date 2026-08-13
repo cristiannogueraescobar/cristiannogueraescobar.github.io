@@ -5,9 +5,11 @@
  *
  * Covered projections:
  *   - assets/i18n.js       : the two exName_/exDesc_ sub-sections per language
- *                            (9 keys x 2 x 5 langs = 180 occurrences), regenerated
- *                            in place by closed, validated structure (no markers).
- *   - assets/examples-data.js : the nine META lines (key/slug/category/type/sense).
+ *                            (catalogue.length keys x 2 x 5 langs; the original
+ *                            F1/F5 baseline was 9 keys = 180 occurrences),
+ *                            regenerated in place by closed, validated structure (no markers).
+ *   - assets/examples-data.js : the META lines (key/slug/category/type/sense), one per
+ *                            catalogue record (append-only; the original baseline held 9).
  *   - examples.html        : the ItemList JSON-LD (position/name/url).
  *   - solver.html          : the EXAMPLES object is projected at COMPOSITION time
  *                            from the catalogue via a marker, so it is not a
@@ -70,22 +72,36 @@ function run(siteDir, opts) {
   return { ok: true, changed: changed, files: projections.map(p => p.file) };
 }
 
-// Replace the contiguous META lines (identified by the leading `{ key: '<firstKey>'`
-// ... trailing `}`) with the projected lines, preserving surrounding bytes.
+// Replace the contiguous META lines (each `{ key: '<k>' ... }`) with the projected lines.
+// Count-agnostic (append-only growth): the old block is located by its REAL extent, validated as
+// the exact historical PREFIX of the current canonical keys (no silent delete/reorder/shrink/dup),
+// and replaced with a length-changing splice. Hardcodes no count.
 function replaceMetaLines(source, metaLines, keys) {
   const lines = source.split('\n');
+  const keyRe = /\{ key: '([^']+)'/;
   let start = -1;
   for (let i = 0; i < lines.length; i++) {
     if (new RegExp("\\{ key: '" + keys[0] + "'").test(lines[i])) { start = i; break; }
   }
   if (start === -1) throw new Error('generate: META block not found');
-  // Verify the block is the nine keys in order.
-  keys.forEach((k, j) => {
-    if (!new RegExp("\\{ key: '" + k + "'").test(lines[start + j])) {
-      throw new Error('generate: META block is not the nine catalogue keys in order');
-    }
+  // Read the block's REAL extent: the contiguous run of `{ key: '...' }` lines from start.
+  const oldKeys = [];
+  let end = start;
+  while (end < lines.length) {
+    const m = keyRe.exec(lines[end]);
+    if (!m) break;
+    oldKeys.push(m[1]);
+    end++;
+  }
+  const oldLen = end - start;
+  // Validate: no duplicates, not a shrink, and the old keys are the exact historical prefix.
+  const seen = {};
+  oldKeys.forEach(k => { if (seen[k]) throw new Error('generate: duplicate META key "' + k + '"'); seen[k] = true; });
+  if (oldKeys.length > keys.length) throw new Error('generate: old META block longer than canonical (shrink)');
+  oldKeys.forEach((k, j) => {
+    if (k !== keys[j]) throw new Error('generate: META block is not the historical prefix of the canonical keys (position ' + j + ': found "' + k + '", expected "' + keys[j] + '")');
   });
-  for (let j = 0; j < keys.length; j++) lines[start + j] = metaLines[j];
+  lines.splice(start, oldLen, ...metaLines);
   return lines.join('\n');
 }
 
@@ -109,4 +125,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { run: run };
+module.exports = { run: run, replaceMetaLines: replaceMetaLines };

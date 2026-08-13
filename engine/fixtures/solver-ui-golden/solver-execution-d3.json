@@ -240,5 +240,26 @@
       "count": 1
     }
   },
-  "d3_contract_patterns_note": "Exact literal-substring counts of D3 execution/worker/results contract shapes in the pre-D composed page (byte-identical baseline). Renaming a specific identifier trips a precise contract, independent of the fragment hash. Derived from the pre-D composed baseline, not the composer under test."
+  "d3_contract_patterns_note": "Exact literal-substring counts of D3 execution/worker/results contract shapes in the pre-D composed page (byte-identical baseline). Renaming a specific identifier trips a precise contract, independent of the fragment hash. Derived from the pre-D composed baseline, not the composer under test.",
+  "canonical": {
+    "_note": "Count-agnostic UI authority for catalogue-owned regions. Derived from the INDEPENDENT historical post-F6 (9-example) composed solver text (see solver-ui-golden-historical-source-f6.json), NOT from the F7a composer under test. Each SHA is the SHA of the region after canonicaliseSolverExamplesRegion() replaces the var EXAMPLES={...} object with the fixed sentinel. Legacy raw SHAs above remain pinned and unchanged. Regions without an EXAMPLES object (head/engine/ui_pre_engine/fragments) are absent here and keep raw comparison.",
+    "_sentinel": "/* SOLVER_EXAMPLES_CATALOGUE_CANONICAL */",
+    "_provenance": "solver-ui-golden-historical-source-f6.json",
+    "composed_total": {
+      "sha256": "c080e159f7ecbf7057f0a18fb6785d778ae381aec4df3f1057ce3cc7c6459c14",
+      "bytes": 209528
+    },
+    "body": {
+      "sha256": "5c99f5ab736210a73d31740e0b65c8758bbb1bd42d71fc5c4e7026b99f76d1a3",
+      "bytes": 189328
+    },
+    "inline_script": {
+      "sha256": "c67aa7070f219f4d553589b27e334cb4fc00d5fec94dd7087b85fc032d3f7a6c",
+      "bytes": 181710
+    },
+    "ui_post_engine": {
+      "sha256": "0125d2a9602eae3eaa02701eac4bbd7cdebe6e28ce708ac885b1ddfebb3f6314",
+      "bytes": 96384
+    }
+  }
 }

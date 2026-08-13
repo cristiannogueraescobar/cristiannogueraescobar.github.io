@@ -64,7 +64,8 @@ function nodeCheck(filePath) {
   catch (e) { err = String(e.message); }
   ok('examples-data.js loads', meta !== null, err);
   if (meta) {
-    ok('exports 9 examples', Array.isArray(meta.META) && meta.META.length === 9, meta.META && meta.META.length);
+    ok('exports a non-empty META array', Array.isArray(meta.META) && meta.META.length >= 9, meta.META && meta.META.length);
+    ok('F7a: exports 24 examples', Array.isArray(meta.META) && meta.META.length === 24, meta.META && meta.META.length);
     const keys = (meta.META || []).map(m => m.key);
     ok('example keys unique', new Set(keys).size === keys.length);
     ok('every example has slug/category/type/sense',

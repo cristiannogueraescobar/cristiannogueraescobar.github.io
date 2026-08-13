@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { composeSolverInterface } = require('../src/shared/compose-solver.js');
+const { canonicaliseSolverExamplesRegion } = require('../src/shared/solver-ui-canonical.js');
 const { checkSolverGridInterface } = require('./tests_solver_grid.js');
 const { checkSolverDetectionInterface } = require('./tests_solver_detection.js');
 const { checkSolverExecutionInterface } = require('./tests_solver_execution.js');
@@ -26,6 +27,9 @@ const { checkSolverVisualizationInterface } = require('./tests_solver_visualizat
 
 const sha = t => crypto.createHash('sha256').update(t, 'utf8').digest('hex');
 const bytesOf = t => Buffer.byteLength(t, 'utf8');
+// Canonicalise the catalogue-owned region before hashing (see tests_solver_grid.js).
+const shaCanon = t => sha(canonicaliseSolverExamplesRegion(t));
+const bytesCanon = t => Buffer.byteLength(canonicaliseSolverExamplesRegion(t), 'utf8');
 const ENGINE_START = '/* ENGINE_START */';
 const ENGINE_END = '/* ENGINE_END */';
 
@@ -76,14 +80,14 @@ function checkSolverInterfaceFinal(siteDir) {
   ok('composer REGIONS order == golden', JSON.stringify(regNames) === JSON.stringify(golden.fragment_order));
 
   // 3. Final byte-identity: composed / head / body / style / engine / inline / ui pre-post.
-  ok('composed total sha matches golden', sha(composed) === golden.composed_total.sha256);
-  ok('composed total bytes match golden', bytesOf(composed) === golden.composed_total.bytes);
+  ok('composed total canonical sha matches golden', shaCanon(composed) === golden.canonical.composed_total.sha256);
+  ok('composed total canonical bytes match golden', bytesCanon(composed) === golden.canonical.composed_total.bytes);
   ok('composition deterministic', composeSolverInterface(src, siteDir) === composed);
   const headM = composed.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
   const bodyM = composed.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i);
   const styleM = composed.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i);
   ok('head matches golden', headM && sha(headM[0]) === golden.head.sha256);
-  ok('body matches golden', bodyM && sha(bodyM[0]) === golden.body.sha256);
+  ok('body canonical matches golden', bodyM && shaCanon(bodyM[0]) === golden.canonical.body.sha256);
   // style golden is the INNER of <style> (no tags), matching the pre-D D0 capture
   // it was derived from (see golden.provenance).
   ok('style matches golden (inner)', styleM && sha(styleM[1]) === golden.style.sha256);
@@ -93,17 +97,19 @@ function checkSolverInterfaceFinal(siteDir) {
   ok('engine bytes canonical', bytesOf(engine) === golden.engine.bytes);
   const big = bigInlineScript(composed);
   // ui_script with the engine region removed — derived from the pre-D D0 ui_script.
-  if (big && golden.ui_script_no_engine) {
+  if (big && golden.canonical && golden.canonical.ui_script_no_engine) {
+    // ui_script with the engine region removed still carries the EXAMPLES object (it sits after
+    // ENGINE_END), so it is catalogue-owned -> canonical comparison against historical authority.
     const uiNoEngine = big[2].slice(0, big[2].indexOf(ENGINE_START)) +
       big[2].slice(big[2].indexOf(ENGINE_END) + ENGINE_END.length);
-    ok('ui_script (engine removed) matches pre-D golden', sha(uiNoEngine) === golden.ui_script_no_engine.sha256);
+    ok('ui_script (engine removed) canonical matches golden', shaCanon(uiNoEngine) === golden.canonical.ui_script_no_engine.sha256);
   }
-  ok('inline script matches golden', big && sha(big[2]) === golden.inline_script.sha256);
+  ok('inline script canonical matches golden', big && shaCanon(big[2]) === golden.canonical.inline_script.sha256);
   if (big) {
     const uiPre = big[2].slice(0, big[2].indexOf(ENGINE_START));
     const uiPost = big[2].slice(big[2].indexOf(ENGINE_END) + ENGINE_END.length);
     ok('UI pre-engine matches golden', sha(uiPre) === golden.ui_pre_engine.sha256);
-    ok('UI post-engine matches golden', sha(uiPost) === golden.ui_post_engine.sha256);
+    ok('UI post-engine canonical matches golden', shaCanon(uiPost) === golden.canonical.ui_post_engine.sha256);
   }
 
   // 4. All nine fragments verbatim + present exactly once; no residual marker.

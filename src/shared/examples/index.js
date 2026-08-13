@@ -26,7 +26,12 @@ function modulePath(siteDir, name) {
  */
 function loadAndValidateCatalogue(siteDir, opts) {
   opts = opts || {};
-  const expectCount = opts.expectCount === undefined ? 9 : opts.expectCount;
+  // F5 generic loader count-default correction required by append-only catalogue growth.
+  // Per the documented F5 contract (see validate.js: "opts.expectCount default undefined pins the
+  // checkpoint count SEPARATELY from the generic architecture"), an omitted expectCount must NOT
+  // pin a count. The previous implicit 9 was a historical pin that broke once the catalogue grew
+  // past nine. Omitted => no count pin; explicit => exact count validation stays active.
+  const expectCount = opts.expectCount;
 
   const catPath = modulePath(siteDir, 'catalogue.js');
   const schemaPath = modulePath(siteDir, 'schema.js');

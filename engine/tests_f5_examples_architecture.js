@@ -26,7 +26,7 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push
 function sha(p) { return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex'); }
 function read(p) { return fs.readFileSync(p, 'utf8'); }
 
-const loaded = loadCanonical(SITE, { expectCount: 9 });
+const loaded = loadCanonical(SITE);
 const canonical = loaded.canonical;
 const byId = {}; canonical.forEach(function (c) { byId[c.key] = c; });
 
@@ -86,7 +86,7 @@ ok('T7: categories validate', loaded.validate.validateCategories(CATEGORIES).ok)
   try { loaded.categories[0].label.en = 'BROKEN'; } catch (e) {}
   ok('T-freeze: mutating exposed registry never changes source', CATEGORIES[0].label.en === before);
   // A second loadCanonical still validates (state not corrupted).
-  ok('T-freeze: a second loadCanonical still validates', loadCanonical(SITE, { expectCount: 9 }).categories.length === 10);
+  ok('T-freeze: a second loadCanonical still validates', loadCanonical(SITE).categories.length === 10);
 })();
 
 // Frozen ID/slug/order CONTRACT, independent of labels/shorts.
@@ -141,7 +141,9 @@ ok('T7: categories validate', loaded.validate.validateCategories(CATEGORIES).ok)
   ok('T-status: solution-bearing + no-solution partition the publishable statuses', E.SOLUTION_BEARING_STATUSES.concat(E.NO_SOLUTION_STATUSES).slice().sort().join(',') === E.PUBLISHABLE_EXPECTED_STATUSES.slice().sort().join(','));
   ok('T-status: ENGINE_STATUSES is the full six', E.ENGINE_STATUSES.length === 6);
   // The nine all use objective-feasible (solution-bearing).
-  ok('T-status: all nine use objective-feasible', canonical.every(function (c) { return c.resultPolicy === 'objective-feasible'; }));
+  ok('T-status: historical nine all use objective-feasible', canonical.slice(0, 9).every(function (c) { return c.resultPolicy === 'objective-feasible'; }));
+  ok('T-status: every record has a valid result policy', canonical.every(function (c) { return c.resultPolicy === 'objective-feasible' || c.resultPolicy === 'exact'; }));
+  ok('T-status: F7a: exactly 4 exact policies (bakery-mix, purchase-split, fertiliser-blend, lp-basics)', canonical.filter(function (c) { return c.resultPolicy === 'exact'; }).map(function (c) { return c.key; }).sort().join(',') === ['bakery-mix','purchase-split','fertiliser-blend','lp-basics'].sort().join(','));
 })();
 
 // Category membership authority is the frozen E.CATEGORY_IDS (no mutable second list).
@@ -180,7 +182,7 @@ canonical.forEach(function (c) {
     ok('L: ' + c.key + '.content.question.' + l + ' has no HTML', !/<[^>]+>/.test(c.content.question[l]));
   });
 });
-ok('L3: catalogue validates with expectCount 9', loaded.validate.validateMetadataCatalogue(CATALOGUE, require(path.join(F5, 'metadata.js')).METADATA, { expectCount: 9 }).ok);
+ok('L3: F7a: catalogue validates with expectCount 24', loaded.validate.validateMetadataCatalogue(CATALOGUE, require(path.join(F5, 'metadata.js')).METADATA, { expectCount: 24 }).ok);
 
 // ---------------------------------------------------------------- AUTHORED vs DERIVED
 const derive = require(path.join(F5, 'derive.js'));
@@ -206,7 +208,7 @@ canonical.forEach(function (c) {
 });
 
 // ---------------------------------------------------------------- CURRENT 9
-ok('M1: checkpoint count is exactly 9', canonical.length === 9);
+ok('M1: F7a: checkpoint count is exactly 24', canonical.length === 24);
 ok('M2: all catalogue keys are migrated', CATALOGUE.every(function (r) { return !!byId[r.key]; }));
 ok('M3: canonical order equals catalogue order (stable)', JSON.stringify(canonical.map(function (c) { return c.key; })) === JSON.stringify(CATALOGUE.map(function (r) { return r.key; })));
 // Legacy model hashes preserved (independent baseline recomputed here).
@@ -401,7 +403,7 @@ canonical.forEach(function (c) {
 
   // The nine current records satisfy grammar + hygiene unchanged.
   const liveCat = require(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js')).CATALOGUE;
-  ok('GR/HY: the nine current records pass grammar + hygiene', schema.validateCatalogue(liveCat, { expectCount: 9 }).ok);
+  ok('GR/HY: all current records pass grammar + hygiene', schema.validateCatalogue(liveCat).ok);
 })();
 
 // ------------------------------------------------- STRICT TAG GRAMMAR
@@ -461,7 +463,7 @@ canonical.forEach(function (c) {
   const liveCat = require(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js')).CATALOGUE;
   const blend = liveCat.find(function (r) { return r.key === 'blend'; });
   ok('TOL: current blend authored tolerance is 1e-8', blend && blend.expected.tolerance === 1e-8, blend && String(blend.expected.tolerance));
-  ok('TOL: the nine current records pass tolerance policy', schema.validateCatalogue(liveCat, { expectCount: 9 }).ok);
+  ok('TOL: all current records pass tolerance policy', schema.validateCatalogue(liveCat).ok);
 })();
 
 // ---------------------------------------------------------------- ROADMAP
