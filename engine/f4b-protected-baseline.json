@@ -13,8 +13,8 @@
     },
     {
       "path": "examples.html",
-      "bytes": 60484,
-      "sha256": "44041496fc513eed6d53be92778e18dbe60a8392a7c4ddcabead45197a0a5d7b"
+      "bytes": 85058,
+      "sha256": "bb568d97b7cba5e1771a604f12169b4a5a5e1ffa153e483642cb50584d156099"
     },
     {
       "path": "capabilities.html",
@@ -48,13 +48,13 @@
     },
     {
       "path": "assets/i18n.js",
-      "bytes": 317272,
-      "sha256": "17644d75af6fc743244173165e75924ada4646148c7ea9bc8e57d1a1dfb3ee2a"
+      "bytes": 341222,
+      "sha256": "cbaf868fb45e5bc2be4c08de1ece9a6750462a205ee052faa4ef41ebb98dfd7f"
     },
     {
       "path": "assets/examples-data.js",
-      "bytes": 4376,
-      "sha256": "2f945a5859888714b56fdee9c40f318b5d2c314c231ec80096c989c51becbaa6"
+      "bytes": 5788,
+      "sha256": "72f35201331b910a447dd402f2548d56111713bc59bc394d65b4b004f2a8e495"
     },
     {
       "path": "assets/product-capabilities.js",
@@ -88,8 +88,8 @@
     },
     {
       "path": "src/shared/examples/catalogue.js",
-      "bytes": 62199,
-      "sha256": "2d03fede1a4d6c996ad8438bdecfbcf9d4a725abe01c3cf46954cb932130b9b0"
+      "bytes": 88314,
+      "sha256": "ac583fc70b181d31ce99d764cb0c18bed491e0f52801cc5eacaf03d8f45ffd49"
     },
     {
       "path": "src/shared/examples/index.js",

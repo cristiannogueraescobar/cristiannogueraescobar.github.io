@@ -1,9 +1,11 @@
-/* tests_f7a_examples_24.js — F7a POSITIVE checkpoint (permanent).
+/* tests_f7a_examples_24.js — F7a HISTORICAL TRANCHE checkpoint (permanent).
  *
- * This is THE F7a checkpoint layer: the one place that asserts catalogue === 24 and pins the exact
- * F7a tranche (keys, slugs, order, model types, result policies, fieldOrder). Generic infrastructure
- * stays count-agnostic; this suite owns the literal 24. When F7b grows the catalogue to 36, this
- * file's 24-assertions are expected to move to an F7b checkpoint — they must NOT be silently relaxed.
+ * Originally this suite owned the literal "catalogue === 24". F7b grew the live catalogue to 36,
+ * so the literal total moved to the F7b checkpoint (tests_f7b_examples_36.js). This suite was NOT
+ * relaxed: it still pins the exact F7a tranche — the first 24 canonical records must remain exactly
+ * historical-9 + F7a-15, in order, with their frozen slugs, model types, result policies and
+ * objectives. It now asserts those properties over the F7a PREFIX of the live catalogue rather than
+ * over the whole catalogue, which is the correct historical contract once later tranches exist.
  *
  * Everything here is checked against the REAL loaded catalogue / canonical records, not a fixture
  * captured from the composer under test. Where a result (status/objective) is asserted, it comes from
@@ -25,6 +27,7 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push
 const HISTORICAL_9 = ['production', 'workshop', 'blend', 'marketing', 'workforce', 'shipping', 'project', 'delivery', 'supplier'];
 const F7A_15 = ['bakery-mix', 'factory-batches', 'clinic-staffing', 'call-centre', 'purchase-split', 'ingredient-sourcing', 'fleet-assignment', 'media-mix', 'fertiliser-blend', 'scholarships', 'food-bank', 'renewable-mix', 'microgrid-capacity', 'hotel-rooms', 'lp-basics'];
 const EXPECTED_24_KEYS = HISTORICAL_9.concat(F7A_15);
+const F7A_TRANCHE_SIZE = EXPECTED_24_KEYS.length; // 24 — the F7a tranche size, not the live total
 const EXACT_POLICY_KEYS = ['bakery-mix', 'purchase-split', 'fertiliser-blend', 'lp-basics'];
 // slug per key (frozen public URL surface)
 const SLUG_BY_KEY = {
@@ -44,45 +47,50 @@ const SLUG_BY_KEY = {
 const { catalogue } = loadAndValidateCatalogue(SITE);
 const { canonical } = loadCanonical(SITE);
 
-// ---- 1. count checkpoint ---------------------------------------------------
-ok('F7a: catalogue length is exactly 24', catalogue.length === 24, String(catalogue.length));
-ok('F7a: canonical length is exactly 24', canonical.length === 24, String(canonical.length));
+// The F7a tranche is the first 24 canonical records; assert over that prefix (later tranches append).
+const tranche = catalogue.slice(0, F7A_TRANCHE_SIZE);
+const trancheCanon = canonical.slice(0, F7A_TRANCHE_SIZE);
+
+// ---- 1. tranche checkpoint -------------------------------------------------
+ok('F7a: catalogue has at least the 24-record F7a tranche', catalogue.length >= F7A_TRANCHE_SIZE, String(catalogue.length));
+ok('F7a: canonical has at least the 24-record F7a tranche', canonical.length >= F7A_TRANCHE_SIZE, String(canonical.length));
+ok('F7a: the F7a tranche is exactly 24 records', tranche.length === 24, String(tranche.length));
 
 // ---- 2. order: historical-9 prefix, then F7a-15 ---------------------------
-ok('F7a: catalogue order equals historical-9 + F7a-15', JSON.stringify(catalogue.map(function (r) { return r.key; })) === JSON.stringify(EXPECTED_24_KEYS));
+ok('F7a: tranche order equals historical-9 + F7a-15', JSON.stringify(tranche.map(function (r) { return r.key; })) === JSON.stringify(EXPECTED_24_KEYS));
 ok('F7a: first nine are the historical keys in order', JSON.stringify(catalogue.slice(0, 9).map(function (r) { return r.key; })) === JSON.stringify(HISTORICAL_9));
-ok('F7a: records 10..24 are the F7a keys in order', JSON.stringify(catalogue.slice(9).map(function (r) { return r.key; })) === JSON.stringify(F7A_15));
+ok('F7a: records 10..24 are the F7a keys in order', JSON.stringify(catalogue.slice(9, 24).map(function (r) { return r.key; })) === JSON.stringify(F7A_15));
 
-// ---- 3. uniqueness ---------------------------------------------------------
+// ---- 3. uniqueness (within the tranche) ------------------------------------
 (function () {
-  var keys = catalogue.map(function (r) { return r.key; });
-  var slugs = catalogue.map(function (r) { return r.slug; });
-  ok('F7a: keys are unique', new Set(keys).size === 24);
-  ok('F7a: slugs are unique', new Set(slugs).size === 24);
+  var keys = tranche.map(function (r) { return r.key; });
+  var slugs = tranche.map(function (r) { return r.slug; });
+  ok('F7a: tranche keys are unique', new Set(keys).size === F7A_TRANCHE_SIZE);
+  ok('F7a: tranche slugs are unique', new Set(slugs).size === F7A_TRANCHE_SIZE);
 })();
 
 // ---- 4. slug per key -------------------------------------------------------
-catalogue.forEach(function (r) {
+tranche.forEach(function (r) {
   ok('F7a: slug for ' + r.key + ' is ' + SLUG_BY_KEY[r.key], r.slug === SLUG_BY_KEY[r.key], r.slug);
 });
 
-// ---- 5. model type distribution (11 continuous, 8 integer, 3 binary, 2 mixed) ----
+// ---- 5. model type distribution within the F7a tranche (11/8/3/2) ----------
 (function () {
   var mt = {};
-  catalogue.forEach(function (r) { mt[r.expected.modelType] = (mt[r.expected.modelType] || 0) + 1; });
-  ok('F7a: 11 continuous models', mt.continuous === 11, String(mt.continuous));
-  ok('F7a: 8 integer models', mt.integer === 8, String(mt.integer));
-  ok('F7a: 3 binary models', mt.binary === 3, String(mt.binary));
-  ok('F7a: 2 mixed models', mt.mixed === 2, String(mt.mixed));
+  tranche.forEach(function (r) { mt[r.expected.modelType] = (mt[r.expected.modelType] || 0) + 1; });
+  ok('F7a: 11 continuous models in tranche', mt.continuous === 11, String(mt.continuous));
+  ok('F7a: 8 integer models in tranche', mt.integer === 8, String(mt.integer));
+  ok('F7a: 3 binary models in tranche', mt.binary === 3, String(mt.binary));
+  ok('F7a: 2 mixed models in tranche', mt.mixed === 2, String(mt.mixed));
 })();
 
-// ---- 6. result policy: 4 exact (named), 20 objective-feasible --------------
+// ---- 6. result policy within the tranche: 4 exact (named), 20 objective-feasible ----
 (function () {
-  var exact = canonical.filter(function (c) { return c.resultPolicy === 'exact'; }).map(function (c) { return c.key; }).sort();
-  var objf = canonical.filter(function (c) { return c.resultPolicy === 'objective-feasible'; });
-  ok('F7a: exactly 4 exact-policy records, the named set', JSON.stringify(exact) === JSON.stringify(EXACT_POLICY_KEYS.slice().sort()), exact.join(','));
-  ok('F7a: exactly 20 objective-feasible records', objf.length === 20, String(objf.length));
-  ok('F7a: every record has a valid result policy', canonical.every(function (c) { return c.resultPolicy === 'exact' || c.resultPolicy === 'objective-feasible'; }));
+  var exact = trancheCanon.filter(function (c) { return c.resultPolicy === 'exact'; }).map(function (c) { return c.key; }).sort();
+  var objf = trancheCanon.filter(function (c) { return c.resultPolicy === 'objective-feasible'; });
+  ok('F7a: exactly 4 exact-policy records in tranche, the named set', JSON.stringify(exact) === JSON.stringify(EXACT_POLICY_KEYS.slice().sort()), exact.join(','));
+  ok('F7a: exactly 20 objective-feasible records in tranche', objf.length === 20, String(objf.length));
+  ok('F7a: every tranche record has a valid result policy', trancheCanon.every(function (c) { return c.resultPolicy === 'exact' || c.resultPolicy === 'objective-feasible'; }));
 })();
 
 // ---- 7. historical objectives immutable (frozen from Phase 1) --------------
@@ -94,12 +102,13 @@ catalogue.forEach(function (r) {
   });
 })();
 
-// ---- 8. fieldOrder present + valid on every record -------------------------
+// ---- 8. fieldOrder present + valid on every tranche record -----------------
 (function () {
   var VALID_FIELDS = ['grid', 'domains', 'openVarSettings', 'whole', 'expected'];
   var src = fs.readFileSync(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js'), 'utf8');
   var keys = catalogue.map(function (r) { return r.key; });
-  keys.forEach(function (key, i) {
+  tranche.forEach(function (rec, i) {
+    var key = rec.key;
     var s = src.indexOf('"key": "' + key + '"');
     var e = i + 1 < keys.length ? src.indexOf('"key": "' + keys[i + 1] + '"') : src.length;
     var block = src.slice(s, e);
@@ -125,5 +134,5 @@ catalogue.forEach(function (r) {
   });
 })();
 
-console.log('F7A EXAMPLES 24 (POSITIVE)  PASSED: ' + pass + '   FAILED: ' + fail);
+console.log('F7A EXAMPLES 24 (HISTORICAL TRANCHE)  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail) { failures.forEach(function (f) { console.log('  FAIL:', f); }); process.exit(1); }

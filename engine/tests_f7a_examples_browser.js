@@ -1,7 +1,7 @@
 /* tests_f7a_examples_browser.js — F7a BROWSER / PLAYWRIGHT (permanent, HARDENED).
  *
  * End-to-end in a real Chromium against the built dist:
- *   - examples.html renders exactly 24 cards in all 5 locales;
+ *   - examples.html renders exactly 36 cards in all 5 locales;
  *   - no horizontal overflow at 320px and 390px;
  *   - EXACT grid identity: each of the 15 F7a slugs loads via solver.html?ex=<slug> and the rendered
  *     #grid contains the record's canonical grid cell-for-cell (every non-empty canonical cell equals
@@ -89,14 +89,14 @@ function gridMatches(rendered, canonical) {
   var base = 'http://localhost:' + port;
   var browser = await chromium.launch();
   try {
-    // ---- examples.html: 24 cards in every locale ----
+    // ---- examples.html: 36 cards in every locale ----
     for (var i = 0; i < LOCALES.length; i++) {
       var loc = LOCALES[i];
       var ctx = await browser.newContext();
       var page = await ctx.newPage();
       await page.goto(base + '/examples.html?lang=' + loc, { waitUntil: 'load' });
       var cardCount = await page.evaluate(function () { return document.querySelectorAll('.lib-card').length; });
-      ok('BROWSER: examples.html shows 24 cards (' + loc + ')', cardCount === 24, String(cardCount));
+      ok('BROWSER: examples.html shows 36 cards (' + loc + ')', cardCount === 36, String(cardCount));
       await ctx.close();
     }
 

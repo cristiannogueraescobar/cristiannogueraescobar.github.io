@@ -1,7 +1,8 @@
 /* tests_f7a_examples_engine.js — F7a CANONICAL ENGINE (permanent).
  *
- * Solves every one of the 24 REAL catalogue records through the REAL engine (harness.run, via the
- * shared f5-solve-verify helper) and verifies the canonical contract end to end:
+ * Solves every one of the REAL live catalogue records (36 today: F5/F6-9 + F7a-15 + F7b-12) through
+ * the REAL engine (harness.run, via the shared f5-solve-verify helper) and verifies the canonical
+ * contract end to end:
  *   - detect/classify: the engine-detected decision cells match derive.deriveDecisionCells;
  *   - solve twice: deterministic (same status + objective + vector both runs);
  *   - status/objective: match the independent expected authority (Phase-1 audit for the F7a 15,
@@ -43,7 +44,7 @@ function expectedFor(rec) {
   return { status: b.expected.status, objective: b.expected.objective, tolerance: b.expected.tolerance };
 }
 
-ok('ENGINE: catalogue has 24 records to solve', canonical.length === 24, String(canonical.length));
+ok('ENGINE: catalogue has 36 records to solve', canonical.length === 36, String(canonical.length));
 
 canonical.forEach(function (rec) {
   var expected = expectedFor(rec);
@@ -58,7 +59,7 @@ canonical.forEach(function (rec) {
   var v1 = (o1.values || []).join(','), v2 = (o2.values || []).join(',');
   ok('ENGINE: ' + rec.key + ' deterministic decision vector', v1 === v2);
 
-  // ---- status is optimal (all 24 are solvable to optimality) ----
+  // ---- status is optimal (all live records are solvable to optimality) ----
   ok('ENGINE: ' + rec.key + ' status is optimal', o1.status === 'optimal', o1.status);
 
   // ---- detect/classify: engine decision cells match derive ----

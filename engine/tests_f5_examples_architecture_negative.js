@@ -17,6 +17,12 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 
 const SITE = path.join(__dirname, '..');
+
+// The CURRENT LIVE catalogue size, read from the real source. This is intentionally count-aware:
+// it is 36 today (F5/F6-9 + F7a-15 + F7b-12) and becomes 48 at F7c without editing this suite. The
+// catalogue-count mutation contracts (remove one / append one) validate against THIS value, never a
+// frozen literal. This is a generic F5 negative suite, NOT the historical F7a checkpoint.
+const CHECKPOINT_COUNT = require(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js')).CATALOGUE.length;
 let pass = 0, fail = 0; const failures = [];
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push(name + (detail ? ' — ' + detail : '')); } }
 
@@ -277,9 +283,10 @@ M('44. public order changed', 'canonical order', function (dst) {
     wf(p, src.slice(0, prodStart) + work + prod + src.slice(blendStart));
   }
 }, 'order');
-M('45. current example removed', 'expected 24', function (dst) {
+M('45. current example removed (count drops below live checkpoint)', 'expected ' + CHECKPOINT_COUNT, function (dst) {
   // Remove exactly ONE record (supplier) from BOTH the catalogue and its metadata, so the count
-  // drops to 23 consistently and trips the F7a checkpoint count (not a metadata/catalogue mismatch).
+  // drops to CHECKPOINT_COUNT-1 consistently and trips the live checkpoint count (not a
+  // metadata/catalogue mismatch).
   const p = f1(dst, 'catalogue.js'); const src = rf(p);
   const supStart = src.indexOf('{\n    "key": "supplier"');
   if (supStart !== -1) {
@@ -297,8 +304,8 @@ M('45. current example removed', 'expected 24', function (dst) {
     if (mEnd !== -1) wf(mp, msrc.slice(0, mStart) + msrc.slice(mEnd + '\n  },'.length));
   }
 }, 'count');
-M('46. F7a: extra example added (count 25)', 'expected 24', function (dst) {
-  // add a tenth metadata entry AND catalogue record minimally -> count 10
+M('46. extra example added (count exceeds live checkpoint)', 'expected ' + CHECKPOINT_COUNT, function (dst) {
+  // add an extra metadata entry AND catalogue record minimally -> count CHECKPOINT_COUNT+1
   const c = f1(dst, 'catalogue.js'); const src = rf(c);
   const tenth = ',\n  { "key":"tenth","slug":"tenth-x","category":"start","type":"continuous","sense":"max","translations":{"en":{"title":"T","desc":"d"},"es":{"title":"T","desc":"d"},"pt":{"title":"T","desc":"d"},"de":{"title":"T","desc":"d"},"fr":{"title":"T","desc":"d"}},"model":{"grid":[["Item","Val","Coeff","Term"],["X","0","2","=B2*C2"],["Tot","","","=SUM(D2:D2)","<=","5"]]},"expected":{"status":"optimal","modelType":"continuous","objective":1}}\n];';
   wf(c, src.replace('\n];\n\nmodule.exports', tenth + '\n\nmodule.exports'));
@@ -528,9 +535,6 @@ M('99. defineExample bad key throws', 'machine ID', function () {}, 'define-bad-
 
 // --------------------------------------------------------------------------
 // Runners per mode.
-// The F7a checkpoint count is the live SITE catalogue length (24 today). Computed dynamically so the
-// checkpoint number lives in the catalogue, not hardcoded in this generic negative runner.
-const CHECKPOINT_COUNT = require(path.join(SITE, 'src', 'shared', 'examples', 'catalogue.js')).CATALOGUE.length;
 function runLoad(m, dst) {
   const r = loadInChild(dst, CHECKPOINT_COUNT);
   // The load must FAIL and the failure text must mention the expected reason.

@@ -59,7 +59,7 @@ function makeHarness(initialUrl, locale) {
 (function () {
   var h = makeHarness('examples.html', 'en');
   var r = h.apply();
-  ok('BEH: F7a: initial shows all 24', r.count === 24 && !r.empty);
+  ok('BEH: LIVE: initial shows all 36', r.count === 36 && !r.empty);
 })();
 
 // ---- search cycle ----
@@ -67,7 +67,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html', 'en');
   h.setState({ q: 'supplier', category: [], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: F7a: search supplier -> supplier + purchasing records', r.count === 3 && r.ids.indexOf('supplier') !== -1);
+  ok('BEH: search supplier -> supplier + purchasing records', r.count === 4 && r.ids.indexOf('supplier') !== -1);
   ok('BEH: search writes q to URL', h.getUrl().indexOf('q=supplier') !== -1);
 })();
 
@@ -76,7 +76,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html', 'en');
   h.setState({ q: '', category: ['production-operations'], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: F7a: category production-operations -> four', r.count === 4);
+  ok('BEH: category production-operations -> six', r.count === 6);
   ok('BEH: category in URL', h.getUrl().indexOf('category=production-operations') !== -1);
 })();
 
@@ -85,7 +85,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html', 'en');
   h.setState({ q: '', category: ['logistics-transport'], type: ['integer'], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: logistics AND integer -> shipping only', r.count === 1 && r.ids[0] === 'shipping');
+  ok('BEH: logistics AND integer -> shipping + container-loading', r.count === 2 && r.ids.slice().sort().join(',') === 'container-loading,shipping');
 })();
 
 // ---- no results ----
@@ -101,7 +101,7 @@ function makeHarness(initialUrl, locale) {
   var h = makeHarness('examples.html?q=foo&type=integer&lang=es', 'en');
   h.setState({ q: '', category: [], type: [], difficulty: [], goal: [] });
   var r = h.apply();
-  ok('BEH: F7a: reset restores all 24', r.count === 24);
+  ok('BEH: LIVE: reset restores all 36', r.count === 36);
   ok('BEH: reset preserves lang', h.getUrl().indexOf('lang=es') !== -1);
   ok('BEH: reset removes q + facets', h.getUrl().indexOf('q=') === -1 && h.getUrl().indexOf('type=') === -1);
 })();

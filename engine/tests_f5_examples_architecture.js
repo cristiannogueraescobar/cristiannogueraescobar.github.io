@@ -182,7 +182,7 @@ canonical.forEach(function (c) {
     ok('L: ' + c.key + '.content.question.' + l + ' has no HTML', !/<[^>]+>/.test(c.content.question[l]));
   });
 });
-ok('L3: F7a: catalogue validates with expectCount 24', loaded.validate.validateMetadataCatalogue(CATALOGUE, require(path.join(F5, 'metadata.js')).METADATA, { expectCount: 24 }).ok);
+ok('L3: catalogue validates with expectCount 36', loaded.validate.validateMetadataCatalogue(CATALOGUE, require(path.join(F5, 'metadata.js')).METADATA, { expectCount: 36 }).ok);
 
 // ---------------------------------------------------------------- AUTHORED vs DERIVED
 const derive = require(path.join(F5, 'derive.js'));
@@ -208,7 +208,7 @@ canonical.forEach(function (c) {
 });
 
 // ---------------------------------------------------------------- CURRENT 9
-ok('M1: F7a: checkpoint count is exactly 24', canonical.length === 24);
+ok('M1: live checkpoint count is exactly 36', canonical.length === 36);
 ok('M2: all catalogue keys are migrated', CATALOGUE.every(function (r) { return !!byId[r.key]; }));
 ok('M3: canonical order equals catalogue order (stable)', JSON.stringify(canonical.map(function (c) { return c.key; })) === JSON.stringify(CATALOGUE.map(function (r) { return r.key; })));
 // Legacy model hashes preserved (independent baseline recomputed here).

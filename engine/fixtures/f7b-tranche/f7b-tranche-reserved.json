@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "tranche": "f7b",
+  "state": "reserved",
+  "note": "F7b Phase 1 RESERVED tranche. These 12 canonical identities and their engine-validated contracts are reserved for the completed F7b state (24 -> 36). They are NOT yet live in the catalogue; going live is Phase 2. Objectives were produced by the REAL engine (solveModel), not hand-written.",
+  "targetTotal": 36,
+  "records": [
+    {
+      "key": "assembly-line-mix",
+      "slug": "assembly-line-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 1700,
+      "category": "production-operations",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "production",
+        "assembly",
+        "mix",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "91170b008f71f3916e3f617ddb552e520d5cfc50dffaee697b4f1069dbbcb0f8",
+      "capabilities": [
+        "continuous-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "machine-shop-jobs",
+      "slug": "machine-shop-job-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 1600,
+      "category": "production-operations",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "production",
+        "machining",
+        "integer",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "d4b877ffc3f1c0ecae89a67aa3b43c5cc3b674287851f32d61ae12d393dcd890",
+      "capabilities": [
+        "integer-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "warehouse-dispatch",
+      "slug": "warehouse-dispatch-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 2440,
+      "category": "logistics-transport",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "logistics",
+        "dispatch",
+        "distribution",
+        "demand"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "modelHash": "c96ec0b2756ec45b5aa38c0e16cc420ec937db19a8a2e4a6c9c32a4178b2d9cf",
+      "capabilities": [
+        "continuous-variables",
+        "minimise",
+        "verification"
+      ]
+    },
+    {
+      "key": "container-loading",
+      "slug": "container-loading-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 3920,
+      "category": "logistics-transport",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "logistics",
+        "loading",
+        "integer",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "1e4890c14a3e47ca9405b11010ae09c324dfb93ef87b9a42f62f53bc69919459",
+      "capabilities": [
+        "integer-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "budget-allocation",
+      "slug": "budget-allocation-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 360,
+      "category": "marketing-finance",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "marketing",
+        "budget",
+        "allocation",
+        "reach"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "7d505bc52b1ad9489332c5aaccf91f98d3399a552562b808c3ceb21af8e3894a",
+      "capabilities": [
+        "continuous-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "raw-material-buy",
+      "slug": "raw-material-purchase-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 19800,
+      "category": "purchasing-suppliers",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "purchasing",
+        "materials",
+        "sourcing",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "modelHash": "df400b4edaa7615e4ed0441cfcb9decfdd2d632c74542d3cc12df624f3eb47f6",
+      "capabilities": [
+        "continuous-variables",
+        "minimise",
+        "verification"
+      ]
+    },
+    {
+      "key": "shift-coverage",
+      "slug": "shift-coverage-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 1560,
+      "category": "workforce-scheduling",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "workforce",
+        "shifts",
+        "integer",
+        "coverage"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "modelHash": "5fc2e1c9657d7835a284798096602f16751b1929f204d0188a48ca3c46e4cd5f",
+      "capabilities": [
+        "integer-variables",
+        "minimise",
+        "verification"
+      ]
+    },
+    {
+      "key": "feed-blend",
+      "slug": "animal-feed-blend",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 353.333333333,
+      "category": "blending-formulation",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "blending",
+        "feed",
+        "nutrition",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "modelHash": "00c2fd344d1f8bba2bc6d899d500010caebb411aa4b7ea61d1f8b643d5bca8aa",
+      "capabilities": [
+        "continuous-variables",
+        "minimise",
+        "verification"
+      ]
+    },
+    {
+      "key": "tutoring-hours",
+      "slug": "tutoring-hours-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 150,
+      "category": "education-social",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "education",
+        "tutoring",
+        "allocation",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "aff7dfd310328f9962fab49d57b7841d9dcf9bbc7fe35435612f583616a775d3",
+      "capabilities": [
+        "continuous-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "battery-dispatch",
+      "slug": "battery-dispatch-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 11350,
+      "category": "energy-sustainability",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "energy",
+        "dispatch",
+        "renewable",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "1048d3c3989e6df758c7e2de9edf2397bfb79282434a74737126469beb03503b",
+      "capabilities": [
+        "continuous-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "menu-planning",
+      "slug": "menu-planning-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 720,
+      "category": "hospitality-retail",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "hospitality",
+        "menu",
+        "mix",
+        "margin"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "a66fa8f43285ebfb519f30a23144c1f69cc4c0abf6e4886fb9f93dbbf73d0060",
+      "capabilities": [
+        "continuous-variables",
+        "maximise",
+        "verification"
+      ]
+    },
+    {
+      "key": "retail-shelf-space",
+      "slug": "retail-shelf-space-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 534,
+      "category": "hospitality-retail",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "retail",
+        "shelf",
+        "integer",
+        "space"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "modelHash": "59cee3014dfedb460eda95501c623529dbe7c39268206d30cb4e1310a9b03e55",
+      "capabilities": [
+        "integer-variables",
+        "maximise",
+        "verification"
+      ]
+    }
+  ]
+}

@@ -66,7 +66,7 @@ NEW_TOOLING.forEach(function (f) {
     // Catalogue loads from the spaced path.
     var loadPath = path.join(base, 'src', 'shared', 'examples', 'index.js');
     var spaced = require(loadPath).loadAndValidateCatalogue(base);
-    ok('PORT: catalogue loads from a spaced path', spaced.catalogue.length === 24, String(spaced.catalogue.length));
+    ok('PORT: catalogue loads from a spaced path', spaced.catalogue.length === 36, String(spaced.catalogue.length));
 
     // Run the pure F7a suites (no browser) from the spaced copy via execFileSync(process.execPath).
     ['tests_f7a_examples_24', 'tests_f7a_examples_engine', 'tests_f7a_examples_search', 'tests_f7a_examples_negative', 'tests_f7a_tranche_baseline', 'tests_f7a_tranche_baseline_negative'].forEach(function (s) {

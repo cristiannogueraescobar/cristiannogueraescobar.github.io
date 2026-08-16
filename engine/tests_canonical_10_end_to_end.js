@@ -177,9 +177,9 @@ try {
     ok('E2E: UI code unchanged by the added-record pipeline: ' + f, read(path.join(tmp, f)) === read(path.join(SITE, f)));
   });
 
-  // ---- the REAL site is unchanged (F7a checkpoint: 24 cards) ----
+  // ---- the REAL site reflects the live library (36 cards) ----
   var realHtml = read(path.join(SITE, 'examples.html'));
-  ok('E2E: F7a: the real site examples.html still has exactly 24 cards', (realHtml.match(/<article class="lib-card"/g) || []).length === 24);
+  ok('E2E: LIVE: the real site examples.html has exactly 36 cards', (realHtml.match(/<article class="lib-card"/g) || []).length === 36);
 } finally {
   if (tmp) fs.rmSync(tmp, { recursive: true, force: true });
 }

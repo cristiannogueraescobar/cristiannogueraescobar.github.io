@@ -33,7 +33,19 @@
     { key: 'renewable-mix', slug: 'renewable-energy-mix', category: 'business', type: 'continuous', sense: 'min' },
     { key: 'microgrid-capacity', slug: 'microgrid-capacity-plan', category: 'business', type: 'continuous', sense: 'min' },
     { key: 'hotel-rooms', slug: 'hotel-room-allocation', category: 'start',  type: 'integer',    sense: 'max' },
-    { key: 'lp-basics',  slug: 'linear-optimisation-basics', category: 'start', type: 'continuous', sense: 'max' }
+    { key: 'lp-basics',  slug: 'linear-optimisation-basics', category: 'start', type: 'continuous', sense: 'max' },
+    { key: 'assembly-line-mix', slug: 'assembly-line-mix', category: 'start', type: 'continuous', sense: 'max' },
+    { key: 'machine-shop-jobs', slug: 'machine-shop-job-plan', category: 'business', type: 'integer', sense: 'max' },
+    { key: 'warehouse-dispatch', slug: 'warehouse-dispatch-plan', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'container-loading', slug: 'container-loading-plan', category: 'business', type: 'integer', sense: 'max' },
+    { key: 'budget-allocation', slug: 'budget-allocation-plan', category: 'start', type: 'continuous', sense: 'max' },
+    { key: 'raw-material-buy', slug: 'raw-material-purchase-plan', category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'shift-coverage', slug: 'shift-coverage-plan', category: 'business', type: 'integer', sense: 'min' },
+    { key: 'feed-blend', slug: 'animal-feed-blend',    category: 'business', type: 'continuous', sense: 'min' },
+    { key: 'tutoring-hours', slug: 'tutoring-hours-plan', category: 'start', type: 'continuous', sense: 'max' },
+    { key: 'battery-dispatch', slug: 'battery-dispatch-plan', category: 'business', type: 'continuous', sense: 'max' },
+    { key: 'menu-planning', slug: 'menu-planning-mix', category: 'start',    type: 'continuous', sense: 'max' },
+    { key: 'retail-shelf-space', slug: 'retail-shelf-space-plan', category: 'business', type: 'integer', sense: 'max' }
   ];
   var CATEGORY_ORDER = ['start', 'business', 'binary'];
 

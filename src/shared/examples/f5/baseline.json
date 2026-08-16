@@ -1,5 +1,5 @@
 {
-  "note": "F5 independent baseline: pre-F5 legacy model hash + public slug + expected MATHEMATICAL result (status/objective/tolerance) for the nine migrated examples. The result POLICY is owned by the canonical metadata, NOT duplicated here. The engine RECALCULATES and compares; expected values are NOT copied from the solver. F7a: the 15 appended entries carry expected status/objective from the independent Phase-1 engine audit (docs/f7a-phase1-engine-audit.json, approved), not from the composer under test.",
+  "note": "F5 independent baseline: pre-F5 legacy model hash + public slug + expected MATHEMATICAL result (status/objective/tolerance) for the nine migrated examples. The result POLICY is owned by the canonical metadata, NOT duplicated here. The engine RECALCULATES and compares; expected values are NOT copied from the solver. F7a: the 15 appended entries carry expected status/objective from the independent Phase-1 engine audit (docs/f7a-phase1-engine-audit.json, approved), not from the composer under test F7b: the 12 further appended entries carry expected status/objective from the externally approved F7b Phase-1 reserved tranche (engine/fixtures/f7b-tranche/f7b-tranche-reserved.json), engine-validated, not from the composer under test.",
   "schemaVersion": 1,
   "examples": [
     {
@@ -263,6 +263,138 @@
       "expected": {
         "status": "optimal",
         "objective": 430,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "assembly-line-mix",
+      "slug": "assembly-line-mix",
+      "legacyCategory": "start",
+      "modelHash": "91170b008f71f3916e3f617ddb552e520d5cfc50dffaee697b4f1069dbbcb0f8",
+      "expected": {
+        "status": "optimal",
+        "objective": 1700,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "machine-shop-jobs",
+      "slug": "machine-shop-job-plan",
+      "legacyCategory": "business",
+      "modelHash": "d4b877ffc3f1c0ecae89a67aa3b43c5cc3b674287851f32d61ae12d393dcd890",
+      "expected": {
+        "status": "optimal",
+        "objective": 1600,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "warehouse-dispatch",
+      "slug": "warehouse-dispatch-plan",
+      "legacyCategory": "business",
+      "modelHash": "c96ec0b2756ec45b5aa38c0e16cc420ec937db19a8a2e4a6c9c32a4178b2d9cf",
+      "expected": {
+        "status": "optimal",
+        "objective": 2440,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "container-loading",
+      "slug": "container-loading-plan",
+      "legacyCategory": "business",
+      "modelHash": "1e4890c14a3e47ca9405b11010ae09c324dfb93ef87b9a42f62f53bc69919459",
+      "expected": {
+        "status": "optimal",
+        "objective": 3920,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "budget-allocation",
+      "slug": "budget-allocation-plan",
+      "legacyCategory": "start",
+      "modelHash": "7d505bc52b1ad9489332c5aaccf91f98d3399a552562b808c3ceb21af8e3894a",
+      "expected": {
+        "status": "optimal",
+        "objective": 360,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "raw-material-buy",
+      "slug": "raw-material-purchase-plan",
+      "legacyCategory": "business",
+      "modelHash": "df400b4edaa7615e4ed0441cfcb9decfdd2d632c74542d3cc12df624f3eb47f6",
+      "expected": {
+        "status": "optimal",
+        "objective": 19800,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "shift-coverage",
+      "slug": "shift-coverage-plan",
+      "legacyCategory": "business",
+      "modelHash": "5fc2e1c9657d7835a284798096602f16751b1929f204d0188a48ca3c46e4cd5f",
+      "expected": {
+        "status": "optimal",
+        "objective": 1560,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "feed-blend",
+      "slug": "animal-feed-blend",
+      "legacyCategory": "business",
+      "modelHash": "00c2fd344d1f8bba2bc6d899d500010caebb411aa4b7ea61d1f8b643d5bca8aa",
+      "expected": {
+        "status": "optimal",
+        "objective": 353.333333333,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "tutoring-hours",
+      "slug": "tutoring-hours-plan",
+      "legacyCategory": "start",
+      "modelHash": "aff7dfd310328f9962fab49d57b7841d9dcf9bbc7fe35435612f583616a775d3",
+      "expected": {
+        "status": "optimal",
+        "objective": 150,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "battery-dispatch",
+      "slug": "battery-dispatch-plan",
+      "legacyCategory": "business",
+      "modelHash": "1048d3c3989e6df758c7e2de9edf2397bfb79282434a74737126469beb03503b",
+      "expected": {
+        "status": "optimal",
+        "objective": 11350,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "menu-planning",
+      "slug": "menu-planning-mix",
+      "legacyCategory": "start",
+      "modelHash": "a66fa8f43285ebfb519f30a23144c1f69cc4c0abf6e4886fb9f93dbbf73d0060",
+      "expected": {
+        "status": "optimal",
+        "objective": 720,
+        "tolerance": null
+      }
+    },
+    {
+      "key": "retail-shelf-space",
+      "slug": "retail-shelf-space-plan",
+      "legacyCategory": "business",
+      "modelHash": "59cee3014dfedb460eda95501c623529dbe7c39268206d30cb4e1310a9b03e55",
+      "expected": {
+        "status": "optimal",
+        "objective": 534,
         "tolerance": null
       }
     }

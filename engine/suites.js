@@ -34,7 +34,12 @@ const SUITES = [
   'tests_f7a_tranche_baseline', 'tests_f7a_tranche_baseline_negative', 'tests_f7a_examples_negative',
   'tests_f7a_portability', 'tests_phase2_arch_fixes',
   'tests_f7a_append_only',
-  'tests_f7a_examples_browser'
+  'tests_f7b_tranche_reserved',
+  'tests_f7b_examples_36',
+  'tests_f7b_tranche_baseline', 'tests_f7b_tranche_baseline_negative',
+  'tests_f7b_localisation_runtime',
+  'tests_f7a_examples_browser',
+  'tests_f7b_examples_browser'
 ];
 
 module.exports = SUITES;

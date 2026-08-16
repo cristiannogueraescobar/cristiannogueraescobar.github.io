@@ -11,7 +11,7 @@
      rect.left  >= 0
      rect.right <= viewport width         (not clipped past the right edge)
      rect.top   >= 0
-   plus: no document horizontal overflow, and the main library content is intact (24 cards).
+   plus: no document horizontal overflow, and the main library content is intact (36 cards).
 
    Requires a built dist served over HTTP and Playwright/Chromium. If neither is available
    the suite SKIPS (reported, not failed) so the offline text battery still runs; the
@@ -105,7 +105,7 @@ var REQUIRED = [
     }, REQUIRED);
 
     ok('NOJS@' + vw + ': no document horizontal overflow', report.docOverflow === false);
-    ok('NOJS@' + vw + ': F7a: main library content intact (24 cards)', report.cards === 24, String(report.cards));
+    ok('NOJS@' + vw + ': LIVE: main library content intact (36 cards)', report.cards === 36, String(report.cards));
     ok('NOJS@' + vw + ': found at least logo + several links + lang', report.items.length >= 5, String(report.items.length));
     report.items.forEach(function (it) {
       if (it.missing) { ok('NOJS@' + vw + ': present: ' + it.name, false, 'element missing'); return; }
