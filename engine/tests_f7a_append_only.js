@@ -1,13 +1,15 @@
-/* tests_f7a_append_only.js — F7a APPEND-ONLY proof (permanent).
+/* tests_f7a_append_only.js — APPEND-ONLY proof (permanent).
  *
- * Proves that F7b can append a 25th example WITHOUT re-pinning any F7a artefact:
+ * Proves that a future tranche (F7c) can append a 37th example WITHOUT re-pinning any earlier
+ * tranche artefact:
  *
  *   1. The F7a tranche historical baseline still PASSES for the original 15 records
  *      (a pure append leaves every frozen per-record contract intact).
- *   2. The F7a checkpoint total-count contract (catalogue === 24) FAILS, because the
- *      production checkpoint must remain EXACTLY 24 until F7b formally moves the count.
+ *   2. The live checkpoint total-count contract (catalogue === 36) FAILS on the appended tree,
+ *      because the live checkpoint must remain EXACTLY 36 until F7c formally moves the count —
+ *      exactly as the F7a checkpoint (===24) behaved when F7b moved the count to 36.
  *
- * Both facts are checked on an isolated temp tree with a valid synthetic #25 record
+ * Both facts are checked on an isolated temp tree with a valid synthetic #37 record
  * appended to catalogue.js and metadata.js. The real source tree is never mutated.
  * Windows-safe: fs built-ins only; the two verdicts are produced by a child Node so the
  * require-cache of the mutated tree never leaks into this process.
@@ -126,7 +128,7 @@ tranche.records.forEach(b=>{
 });
 process.stdout.write(JSON.stringify({
   catalogueLength: cat.length,
-  checkpoint24Holds: cat.length===24,     // the F7a checkpoint assertion
+  checkpoint36Holds: cat.length===36,     // the live checkpoint assertion
   historicalTrancheAllPass: historicalAllPass
 }));
 `;
@@ -139,19 +141,19 @@ function runChecker(dir) {
   return JSON.parse(out);
 }
 
-// --- Baseline: clean tree at exactly 24, checkpoint holds, historical tranche passes.
+// --- Baseline: clean tree at exactly 36, checkpoint holds, historical tranche passes.
 (function () {
   const dir = makeTree();
   try {
     const v = runChecker(dir);
     ok('APPEND-ONLY: clean tree loads', !v.loadError, v.loadError);
-    ok('APPEND-ONLY: clean catalogue length is 24', v.catalogueLength === 24, String(v.catalogueLength));
-    ok('APPEND-ONLY: clean checkpoint (===24) holds', v.checkpoint24Holds === true);
+    ok('APPEND-ONLY: clean catalogue length is 36', v.catalogueLength === 36, String(v.catalogueLength));
+    ok('APPEND-ONLY: clean checkpoint (===36) holds', v.checkpoint36Holds === true);
     ok('APPEND-ONLY: clean historical tranche all-pass', v.historicalTrancheAllPass === true);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 })();
 
-// --- Append #25: historical tranche must still PASS, checkpoint (===24) must FAIL.
+// --- Append #37: historical tranche must still PASS, checkpoint (===36) must FAIL.
 (function () {
   const dir = makeTree();
   try {
@@ -159,11 +161,11 @@ function runChecker(dir) {
     appendSyntheticMetadata(dir);
     const v = runChecker(dir);
     ok('APPEND-ONLY: appended tree still loads/validates', !v.loadError, v.loadError);
-    ok('APPEND-ONLY: catalogue length becomes 25', v.catalogueLength === 25, String(v.catalogueLength));
-    // (1) append is non-destructive to the 15 frozen records
-    ok('APPEND-ONLY: historical tranche STILL PASSES after append (15 untouched)', v.historicalTrancheAllPass === true);
-    // (2) the production checkpoint must remain exactly 24 → the ===24 contract now FAILS
-    ok('APPEND-ONLY: checkpoint (===24) now FAILS (must stay exactly 24)', v.checkpoint24Holds === false, 'checkpoint still held at ' + v.catalogueLength);
+    ok('APPEND-ONLY: catalogue length becomes 37', v.catalogueLength === 37, String(v.catalogueLength));
+    // (1) append is non-destructive to the frozen F7a tranche records
+    ok('APPEND-ONLY: historical tranche STILL PASSES after append (F7a-15 untouched)', v.historicalTrancheAllPass === true);
+    // (2) the live checkpoint must remain exactly 36 → the ===36 contract now FAILS
+    ok('APPEND-ONLY: checkpoint (===36) now FAILS (must stay exactly 36 until F7c)', v.checkpoint36Holds === false, 'checkpoint still held at ' + v.catalogueLength);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 })();
 

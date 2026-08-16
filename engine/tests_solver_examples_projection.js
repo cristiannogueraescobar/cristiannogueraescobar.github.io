@@ -12,8 +12,10 @@
  *   generic()  — count-agnostic invariants that hold for ANY catalogue size (9/24/36/48/60): the
  *                projection reproduces the canonical catalogue exactly, in order, uniquely, with
  *                valid fieldOrder and no manual divergence. Never hardcodes a count.
- *   f7a()      — the F7a CHECKPOINT: pins exactly 24 records, the first 9 historical keys, and the
- *                exact 15 F7a additions. This is the only place a count is asserted.
+ *   f7aCheckpoint() — the LIVE checkpoint: pins exactly 36 projected records (the current live
+ *                total), the first 9 historical keys, the 15 F7a additions (records 10-24), and the
+ *                12 F7b additions (records 25-36), each in order. This is the only place a total
+ *                count is asserted. Historical F7a total was 24; it grew to 36 when F7b went live.
  */
 'use strict';
 const path = require('path');
@@ -26,6 +28,9 @@ const HISTORICAL_9 = ['production', 'workshop', 'blend', 'marketing', 'workforce
 const F7A_15 = ['bakery-mix', 'factory-batches', 'clinic-staffing', 'call-centre', 'purchase-split',
   'ingredient-sourcing', 'fleet-assignment', 'media-mix', 'fertiliser-blend', 'scholarships',
   'food-bank', 'renewable-mix', 'microgrid-capacity', 'hotel-rooms', 'lp-basics'];
+const F7B_12 = ['assembly-line-mix', 'machine-shop-jobs', 'warehouse-dispatch', 'container-loading',
+  'budget-allocation', 'raw-material-buy', 'shift-coverage', 'feed-blend', 'tutoring-hours',
+  'battery-dispatch', 'menu-planning', 'retail-shelf-space'];
 
 const VALID_FIELDS = ['grid', 'domains', 'openVarSettings', 'whole', 'expected'];
 
@@ -77,15 +82,17 @@ function run(rootDir) {
   return { pass, fail, failures, keys, catalogueLen: catalogue.length };
 }
 
-// ---- F7a checkpoint (the only count assertion) ----
+// ---- live checkpoint (the only count assertion) ----
 function f7aCheckpoint(rootDir) {
   const loaded = loadAndValidateCatalogue(rootDir || path.join(__dirname, '..'));
   const keys = projectedKeys(loaded.serialize.serializeSolverExamples(loaded.catalogue));
-  ok('F7a: exactly 24 projected records', keys.length === 24, 'got ' + keys.length);
+  ok('LIVE: exactly 36 projected records', keys.length === 36, 'got ' + keys.length);
   ok('F7a: first 9 are the historical keys in order',
     JSON.stringify(keys.slice(0, 9)) === JSON.stringify(HISTORICAL_9));
   ok('F7a: next 15 are the F7a additions in order',
-    JSON.stringify(keys.slice(9)) === JSON.stringify(F7A_15));
+    JSON.stringify(keys.slice(9, 24)) === JSON.stringify(F7A_15));
+  ok('F7b: last 12 are the F7b additions in order',
+    JSON.stringify(keys.slice(24)) === JSON.stringify(F7B_12));
 }
 
 if (require.main === module) {

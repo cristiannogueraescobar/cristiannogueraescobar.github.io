@@ -1,0 +1,772 @@
+{
+  "gridBySlug": {
+    "assembly-line-mix": [
+      [
+        "Product",
+        "Units",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Standard",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Premium",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total profit (GBP)",
+        "",
+        "=40*B2+60*B3",
+        "",
+        ""
+      ],
+      [
+        "Machine hours",
+        "",
+        "=2*B2+4*B3",
+        "<=",
+        "100"
+      ],
+      [
+        "Assembly hours",
+        "",
+        "=3*B2+2*B3",
+        "<=",
+        "90"
+      ]
+    ],
+    "machine-shop-job-plan": [
+      [
+        "Job",
+        "Runs",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Brackets",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Flanges",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Housings",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total contribution (GBP)",
+        "",
+        "=70*B2+55*B3+95*B4",
+        "",
+        ""
+      ],
+      [
+        "Lathe hours",
+        "",
+        "=2*B2+1*B3+3*B4",
+        "<=",
+        "40"
+      ],
+      [
+        "Mill hours",
+        "",
+        "=1*B2+2*B3+2*B4",
+        "<=",
+        "36"
+      ],
+      [
+        "Max housing runs",
+        "",
+        "=B4",
+        "<=",
+        "6"
+      ]
+    ],
+    "warehouse-dispatch-plan": [
+      [
+        "Route",
+        "Loads",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "DepotA",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "DepotB",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total cost (GBP)",
+        "",
+        "=18*B2+25*B3",
+        "",
+        ""
+      ],
+      [
+        "Demand covered",
+        "",
+        "=B2+B3",
+        ">=",
+        "120"
+      ],
+      [
+        "DepotA capacity",
+        "",
+        "=B2",
+        "<=",
+        "80"
+      ],
+      [
+        "DepotB capacity",
+        "",
+        "=B3",
+        "<=",
+        "90"
+      ]
+    ],
+    "container-loading-plan": [
+      [
+        "Pallet type",
+        "Count",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Light",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Heavy",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total value (GBP)",
+        "",
+        "=120*B2+200*B3",
+        "",
+        ""
+      ],
+      [
+        "Weight (kg)",
+        "",
+        "=150*B2+400*B3",
+        "<=",
+        "6000"
+      ],
+      [
+        "Floor slots",
+        "",
+        "=B2+B3",
+        "<=",
+        "28"
+      ]
+    ],
+    "budget-allocation-plan": [
+      [
+        "Channel",
+        "Spend (k)",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Search",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Social",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total reach (k)",
+        "",
+        "=8*B2+6*B3",
+        "",
+        ""
+      ],
+      [
+        "Budget (k)",
+        "",
+        "=B2+B3",
+        "<=",
+        "50"
+      ],
+      [
+        "Max search (k)",
+        "",
+        "=B2",
+        "<=",
+        "30"
+      ],
+      [
+        "Min social (k)",
+        "",
+        "=B3",
+        ">=",
+        "10"
+      ]
+    ],
+    "raw-material-purchase-plan": [
+      [
+        "Supplier",
+        "Tonnes",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "SupplierX",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "SupplierY",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total cost (GBP)",
+        "",
+        "=210*B2+190*B3",
+        "",
+        ""
+      ],
+      [
+        "Tonnes required",
+        "",
+        "=B2+B3",
+        ">=",
+        "100"
+      ],
+      [
+        "SupplierX limit",
+        "",
+        "=B2",
+        "<=",
+        "70"
+      ],
+      [
+        "SupplierY limit",
+        "",
+        "=B3",
+        "<=",
+        "60"
+      ]
+    ],
+    "shift-coverage-plan": [
+      [
+        "Shift crew",
+        "Staff",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Day",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Evening",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total wage cost (GBP)",
+        "",
+        "=120*B2+150*B3",
+        "",
+        ""
+      ],
+      [
+        "Day cover",
+        "",
+        "=B2",
+        ">=",
+        "5"
+      ],
+      [
+        "Evening cover",
+        "",
+        "=B3",
+        ">=",
+        "4"
+      ],
+      [
+        "Total headcount",
+        "",
+        "=B2+B3",
+        ">=",
+        "12"
+      ]
+    ],
+    "animal-feed-blend": [
+      [
+        "Ingredient",
+        "kg",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Grain",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Soy",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total cost (GBP)",
+        "",
+        "=3*B2+5*B3",
+        "",
+        ""
+      ],
+      [
+        "Batch mass (kg)",
+        "",
+        "=B2+B3",
+        ">=",
+        "100"
+      ],
+      [
+        "Protein units",
+        "",
+        "=1*B2+4*B3",
+        ">=",
+        "180"
+      ],
+      [
+        "Max grain (kg)",
+        "",
+        "=B2",
+        "<=",
+        "80"
+      ]
+    ],
+    "tutoring-hours-plan": [
+      [
+        "Programme",
+        "Hours",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Maths",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Reading",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Students helped",
+        "",
+        "=3*B2+2*B3",
+        "",
+        ""
+      ],
+      [
+        "Tutor hours",
+        "",
+        "=B2+B3",
+        "<=",
+        "60"
+      ],
+      [
+        "Room hours",
+        "",
+        "=2*B2+1*B3",
+        "<=",
+        "90"
+      ],
+      [
+        "Min reading hours",
+        "",
+        "=B3",
+        ">=",
+        "15"
+      ]
+    ],
+    "battery-dispatch-plan": [
+      [
+        "Source",
+        "MWh",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Solar",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Battery",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total revenue (GBP)",
+        "",
+        "=50*B2+65*B3",
+        "",
+        ""
+      ],
+      [
+        "Grid limit (MWh)",
+        "",
+        "=B2+B3",
+        "<=",
+        "200"
+      ],
+      [
+        "Solar available",
+        "",
+        "=B2",
+        "<=",
+        "140"
+      ],
+      [
+        "Battery throughput",
+        "",
+        "=B3",
+        "<=",
+        "90"
+      ]
+    ],
+    "menu-planning-mix": [
+      [
+        "Dish",
+        "Portions",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Pasta",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Salad",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total margin (GBP)",
+        "",
+        "=7*B2+5*B3",
+        "",
+        ""
+      ],
+      [
+        "Prep minutes",
+        "",
+        "=6*B2+4*B3",
+        "<=",
+        "600"
+      ],
+      [
+        "Fresh stock",
+        "",
+        "=2*B2+3*B3",
+        "<=",
+        "300"
+      ]
+    ],
+    "retail-shelf-space-plan": [
+      [
+        "Product line",
+        "Facings",
+        "Term",
+        "",
+        ""
+      ],
+      [
+        "Snacks",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Drinks",
+        "0",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Weekly profit (GBP)",
+        "",
+        "=15*B2+22*B3",
+        "",
+        ""
+      ],
+      [
+        "Shelf facings",
+        "",
+        "=B2+B3",
+        "<=",
+        "30"
+      ],
+      [
+        "Chiller facings",
+        "",
+        "=B3",
+        "<=",
+        "12"
+      ],
+      [
+        "Min snack facings",
+        "",
+        "=B2",
+        ">=",
+        "6"
+      ]
+    ]
+  },
+  "solveCases": [
+    {
+      "slug": "assembly-line-mix",
+      "key": "assembly-line-mix",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 1700
+    },
+    {
+      "slug": "machine-shop-job-plan",
+      "key": "machine-shop-jobs",
+      "type": "integer",
+      "status": "optimal",
+      "objective": 1600
+    },
+    {
+      "slug": "warehouse-dispatch-plan",
+      "key": "warehouse-dispatch",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 2440
+    },
+    {
+      "slug": "container-loading-plan",
+      "key": "container-loading",
+      "type": "integer",
+      "status": "optimal",
+      "objective": 3920
+    },
+    {
+      "slug": "budget-allocation-plan",
+      "key": "budget-allocation",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 360
+    },
+    {
+      "slug": "raw-material-purchase-plan",
+      "key": "raw-material-buy",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 19800
+    },
+    {
+      "slug": "shift-coverage-plan",
+      "key": "shift-coverage",
+      "type": "integer",
+      "status": "optimal",
+      "objective": 1560
+    },
+    {
+      "slug": "animal-feed-blend",
+      "key": "feed-blend",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 353.333333333
+    },
+    {
+      "slug": "tutoring-hours-plan",
+      "key": "tutoring-hours",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 150
+    },
+    {
+      "slug": "battery-dispatch-plan",
+      "key": "battery-dispatch",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 11350
+    },
+    {
+      "slug": "menu-planning-mix",
+      "key": "menu-planning",
+      "type": "continuous",
+      "status": "optimal",
+      "objective": 720
+    },
+    {
+      "slug": "retail-shelf-space-plan",
+      "key": "retail-shelf-space",
+      "type": "integer",
+      "status": "optimal",
+      "objective": 534
+    }
+  ]
+}

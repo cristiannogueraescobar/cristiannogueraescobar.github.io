@@ -19,7 +19,10 @@ const { loadCanonical } = require(path.join(SITE, 'src', 'shared', 'examples', '
 let pass = 0, fail = 0; const failures = [];
 function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push(name + (detail ? ' — ' + detail : '')); } }
 
-const CHECKPOINT = 24;
+// CHECKPOINT is the CURRENT LIVE catalogue size (36 = F5/F6-9 + F7a-15 + F7b-12), not a frozen
+// F7a-era value. This suite mutates the live catalogue and checks the validator against the live
+// count; it moves with each tranche (was 24 through F7a, 36 since F7b went live).
+const CHECKPOINT = 36;
 const F7A_15 = ['bakery-mix', 'factory-batches', 'clinic-staffing', 'call-centre', 'purchase-split', 'ingredient-sourcing', 'fleet-assignment', 'media-mix', 'fertiliser-blend', 'scholarships', 'food-bank', 'renewable-mix', 'microgrid-capacity', 'hotel-rooms', 'lp-basics'];
 
 const loaded = loadAndValidateCatalogue(SITE);

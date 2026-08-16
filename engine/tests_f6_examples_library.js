@@ -50,7 +50,7 @@ var records = payload.examples;
 
 // ---------------------------------------------------------------- ARCHITECTURE
 (function () {
-  ok('ARCH: F7a: exactly 24 real examples', records.length === 24, String(records.length));
+  ok('LIVE: exactly 36 real examples', records.length === 36, String(records.length));
   ok('ARCH: payload locales are the five F5 locales', JSON.stringify(payload.locales) === JSON.stringify(E.LOCALES.slice()));
   ok('ARCH: payload categories are the ten canonical categories', payload.categories.length === CATS.length);
   // The record data equals what the F5 projectors produce (no re-stored parallel data).
@@ -85,7 +85,7 @@ var records = payload.examples;
   var html = read(path.join(SITE, 'examples.html'));
   // Nine article cards, each with a data-ex-id and a solver link.
   var ids = (html.match(/data-ex-id="([a-z0-9-]+)"/g) || []).map(function (m) { return m.replace(/.*"([^"]+)".*/, '$1'); });
-  ok('HTML: F7a: 24 card entries in base HTML', ids.length === 24, String(ids.length));
+  ok('LIVE: 36 card entries in base HTML', ids.length === 36, String(ids.length));
   ok('HTML: card ids are the nine keys', JSON.stringify(ids.slice().sort()) === JSON.stringify(records.map(function (r) { return r.id; }).sort()));
   // Nine correct solver links present as anchors in the base HTML.
   records.forEach(function (r) {
@@ -101,7 +101,7 @@ var records = payload.examples;
   // No inline event handlers.
   ok('HTML: no inline onclick handlers', !/\son[a-z]+\s*=\s*"/.test(html.replace(/data-i18n[^=]*=/g, '')));
   // JSON-LD ItemList preserved (position/name/url for the nine).
-  ok('HTML: F7a: ItemList JSON-LD has 24 items', /"@type":"ItemList"/.test(html) && (html.match(/"@type":"ListItem"/g) || []).length === 24);
+  ok('LIVE: ItemList JSON-LD has 36 items', /"@type":"ItemList"/.test(html) && (html.match(/"@type":"ListItem"/g) || []).length === 36);
   // Canonical + title/meta preserved.
   ok('HTML: canonical link preserved', /rel="canonical"[^>]*examples\.html/.test(html));
 })();
@@ -115,7 +115,7 @@ var records = payload.examples;
   function slugsFor(q, loc) { return core.filterExamples(records, { q: q }, loc).map(function (r) { return r.slug; }); }
   ok('SEARCH/en: title term "shipping"', slugsFor('shipping', 'en').indexOf('shipping-plan') !== -1);
   ok('SEARCH/en: question term "budget"', slugsFor('budget', 'en').indexOf('marketing-budget') !== -1);
-  ok('SEARCH/es: F7a: "proveedores" -> purchasing/supplier records', slugsFor('proveedores', 'es').sort().join(',') === ['supplier-activation','purchase-order-split','ingredient-sourcing-plan'].sort().join(','));
+  ok('SEARCH/es: "proveedores" -> purchasing/supplier records (incl. F7b raw-material)', slugsFor('proveedores', 'es').sort().join(',') === ['supplier-activation','purchase-order-split','ingredient-sourcing-plan','raw-material-purchase-plan'].sort().join(','));
   ok('SEARCH/es: diacritic "produccion" -> production', slugsFor('produccion', 'es').indexOf('production-plan') !== -1);
   ok('SEARCH/pt: "mistura" -> blend', slugsFor('mistura', 'pt').indexOf('cheapest-feed-blend') !== -1);
   ok('SEARCH/de: "personal" -> workforce', slugsFor('personal', 'de').indexOf('workforce-scheduling') !== -1);
@@ -149,8 +149,8 @@ var records = payload.examples;
     ok('FILTER: category ' + cat, JSON.stringify(slugs({ category: [cat] })) === JSON.stringify(expected));
   });
   // OR within a facet, AND across facets.
-  ok('FILTER: F7a: OR within facet (integer OR binary) === 11', slugs({ type: ['integer', 'binary'] }).length === 11);
-  ok('FILTER: AND across facets (logistics AND integer)', JSON.stringify(slugs({ category: ['logistics-transport'], type: ['integer'] })) === '["shipping-plan"]');
+  ok('FILTER: OR within facet (integer OR binary) === 15', slugs({ type: ['integer', 'binary'] }).length === 15);
+  ok('FILTER: AND across facets (logistics AND integer)', JSON.stringify(slugs({ category: ['logistics-transport'], type: ['integer'] }).slice().sort()) === JSON.stringify(['container-loading-plan', 'shipping-plan']));
   ok('FILTER: combined zero match', slugs({ category: ['blending-formulation'], type: ['binary'] }).length === 0);
 })();
 

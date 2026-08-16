@@ -160,7 +160,7 @@ function fx(grid, domains, whole, sense) { return { key: 'fx', slug: 'fx-x', cat
   // malformed future fixture still fails
   ok('DRY10: malformed future fixture rejected', (function () { try { authoring.defineExample(rec10, Object.assign({}, meta10, { difficulty: 'wizard' })); return false; } catch (e) { return /difficulty is invalid/.test(e.message); } })());
   // catalogue still exactly nine
-  ok('DRY10: F7a: catalogue still has exactly 24 (dry-run did not mutate it)', canonical.length === 24);
+  ok('DRY10: live catalogue still has exactly 36 (dry-run did not mutate it)', canonical.length === 36);
 })();
 
 // ---- NO-SOLUTION STATUS FIXTURES: full authoring flow + real engine -------

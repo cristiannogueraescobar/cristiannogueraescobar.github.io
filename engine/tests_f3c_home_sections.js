@@ -551,7 +551,7 @@ function run(siteDir) {
     'faabb2c240951bb9c2e90bb0d1762a3cf29409f12cf02d4958a0fcb5c77a39a6');
   const catMod = require(path.join(siteDir, 'src', 'shared', 'examples', 'index.js'));
   const catalogue = catMod.loadAndValidateCatalogue(siteDir).catalogue;
-  ok('19: F7a: exactly 24 published examples', catalogue.length === 24, String(catalogue.length));
+  ok('19: LIVE: exactly 36 published examples', catalogue.length === 36, String(catalogue.length));
 
   // ===== 21 & 22. Windows portability of the F3c suite itself. =====
   const selfSrc = fs.readFileSync(path.join(__dirname, 'tests_f3c_home_sections.js'), 'utf8');

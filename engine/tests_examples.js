@@ -120,7 +120,7 @@ Object.keys(EXAMPLES).forEach(function (key) {
   // Each example appears as a semantic card entry exactly once.
   const cardIds = [...exHtml.matchAll(/data-ex-id="([a-z0-9-]+)"/g)].map(m => m[1]);
   ok('base HTML renders one card per catalogue example', cardIds.length === metaSlugs.length, 'got ' + cardIds.length + ' of ' + metaSlugs.length);
-  ok('F7a: base HTML renders 24 example cards', cardIds.length === 24, 'got ' + cardIds.length);
+  ok('LIVE: base HTML renders 36 example cards', cardIds.length === 36, 'got ' + cardIds.length);
   ok('no duplicate example cards', new Set(cardIds).size === cardIds.length);
   const ldMatch = exHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   ok('examples.html has JSON-LD', !!ldMatch);
@@ -131,7 +131,7 @@ Object.keys(EXAMPLES).forEach(function (key) {
     if (ld && ld.itemListElement) {
       const urlSlugs = ld.itemListElement.map(it => (it.url.match(/ex=([a-z-]+)/) || [])[1]);
       ok('ItemList has one item per catalogue example', ld.itemListElement.length === metaSlugs.length, 'got ' + ld.itemListElement.length + ' of ' + metaSlugs.length);
-      ok('F7a: ItemList has 24 items', ld.itemListElement.length === 24, 'got ' + ld.itemListElement.length);
+      ok('LIVE: ItemList has 36 items', ld.itemListElement.length === 36, 'got ' + ld.itemListElement.length);
       metaSlugs.forEach(function (slug) { ok('ItemList includes ' + slug, urlSlugs.indexOf(slug) >= 0); });
       const positions = ld.itemListElement.map(it => it.position);
       const expectedPositions = metaSlugs.map((_, i) => i + 1).join(',');

@@ -3089,6 +3089,1176 @@ var CATALOGUE = [
       "modelType": "continuous",
       "objective": 430
     }
+  },
+  {
+    "key": "assembly-line-mix",
+    "slug": "assembly-line-mix",
+    "category": "start",
+    "type": "continuous",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Assembly line mix",
+        "desc": "Choose standard and premium output to maximise profit within machine and assembly hours"
+      },
+      "es": {
+        "title": "Combinación de línea de montaje",
+        "desc": "Elige la producción estándar y premium para maximizar el beneficio dentro de las horas de máquina y de montaje"
+      },
+      "pt": {
+        "title": "Combinação de linha de montagem",
+        "desc": "Escolha a produção padrão e premium para maximizar o lucro dentro das horas de máquina e de montagem"
+      },
+      "de": {
+        "title": "Montagelinien-Mix",
+        "desc": "Standard- und Premium-Ausstoß wählen, um den Gewinn innerhalb der Maschinen- und Montagestunden zu maximieren"
+      },
+      "fr": {
+        "title": "Répartition de ligne d'assemblage",
+        "desc": "Choisir la production standard et premium pour maximiser le profit dans les heures machine et d'assemblage"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Product",
+          "Units",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Standard",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Premium",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total profit (GBP)",
+          "",
+          "=40*B2+60*B3",
+          "",
+          ""
+        ],
+        [
+          "Machine hours",
+          "",
+          "=2*B2+4*B3",
+          "<=",
+          "100"
+        ],
+        [
+          "Assembly hours",
+          "",
+          "=3*B2+2*B3",
+          "<=",
+          "90"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 1700
+    }
+  },
+  {
+    "key": "machine-shop-jobs",
+    "slug": "machine-shop-job-plan",
+    "category": "business",
+    "type": "integer",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Machine shop job plan",
+        "desc": "Schedule whole job runs to maximise contribution within lathe and mill hours"
+      },
+      "es": {
+        "title": "Plan de trabajos de taller mecánico",
+        "desc": "Programa tandas enteras de trabajo para maximizar la contribución dentro de las horas de torno y de fresadora"
+      },
+      "pt": {
+        "title": "Plano de trabalhos de oficina mecânica",
+        "desc": "Programe lotes inteiros de trabalho para maximizar a contribuição dentro das horas de torno e de fresa"
+      },
+      "de": {
+        "title": "Werkstatt-Auftragsplan",
+        "desc": "Ganze Auftragsläufe planen, um den Deckungsbeitrag innerhalb der Dreh- und Frässtunden zu maximieren"
+      },
+      "fr": {
+        "title": "Plan de travaux d'atelier d'usinage",
+        "desc": "Planifier des séries de travaux entières pour maximiser la contribution dans les heures de tour et de fraiseuse"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Job",
+          "Runs",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Brackets",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Flanges",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Housings",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total contribution (GBP)",
+          "",
+          "=70*B2+55*B3+95*B4",
+          "",
+          ""
+        ],
+        [
+          "Lathe hours",
+          "",
+          "=2*B2+1*B3+3*B4",
+          "<=",
+          "40"
+        ],
+        [
+          "Mill hours",
+          "",
+          "=1*B2+2*B3+2*B4",
+          "<=",
+          "36"
+        ],
+        [
+          "Max housing runs",
+          "",
+          "=B4",
+          "<=",
+          "6"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "whole": true
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "integer",
+      "objective": 1600
+    }
+  },
+  {
+    "key": "warehouse-dispatch",
+    "slug": "warehouse-dispatch-plan",
+    "category": "business",
+    "type": "continuous",
+    "sense": "min",
+    "translations": {
+      "en": {
+        "title": "Warehouse dispatch plan",
+        "desc": "Cover demand from two depots at least cost within each depot capacity"
+      },
+      "es": {
+        "title": "Plan de despacho de almacén",
+        "desc": "Cubre la demanda desde dos depósitos al menor coste dentro de la capacidad de cada depósito"
+      },
+      "pt": {
+        "title": "Plano de expedição de armazém",
+        "desc": "Cubra a demanda a partir de dois depósitos ao menor custo dentro da capacidade de cada depósito"
+      },
+      "de": {
+        "title": "Lager-Versandplan",
+        "desc": "Nachfrage aus zwei Depots zu geringsten Kosten innerhalb der jeweiligen Depotkapazität decken"
+      },
+      "fr": {
+        "title": "Plan d'expédition d'entrepôt",
+        "desc": "Couvrir la demande depuis deux dépôts au moindre coût dans la capacité de chaque dépôt"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Route",
+          "Loads",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "DepotA",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "DepotB",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total cost (GBP)",
+          "",
+          "=18*B2+25*B3",
+          "",
+          ""
+        ],
+        [
+          "Demand covered",
+          "",
+          "=B2+B3",
+          ">=",
+          "120"
+        ],
+        [
+          "DepotA capacity",
+          "",
+          "=B2",
+          "<=",
+          "80"
+        ],
+        [
+          "DepotB capacity",
+          "",
+          "=B3",
+          "<=",
+          "90"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 2440
+    }
+  },
+  {
+    "key": "container-loading",
+    "slug": "container-loading-plan",
+    "category": "business",
+    "type": "integer",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Container loading plan",
+        "desc": "Load whole pallets to maximise value within weight and floor slot limits"
+      },
+      "es": {
+        "title": "Plan de carga de contenedor",
+        "desc": "Carga palés enteros para maximizar el valor dentro de los límites de peso y de plazas de suelo"
+      },
+      "pt": {
+        "title": "Plano de carregamento de contentor",
+        "desc": "Carregue paletes inteiras para maximizar o valor dentro dos limites de peso e de lugares no piso"
+      },
+      "de": {
+        "title": "Container-Beladeplan",
+        "desc": "Ganze Paletten laden, um den Wert innerhalb der Gewichts- und Stellplatzgrenzen zu maximieren"
+      },
+      "fr": {
+        "title": "Plan de chargement de conteneur",
+        "desc": "Charger des palettes entières pour maximiser la valeur dans les limites de poids et d'emplacements au sol"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Pallet type",
+          "Count",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Light",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Heavy",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total value (GBP)",
+          "",
+          "=120*B2+200*B3",
+          "",
+          ""
+        ],
+        [
+          "Weight (kg)",
+          "",
+          "=150*B2+400*B3",
+          "<=",
+          "6000"
+        ],
+        [
+          "Floor slots",
+          "",
+          "=B2+B3",
+          "<=",
+          "28"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "whole": true
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "integer",
+      "objective": 3920
+    }
+  },
+  {
+    "key": "budget-allocation",
+    "slug": "budget-allocation-plan",
+    "category": "start",
+    "type": "continuous",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Budget allocation plan",
+        "desc": "Split a fixed budget across two channels to maximise reach within channel limits"
+      },
+      "es": {
+        "title": "Plan de asignación de presupuesto",
+        "desc": "Reparte un presupuesto fijo entre dos canales para maximizar el alcance dentro de los límites de cada canal"
+      },
+      "pt": {
+        "title": "Plano de alocação de orçamento",
+        "desc": "Divida um orçamento fixo entre dois canais para maximizar o alcance dentro dos limites de cada canal"
+      },
+      "de": {
+        "title": "Budgetzuteilungsplan",
+        "desc": "Ein festes Budget auf zwei Kanäle aufteilen, um die Reichweite innerhalb der Kanalgrenzen zu maximieren"
+      },
+      "fr": {
+        "title": "Plan d'allocation de budget",
+        "desc": "Répartir un budget fixe entre deux canaux pour maximiser la portée dans les limites de chaque canal"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Channel",
+          "Spend (k)",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Search",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Social",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total reach (k)",
+          "",
+          "=8*B2+6*B3",
+          "",
+          ""
+        ],
+        [
+          "Budget (k)",
+          "",
+          "=B2+B3",
+          "<=",
+          "50"
+        ],
+        [
+          "Max search (k)",
+          "",
+          "=B2",
+          "<=",
+          "30"
+        ],
+        [
+          "Min social (k)",
+          "",
+          "=B3",
+          ">=",
+          "10"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 360
+    }
+  },
+  {
+    "key": "raw-material-buy",
+    "slug": "raw-material-purchase-plan",
+    "category": "business",
+    "type": "continuous",
+    "sense": "min",
+    "translations": {
+      "en": {
+        "title": "Raw material purchase plan",
+        "desc": "Buy tonnage from two suppliers at least cost while meeting a requirement"
+      },
+      "es": {
+        "title": "Plan de compra de materia prima",
+        "desc": "Compra tonelaje a dos proveedores al menor coste cumpliendo un requisito"
+      },
+      "pt": {
+        "title": "Plano de compra de matéria-prima",
+        "desc": "Compre tonelagem de dois fornecedores ao menor custo cumprindo um requisito"
+      },
+      "de": {
+        "title": "Rohstoff-Einkaufsplan",
+        "desc": "Tonnage von zwei Lieferanten zu geringsten Kosten kaufen und dabei einen Bedarf decken"
+      },
+      "fr": {
+        "title": "Plan d'achat de matière première",
+        "desc": "Acheter du tonnage auprès de deux fournisseurs au moindre coût tout en couvrant un besoin"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Supplier",
+          "Tonnes",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "SupplierX",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "SupplierY",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total cost (GBP)",
+          "",
+          "=210*B2+190*B3",
+          "",
+          ""
+        ],
+        [
+          "Tonnes required",
+          "",
+          "=B2+B3",
+          ">=",
+          "100"
+        ],
+        [
+          "SupplierX limit",
+          "",
+          "=B2",
+          "<=",
+          "70"
+        ],
+        [
+          "SupplierY limit",
+          "",
+          "=B3",
+          "<=",
+          "60"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 19800
+    }
+  },
+  {
+    "key": "shift-coverage",
+    "slug": "shift-coverage-plan",
+    "category": "business",
+    "type": "integer",
+    "sense": "min",
+    "translations": {
+      "en": {
+        "title": "Shift coverage plan",
+        "desc": "Assign whole staff to day and evening shifts at least wage cost while covering demand"
+      },
+      "es": {
+        "title": "Plan de cobertura de turnos",
+        "desc": "Asigna personal entero a los turnos de día y de tarde al menor coste salarial cubriendo la demanda"
+      },
+      "pt": {
+        "title": "Plano de cobertura de turnos",
+        "desc": "Atribua funcionários inteiros aos turnos de dia e de noite ao menor custo salarial cobrindo a demanda"
+      },
+      "de": {
+        "title": "Schichtabdeckungsplan",
+        "desc": "Ganze Mitarbeiter den Tag- und Abendschichten zuweisen, zu geringsten Lohnkosten und bei gedeckter Nachfrage"
+      },
+      "fr": {
+        "title": "Plan de couverture des équipes",
+        "desc": "Affecter du personnel entier aux équipes de jour et de soir au moindre coût salarial tout en couvrant la demande"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Shift crew",
+          "Staff",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Day",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Evening",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total wage cost (GBP)",
+          "",
+          "=120*B2+150*B3",
+          "",
+          ""
+        ],
+        [
+          "Day cover",
+          "",
+          "=B2",
+          ">=",
+          "5"
+        ],
+        [
+          "Evening cover",
+          "",
+          "=B3",
+          ">=",
+          "4"
+        ],
+        [
+          "Total headcount",
+          "",
+          "=B2+B3",
+          ">=",
+          "12"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "whole": true
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "integer",
+      "objective": 1560
+    }
+  },
+  {
+    "key": "feed-blend",
+    "slug": "animal-feed-blend",
+    "category": "business",
+    "type": "continuous",
+    "sense": "min",
+    "translations": {
+      "en": {
+        "title": "Animal feed blend",
+        "desc": "Blend grain and soy at least cost to meet mass and protein requirements"
+      },
+      "es": {
+        "title": "Mezcla de pienso animal",
+        "desc": "Mezcla grano y soja al menor coste para cumplir los requisitos de masa y de proteína"
+      },
+      "pt": {
+        "title": "Mistura de ração animal",
+        "desc": "Misture grão e soja ao menor custo para cumprir os requisitos de massa e de proteína"
+      },
+      "de": {
+        "title": "Tierfuttermischung",
+        "desc": "Getreide und Soja zu geringsten Kosten mischen, um Massen- und Proteinvorgaben zu erfüllen"
+      },
+      "fr": {
+        "title": "Mélange d'aliment pour animaux",
+        "desc": "Mélanger céréale et soja au moindre coût pour respecter les exigences de masse et de protéine"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Ingredient",
+          "kg",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Grain",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Soy",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total cost (GBP)",
+          "",
+          "=3*B2+5*B3",
+          "",
+          ""
+        ],
+        [
+          "Batch mass (kg)",
+          "",
+          "=B2+B3",
+          ">=",
+          "100"
+        ],
+        [
+          "Protein units",
+          "",
+          "=1*B2+4*B3",
+          ">=",
+          "180"
+        ],
+        [
+          "Max grain (kg)",
+          "",
+          "=B2",
+          "<=",
+          "80"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 353.333333333
+    }
+  },
+  {
+    "key": "tutoring-hours",
+    "slug": "tutoring-hours-plan",
+    "category": "start",
+    "type": "continuous",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Tutoring hours plan",
+        "desc": "Allocate tutoring hours to maximise students helped within tutor and room limits"
+      },
+      "es": {
+        "title": "Plan de horas de tutoría",
+        "desc": "Asigna las horas de tutoría para maximizar los estudiantes atendidos dentro de los límites de tutor y de aula"
+      },
+      "pt": {
+        "title": "Plano de horas de tutoria",
+        "desc": "Aloque as horas de tutoria para maximizar os alunos atendidos dentro dos limites de tutor e de sala"
+      },
+      "de": {
+        "title": "Nachhilfestundenplan",
+        "desc": "Nachhilfestunden zuteilen, um die betreuten Schüler innerhalb der Tutoren- und Raumgrenzen zu maximieren"
+      },
+      "fr": {
+        "title": "Plan d'heures de tutorat",
+        "desc": "Répartir les heures de tutorat pour maximiser les élèves aidés dans les limites de tuteur et de salle"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Programme",
+          "Hours",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Maths",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Reading",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Students helped",
+          "",
+          "=3*B2+2*B3",
+          "",
+          ""
+        ],
+        [
+          "Tutor hours",
+          "",
+          "=B2+B3",
+          "<=",
+          "60"
+        ],
+        [
+          "Room hours",
+          "",
+          "=2*B2+1*B3",
+          "<=",
+          "90"
+        ],
+        [
+          "Min reading hours",
+          "",
+          "=B3",
+          ">=",
+          "15"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 150
+    }
+  },
+  {
+    "key": "battery-dispatch",
+    "slug": "battery-dispatch-plan",
+    "category": "business",
+    "type": "continuous",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Battery dispatch plan",
+        "desc": "Dispatch solar and battery energy to maximise revenue within grid and source limits"
+      },
+      "es": {
+        "title": "Plan de despacho de baterías",
+        "desc": "Despacha energía solar y de baterías para maximizar los ingresos dentro de los límites de red y de fuente"
+      },
+      "pt": {
+        "title": "Plano de despacho de bateria",
+        "desc": "Despache energia solar e de bateria para maximizar a receita dentro dos limites de rede e de fonte"
+      },
+      "de": {
+        "title": "Batterie-Einsatzplan",
+        "desc": "Solar- und Batterieenergie einsetzen, um den Erlös innerhalb der Netz- und Quellgrenzen zu maximieren"
+      },
+      "fr": {
+        "title": "Plan de distribution de batterie",
+        "desc": "Distribuer l'énergie solaire et de batterie pour maximiser les revenus dans les limites du réseau et des sources"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Source",
+          "MWh",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Solar",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Battery",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total revenue (GBP)",
+          "",
+          "=50*B2+65*B3",
+          "",
+          ""
+        ],
+        [
+          "Grid limit (MWh)",
+          "",
+          "=B2+B3",
+          "<=",
+          "200"
+        ],
+        [
+          "Solar available",
+          "",
+          "=B2",
+          "<=",
+          "140"
+        ],
+        [
+          "Battery throughput",
+          "",
+          "=B3",
+          "<=",
+          "90"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 11350
+    }
+  },
+  {
+    "key": "menu-planning",
+    "slug": "menu-planning-mix",
+    "category": "start",
+    "type": "continuous",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Menu planning mix",
+        "desc": "Choose dish portions to maximise margin within prep time and fresh stock"
+      },
+      "es": {
+        "title": "Combinación de planificación de menú",
+        "desc": "Elige las porciones de cada plato para maximizar el margen dentro del tiempo de preparación y del stock fresco"
+      },
+      "pt": {
+        "title": "Combinação de planeamento de menu",
+        "desc": "Escolha as porções de cada prato para maximizar a margem dentro do tempo de preparação e do stock fresco"
+      },
+      "de": {
+        "title": "Menüplanungs-Mix",
+        "desc": "Gericht-Portionen wählen, um die Marge innerhalb von Zubereitungszeit und Frischbestand zu maximieren"
+      },
+      "fr": {
+        "title": "Répartition de planification de menu",
+        "desc": "Choisir les portions de chaque plat pour maximiser la marge dans le temps de préparation et le stock frais"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Dish",
+          "Portions",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Pasta",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Salad",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Total margin (GBP)",
+          "",
+          "=7*B2+5*B3",
+          "",
+          ""
+        ],
+        [
+          "Prep minutes",
+          "",
+          "=6*B2+4*B3",
+          "<=",
+          "600"
+        ],
+        [
+          "Fresh stock",
+          "",
+          "=2*B2+3*B3",
+          "<=",
+          "300"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ]
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "continuous",
+      "objective": 720
+    }
+  },
+  {
+    "key": "retail-shelf-space",
+    "slug": "retail-shelf-space-plan",
+    "category": "business",
+    "type": "integer",
+    "sense": "max",
+    "translations": {
+      "en": {
+        "title": "Retail shelf space plan",
+        "desc": "Assign whole shelf facings to maximise weekly profit within shelf and chiller limits"
+      },
+      "es": {
+        "title": "Plan de espacio de estantería minorista",
+        "desc": "Asigna frentes enteros de estantería para maximizar el beneficio semanal dentro de los límites de estantería y de refrigerador"
+      },
+      "pt": {
+        "title": "Plano de espaço de prateleira no varejo",
+        "desc": "Atribua frentes inteiras de prateleira para maximizar o lucro semanal dentro dos limites de prateleira e de refrigerador"
+      },
+      "de": {
+        "title": "Einzelhandels-Regalflächenplan",
+        "desc": "Ganze Regalfronten zuweisen, um den Wochengewinn innerhalb der Regal- und Kühlgrenzen zu maximieren"
+      },
+      "fr": {
+        "title": "Plan d'espace de rayon de détail",
+        "desc": "Attribuer des faces de rayon entières pour maximiser le profit hebdomadaire dans les limites de rayon et de réfrigérateur"
+      }
+    },
+    "model": {
+      "grid": [
+        [
+          "Product line",
+          "Facings",
+          "Term",
+          "",
+          ""
+        ],
+        [
+          "Snacks",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Drinks",
+          "0",
+          "",
+          "",
+          ""
+        ],
+        [
+          "",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "Weekly profit (GBP)",
+          "",
+          "=15*B2+22*B3",
+          "",
+          ""
+        ],
+        [
+          "Shelf facings",
+          "",
+          "=B2+B3",
+          "<=",
+          "30"
+        ],
+        [
+          "Chiller facings",
+          "",
+          "=B3",
+          "<=",
+          "12"
+        ],
+        [
+          "Min snack facings",
+          "",
+          "=B2",
+          ">=",
+          "6"
+        ]
+      ],
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "whole": true
+    },
+    "expected": {
+      "status": "optimal",
+      "modelType": "integer",
+      "objective": 534
+    }
   }
 ];
 

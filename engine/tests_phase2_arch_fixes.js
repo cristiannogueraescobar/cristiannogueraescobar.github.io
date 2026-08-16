@@ -11,8 +11,9 @@
  *   FIX 3 (engine/generate-examples.js: replaceMetaLines): rewrites the meta lines for exactly the
  *          current key set, count-agnostic, and the generator reports the site as up to date.
  *
- * Everything runs through the REAL modules (no mocks). The literal 24 appears only where this suite
- * asserts the F7a checkpoint; the fixes themselves are checked to be count-agnostic.
+ * Everything runs through the REAL modules (no mocks). The live checkpoint count (36 today) appears
+ * only where this suite asserts the current live checkpoint; the fixes themselves are checked to be
+ * count-agnostic (the generic infrastructure hardcodes no total). Historical F7a total was 24.
  */
 'use strict';
 const fs = require('fs');
@@ -32,7 +33,7 @@ function ok(name, cond, detail) { if (cond) pass++; else { fail++; failures.push
 const loaded = loadAndValidateCatalogue(SITE);
 const catalogue = loaded.catalogue;
 const serialize = loaded.serialize;
-const N = catalogue.length; // the live checkpoint count (24 today), read from data not hardcoded
+const N = catalogue.length; // the live checkpoint count (36 today; was 24 at F7a), read from data not hardcoded
 
 // ============================ FIX 1 ========================================
 // Omitted expectCount must not pin; wrong count must fail; correct count passes.
@@ -135,15 +136,17 @@ const N = catalogue.length; // the live checkpoint count (24 today), read from d
   var served = fs.readFileSync(path.join(SITE, 'assets', 'examples-data.js'), 'utf8');
   ok('FIX3x: identity replaceMetaLines is a no-op', genExamples.replaceMetaLines(served, metaLines, keys) === served);
 
-  // Cross-fix: the generic infrastructure files carry NO literal 24 (it lives only in F7a checkpoints).
+  // Cross-fix: the generic infrastructure files carry NO literal catalogue-count (9/24/36); the
+  // count lives only in the checkpoint suites, never in index/projectors/generators.
   ['src/shared/examples/index.js', 'src/shared/examples/f5/index.js', 'src/shared/examples/projectors.js', 'engine/generate-examples.js'].forEach(function (rel) {
     var s = fs.readFileSync(path.join(SITE, rel), 'utf8');
     ok('CROSS: ' + rel + ' contains no hardcoded 24', s.indexOf('24') === -1 || !/[^0-9]24[^0-9]/.test(s.replace(/\/\/[^\n]*/g, '')));
   });
 })();
 
-// The ONE place the literal 24 is asserted (F7a checkpoint), to prove the fixes above operate at 24.
-ok('CHECKPOINT: the live catalogue is at the F7a checkpoint of 24', N === 24, String(N));
+// The ONE place the live catalogue total is asserted here (current checkpoint), to prove the
+// count-agnostic fixes above operate at the real live count (36 today; 24 at F7a).
+ok('CHECKPOINT: the live catalogue is at the F7b checkpoint of 36', N === 36, String(N));
 
 console.log('PHASE-2 ARCH FIXES  PASSED: ' + pass + '   FAILED: ' + fail);
 if (fail) { failures.forEach(function (f) { console.log('  FAIL:', f); }); process.exit(1); }

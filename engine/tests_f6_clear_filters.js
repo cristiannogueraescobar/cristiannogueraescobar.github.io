@@ -12,7 +12,7 @@
      2. types a query that yields 0 results
      3. asserts visible_count == 0, #libEmpty visible, its "Clear filters" button visible
      4. performs a REAL click on THAT button
-     5. asserts search == "", all facets unchecked, 24 cards visible, #libEmpty hidden,
+     5. asserts search == "", all facets unchecked, 36 cards visible, #libEmpty hidden,
         q/category/type/difficulty/goal removed from the URL, lang + unrelated param + hash
         preserved, and focus back on #libSearch
      6. NEGATIVE: strips the empty-state button's binding (mimicking the original bug) and
@@ -104,7 +104,7 @@ function serve(root) {
     });
     ok('CLEAR/empty: search input cleared', after.search === '', JSON.stringify(after.search));
     ok('CLEAR/empty: all facets unchecked', after.facetsChecked === 0, String(after.facetsChecked));
-    ok('CLEAR/empty: F7a: 24 cards visible again', after.visible === 24, String(after.visible));
+    ok('CLEAR/empty: LIVE: 36 cards visible again', after.visible === 36, String(after.visible));
     ok('CLEAR/empty: #libEmpty hidden', after.emptyHidden === true);
     ok('CLEAR/empty: q removed from URL', !/[?&]q=/.test(after.href), after.href);
     ok('CLEAR/empty: category removed from URL', after.href.indexOf('category=') === -1, after.href);
@@ -139,7 +139,7 @@ function serve(root) {
       };
     });
     ok('CLEAR/top: #libClear ("Clear all") still clears search', top.search === '');
-    ok('CLEAR/top: F7a: #libClear restores 24 cards', top.visible === 24, String(top.visible));
+    ok('CLEAR/top: LIVE: #libClear restores 36 cards', top.visible === 36, String(top.visible));
     ok('CLEAR/top: #libClear returns focus to search', top.focusId === 'libSearch');
     await ctxP.close();
   }

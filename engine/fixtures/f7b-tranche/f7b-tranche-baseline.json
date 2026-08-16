@@ -1,0 +1,324 @@
+{
+  "note": "F7b immutable tranche baseline: the frozen per-record contract for exactly the 12 F7b examples made live in Phase 2. Protects key, slug, model type, result policy, fieldOrder, objective, taxonomic category, difficulty, minutes, tags, direction, status, and SHA-256 digests of translations, metadata content and the complete authored metadata record, plus the modelHash. Analogous to engine/fixtures/f7a-tranche/f7a-tranche-baseline.json. The contract is asserted per-record over the live catalogue, so future F7c/F7d appends (records 37+) do NOT invalidate it.",
+  "schemaVersion": 1,
+  "tranche": "f7b",
+  "membershipCount": 12,
+  "records": [
+    {
+      "key": "assembly-line-mix",
+      "slug": "assembly-line-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 1700,
+      "category": "production-operations",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "production",
+        "assembly",
+        "mix",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "00944ff6a437db9512dff1284dbbcdb4d30d225a7ab5b7db4965968e751abc88",
+      "contentSha256": "2cace1f675e1e95d50283e7060252aead009ec6d78cf369a802d5ca2a87116b0",
+      "modelHash": "91170b008f71f3916e3f617ddb552e520d5cfc50dffaee697b4f1069dbbcb0f8",
+      "metadataSha256": "5308272028337a89e6807ecd5f51c718b68d30ae619727a3357e5ade63269415"
+    },
+    {
+      "key": "machine-shop-jobs",
+      "slug": "machine-shop-job-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 1600,
+      "category": "production-operations",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "production",
+        "machining",
+        "integer",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "9b9a67f2390a6c4c7a98547404705ecaa3fdf17b57838802bfd5c4f991b7e452",
+      "contentSha256": "1f2a4cf32fa327189b1683ec462a8e65780a6ecf4dcb663c346de05096e2d3de",
+      "modelHash": "d4b877ffc3f1c0ecae89a67aa3b43c5cc3b674287851f32d61ae12d393dcd890",
+      "metadataSha256": "7a80b98b801f0e8b8b9c180b3cb2f347f453104decfabda7dfb0ebd93edb8515"
+    },
+    {
+      "key": "warehouse-dispatch",
+      "slug": "warehouse-dispatch-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 2440,
+      "category": "logistics-transport",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "logistics",
+        "dispatch",
+        "distribution",
+        "demand"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "b178b89835c1eb785918c3b24171aa3aea4e2636c56071a9a47e5faad625cd96",
+      "contentSha256": "2d318f67cd29425417597fe708fc97eb0a59129846b0f7c8b8a3b520eff7625d",
+      "modelHash": "c96ec0b2756ec45b5aa38c0e16cc420ec937db19a8a2e4a6c9c32a4178b2d9cf",
+      "metadataSha256": "aee1ca319f182d3c83894518a434806f1486454c7281420335448f8b395a3851"
+    },
+    {
+      "key": "container-loading",
+      "slug": "container-loading-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 3920,
+      "category": "logistics-transport",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "logistics",
+        "loading",
+        "integer",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "1fef21d9099717f316bb2069d29d48723e3e7d04959a7f62294b78672131de2f",
+      "contentSha256": "33c1116106c76774940d579b8b3553ec8abc5e9579dbcee1a14dc830bee55e10",
+      "modelHash": "1e4890c14a3e47ca9405b11010ae09c324dfb93ef87b9a42f62f53bc69919459",
+      "metadataSha256": "400ff7d453e33d53369aff729b6d8736043401a5c8be42fb4a4d12ff6fef49b7"
+    },
+    {
+      "key": "budget-allocation",
+      "slug": "budget-allocation-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 360,
+      "category": "marketing-finance",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "marketing",
+        "budget",
+        "allocation",
+        "reach"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "b73713d7e5bad1b7e8458202271e27fb9945222a0eb089232f8a90b4e301107f",
+      "contentSha256": "3f057818c647b684e328b36ca209c05b67e4d729c2e2c892776ea6f42ac76837",
+      "modelHash": "7d505bc52b1ad9489332c5aaccf91f98d3399a552562b808c3ceb21af8e3894a",
+      "metadataSha256": "f45284e2565845af52653fac61f0e3b1e918f41c0cf4df85001fe7ded04a8bd7"
+    },
+    {
+      "key": "raw-material-buy",
+      "slug": "raw-material-purchase-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 19800,
+      "category": "purchasing-suppliers",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "purchasing",
+        "materials",
+        "sourcing",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "429cf34dfc126634e8a8918da3b65dc668a27f0838295c44c15bf9446b1b8852",
+      "contentSha256": "8807502e5229e34ce85f074a7d743b830115619f1ab0955b457750527efd381a",
+      "modelHash": "df400b4edaa7615e4ed0441cfcb9decfdd2d632c74542d3cc12df624f3eb47f6",
+      "metadataSha256": "d1cf64a1b02df1bfb64b5349a515c705fe0454f28d20cad7045a9fa750a99de5"
+    },
+    {
+      "key": "shift-coverage",
+      "slug": "shift-coverage-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 1560,
+      "category": "workforce-scheduling",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "workforce",
+        "shifts",
+        "integer",
+        "coverage"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "39a8d2dbe47275543816fecc0d3fb0bfd26ee1253f30712fe8a99fc139e8ba53",
+      "contentSha256": "cdd03cfda751286b4327452aed1c93e744b8fd9495dbbd08cc8a5c07647f5cd2",
+      "modelHash": "5fc2e1c9657d7835a284798096602f16751b1929f204d0188a48ca3c46e4cd5f",
+      "metadataSha256": "31639149708c470287fcf9ce208b96e6dfde93d034842b36dddb8366cc6d9cdf"
+    },
+    {
+      "key": "feed-blend",
+      "slug": "animal-feed-blend",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 353.333333333,
+      "category": "blending-formulation",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "blending",
+        "feed",
+        "nutrition",
+        "cost"
+      ],
+      "direction": "min",
+      "status": "optimal",
+      "translationsSha256": "63094a8f182eb9d9e4fea67591cd16b8e18fc093582a4d1b4c617d4387e9a5de",
+      "contentSha256": "02bf34594e85500e9e6becfae24242af63a572081c7f729952d7de6dc182fb34",
+      "modelHash": "00c2fd344d1f8bba2bc6d899d500010caebb411aa4b7ea61d1f8b643d5bca8aa",
+      "metadataSha256": "a0a1c60fb3bb711b866282c5292f89570582d7e35068f28020e79d71b2786ded"
+    },
+    {
+      "key": "tutoring-hours",
+      "slug": "tutoring-hours-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 150,
+      "category": "education-social",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "education",
+        "tutoring",
+        "allocation",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "f6817447a8ef84f4ba9e3aadc124d1d81b366e4e9187885bf4a5c28f3b4caee5",
+      "contentSha256": "3ba1cd4959ac0a559ced7fa27b719a7014fd33c501c6ec66e83d36ed93c9f236",
+      "modelHash": "aff7dfd310328f9962fab49d57b7841d9dcf9bbc7fe35435612f583616a775d3",
+      "metadataSha256": "ce461e4f70c1adeb38b73a9a30c6e202dd9867dce33b5bea1bd1e337bbb5b6c9"
+    },
+    {
+      "key": "battery-dispatch",
+      "slug": "battery-dispatch-plan",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 11350,
+      "category": "energy-sustainability",
+      "difficulty": "intermediate",
+      "minutes": 5,
+      "tags": [
+        "energy",
+        "dispatch",
+        "renewable",
+        "capacity"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "dad110b29dd1a547d24e3fe1bce95b41e454769b080d3cd022b7904eff9b5c8e",
+      "contentSha256": "f9b3bf78cda9b31daf8965593a4c931c536ecedc102f207fd14d561bce1cc23b",
+      "modelHash": "1048d3c3989e6df758c7e2de9edf2397bfb79282434a74737126469beb03503b",
+      "metadataSha256": "cb057bba86125cf79a7e88fbce00f048478de85592150617c202bc678cbdff5a"
+    },
+    {
+      "key": "menu-planning",
+      "slug": "menu-planning-mix",
+      "modelType": "continuous",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "expected"
+      ],
+      "objective": 720,
+      "category": "hospitality-retail",
+      "difficulty": "beginner",
+      "minutes": 4,
+      "tags": [
+        "hospitality",
+        "menu",
+        "mix",
+        "margin"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "d463632e1d4562d726083936355d07625bc8811b1c5d4467d11bb370189e01ee",
+      "contentSha256": "cbc6ff514e4483f17b45d319172566e622267ff40db695ee40e6cde72ddbe9e4",
+      "modelHash": "a66fa8f43285ebfb519f30a23144c1f69cc4c0abf6e4886fb9f93dbbf73d0060",
+      "metadataSha256": "b157b917f0e88faa0d717025a2afcb432949e120263951cc52ad1e9662419b94"
+    },
+    {
+      "key": "retail-shelf-space",
+      "slug": "retail-shelf-space-plan",
+      "modelType": "integer",
+      "resultPolicy": "objective-feasible",
+      "fieldOrder": [
+        "grid",
+        "whole",
+        "expected"
+      ],
+      "objective": 534,
+      "category": "hospitality-retail",
+      "difficulty": "intermediate",
+      "minutes": 6,
+      "tags": [
+        "retail",
+        "shelf",
+        "integer",
+        "space"
+      ],
+      "direction": "max",
+      "status": "optimal",
+      "translationsSha256": "63fc913fb152fdc8ccda966f52645affdc478238dc3892adddc788e2998d0ff2",
+      "contentSha256": "af27e74d1f850b00bf3acfef91cd357dc0aec6ec0ee47925c6976c523497b892",
+      "modelHash": "59cee3014dfedb460eda95501c623529dbe7c39268206d30cb4e1310a9b03e55",
+      "metadataSha256": "c1d78407941d91bbb621e471f9e97c9b7fe93d72d10f6683cb2010e012a7c5e6"
+    }
+  ]
+}

@@ -28,8 +28,8 @@ const LANGS = ['en', 'es', 'pt', 'de', 'fr'];
 
 // 1. Single authority loads + validates (generic: whatever the catalogue size is, it loaded).
 ok('1 catalogue authority loads and validates', catalogue.length >= 9);
-// 2. F7a checkpoint: exactly 24 examples (the only place a total count is pinned).
-ok('2 F7a: exactly 24 examples', catalogue.length === 24);
+// 2. Live checkpoint: exactly 36 examples (the current live total; was 24 at F7a).
+ok('2 LIVE: exactly 36 examples', catalogue.length === 36);
 // 3. Unique keys (generic: over the whole catalogue).
 ok('3 unique keys', new Set(catalogue.map(r => r.key)).size === catalogue.length);
 // 4. Unique slugs (generic: over the whole catalogue).
@@ -38,7 +38,7 @@ ok('4 unique slugs', new Set(catalogue.map(r => r.slug)).size === catalogue.leng
 ok('5 historical nine are the canonical prefix, in order',
   JSON.stringify(catalogue.slice(0, 9).map(r => r.key)) === JSON.stringify(HISTORICAL_ORDER));
 ok('5b F7a fifteen follow the historical nine, in order',
-  JSON.stringify(catalogue.slice(9).map(r => r.key)) === JSON.stringify(F7A_ORDER));
+  JSON.stringify(catalogue.slice(9, 24).map(r => r.key)) === JSON.stringify(F7A_ORDER));
 // 6. Five languages each.
 ok('6 five languages each', catalogue.every(r => LANGS.every(l => r.translations[l])));
 // 7. Non-empty titles.
@@ -61,7 +61,7 @@ ok('13b historical whole set intact (subset)',
   ['shipping', 'workforce'].every(k => catalogue.find(r => r.key === k && r.model.whole === true)));
 ok('13c F7a: exact whole-declaring set',
   catalogue.filter(r => r.model.whole).map(r => r.key).sort().join(',') ===
-  ['workforce', 'shipping', 'factory-batches', 'clinic-staffing', 'call-centre', 'scholarships', 'food-bank', 'hotel-rooms'].sort().join(','));
+  ['workforce', 'shipping', 'factory-batches', 'clinic-staffing', 'call-centre', 'scholarships', 'food-bank', 'hotel-rooms', 'machine-shop-jobs', 'container-loading', 'shift-coverage', 'retail-shelf-space'].sort().join(','));
 // 14. domains only where declared. Historical set stays; F7a adds mixed/binary records with domains.
 ok('14a historical domains set intact (subset)',
   ['delivery', 'marketing', 'project', 'supplier'].every(k => catalogue.find(r => r.key === k && r.model.domains)));
@@ -82,18 +82,18 @@ ok('19 tolerance positive where present', catalogue.every(r => r.expected.tolera
 ok('20 no pinned variable values', catalogue.every(r => !('values' in r.expected) && !('variables' in r.expected)));
 // 21. Solver EXAMPLES projection byte total. F7a checkpoint pins the exact value for this tranche;
 //     served==regenerated (count-agnostic) is asserted at 38 and by the projection contract.
-ok('21 F7a: solver EXAMPLES projection byte total', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 15760);
+ok('21 F7a: solver EXAMPLES projection byte total', Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 21228);
 // 22. i18n projection occurrences: 20 per record (exName + exDesc, each repeated in TWO subsections,
 //     across 5 locales = 2*2*5). Count-agnostic: catalogue.length * 20 (was 9*20=180; now 24*20=480).
 const occ = serialize.i18nExpectedOccurrences(catalogue, LANGS);
 ok('22 i18n occurrences == catalogue length * 20',
   occ.reduce((s, o) => s + o.expected, 0) === catalogue.length * 20);
-ok('22b F7a: i18n occurrences == 480', occ.reduce((s, o) => s + o.expected, 0) === 480);
+ok('22b LIVE: i18n occurrences == 720', occ.reduce((s, o) => s + o.expected, 0) === 720);
 // 23. examples-data META lines = 9.
 ok('23 examples-data META lines == catalogue length', serialize.examplesDataMetaLines(catalogue).length === catalogue.length);
-// 24. JSON-LD has 9 ListItems.
+// 24. JSON-LD ListItem count tracks the live catalogue length (count-agnostic).
 ok('24 JSON-LD ListItems == catalogue length', (serialize.examplesJsonLd(catalogue).match(/"@type":"ListItem"/g) || []).length === catalogue.length);
-// 25. no-JS links = 9.
+// 25. no-JS link count tracks the live catalogue length (count-agnostic).
 ok('25 no-JS links == catalogue length', serialize.examplesNoJsLinks(catalogue).length === catalogue.length);
 // 26. URL builder derives from slug.
 (function () {
@@ -179,7 +179,7 @@ ok('37 domains reference real cells', catalogue.every(r => {
 // 38. Solver EXAMPLES projection: count-agnostic served==regenerated is owned by the projection
 //     contract + composition suites. F7a checkpoint pins the exact byte total for THIS tranche.
 ok('38 F7a: solver EXAMPLES projection byte total',
-  Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 15760);
+  Buffer.byteLength(serialize.serializeSolverExamples(catalogue), 'utf8') === 21228);
 // 39/40. i18n.js and examples-data.js are served byte-identical to what the generator projects from
 //     the current catalogue (no editable second copy). This is count-agnostic: it holds for any
 //     catalogue size, so 24->36 needs no edit here. The generator's --check compares served vs

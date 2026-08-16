@@ -80,10 +80,10 @@ function clone(x) { return JSON.parse(JSON.stringify(x)); }
 
 // M: category / model / difficulty / goal filters must actually filter.
 (function () {
-  ok('NEG13: category filter narrows', core.filterExamples(records, { category: ['blending-formulation'] }, 'en').length === 2);
+  ok('NEG13: category filter narrows', core.filterExamples(records, { category: ['blending-formulation'] }, 'en').length === 3);
   ok('NEG14: model filter narrows', core.filterExamples(records, { type: ['mixed'] }, 'en').length === 2);
-  ok('NEG15: difficulty filter narrows', core.filterExamples(records, { difficulty: ['beginner'] }, 'en').length === 5);
-  ok('NEG16: goal filter narrows', core.filterExamples(records, { goal: ['minimise'] }, 'en').length === 12);
+  ok('NEG15: difficulty filter narrows', core.filterExamples(records, { difficulty: ['beginner'] }, 'en').length === 9);
+  ok('NEG16: goal filter narrows', core.filterExamples(records, { goal: ['minimise'] }, 'en').length === 16);
 })();
 
 // M: AND semantics across facets (a contradictory combo must be empty).
@@ -300,14 +300,14 @@ function genCheck(dst) {
   // Historical nine slugs must remain present (immutable subset).
   var historicalSlugs = ['cheapest-feed-blend', 'delivery-load', 'marketing-budget', 'production-plan', 'project-selection', 'shipping-plan', 'supplier-activation', 'workforce-scheduling', 'workshop-chart'];
   ok('NEG35: historical slugs still present', historicalSlugs.every(function (s) { return slugs.indexOf(s) !== -1; }));
-  // F7a checkpoint: the exact 24-slug set.
-  var expected24Slugs = ['bakery-production-mix', 'call-centre-shift-plan', 'cheapest-feed-blend', 'clinic-staffing-plan', 'delivery-load', 'factory-batch-plan', 'fertiliser-blend-plan', 'fleet-assignment-plan', 'food-bank-allocation', 'hotel-room-allocation', 'ingredient-sourcing-plan', 'linear-optimisation-basics', 'marketing-budget', 'media-channel-mix', 'microgrid-capacity-plan', 'production-plan', 'project-selection', 'purchase-order-split', 'renewable-energy-mix', 'scholarship-allocation', 'shipping-plan', 'supplier-activation', 'workforce-scheduling', 'workshop-chart'];
-  ok('NEG35: F7a: current slug set is exactly the 24', JSON.stringify(slugs) === JSON.stringify(expected24Slugs));
+  // Live checkpoint: the exact 36-slug set (was the 24-slug set at F7a).
+  var expected36Slugs = ["animal-feed-blend", "assembly-line-mix", "bakery-production-mix", "battery-dispatch-plan", "budget-allocation-plan", "call-centre-shift-plan", "cheapest-feed-blend", "clinic-staffing-plan", "container-loading-plan", "delivery-load", "factory-batch-plan", "fertiliser-blend-plan", "fleet-assignment-plan", "food-bank-allocation", "hotel-room-allocation", "ingredient-sourcing-plan", "linear-optimisation-basics", "machine-shop-job-plan", "marketing-budget", "media-channel-mix", "menu-planning-mix", "microgrid-capacity-plan", "production-plan", "project-selection", "purchase-order-split", "raw-material-purchase-plan", "renewable-energy-mix", "retail-shelf-space-plan", "scholarship-allocation", "shift-coverage-plan", "shipping-plan", "supplier-activation", "tutoring-hours-plan", "warehouse-dispatch-plan", "workforce-scheduling", "workshop-chart"];
+  ok('NEG35: LIVE: current slug set is exactly the 36', JSON.stringify(slugs) === JSON.stringify(expected36Slugs));
   var keys = records.map(function (r) { return r.id; }).sort();
   var historicalKeys = ['blend', 'delivery', 'marketing', 'production', 'project', 'shipping', 'supplier', 'workforce', 'workshop'];
   ok('NEG36: historical keys still present', historicalKeys.every(function (k) { return keys.indexOf(k) !== -1; }));
-  var expected24Keys = ['bakery-mix', 'blend', 'call-centre', 'clinic-staffing', 'delivery', 'factory-batches', 'fertiliser-blend', 'fleet-assignment', 'food-bank', 'hotel-rooms', 'ingredient-sourcing', 'lp-basics', 'marketing', 'media-mix', 'microgrid-capacity', 'production', 'project', 'purchase-split', 'renewable-mix', 'scholarships', 'shipping', 'supplier', 'workforce', 'workshop'];
-  ok('NEG36: F7a: current key set is exactly the 24', JSON.stringify(keys) === JSON.stringify(expected24Keys));
+  var expected36Keys = ["assembly-line-mix", "bakery-mix", "battery-dispatch", "blend", "budget-allocation", "call-centre", "clinic-staffing", "container-loading", "delivery", "factory-batches", "feed-blend", "fertiliser-blend", "fleet-assignment", "food-bank", "hotel-rooms", "ingredient-sourcing", "lp-basics", "machine-shop-jobs", "marketing", "media-mix", "menu-planning", "microgrid-capacity", "production", "project", "purchase-split", "raw-material-buy", "renewable-mix", "retail-shelf-space", "scholarships", "shift-coverage", "shipping", "supplier", "tutoring-hours", "warehouse-dispatch", "workforce", "workshop"];
+  ok('NEG36: LIVE: current key set is exactly the 36', JSON.stringify(keys) === JSON.stringify(expected36Keys));
   ok('NEG37: F7a: mixed models are supplier-activation + ingredient-sourcing-plan', records.filter(function (r) { return r.modelType === 'mixed'; }).map(function (r) { return r.slug; }).sort().join(',') === ['supplier-activation','ingredient-sourcing-plan'].sort().join(','));
 })();
 
@@ -365,9 +365,9 @@ function genCheck(dst) {
 
 // M: example #10 must NOT be published (still exactly nine).
 (function () {
-  ok('NEG45/46: F7a: exactly 24 published examples', records.length === 24);
+  ok('NEG45/46: LIVE: exactly 36 published examples', records.length === 36);
   var html = read(path.join(SITE, 'examples.html'));
-  ok('NEG45b: F7a: base HTML has exactly 24 cards', (html.match(/data-ex-id="/g) || []).length === 24);
+  ok('NEG45b: LIVE: base HTML has exactly 36 cards', (html.match(/data-ex-id="/g) || []).length === 36);
 })();
 
 // M: full model/grid or expected result must not leak into the browser payload.
